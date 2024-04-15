@@ -1,0 +1,18 @@
+{
+  "extends": "next/core-web-vitals",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "indent": [
+      "error",
+      4,
+      {
+          "SwitchCase": 1
+      }
+    ],
+    "@typescript-eslint/strict-boolean-expressions": "error"
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
+
