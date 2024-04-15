@@ -6,7 +6,7 @@
       "error",
       4,
       {
-          "SwitchCase": 1
+        "SwitchCase": 1
       }
     ],
     "@typescript-eslint/strict-boolean-expressions": "error"
@@ -15,4 +15,3 @@
     "project": "./tsconfig.json"
   }
 }
-
