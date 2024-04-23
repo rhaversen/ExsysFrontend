@@ -23,24 +23,24 @@ spec:
                 - name: frontend-deployment
                   resources:
                       limits:
-                          cpu: "0.1"
-                          memory: "100Mi"
+                          cpu: "400m"
+                          memory: "300M"
                       requests:
-                          cpu: "0.05"
-                          memory: "50Mi"
+                          cpu: "250m"
+                          memory: "200M"
                   image: "rhaversen/exsys-frontend:${GITHUB_SHA}"
                   imagePullPolicy: Always
                   livenessProbe:
                       httpGet:
                           path: service/livez
-                          port: 5000
+                          port: 3000
                       periodSeconds: 10
                       initialDelaySeconds: 15
                       failureThreshold: 5
                   readinessProbe:
                       httpGet:
                           path: service/readyz
-                          port: 5000
+                          port: 3000
                       periodSeconds: 10
                       initialDelaySeconds: 15
                       failureThreshold: 5
