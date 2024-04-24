@@ -9,7 +9,10 @@ export const metadata: Metadata = {
 		template: '%s | Kantine',
 		default: 'Kantine', // a default is required when creating a template
 	},
-	description: 'Bestil mad fra Ny Skivehus Kantine'
+	description: 'Bestil mad fra Ny Skivehus Kantine',
+	icons: {
+		icon: '/favicon.ico',
+	}
 }
 
 export default function RootLayout({
