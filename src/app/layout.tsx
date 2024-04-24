@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 		default: 'Kantine', // a default is required when creating a template
 	},
 	description: 'Bestil mad fra Ny Skivehus Kantine',
+	alternates: {
+		canonical: 'https://www.kantine.nyskivehus.dk',
+	},
 	icons: {
 		icon: '/favicon.ico',
 	}
