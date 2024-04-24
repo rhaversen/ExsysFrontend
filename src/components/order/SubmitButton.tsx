@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 type SubmitButtonProps = {
 	onClick: () => void;
@@ -13,7 +13,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ onClick }) => {
 		>
 			Færdiggør Bestilling
 		</button>
-	);
-};
+	)
+}
 
-export default SubmitButton;
+export default SubmitButton

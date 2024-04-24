@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import QuantityAdjuster from "@/components/ui/QuantityAdjuster";
+import React, { useState } from 'react'
+import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 
 export type ProductProps = {
 	id: string;
@@ -18,12 +18,12 @@ const Product: React.FC<ProductProps> = ({
 	price,
 	onQuantityChange,
 }) => {
-	const [quantity, setQuantity] = useState(initialQuantity);
+	const [quantity, setQuantity] = useState(initialQuantity)
 
 	const handleQuantityChange = (newQuantity: number) => {
-		setQuantity(newQuantity);
-		onQuantityChange(id, newQuantity);
-	};
+		setQuantity(newQuantity)
+		onQuantityChange(id, newQuantity)
+	}
 
 	return (
 		<div className="p-6 mx-auto bg-transparent shadow-md flex flex-row items-start space-x-4 text-black">
@@ -39,7 +39,7 @@ const Product: React.FC<ProductProps> = ({
 				/>
 			</div>
 		</div>
-	);
-};
+	)
+}
 
-export default Product;
+export default Product

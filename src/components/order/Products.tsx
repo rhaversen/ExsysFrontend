@@ -1,5 +1,5 @@
-import React from "react";
-import Product from "@/components/order/Product";
+import React from 'react'
+import Product from '@/components/order/Product'
 
 type ProductProps = {
 	_id: string;
@@ -33,7 +33,7 @@ const Products: React.FC<ProductsProps> = ({
 				/>
 			))}
 		</div>
-	);
-};
+	)
+}
 
-export default Products;
+export default Products

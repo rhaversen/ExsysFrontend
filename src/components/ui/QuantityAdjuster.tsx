@@ -1,4 +1,4 @@
-import QuantityAdjustButton from "@/components/ui/QuantityAdjustButton";
+import QuantityAdjustButton from '@/components/ui/QuantityAdjustButton'
 
 type QuantityAdjusterProps = {
 	quantity: number;
@@ -33,7 +33,7 @@ const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
 				/>
 			</div>
 		</div>
-	);
-};
+	)
+}
 
-export default QuantityAdjuster;
+export default QuantityAdjuster
