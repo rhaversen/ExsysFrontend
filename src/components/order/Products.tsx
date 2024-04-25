@@ -2,11 +2,11 @@ import React from 'react'
 import Product from '@/components/order/Product'
 
 type ProductProps = {
-	_id: string;
-	name: string;
-	description: string;
-	price: number;
-};
+	_id: string
+	name: string
+	description: string
+	price: number
+}
 
 const Products = ({
 	products,
@@ -14,10 +14,10 @@ const Products = ({
 	availabilities,
 	onQuantityChange,
 }: {
-	products: ProductProps[];
-	quantities: Record<string, number>;
-	availabilities: Record<string, boolean>;
-	onQuantityChange: (key: string, newQuantity: number) => void;
+	products: ProductProps[]
+	quantities: Record<string, number>
+	availabilities: Record<string, boolean>
+	onQuantityChange: (key: string, newQuantity: number) => void
 }) => {
 	return (
 		<div>

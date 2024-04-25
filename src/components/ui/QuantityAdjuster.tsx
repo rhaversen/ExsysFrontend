@@ -5,9 +5,9 @@ const QuantityAdjuster = ({
 	available,
 	setQuantity,
 }: {
-	quantity: number;
-	available: boolean;
-	setQuantity: (newQuantity: number) => void;
+	quantity: number
+	available: boolean
+	setQuantity: (newQuantity: number) => void
 }) => {
 	return (
 		<div

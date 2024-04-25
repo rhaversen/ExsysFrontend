@@ -10,13 +10,13 @@ const Product = ({
 	available,
 	onQuantityChange,
 }: {
-	id: string;
-	initialQuantity: number;
-	name: string;
-	description: string;
-	price: number;
-	available: boolean;
-	onQuantityChange: (id: string, quantity: number) => void;
+	id: string
+	initialQuantity: number
+	name: string
+	description: string
+	price: number
+	available: boolean
+	onQuantityChange: (id: string, quantity: number) => void
 }) => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
