@@ -1,10 +1,6 @@
 import React from 'react'
 
-type SubmitButtonProps = {
-	onClick: () => void;
-};
-
-const SubmitButton: React.FC<SubmitButtonProps> = ({ onClick }) => {
+const SubmitButton = ({ onClick }: { onClick: () => void }) => {
 	return (
 		<button
 			type="submit"

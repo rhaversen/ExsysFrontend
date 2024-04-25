@@ -1,13 +1,11 @@
 import QuantityAdjustButton from '@/components/ui/QuantityAdjustButton'
 
-type QuantityAdjusterProps = {
-	quantity: number;
-	setQuantity: (newQuantity: number) => void;
-};
-
-const QuantityAdjuster: React.FC<QuantityAdjusterProps> = ({
+const QuantityAdjuster = ({
 	quantity = 0,
 	setQuantity,
+}: {
+	quantity: number;
+	setQuantity: (newQuantity: number) => void;
 }) => {
 	return (
 		<div className="inline-flex items-center border-2 px-1 py-1 border-blue-500 rounded-full">

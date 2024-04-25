@@ -8,16 +8,14 @@ type ProductProps = {
 	price: number;
 };
 
-type ProductsProps = {
-	products: ProductProps[];
-	quantities: Record<string, number>;
-	onQuantityChange: (key: string, newQuantity: number) => void;
-};
-
-const Products: React.FC<ProductsProps> = ({
+const Products = ({
 	products,
 	quantities,
 	onQuantityChange,
+}: {
+	products: ProductProps[];
+	quantities: Record<string, number>;
+	onQuantityChange: (key: string, newQuantity: number) => void;
 }) => {
 	return (
 		<div>

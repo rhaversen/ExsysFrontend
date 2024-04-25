@@ -1,22 +1,20 @@
 import React, { useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 
-export type ProductProps = {
-	id: string;
-	initialQuantity: number;
-	name: string;
-	description: string;
-	price: number;
-	onQuantityChange: (id: string, quantity: number) => void;
-};
-
-const Product: React.FC<ProductProps> = ({
+const Product = ({
 	id,
 	initialQuantity,
 	name,
 	description,
 	price,
 	onQuantityChange,
+}: {
+	id: string;
+	initialQuantity: number;
+	name: string;
+	description: string;
+	price: number;
+	onQuantityChange: (id: string, quantity: number) => void;
 }) => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
