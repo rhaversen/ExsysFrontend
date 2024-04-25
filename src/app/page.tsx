@@ -18,7 +18,7 @@ const Page: React.FC = () => {
 				setProducts(response.data)
 				setQuantities(
 					response.data.reduce(
-						(acc: any, product: { _id: any }) => ({
+						(acc: any, product: { _id: string }) => ({
 							...acc,
 							[product._id]: 0,
 						}),
@@ -31,7 +31,7 @@ const Page: React.FC = () => {
 		}
 
 		fetchProducts()
-	}, [])
+	}, [API_URL])
 
 	const handleQuantityChange = (key: string, newQuantity: number) => {
 		setQuantities((prevQuantities) => ({
@@ -42,13 +42,15 @@ const Page: React.FC = () => {
 
 	const submitOrder = async () => {
 		try {
-			const requestedDeliveryDate = new Date() // Set this to the desired delivery date
+			// 15 minutes from now as UTC data
+			const now = new Date()
+			const requestedDeliveryDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes() + 15))
 
 			const rooms = await axios.get(API_URL + '/v1/rooms')
 			const roomId = rooms.data[0]._id
 
 			const productsArray = Object.entries(quantities).map(
-				([product, quantity]) => ({ product, quantity })
+				([product, quantity]) => ({ productId: product, quantity })
 			)
 
 			const data = {
@@ -59,9 +61,7 @@ const Page: React.FC = () => {
 
 			console.log(data)
 
-			const response = await axios.post(API_URL + '/v1/orders', {
-				data,
-			})
+			const response = await axios.post(API_URL + '/v1/orders', data)
 
 			console.log(response.data)
 		} catch (error) {
