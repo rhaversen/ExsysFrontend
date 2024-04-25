@@ -1,11 +1,13 @@
 import React from 'react'
 import Product from '@/components/order/Product'
+import { OrderWindow } from '@/lib/timeUtils'
 
 type ProductProps = {
 	_id: string
 	name: string
 	description: string
 	price: number
+	orderWindow: OrderWindow
 }
 
 const Products = ({
@@ -31,6 +33,7 @@ const Products = ({
 					price={product.price}
 					onQuantityChange={onQuantityChange}
 					available={availabilities[product._id]}
+					orderWindow={product.orderWindow}
 				/>
 			))}
 		</div>

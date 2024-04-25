@@ -3,9 +3,9 @@ const QuantityAdjustButton = ({
 	text,
 	available,
 }: {
-	onClick: () => void;
-	text: string;
-	available: boolean;
+	onClick: () => void
+	text: string
+	available: boolean
 }) => {
 	return (
 		<button
