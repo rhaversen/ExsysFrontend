@@ -48,7 +48,7 @@ const Page: React.FC = () => {
 			const roomId = rooms.data[0]._id
 
 			const productsArray = Object.entries(quantities).map(
-				([product, quantity]) => ({ product, quantity })
+				([product, quantity]) => ({ productId: product, quantity })
 			)
 
 			const data = {
