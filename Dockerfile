@@ -14,11 +14,10 @@ WORKDIR /app
 # Create a user within the container
 RUN useradd -m exsys_frontend_user
 
-# Copy .next, public, package.json and package-lock.json and Config directory
+# Copy .next, public, package.json and package-lock.json
 COPY .next/ ./.next/
 COPY public/ ./public/
 COPY package*.json ./
-COPY config/ ./config/
 
 # Make sure the directory belongs to the non-root user
 RUN chown -R exsys_frontend_user:exsys_frontend_user /app

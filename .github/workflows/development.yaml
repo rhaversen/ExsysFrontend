@@ -34,3 +34,19 @@ jobs:
 
             - name: Lint tests
               run: npm run lint
+
+    test-image:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download production artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: .next
+                  path: .next
+
+            - name: Build Docker image
+              uses: ./.github/actions/build-dockerfile
