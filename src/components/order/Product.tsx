@@ -38,8 +38,8 @@ const Product = ({
 		>
 			<div className="ml-10 flex-grow">
 				<h2 className="text-xl font-semibold">{name}</h2>
-				<p className="text-gray-500">{description}</p>
-				<p className="text-gray-500">
+				<p className="text-gray-600 mt-2">{description}</p>
+				<p className="text-gray-600 mt-2 text-sm">
 					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
 					{' - '}
 					{orderWindow.to.hour.toString().padStart(2, '0')}:{orderWindow.to.minute.toString().padStart(2, '0')}
