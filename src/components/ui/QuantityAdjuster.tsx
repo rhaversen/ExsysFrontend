@@ -11,8 +11,7 @@ const QuantityAdjuster = ({
 }) => {
 	return (
 		<div
-			className={`inline-flex items-center border-2 px-1 py-1 rounded-full ${
-				available ? 'border-blue-500' : 'border-gray-400'
+			className={`inline-flex items-center border-2 px-1 py-1 rounded-full ${available ? 'border-blue-500' : 'border-gray-400'
 			}`}
 		>
 			<div className="flex items-center">
@@ -26,8 +25,7 @@ const QuantityAdjuster = ({
 				</label>
 				<input
 					id="quantityInput"
-					className={`w-16 bg-transparent text-center text-black select-all ${
-						available ? 'text-blue-500' : 'text-gray-500'
+					className={`w-16 bg-transparent text-center text-black select-all ${available ? 'text-blue-500' : 'text-gray-500'
 					}`}
 					type="text"
 					value={quantity}

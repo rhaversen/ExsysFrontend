@@ -30,10 +30,9 @@ const Product = ({
 
 	return (
 		<div
-			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${
-				available
-					? 'text-black'
-					: 'text-gray-500 bg-gray-400 bg-opacity-50'
+			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${available
+				? 'text-black'
+				: 'text-gray-500 bg-gray-400 bg-opacity-50'
 			}`}
 		>
 			<div className="ml-10 flex-grow">
@@ -43,7 +42,7 @@ const Product = ({
 					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
 					{' - '}
 					{orderWindow.to.hour.toString().padStart(2, '0')}:{orderWindow.to.minute.toString().padStart(2, '0')}
-				</p>			
+				</p>
 			</div>
 			<div className="flex flex-col items-center">
 				<p className="mt-2 mb-2">Pris: {price} kr</p>
