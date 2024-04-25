@@ -59,9 +59,7 @@ const Page: React.FC = () => {
 
 			console.log(data)
 
-			const response = await axios.post(API_URL + '/v1/orders', {
-				data,
-			})
+			const response = await axios.post(API_URL + '/v1/orders', data)
 
 			console.log(response.data)
 		} catch (error) {
