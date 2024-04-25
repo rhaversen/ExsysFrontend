@@ -1,6 +1,6 @@
 import React from 'react'
 import Product from '@/components/order/Product'
-import { OrderWindow } from '@/lib/timeUtils'
+import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
 
 type ProductProps = {
 	_id: string
@@ -33,7 +33,7 @@ const Products = ({
 					price={product.price}
 					onQuantityChange={onQuantityChange}
 					available={availabilities[product._id]}
-					orderWindow={product.orderWindow}
+					orderWindow={convertOrderWindowFromUTC(product.orderWindow)}
 				/>
 			))}
 		</div>
