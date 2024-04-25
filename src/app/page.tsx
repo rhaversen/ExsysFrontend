@@ -19,7 +19,6 @@ const Page: React.FC = () => {
 		const fetchProducts = async () => {
 			try {
 				const response = await axios.get(API_URL + '/v1/products')
-				console.log(response.data)
 				setProducts(response.data)
 				setQuantities(
 					response.data.reduce(

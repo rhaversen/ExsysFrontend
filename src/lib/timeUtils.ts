@@ -64,7 +64,6 @@ export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow
 
 export function isCurrentTimeInUTCOrderWindow(orderWindow: OrderWindow): boolean {
 	const { from, to } = orderWindow
-	console.log(convertOrderWindowFromUTC(orderWindow))
 
 	// Get the current time in UTC
 	const now = new Date()
@@ -80,16 +79,11 @@ export function isCurrentTimeInUTCOrderWindow(orderWindow: OrderWindow): boolean
 	if (fromDate > toDate) {
 		toDate.setDate(toDate.getDate() + 1)
 	}
-	console.log(fromDate)
-	console.log(now)
-	console.log(toDate)
 
 	// Check if the current time is within the order window
 	if (fromDate.getTime() <= now.getTime() && now.getTime() <= toDate.getTime()) {
-		console.log('true')
 		return true
 	}
 
-	console.log('false')
 	return false
 }
