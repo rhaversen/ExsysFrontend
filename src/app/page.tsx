@@ -5,6 +5,7 @@ import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/order/SubmitButton'
 import { OrderWindow, isCurrentTimeInUTCOrderWindow } from '@/lib/timeUtils'
+import RoomSelector from '@/components/order/RoomSelector'
 
 const Page: React.FC = () => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -12,6 +13,8 @@ const Page: React.FC = () => {
 	const [products, setProducts] = useState([])
 	const [quantities, setQuantities] = useState<Record<string, number>>({})
 	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
+	const [rooms, setRooms] = useState<{ _id: string; name: string; description: string }[]>([]) // Ensure rooms is an array of objects
+	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
@@ -48,14 +51,33 @@ const Page: React.FC = () => {
 			}
 		}
 
+		const fetchRooms = async () => {
+			try {
+				const response = await axios.get<{ _id: string; name: string; description: string; }[]>(API_URL + '/v1/rooms')
+				setRooms(response.data)
+			} catch (error) {
+				console.error('Failed to fetch rooms:', error)
+			}
+		}
+
+		fetchRooms()
 		fetchProducts()
 	}, [API_URL])
+
+	useEffect(() => {
+		console.log(rooms)
+	}, [rooms])
 
 	const handleQuantityChange = (key: string, newQuantity: number) => {
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
 			[key]: newQuantity,
 		}))
+	}
+
+	const handleRoomSelect = (roomId: string) => {
+		console.log(roomId)
+		setSelectedRoomId(roomId)
 	}
 
 	const submitOrder = async () => {
@@ -72,9 +94,6 @@ const Page: React.FC = () => {
 				)
 			)
 
-			const rooms = await axios.get(API_URL + '/v1/rooms')
-			const roomId = rooms.data[0]._id
-
 			const productsArray = Object.entries(quantities).map(
 				([product, quantity]) => ({ productId: product, quantity })
 			)
@@ -82,14 +101,13 @@ const Page: React.FC = () => {
 			const data = {
 				requestedDeliveryDate,
 				products: productsArray,
-				roomId,
+				roomId: selectedRoomId
 			}
 
 			console.log(data)
 
-			const response = await axios.post(API_URL + '/v1/orders', data)
+			await axios.post(API_URL + '/v1/orders', data)
 
-			console.log(response.data)
 		} catch (error) {
 			console.error(error)
 		}
@@ -97,6 +115,7 @@ const Page: React.FC = () => {
 
 	return (
 		<div className="bg-white">
+			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
 			<Products
 				products={products}
 				quantities={quantities}
