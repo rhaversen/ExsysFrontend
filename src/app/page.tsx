@@ -18,7 +18,7 @@ const Page: React.FC = () => {
 				setProducts(response.data)
 				setQuantities(
 					response.data.reduce(
-						(acc: any, product: { _id: any }) => ({
+						(acc: any, product: { _id: string }) => ({
 							...acc,
 							[product._id]: 0,
 						}),
