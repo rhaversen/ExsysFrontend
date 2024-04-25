@@ -42,7 +42,9 @@ const Page: React.FC = () => {
 
 	const submitOrder = async () => {
 		try {
-			const requestedDeliveryDate = new Date() // Set this to the desired delivery date
+			// 15 minutes from now as UTC data
+			const now = new Date();
+			const requestedDeliveryDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes() + 15));
 
 			const rooms = await axios.get(API_URL + '/v1/rooms')
 			const roomId = rooms.data[0]._id
