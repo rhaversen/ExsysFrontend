@@ -4,23 +4,42 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/order/SubmitButton'
+import { OrderWindow, isCurrentTimeInUTCOrderWindow } from '@/lib/timeUtils'
 
 const Page: React.FC = () => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState([])
 	const [quantities, setQuantities] = useState<Record<string, number>>({})
+	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
 
 	useEffect(() => {
+		if (API_URL === undefined || API_URL === null) return
+
 		const fetchProducts = async () => {
 			try {
 				const response = await axios.get(API_URL + '/v1/products')
+				console.log(response.data)
 				setProducts(response.data)
 				setQuantities(
 					response.data.reduce(
 						(acc: any, product: { _id: string }) => ({
 							...acc,
 							[product._id]: 0,
+						}),
+						{}
+					)
+				)
+				setAvailabilities(
+					response.data.reduce(
+						(
+							acc: any,
+							product: { _id: string; orderWindow: OrderWindow }
+						) => ({
+							...acc,
+							[product._id]: isCurrentTimeInUTCOrderWindow(
+								product.orderWindow
+							),
 						}),
 						{}
 					)
@@ -74,6 +93,7 @@ const Page: React.FC = () => {
 			<Products
 				products={products}
 				quantities={quantities}
+				availabilities={availabilities}
 				onQuantityChange={handleQuantityChange}
 			/>
 			<SubmitButton onClick={submitOrder} />

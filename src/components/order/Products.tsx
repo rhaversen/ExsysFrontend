@@ -11,10 +11,12 @@ type ProductProps = {
 const Products = ({
 	products,
 	quantities,
+	availabilities,
 	onQuantityChange,
 }: {
 	products: ProductProps[];
 	quantities: Record<string, number>;
+	availabilities: Record<string, boolean>;
 	onQuantityChange: (key: string, newQuantity: number) => void;
 }) => {
 	return (
@@ -28,6 +30,7 @@ const Products = ({
 					description={product.description}
 					price={product.price}
 					onQuantityChange={onQuantityChange}
+					available={availabilities[product._id]}
 				/>
 			))}
 		</div>
