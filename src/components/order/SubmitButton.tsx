@@ -1,18 +1,27 @@
 import React from 'react'
 
-type SubmitButtonProps = {
-	onClick: () => void;
-};
-
-const SubmitButton: React.FC<SubmitButtonProps> = ({ onClick }) => {
+const SubmitButton = ({
+	onClick,
+	disabled
+}: {
+	onClick: () => void,
+	disabled: boolean
+}) => {
 	return (
-		<button
-			type="submit"
-			className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-			onClick={onClick}
-		>
-			Færdiggør Bestilling
-		</button>
+		<div className="flex items-center justify-center flex-grow p-5">
+			<button
+				type="submit"
+				className={`font-bold py-2 px-20 rounded m-0 text-white active:bg-blue-700
+				${disabled
+			? 'bg-blue-400 hover:bg-blue-400 cursor-not-allowed'
+			: 'bg-blue-500 hover:bg-blue-600 cursor-pointer'}
+				`}
+				onClick={onClick}
+				disabled={disabled}
+			>
+				Bestil
+			</button>
+		</div>
 	)
 }
 

@@ -1,22 +1,25 @@
 import React, { useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
+import { OrderWindow } from '@/lib/timeUtils'
 
-export type ProductProps = {
-	id: string;
-	initialQuantity: number;
-	name: string;
-	description: string;
-	price: number;
-	onQuantityChange: (id: string, quantity: number) => void;
-};
-
-const Product: React.FC<ProductProps> = ({
+const Product = ({
 	id,
 	initialQuantity,
 	name,
 	description,
 	price,
+	disabled,
+	orderWindow,
 	onQuantityChange,
+}: {
+	id: string
+	initialQuantity: number
+	name: string
+	description: string
+	price: number
+	disabled: boolean
+	orderWindow: OrderWindow
+	onQuantityChange: (id: string, quantity: number) => void
 }) => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
@@ -26,14 +29,25 @@ const Product: React.FC<ProductProps> = ({
 	}
 
 	return (
-		<div className="p-6 mx-auto bg-transparent shadow-md flex flex-row items-start space-x-4 text-black">
-			<div className="flex-grow">
+		<div
+			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${disabled
+				? 'text-gray-500 bg-gray-400 bg-opacity-50'
+				: 'text-black'
+			}`}
+		>
+			<div className="ml-10 flex-grow">
 				<h2 className="text-xl font-semibold">{name}</h2>
-				<p className="text-gray-500">{description}</p>
+				<p className="text-gray-600 mt-2">{description}</p>
+				<p className="text-gray-600 mt-2 text-sm">
+					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
+					{' - '}
+					{orderWindow.to.hour.toString().padStart(2, '0')}:{orderWindow.to.minute.toString().padStart(2, '0')}
+				</p>
 			</div>
 			<div className="flex flex-col items-center">
 				<p className="mt-2 mb-2">Pris: {price} kr</p>
 				<QuantityAdjuster
+					disabled={disabled}
 					quantity={quantity}
 					setQuantity={handleQuantityChange}
 				/>
