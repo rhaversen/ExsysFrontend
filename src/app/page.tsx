@@ -17,6 +17,7 @@ const Page: React.FC = () => {
 	const [rooms, setRooms] = useState<{ _id: string; name: string; description: string }[]>([]) // Ensure rooms is an array of objects
 	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
@@ -66,6 +67,13 @@ const Page: React.FC = () => {
 		fetchProducts()
 	}, [API_URL])
 
+	useEffect(() => {
+		const productSelected = Object.values(quantities).some((quantity) => quantity > 0)
+		const roomSelected = selectedRoomId !== ''
+		const dateSelected = selectedDate !== null
+		setFormIsValid(productSelected && roomSelected && dateSelected)
+	}, [quantities, selectedRoomId, selectedDate])
+
 	const handleDateSelect = (date: Date) => {
 		setSelectedDate(date)
 	}
@@ -112,7 +120,7 @@ const Page: React.FC = () => {
 			/>
 			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
 			<DeliveryTimeSelector selectedDate={selectedDate} onDateSelect={handleDateSelect} />
-			<SubmitButton onClick={submitOrder} />
+			<SubmitButton onClick={submitOrder} disabled={!formIsValid} />
 		</div>
 	)
 }
