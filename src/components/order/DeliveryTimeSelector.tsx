@@ -38,20 +38,22 @@ const DeliveryTimeSelector = ({
 	}, [])
 
 	return (
-		<select
-			aria-label="Vælg tidspunkt"
-			className="px-4 py-2 border bg-blue-500 rounded-md shadow-sm text-white focus:outline-none"
-			value={selectedDate.toISOString()}
-			onChange={handleTimeChange}
-		>
-			{options.map((date) => {
-				return (
-					<option key={date.toISOString()} value={date.toISOString()} className="bg-white text-black">
-						{formatTime(date)}
-					</option>
-				)
-			})}
-		</select>
+		<div className="p-5">
+			<select
+				aria-label="Vælg tidspunkt"
+				className="p-5 border bg-blue-500 rounded-md shadow-sm text-white focus:outline-none cursor-pointer"
+				value={selectedDate.toISOString()}
+				onChange={handleTimeChange}
+			>
+				{options.map((date) => {
+					return (
+						<option key={date.toISOString()} value={date.toISOString()} className="bg-white text-black">
+							{formatTime(date)}
+						</option>
+					)
+				})}
+			</select>
+		</div>
 	)
 }
 

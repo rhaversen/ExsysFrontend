@@ -16,8 +16,8 @@ const RoomSelector = ({
 	}
 
 	return (
-		<div className="flex flex-col items-start">
-			<select aria-label='Vælg rum' id="room-selector" value={selectedRoom} onChange={handleRoomChange} className="px-4 py-2 border bg-blue-500 rounded-md shadow-sm text-white focus:outline-none">
+		<div className="p-5">
+			<select aria-label='Vælg rum' value={selectedRoom} onChange={handleRoomChange} className="p-5 border bg-blue-500 rounded-md shadow-sm text-white focus:outline-none cursor-pointer">
 				<option value="" disabled className="bg-white text-black">Vælg rum</option>
 				{rooms.map((room) => (
 					<option key={room._id} value={room._id} className="bg-white text-black">

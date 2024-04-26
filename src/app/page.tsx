@@ -111,25 +111,31 @@ const Page: React.FC = () => {
 	}
 
 	return (
-		<div className="bg-white">
-			<Products
-				products={products}
-				quantities={quantities}
-				availabilities={availabilities}
-				onQuantityChange={handleQuantityChange}
-			/>
-			<RoomSelector
-				rooms={rooms}
-				onRoomSelect={handleRoomSelect}
-			/>
-			<DeliveryTimeSelector
-				selectedDate={selectedDate}
-				onDateSelect={handleDateSelect}
-			/>
-			<SubmitButton
-				onClick={submitOrder}
-				disabled={!formIsValid}
-			/>
+		<div className="bg-white flex flex-col h-screen overflow-hidden mx-auto shadow-lg max-w-screen-lg">
+			<div className="overflow-auto">
+				<Products
+					products={products}
+					quantities={quantities}
+					availabilities={availabilities}
+					onQuantityChange={handleQuantityChange}
+				/>
+			</div>
+			<div className="mt-auto">
+				<div className="flex justify-center mt-4">
+					<RoomSelector
+						rooms={rooms}
+						onRoomSelect={handleRoomSelect}
+					/>
+					<DeliveryTimeSelector
+						selectedDate={selectedDate}
+						onDateSelect={handleDateSelect}
+					/>
+				</div>
+				<SubmitButton
+					onClick={submitOrder}
+					disabled={!formIsValid}
+				/>
+			</div>
 		</div>
 	)
 }
