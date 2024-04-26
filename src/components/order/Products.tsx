@@ -1,23 +1,25 @@
 import React from 'react'
 import Product from '@/components/order/Product'
+import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
 
 type ProductProps = {
-	_id: string;
-	name: string;
-	description: string;
-	price: number;
-};
+	_id: string
+	name: string
+	description: string
+	price: number
+	orderWindow: OrderWindow
+}
 
-type ProductsProps = {
-	products: ProductProps[];
-	quantities: Record<string, number>;
-	onQuantityChange: (key: string, newQuantity: number) => void;
-};
-
-const Products: React.FC<ProductsProps> = ({
+const Products = ({
 	products,
 	quantities,
+	availabilities,
 	onQuantityChange,
+}: {
+	products: ProductProps[]
+	quantities: Record<string, number>
+	availabilities: Record<string, boolean>
+	onQuantityChange: (key: string, newQuantity: number) => void
 }) => {
 	return (
 		<div>
@@ -30,6 +32,8 @@ const Products: React.FC<ProductsProps> = ({
 					description={product.description}
 					price={product.price}
 					onQuantityChange={onQuantityChange}
+					disabled={!availabilities[product._id]}
+					orderWindow={convertOrderWindowFromUTC(product.orderWindow)}
 				/>
 			))}
 		</div>
