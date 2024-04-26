@@ -6,6 +6,7 @@ import Products from '@/components/order/Products'
 import SubmitButton from '@/components/order/SubmitButton'
 import { OrderWindow, isCurrentTimeInUTCOrderWindow } from '@/lib/timeUtils'
 import RoomSelector from '@/components/order/RoomSelector'
+import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 
 const Page: React.FC = () => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -15,6 +16,7 @@ const Page: React.FC = () => {
 	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
 	const [rooms, setRooms] = useState<{ _id: string; name: string; description: string }[]>([]) // Ensure rooms is an array of objects
 	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
+	const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
@@ -66,6 +68,7 @@ const Page: React.FC = () => {
 
 	const handleDateSelect = (date: Date) => {
 		setSelectedDate(date)
+		console.log(date)
 	}
 
 	const handleQuantityChange = (key: string, newQuantity: number) => {
@@ -81,24 +84,12 @@ const Page: React.FC = () => {
 
 	const submitOrder = async () => {
 		try {
-			// 15 minutes from now as UTC data
-			const now = new Date()
-			const requestedDeliveryDate = new Date(
-				Date.UTC(
-					now.getUTCFullYear(),
-					now.getUTCMonth(),
-					now.getUTCDate(),
-					now.getUTCHours(),
-					now.getUTCMinutes() + 15
-				)
-			)
-
 			const productsArray = Object.entries(quantities).map(
 				([product, quantity]) => ({ productId: product, quantity })
 			)
 
 			const data = {
-				requestedDeliveryDate,
+				requestedDeliveryDate: selectedDate.toISOString(),
 				products: productsArray,
 				roomId: selectedRoomId
 			}
@@ -121,6 +112,7 @@ const Page: React.FC = () => {
 				onQuantityChange={handleQuantityChange}
 			/>
 			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
+			<DeliveryTimeSelector selectedDate={selectedDate} onDateSelect={handleDateSelect} />
 			<SubmitButton onClick={submitOrder} />
 		</div>
 	)
