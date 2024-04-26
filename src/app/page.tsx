@@ -115,13 +115,13 @@ const Page: React.FC = () => {
 
 	return (
 		<div className="bg-white">
-			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
 			<Products
 				products={products}
 				quantities={quantities}
 				availabilities={availabilities}
 				onQuantityChange={handleQuantityChange}
 			/>
+			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
 			<SubmitButton onClick={submitOrder} />
 		</div>
 	)
