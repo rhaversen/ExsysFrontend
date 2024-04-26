@@ -118,9 +118,18 @@ const Page: React.FC = () => {
 				availabilities={availabilities}
 				onQuantityChange={handleQuantityChange}
 			/>
-			<RoomSelector rooms={rooms} onRoomSelect={handleRoomSelect} />
-			<DeliveryTimeSelector selectedDate={selectedDate} onDateSelect={handleDateSelect} />
-			<SubmitButton onClick={submitOrder} disabled={!formIsValid} />
+			<RoomSelector
+				rooms={rooms}
+				onRoomSelect={handleRoomSelect}
+			/>
+			<DeliveryTimeSelector
+				selectedDate={selectedDate}
+				onDateSelect={handleDateSelect}
+			/>
+			<SubmitButton
+				onClick={submitOrder}
+				disabled={!formIsValid}
+			/>
 		</div>
 	)
 }
