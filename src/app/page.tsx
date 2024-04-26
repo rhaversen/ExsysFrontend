@@ -68,7 +68,6 @@ const Page: React.FC = () => {
 
 	const handleDateSelect = (date: Date) => {
 		setSelectedDate(date)
-		console.log(date)
 	}
 
 	const handleQuantityChange = (key: string, newQuantity: number) => {
