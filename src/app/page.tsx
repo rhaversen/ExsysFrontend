@@ -64,9 +64,9 @@ const Page: React.FC = () => {
 		fetchProducts()
 	}, [API_URL])
 
-	useEffect(() => {
-		console.log(rooms)
-	}, [rooms])
+	const handleDateSelect = (date: Date) => {
+		setSelectedDate(date)
+	}
 
 	const handleQuantityChange = (key: string, newQuantity: number) => {
 		setQuantities((prevQuantities) => ({
@@ -76,7 +76,6 @@ const Page: React.FC = () => {
 	}
 
 	const handleRoomSelect = (roomId: string) => {
-		console.log(roomId)
 		setSelectedRoomId(roomId)
 	}
 
