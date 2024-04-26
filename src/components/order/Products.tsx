@@ -32,7 +32,7 @@ const Products = ({
 					description={product.description}
 					price={product.price}
 					onQuantityChange={onQuantityChange}
-					available={availabilities[product._id]}
+					disabled={!availabilities[product._id]}
 					orderWindow={convertOrderWindowFromUTC(product.orderWindow)}
 				/>
 			))}

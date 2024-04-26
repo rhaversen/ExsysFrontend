@@ -1,22 +1,22 @@
 const QuantityAdjustButton = ({
 	onClick,
 	text,
-	available,
+	disabled,
 }: {
 	onClick: () => void
 	text: string
-	available: boolean
+	disabled: boolean
 }) => {
 	return (
 		<button
 			type="button"
 			className={`w-10 h-10 bg-transparent border-2 font-bold rounded-full flex justify-center items-center
-			${available
+			${disabled
 			? 'border-gray-400 text-gray-400 cursor-not-allowed'
 			: 'border-blue-500 text-blue-500'}
 			`}
 			onClick={onClick}
-			disabled={!available}
+			disabled={disabled}
 		>
 			{text}
 		</button>

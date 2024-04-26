@@ -8,7 +8,7 @@ const Product = ({
 	name,
 	description,
 	price,
-	available,
+	disabled,
 	orderWindow,
 	onQuantityChange,
 }: {
@@ -17,7 +17,7 @@ const Product = ({
 	name: string
 	description: string
 	price: number
-	available: boolean
+	disabled: boolean
 	orderWindow: OrderWindow
 	onQuantityChange: (id: string, quantity: number) => void
 }) => {
@@ -30,9 +30,9 @@ const Product = ({
 
 	return (
 		<div
-			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${available
-				? 'text-black'
-				: 'text-gray-500 bg-gray-400 bg-opacity-50'
+			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${disabled
+				? 'text-gray-500 bg-gray-400 bg-opacity-50'
+				: 'text-black'
 			}`}
 		>
 			<div className="ml-10 flex-grow">
@@ -47,7 +47,7 @@ const Product = ({
 			<div className="flex flex-col items-center">
 				<p className="mt-2 mb-2">Pris: {price} kr</p>
 				<QuantityAdjuster
-					available={available}
+					disabled={disabled}
 					quantity={quantity}
 					setQuantity={handleQuantityChange}
 				/>
