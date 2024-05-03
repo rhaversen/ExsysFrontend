@@ -1,11 +1,11 @@
+'use client'
+
 import React from 'react'
 
-const Admin: React.FC = () => {
+export default function Page() {
 
 	return (
 		<>
 		</>
 	)
 }
-
-export default Admin
