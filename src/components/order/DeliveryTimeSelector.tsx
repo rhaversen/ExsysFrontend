@@ -30,7 +30,7 @@ const DeliveryTimeSelector = ({
 			const hours = Math.floor(i / 4)
 			const minutes = (i % 4) * 15
 			const optionTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
-			if (optionTime.getTime() >= nextInterval.getTime()) {
+			if (optionTime.getTime() >= nextInterval.getTime() + 60 * 1000) {
 				options.push(optionTime)
 			}
 		}
