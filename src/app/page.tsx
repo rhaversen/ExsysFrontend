@@ -7,7 +7,7 @@ export default function Page() {
 	const router = useRouter()
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
 			<h1 className="mb-4 text-2xl font-bold text-gray-700">Vælg Opgave</h1>
 			<div className="flex space-x-4">
 				<button
@@ -21,6 +21,6 @@ export default function Page() {
 					Personale
 				</button>
 			</div>
-		</div>
+		</main>
 	)
 }
