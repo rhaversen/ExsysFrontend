@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
@@ -37,33 +37,32 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
 
-	const fetchProducts = async () => {
+	const fetchProducts = useCallback(async () => {
 		try {
-			const response = await axios.get(API_URL + '/v1/products')
-			// Convert order window to local time with convertOrderWindowFromUTC utility function
-			response.data.forEach((product: { orderWindow: OrderWindow }) => {
+		  const response = await axios.get(API_URL + '/v1/products')
+		  response.data.forEach((product: { orderWindow: OrderWindow }) => {
 				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			})
-			setProducts(response.data)
+		  })
+		  setProducts(response.data)
 		} catch (error) {
-			console.error(error)
+		  console.error(error)
 		}
-	}
-
-	const fetchOptions = async () => {
+	  }, [API_URL, setProducts])
+	  
+	  const fetchOptions = useCallback(async () => {
 		try {
-			const response = await axios.get(API_URL + '/v1/options')
-			setOptions(response.data)
+		  const response = await axios.get(API_URL + '/v1/options')
+		  setOptions(response.data)
 		} catch (error) {
-			console.error(error)
+		  console.error(error)
 		}
-	}
-
+	  }, [API_URL, setOptions])
+	  
 	useEffect(() => {
 		if (API_URL === undefined) return
 		fetchProducts()
 		fetchOptions()
-	})
+	}, [API_URL, fetchProducts, fetchOptions])
 
 	useEffect(() => {
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)

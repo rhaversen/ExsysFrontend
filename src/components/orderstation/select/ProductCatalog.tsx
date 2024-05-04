@@ -1,7 +1,7 @@
 import Product from '@/components/orderstation/select/Product'
 import { OrderWindow, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/app/orderstation/[room]/page'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 const ProductCatalog = ({
 	products,
@@ -12,33 +12,28 @@ const ProductCatalog = ({
 }) => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<string, boolean>>({})
 
-	const updateProductAvailabilities = () => {
+	const updateProductAvailabilities = useCallback(() => {
 		setProductAvailabilities(
 			products.reduce(
-				(
-					acc: any,
-					product: { _id: string; orderWindow: OrderWindow }
-				) => ({
+				(acc, product) => ({
 					...acc,
-					[product._id]: isCurrentTimeInOrderWindow(
-						product.orderWindow
-					),
+					[product._id]: isCurrentTimeInOrderWindow(product.orderWindow),
 				}),
 				{}
 			)
 		)
-	}
+	}, [products])
 
 	useEffect(() => {
 		updateProductAvailabilities()
-	}, [products])
+	}, [updateProductAvailabilities])
 
 	useEffect(() => {
 		const interval = setInterval(() => updateProductAvailabilities(), 60000)
 		return () => {
 			clearInterval(interval)
 		}
-	}, [products])
+	}, [products, updateProductAvailabilities])
 
 	return (
 		<div className="flex flex-wrap justify-center">
