@@ -1,5 +1,5 @@
 import Product from '@/components/orderstation/select/Product'
-import { OrderWindow, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/app/orderstation/[room]/page'
 import React, { useCallback, useEffect, useState } from 'react'
 

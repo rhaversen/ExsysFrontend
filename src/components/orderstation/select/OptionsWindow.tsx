@@ -1,5 +1,5 @@
 import React from 'react'
-import { OptionType, ProductType } from '@/app/orderstation/[room]/page'
+import { OptionType } from '@/app/orderstation/[room]/page'
 import Option from '@/components/orderstation/select/Option'
 
 const OptionsWindow = ({

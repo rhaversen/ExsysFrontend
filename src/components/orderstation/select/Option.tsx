@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import { OptionType, ProductType } from '@/app/orderstation/[room]/page'
+import { OptionType } from '@/app/orderstation/[room]/page'
 
 const Option = ({
 	option,
