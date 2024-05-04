@@ -24,6 +24,7 @@ export interface OptionType {
 	_id: string
 	name: string
 	price: number
+	imageURL?: string
 }
 
 export default function Page({ params }: Readonly<{ params: { room: string } }>) {
