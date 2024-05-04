@@ -26,6 +26,15 @@ const OptionsWindow = ({
 							onOptionSelect={onOptionSelect}
 						/>
 					))}
+					<Option
+						option={{
+							_id: 'none',
+							name: 'Intet',
+							imageURL: '/none.svg',
+							price: 0
+						}}
+						onOptionSelect={onClose}
+					/>
 				</div>
 			</div>
 		</button>
