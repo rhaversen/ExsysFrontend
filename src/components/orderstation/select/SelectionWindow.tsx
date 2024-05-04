@@ -5,11 +5,11 @@ import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 const SelectionWindow = ({
 	products,
 	options,
-	onCartChange
+	handleCartChange
 }: {
 	products: ProductType[]
 	options: OptionType[]
-	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
+	handleCartChange: (_id: string, type: 'products' | 'options', change: number) => void
 }) => {
 	return (
 		<div>

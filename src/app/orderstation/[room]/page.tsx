@@ -70,10 +70,10 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 		setFormIsValid(productSelected)
 	}, [cart])
 
-	const handleCartChange = (_id: string, type: 'products' | 'options', quantity: number) => {
+	const handleCartChange = (_id: string, type: 'products' | 'options', change: number) => {
 		setCart((prevCart) => {
 			const newCart = { ...prevCart }
-			newCart[type][_id] = quantity
+			newCart[type][_id] += change
 			return newCart
 		})
 	}
@@ -108,7 +108,7 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 			<SelectionWindow
 				products={products}
 				options={options}
-				onCartChange={handleCartChange}
+				handleCartChange={handleCartChange}
 			/>
 			<CartWindow
 				products={products}
