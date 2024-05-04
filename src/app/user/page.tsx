@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/order/SubmitButton'
-import { OrderWindow, isCurrentTimeInUTCOrderWindow } from '@/lib/timeUtils'
+import { OrderWindow, convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 
@@ -42,9 +42,9 @@ export default function Page() {
 							product: { _id: string; orderWindow: OrderWindow }
 						) => ({
 							...acc,
-							[product._id]: isCurrentTimeInUTCOrderWindow(
+							[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
 								product.orderWindow
-							),
+							)),
 						}),
 						{}
 					)
@@ -111,7 +111,7 @@ export default function Page() {
 	}
 
 	return (
-		<div className="bg-white flex flex-col h-screen overflow-hidden mx-auto shadow-lg max-w-screen-lg">
+		<main className="bg-white flex flex-col h-screen overflow-hidden mx-auto shadow-lg max-w-screen-lg">
 			<div className="overflow-auto">
 				<Products
 					products={products}
@@ -136,6 +136,6 @@ export default function Page() {
 					disabled={!formIsValid}
 				/>
 			</div>
-		</div>
+		</main>
 	)
 }
