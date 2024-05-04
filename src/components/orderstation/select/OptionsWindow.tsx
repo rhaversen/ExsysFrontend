@@ -5,12 +5,17 @@ import Option from '@/components/orderstation/select/Option'
 const OptionsWindow = ({
 	productOptions,
 	onOptionSelect,
+	onClose
 }: {
 	productOptions: OptionType[]
 	onOptionSelect: (option: OptionType) => void
+	onClose: () => void
 }) => {
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
+		<button
+			onClick={onClose}
+			type='button'
+			className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
 			<div className="bg-white rounded-3xl p-10">
 				<h2 className="text-2xl font-bold mb-4 text-center text-black">Tilvalg</h2>
 				<div className="flex flex-wrap justify-center gap-4">
@@ -23,7 +28,7 @@ const OptionsWindow = ({
 					))}
 				</div>
 			</div>
-		</div>
+		</button>
 	)
 }
 
