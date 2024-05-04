@@ -3,10 +3,10 @@ import { OptionType, ProductType } from '@/app/orderstation/[room]/page'
 import Option from '@/components/orderstation/select/Option'
 
 const OptionsWindow = ({
-	options,
+	productOptions,
 	onOptionSelect,
 }: {
-	options: OptionType[]
+	productOptions: OptionType[]
 	onOptionSelect: (option: OptionType) => void
 }) => {
 	return (
@@ -14,7 +14,7 @@ const OptionsWindow = ({
 			<div className="bg-white rounded-3xl p-10">
 				<h2 className="text-2xl font-bold mb-4 text-center text-black">Tilvalg</h2>
 				<div className="flex flex-wrap justify-center gap-4">
-					{options.map((option) => (
+					{productOptions.map((option) => (
 						<Option
 							key={option._id}
 							option={option}
