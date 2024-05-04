@@ -16,18 +16,17 @@ const SelectionWindow = ({
 	const [selectedProductOptions, setSelectedProductOptions] = useState<OptionType[]>([])
 
 	const handleProductSelect = (product: ProductType) => {
-		handleCartChange(product._id, 'products', 1)
-
 		if (product.options.length > 0) {
 			const productOptions = options.filter(option => product.options.includes(option._id))
 			setSelectedProductOptions(productOptions)
 			setShowOptions(true)
 		}
+		handleCartChange(product._id, 'products', 1)
 	}
 
 	const handleOptionSelect = (option: OptionType) => {
-		handleCartChange(option._id, 'options', 1)
 		setShowOptions(false)
+		handleCartChange(option._id, 'options', 1)
 	}
 
 	return (
