@@ -62,12 +62,8 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 	useEffect(() => {
 		if (API_URL === undefined) return
 		fetchProducts()
-	}, [API_URL])
-
-	useEffect(() => {
-		if (API_URL === undefined) return
 		fetchOptions()
-	}, [API_URL])
+	})
 
 	useEffect(() => {
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
