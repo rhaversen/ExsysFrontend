@@ -39,25 +39,25 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 
 	const fetchProducts = useCallback(async () => {
 		try {
-		  const response = await axios.get(API_URL + '/v1/products')
-		  response.data.forEach((product: { orderWindow: OrderWindow }) => {
+			const response = await axios.get(API_URL + '/v1/products')
+			response.data.forEach((product: { orderWindow: OrderWindow }) => {
 				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-		  })
-		  setProducts(response.data)
+			})
+			setProducts(response.data)
 		} catch (error) {
-		  console.error(error)
+			console.error(error)
 		}
-	  }, [API_URL, setProducts])
-	  
-	  const fetchOptions = useCallback(async () => {
+	}, [API_URL, setProducts])
+
+	const fetchOptions = useCallback(async () => {
 		try {
-		  const response = await axios.get(API_URL + '/v1/options')
-		  setOptions(response.data)
+			const response = await axios.get(API_URL + '/v1/options')
+			setOptions(response.data)
 		} catch (error) {
-		  console.error(error)
+			console.error(error)
 		}
-	  }, [API_URL, setOptions])
-	  
+	}, [API_URL, setOptions])
+
 	useEffect(() => {
 		if (API_URL === undefined) return
 		fetchProducts()
