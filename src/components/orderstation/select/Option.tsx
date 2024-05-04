@@ -19,7 +19,9 @@ const Option = ({
 			>
 				<div className="flex flex-row items-center justify-center">
 					<h3 className={'font-bold pr-2 text-black'}>{option.name}</h3>
-					<p className={'italic text-gray-700'}>{`${option.price === 0 ? '+' : ''}` + option.price + ' kr'}</p>
+					<p className={'italic text-gray-700'}>
+						{option.price === 0 ? 'Gratis' : `${option.price} kr`}
+					</p>
 				</div>
 				<Image
 					width={200}

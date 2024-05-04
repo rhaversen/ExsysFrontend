@@ -25,7 +25,9 @@ const Product = ({
 			>
 				<div className="flex flex-row items-center justify-center">
 					<h3 className={`font-bold pr-2 ${disabled ? 'text-gray-500' : 'text-black'}`}>{product.name}</h3>
-					<p className={`italic ${disabled ? 'text-gray-500' : 'text-gray-700'}`}>{product.price + ' kr'}</p>
+					<p className={`italic ${disabled ? 'text-gray-500' : 'text-gray-700'}`}>
+						{product.price === 0 ? 'Gratis' : `${product.price} kr`}
+					</p>
 				</div>
 				<div className={`${disabled ? 'text-gray-500' : 'text-gray-700'}`}>
 					{product.orderWindow.from.hour.toString().padStart(2, '0')}:{product.orderWindow.from.minute.toString().padStart(2, '0')}
