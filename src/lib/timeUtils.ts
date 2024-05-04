@@ -38,28 +38,33 @@ export function convertOrderWindowToUTC(orderWindow: OrderWindow): OrderWindow {
 export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow {
 	const { from, to } = orderWindow
 
+	// Get the current time in UTC
+	const now = new Date()
+	const currentYear = now.getUTCFullYear()
+	const currentMonth = now.getUTCMonth()
+	const currentDate = now.getUTCDate()
+
 	// Create Date objects for the 'from' and 'to' times in UTC
-	let fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
-	let toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
+	const fromDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, from.hour, from.minute))
+	const toDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, to.hour, to.minute))
 
 	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
 	if (fromDate > toDate) {
 		toDate.setDate(toDate.getDate() + 1)
 	}
 
-	// Convert to local time
-	const fromInLocal = {
-		hour: fromDate.getHours(),
-		minute: fromDate.getMinutes()
-	}
-
-	const toInLocal = {
-		hour: toDate.getHours(),
-		minute: toDate.getMinutes()
-	}
-
 	// Return the new orderWindow object in local time
-	return { from: fromInLocal, to: toInLocal }
+	return {
+		from: {
+			hour: fromDate.getHours(),
+			minute: fromDate.getMinutes()
+
+		}, to: {
+			hour: toDate.getHours(),
+			minute: toDate.getMinutes()
+
+		}
+	}
 }
 
 export function isCurrentTimeInUTCOrderWindow(orderWindow: OrderWindow): boolean {
