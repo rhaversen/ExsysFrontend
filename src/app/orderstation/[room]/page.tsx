@@ -71,11 +71,10 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 	}, [cart])
 
 	const handleCartChange = (_id: string, type: 'products' | 'options', change: number) => {
-		setCart((prevCart) => {
-			const newCart = { ...prevCart }
-			newCart[type][_id] += change
-			return newCart
-		})
+		const newCart = { ...cart }
+		if (newCart[type][_id] === undefined) newCart[type][_id] = 0
+		newCart[type][_id] += change
+		setCart(newCart)
 	}
 
 	const submitOrder = async () => {
