@@ -92,7 +92,7 @@ export default function Page() {
 	const submitOrder = async () => {
 		try {
 			const productsArray = Object.entries(quantities).map(
-				([product, quantity]) => ({ productId: product, quantity })
+				([product, quantity]) => ({ id: product, quantity })
 			)
 
 			const data = {
