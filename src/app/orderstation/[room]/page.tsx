@@ -16,7 +16,7 @@ export interface ProductType {
 	name: string
 	price: number
 	orderWindow: OrderWindow
-	options: OptionType[]
+	options: string[]
 	imageURL?: string
 }
 
