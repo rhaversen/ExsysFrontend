@@ -16,10 +16,10 @@ const OptionsWindow = ({
 				<div className="flex flex-wrap justify-center gap-4">
 					{options.map((option) => (
 						<Option
-                            key={option._id}
-                            option={option}
-                            onOptionSelect={onOptionSelect}
-                        />
+							key={option._id}
+							option={option}
+							onOptionSelect={onOptionSelect}
+						/>
 					))}
 				</div>
 			</div>
