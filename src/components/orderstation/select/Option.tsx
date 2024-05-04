@@ -7,14 +7,14 @@ const Option = ({
 	onOptionSelect,
 }: {
 	option: OptionType
-	onOptionSelect: (_id: string) => void
+	onOptionSelect: (option: OptionType) => void
 }) => {
 	return (
 		<div className='p-2 m-2 relative'>
 			<button
 				type='button'
 				className="cursor-pointer"
-				onClick={() => onOptionSelect(option?._id)}
+				onClick={() => onOptionSelect(option)}
 				draggable="false"
 			>
 				<div className="flex flex-row items-center justify-center">

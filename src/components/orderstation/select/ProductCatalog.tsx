@@ -8,7 +8,7 @@ const ProductCatalog = ({
 	onProductSelect
 }: {
 	products: ProductType[]
-	onProductSelect: (_id: string) => void;
+	onProductSelect: (product: ProductType) => void;
 }) => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<string, boolean>>({})
 

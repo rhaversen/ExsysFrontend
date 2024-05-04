@@ -9,7 +9,7 @@ const Product = ({
 }: {
 	product: ProductType
 	disabled: boolean
-	onProductSelect: (_id: string) => void
+	onProductSelect: (product: ProductType) => void
 }) => {
 	return (
 		<div className='p-2 m-2 relative'>
@@ -19,7 +19,7 @@ const Product = ({
 			<button
 				type='button'
 				className="cursor-pointer"
-				onClick={() => onProductSelect(product._id)}
+				onClick={() => onProductSelect(product)}
 				draggable="false"
 				disabled={disabled}
 			>

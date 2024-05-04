@@ -7,7 +7,7 @@ const OptionsWindow = ({
 	onOptionSelect,
 }: {
 	options: OptionType[]
-	onOptionSelect: (_id: string) => void
+	onOptionSelect: (option: OptionType) => void
 }) => {
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-transparent z-10">
