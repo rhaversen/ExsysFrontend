@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { ProductType, OptionType } from '@/app/orderstation/[room]/page'
 import { CartType } from '@/app/orderstation/[room]/page'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
@@ -19,14 +19,31 @@ const CartWindow = ({
 	onSubmit: () => void
 	formIsValid: boolean
 }) => {
+	const [cartIsEmpty, setCartIsEmpty] = useState(false)
+
+	useEffect(() => {
+		const cartIsEmpty = Object.values(cart.products).every(quantity => quantity === 0) && Object.values(cart.options).every(quantity => quantity === 0)
+		setCartIsEmpty(cartIsEmpty)
+	}, [cart])
+
 	return (
-		<div>
-			<OrderSummary
-				products={products}
-				options={options}
-				cart={cart}
-				onCartChange={onCartChange}
-			/>
+		<div className='bg-gray-300 h-full flex flex-col'>
+			{cartIsEmpty ?
+				<div className="h-screen flex items-center justify-center">
+					<p className="text-center italic text-xl text-gray-500">
+						{'Din kurv er tom'}
+						{'Vælg produkter på vinduet til venstre'}
+					</p>
+				</div>
+				: <div className="overflow-y-auto flex-1 shadow-inner">
+					<OrderSummary
+						products={products}
+						options={options}
+						cart={cart}
+						onCartChange={onCartChange}
+					/>
+				</div>
+			}
 			<div className="h-2 text-black">
 				{`Samlet Pris: ${(
 					Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + products.find(product => product._id === _id)?.price! * quantity, 0) +
