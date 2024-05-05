@@ -12,7 +12,6 @@ const DeliveryTimeSelector = ({
 	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedTime = new Date(event.target.value)
 		onDateSelect(selectedTime)
-		console.log(selectedTime)
 	}
 
 	const formatTime = (date: Date): string => {
