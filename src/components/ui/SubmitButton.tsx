@@ -10,7 +10,7 @@ const SubmitButton = ({
 	disabled: boolean
 }) => {
 	return (
-		<div className="flex items-center justify-center flex-grow p-5">
+		<div className="flex justify-center p-5">
 			<button
 				type="submit"
 				className={`font-bold py-2 px-20 rounded m-0 text-white 
