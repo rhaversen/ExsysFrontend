@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 
 const Room = ({
 	room,
@@ -6,7 +6,7 @@ const Room = ({
 }: {
 	room: { _id: string, name: string, description: string }
 	onRoomSelect: (roomId: string) => void
-}) => {
+}): ReactElement => {
 	return (
 		<button
 			type="button"

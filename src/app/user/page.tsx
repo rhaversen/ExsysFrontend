@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/ui/SubmitButton'
@@ -8,7 +8,7 @@ import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow, type OrderWindow
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 
-export default function Page () {
+export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState([])

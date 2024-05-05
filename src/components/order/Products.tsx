@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import Product from '@/components/order/Product'
 import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
 
@@ -20,7 +20,7 @@ const Products = ({
 	quantities: Record<string, number>
 	availabilities: Record<string, boolean>
 	onQuantityChange: (key: string, newQuantity: number) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div>
 			{products.map((product) => (

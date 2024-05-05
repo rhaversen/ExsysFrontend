@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const DeliveryTimeSelector = ({
 	selectedDate,
@@ -6,7 +6,7 @@ const DeliveryTimeSelector = ({
 }: {
 	selectedDate: Date
 	onDateSelect: (date: Date) => void
-}) => {
+}): ReactElement => {
 	const [options, setOptions] = useState<Date[]>([])
 
 	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

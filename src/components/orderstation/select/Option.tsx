@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import Image from 'next/image'
 import { type OptionType } from '@/app/orderstation/[room]/page'
 
@@ -8,7 +8,7 @@ const Option = ({
 }: {
 	option: OptionType
 	onOptionSelect: (option: OptionType) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div className="p-2 m-2 relative">
 			<button

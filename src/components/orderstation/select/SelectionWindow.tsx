@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { type ReactElement, useState } from 'react'
 import { type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
@@ -11,7 +11,7 @@ const SelectionWindow = ({
 	products: ProductType[]
 	options: OptionType[]
 	handleCartChange: (_id: string, type: 'products' | 'options', change: number) => void
-}) => {
+}): ReactElement => {
 	const [showOptions, setShowOptions] = useState(false)
 	const [selectedProductOptions, setSelectedProductOptions] = useState<OptionType[]>([])
 

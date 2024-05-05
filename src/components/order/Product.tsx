@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { type ReactElement, useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 import { type OrderWindow } from '@/lib/timeUtils'
 
@@ -20,7 +20,7 @@ const Product = ({
 	disabled: boolean
 	orderWindow: OrderWindow
 	onQuantityChange: (id: string, quantity: number) => void
-}) => {
+}): ReactElement => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
 	const handleQuantityChange = (newQuantity: number) => {

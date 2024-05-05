@@ -1,4 +1,5 @@
 import QuantityAdjustButton from '@/components/ui/QuantityAdjustButton'
+import { type ReactElement } from 'react'
 
 const QuantityAdjuster = ({
 	quantity = 0,
@@ -8,7 +9,7 @@ const QuantityAdjuster = ({
 	quantity: number
 	disabled: boolean
 	setQuantity: (newQuantity: number) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div
 			className={`inline-flex items-center border-2 px-1 py-1 rounded-full

@@ -1,4 +1,5 @@
 import QuantityAdjustButton from '@/components/orderstation/cart/QuantityAdjustButton'
+import { type ReactElement } from 'react'
 
 const QuantityAdjuster = ({
 	quantity,
@@ -6,7 +7,7 @@ const QuantityAdjuster = ({
 }: {
 	quantity: number
 	onQuantityChange: (change: number) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div className={'inline-flex items-center border-2 px-1 py-1 rounded-full border-blue-500'}>
 			<div className="flex items-center">

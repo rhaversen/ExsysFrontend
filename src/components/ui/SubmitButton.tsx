@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 
 const SubmitButton = ({
 	text,
@@ -8,7 +8,7 @@ const SubmitButton = ({
 	text: string
 	onClick: () => void
 	disabled: boolean
-}) => {
+}): ReactElement => {
 	return (
 		<div className="flex justify-center p-5">
 			<button

@@ -1,7 +1,7 @@
 import Product from '@/components/orderstation/select/Product'
 import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/app/orderstation/[room]/page'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const ProductCatalog = ({
 	products,
@@ -9,7 +9,7 @@ const ProductCatalog = ({
 }: {
 	products: ProductType[]
 	onProductSelect: (product: ProductType) => void
-}) => {
+}): ReactElement => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<string, boolean>>({})
 
 	const updateProductAvailabilities = useCallback(() => {

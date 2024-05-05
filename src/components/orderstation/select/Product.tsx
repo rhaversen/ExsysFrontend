@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import Image from 'next/image'
 import { type ProductType } from '@/app/orderstation/[room]/page'
 
@@ -10,7 +10,7 @@ const Product = ({
 	product: ProductType
 	disabled: boolean
 	onProductSelect: (product: ProductType) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div className="p-2 m-2 relative">
 			{disabled &&

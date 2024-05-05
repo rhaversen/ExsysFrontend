@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import { type OptionType } from '@/app/orderstation/[room]/page'
 import Option from '@/components/orderstation/select/Option'
 
@@ -10,7 +10,7 @@ const OptionsWindow = ({
 	productOptions: OptionType[]
 	onOptionSelect: (option: OptionType) => void
 	onClose: () => void
-}) => {
+}): ReactElement => {
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
 			<button

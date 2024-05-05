@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function Page () {
+export default function Page (): ReactElement {
 	const router = useRouter()
 
 	return (

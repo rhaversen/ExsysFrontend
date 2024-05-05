@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { type ReactElement, useState } from 'react'
 
 const RoomSelector = ({
 	rooms,
@@ -6,7 +6,7 @@ const RoomSelector = ({
 }: {
 	rooms: Array<{ _id: string, name: string, description: string }>
 	onRoomSelect: (roomId: string) => void
-}) => {
+}): ReactElement => {
 	const [selectedRoom, setSelectedRoom] = useState('') // Initialize with an empty string
 
 	const handleRoomChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

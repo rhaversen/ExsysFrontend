@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import Item from '@/components/orderstation/cart/Item'
 
@@ -12,7 +12,7 @@ const OrderSummary = ({
 	options: OptionType[]
 	cart: CartType
 	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
-}) => {
+}): ReactElement => {
 	// Combine products and options into one array
 	const cartItems = [...Object.entries(cart.products), ...Object.entries(cart.options)].map(([id, quantity]) => {
 		// Find the item in either products or options

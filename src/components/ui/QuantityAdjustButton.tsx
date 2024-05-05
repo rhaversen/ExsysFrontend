@@ -1,3 +1,5 @@
+import { type ReactElement } from 'react'
+
 const QuantityAdjustButton = ({
 	onClick,
 	text,
@@ -6,7 +8,7 @@ const QuantityAdjustButton = ({
 	onClick: () => void
 	text: string
 	disabled: boolean
-}) => {
+}): ReactElement => {
 	return (
 		<button
 			type="button"

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import Image from 'next/image'
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
 
@@ -18,7 +18,7 @@ const Item = ({
 	type: 'products' | 'options'
 	quantity: number
 	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
-}) => {
+}): ReactElement => {
 	const handleQuantityChange = (change: number) => {
 		onCartChange(id, type, change)
 	}

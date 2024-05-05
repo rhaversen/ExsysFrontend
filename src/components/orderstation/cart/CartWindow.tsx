@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
@@ -17,7 +17,7 @@ const CartWindow = ({
 	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
 	onSubmit: () => void
 	formIsValid: boolean
-}) => {
+}): ReactElement => {
 	const [cartIsEmpty, setCartIsEmpty] = useState(false)
 
 	useEffect(() => {

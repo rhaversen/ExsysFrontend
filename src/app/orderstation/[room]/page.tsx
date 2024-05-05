@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
@@ -27,7 +27,7 @@ export interface OptionType {
 	imageURL?: string
 }
 
-export default function Page ({ params }: Readonly<{ params: { room: string } }>) {
+export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState<ProductType[]>([])
