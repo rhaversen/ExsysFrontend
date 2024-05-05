@@ -16,9 +16,9 @@ const OrderSummary = ({
 	// Combine products and options into one array
 	const cartItems = [...Object.entries(cart.products), ...Object.entries(cart.options)].map(([id, quantity]) => {
 		// Find the item in either products or options
-		const item = products.find((p) => p._id === id) || options.find((o) => o._id === id)
+		const item = products.find((p) => p._id === id) ?? options.find((o) => o._id === id)
 		// If the item is not found, throw an error
-		if (!item) {
+		if (item === undefined) {
 			throw new Error(`Item with id ${id} not found`)
 		}
 		// Determine if the item is a product or an option
