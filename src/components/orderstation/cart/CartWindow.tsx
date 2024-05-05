@@ -4,6 +4,7 @@ import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
 
 const CartWindow = ({
+	price,
 	products,
 	options,
 	cart,
@@ -11,6 +12,7 @@ const CartWindow = ({
 	onSubmit,
 	formIsValid
 }: {
+	price: number
 	products: ProductType[]
 	options: OptionType[]
 	cart: CartType
@@ -48,10 +50,7 @@ const CartWindow = ({
 				</div>
 			}
 			<div className="text-black text-center pt-5">
-				{`Samlet Pris: ${(
-					Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
-					Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
-				)} kr`}
+				{`Samlet Pris: ${price} kr`}
 			</div>
 			<SubmitButton
 				text="Bestil"

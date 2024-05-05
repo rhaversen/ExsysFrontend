@@ -18,6 +18,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		options: {}
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
+	const [price, setPrice] = useState(0)
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		console.log('Fetching products and options')
@@ -48,6 +49,14 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	useEffect(() => {
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
 		setFormIsValid(productSelected)
+	}, [cart])
+
+	useEffect(() => {
+		const price = (
+			Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
+			Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
+		)
+		setPrice(price)
 	}, [cart])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
