@@ -1,6 +1,6 @@
 import React, { type ReactElement, useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
-import { type OrderWindow } from '@/lib/timeUtils'
+import { type OrderWindow } from '@/lib/backendDataTypes'
 
 const Product = ({
 	id,

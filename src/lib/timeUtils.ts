@@ -1,12 +1,4 @@
-interface Time {
-	hour: number
-	minute: number
-}
-
-export interface OrderWindow {
-	from: Time
-	to: Time
-}
+import { type OrderWindow, type Time } from '@/lib/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const { from, to } = orderWindow

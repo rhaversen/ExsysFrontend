@@ -1,6 +1,6 @@
 import React, { type ReactElement } from 'react'
 import Image from 'next/image'
-import { type OptionType } from '@/app/orderstation/[room]/page'
+import { type OptionType } from '@/lib/backendDataTypes'
 
 const Option = ({
 	option,

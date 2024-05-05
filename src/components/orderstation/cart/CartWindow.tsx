@@ -1,5 +1,5 @@
 import React, { type ReactElement, useEffect, useState } from 'react'
-import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
+import { type ProductType, type OptionType, type CartType } from '@/lib/backendDataTypes'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
 

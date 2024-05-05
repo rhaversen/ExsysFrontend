@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react'
-import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
+import { type ProductType, type OptionType, type CartType } from '@/lib/backendDataTypes'
 import Item from '@/components/orderstation/cart/Item'
 
 const OrderSummary = ({

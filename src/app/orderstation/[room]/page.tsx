@@ -2,30 +2,10 @@
 
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
-
-export interface CartType {
-	products: Record<ProductType['_id'], number>
-	options: Record<OptionType['_id'], number>
-}
-
-export interface ProductType {
-	_id: string
-	name: string
-	price: number
-	orderWindow: OrderWindow
-	options: string[]
-	imageURL?: string
-}
-
-export interface OptionType {
-	_id: string
-	name: string
-	price: number
-	imageURL?: string
-}
+import { type CartType, type OptionType, type ProductType, type OrderWindow } from '@/lib/backendDataTypes'
 
 export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

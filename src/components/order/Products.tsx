@@ -1,14 +1,7 @@
 import React, { type ReactElement } from 'react'
 import Product from '@/components/order/Product'
-import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
-
-interface ProductProps {
-	_id: string
-	name: string
-	description: string
-	price: number
-	orderWindow: OrderWindow
-}
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { type ProductType } from '@/lib/backendDataTypes'
 
 const Products = ({
 	products,
@@ -16,7 +9,7 @@ const Products = ({
 	availabilities,
 	onQuantityChange
 }: {
-	products: ProductProps[]
+	products: ProductType[]
 	quantities: Record<string, number>
 	availabilities: Record<string, boolean>
 	onQuantityChange: (key: string, newQuantity: number) => void

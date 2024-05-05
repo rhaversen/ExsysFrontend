@@ -4,6 +4,7 @@ import React, { type ReactElement, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Room from '@/components/orderstation/Room'
+import { type RoomType } from '@/lib/backendDataTypes'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

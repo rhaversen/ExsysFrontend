@@ -1,6 +1,6 @@
 import React, { type ReactElement } from 'react'
 import Image from 'next/image'
-import { type ProductType } from '@/app/orderstation/[room]/page'
+import { type ProductType } from '@/lib/backendDataTypes'
 
 const Product = ({
 	product,

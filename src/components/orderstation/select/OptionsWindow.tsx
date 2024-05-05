@@ -1,6 +1,6 @@
 import React, { type ReactElement } from 'react'
-import { type OptionType } from '@/app/orderstation/[room]/page'
 import Option from '@/components/orderstation/select/Option'
+import { type OptionType } from '@/lib/backendDataTypes'
 
 const OptionsWindow = ({
 	productOptions,
