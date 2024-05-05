@@ -14,7 +14,7 @@ const Product = ({
 	return (
 		<div className='p-2 m-2 relative'>
 			{disabled &&
-				<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10"></div>
+				<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10"/>
 			}
 			<button
 				type='button'
@@ -24,7 +24,9 @@ const Product = ({
 				disabled={disabled}
 			>
 				<div className="flex flex-row items-center justify-center">
-					<h3 className={`font-bold pr-2 ${disabled ? 'text-gray-500' : 'text-black'}`}>{product.name}</h3>
+					<h3 className={`font-bold pr-2 ${disabled ? 'text-gray-500' : 'text-black'}`}>
+						{product.name}
+					</h3>
 					<p className={`italic ${disabled ? 'text-gray-500' : 'text-gray-700'}`}>
 						{product.price === 0 ? 'Gratis' : `${product.price} kr`}
 					</p>

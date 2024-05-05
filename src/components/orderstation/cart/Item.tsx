@@ -26,7 +26,9 @@ const Item = ({
 
 	return (
 		<div className='p-2 m-2 relative'>
-			<h3 className='font-bold text-black text-center'>{name}</h3>
+			<h3 className='font-bold text-black text-center'>
+				{name}
+			</h3>
 			<div className="flex flex-row items-center justify-center">
 				<Image
 					width={80}
