@@ -6,6 +6,7 @@ import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { useInterval } from 'react-use'
 
 export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -48,6 +49,8 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
 		setFormIsValid(productSelected)
 	}, [cart])
+
+	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 
 	const handleCartChange = (_id: string, type: 'products' | 'options', change: number): void => {
 		const newCart = { ...cart }
