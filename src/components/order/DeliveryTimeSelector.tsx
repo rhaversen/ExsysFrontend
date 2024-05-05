@@ -9,13 +9,13 @@ const DeliveryTimeSelector = ({
 }): ReactElement => {
 	const [options, setOptions] = useState<Date[]>([])
 
-	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedTime = new Date(event.target.value)
 		onDateSelect(selectedTime)
 		console.log(selectedTime)
 	}
 
-	const formatTime = (date: Date) => {
+	const formatTime = (date: Date): string => {
 		const hours = date.getHours().toString().padStart(2, '0')
 		const minutes = date.getMinutes().toString().padStart(2, '0')
 		return `${hours}:${minutes}`

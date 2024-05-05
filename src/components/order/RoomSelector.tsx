@@ -9,7 +9,7 @@ const RoomSelector = ({
 }): ReactElement => {
 	const [selectedRoom, setSelectedRoom] = useState('') // Initialize with an empty string
 
-	const handleRoomChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleRoomChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedRoom = event.target.value // Get the value of the selected option
 		setSelectedRoom(selectedRoom)
 		onRoomSelect(selectedRoom)

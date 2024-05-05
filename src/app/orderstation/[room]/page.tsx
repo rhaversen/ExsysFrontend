@@ -52,7 +52,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		setFormIsValid(productSelected)
 	}, [cart])
 
-	const handleCartChange = (_id: string, type: 'products' | 'options', change: number) => {
+	const handleCartChange = (_id: string, type: 'products' | 'options', change: number): void => {
 		const newCart = { ...cart }
 		if (newCart[type][_id] === undefined) newCart[type][_id] = 0
 		newCart[type][_id] += change
@@ -60,7 +60,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		setCart(newCart)
 	}
 
-	const submitOrder = async () => {
+	const submitOrder = async (): Promise<void> => {
 		try {
 			const productCart = Object.entries(cart.products).map(
 				([item, quantity]) => ({ id: item, quantity })

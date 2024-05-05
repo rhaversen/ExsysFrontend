@@ -16,7 +16,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
 
-		const fetchRooms = async () => {
+		const fetchRooms = async (): Promise<void> => {
 			try {
 				const response = await axios.get(API_URL + '/v1/rooms')
 				const rooms = response.data as RoomType[]
@@ -29,7 +29,7 @@ export default function Page (): ReactElement {
 		fetchRooms()
 	}, [API_URL])
 
-	const handleRoomSelect = (roomId: string) => {
+	const handleRoomSelect = (roomId: string): void => {
 		router.push(`/orderstation/${roomId}`)
 	}
 

@@ -23,7 +23,7 @@ const Product = ({
 }): ReactElement => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
-	const handleQuantityChange = (newQuantity: number) => {
+	const handleQuantityChange = (newQuantity: number): void => {
 		setQuantity(newQuantity)
 		onQuantityChange(id, newQuantity)
 	}

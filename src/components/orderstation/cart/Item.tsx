@@ -19,7 +19,7 @@ const Item = ({
 	quantity: number
 	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
 }): ReactElement => {
-	const handleQuantityChange = (change: number) => {
+	const handleQuantityChange = (change: number): void => {
 		onCartChange(id, type, change)
 	}
 

@@ -23,7 +23,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
 
-		const fetchProducts = async () => {
+		const fetchProducts = async (): Promise<void> => {
 			try {
 				const response = await axios.get(API_URL + '/v1/products')
 				const products = response.data as ProductType[]
@@ -53,7 +53,7 @@ export default function Page (): ReactElement {
 			}
 		}
 
-		const fetchRooms = async () => {
+		const fetchRooms = async (): Promise<void> => {
 			try {
 				const response = await axios.get(API_URL + '/v1/rooms')
 				const rooms = response.data as RoomType[]
@@ -74,22 +74,22 @@ export default function Page (): ReactElement {
 		setFormIsValid(productSelected && roomSelected && dateSelected)
 	}, [quantities, selectedRoomId, selectedDate])
 
-	const handleDateSelect = (date: Date) => {
+	const handleDateSelect = (date: Date): void => {
 		setSelectedDate(date)
 	}
 
-	const handleQuantityChange = (key: string, newQuantity: number) => {
+	const handleQuantityChange = (key: string, newQuantity: number): void => {
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
 			[key]: newQuantity
 		}))
 	}
 
-	const handleRoomSelect = (roomId: string) => {
+	const handleRoomSelect = (roomId: string): void => {
 		setSelectedRoomId(roomId)
 	}
 
-	const submitOrder = async () => {
+	const submitOrder = async (): Promise<void> => {
 		try {
 			const productsArray = Object.entries(quantities).map(
 				([product, quantity]) => ({ id: product, quantity })
