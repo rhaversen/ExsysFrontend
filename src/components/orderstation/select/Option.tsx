@@ -14,7 +14,9 @@ const Option = ({
 			<button
 				type="button"
 				className="cursor-pointer"
-				onClick={() => { onOptionSelect(option) }}
+				onClick={() => {
+					onOptionSelect(option)
+				}}
 				draggable="false"
 			>
 				<div className="flex flex-row items-center justify-center">

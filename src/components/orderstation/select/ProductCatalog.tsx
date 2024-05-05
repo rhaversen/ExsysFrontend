@@ -29,7 +29,9 @@ const ProductCatalog = ({
 	}, [updateProductAvailabilities])
 
 	useEffect(() => {
-		const interval = setInterval(() => { updateProductAvailabilities() }, 10000)
+		const interval = setInterval(() => {
+			updateProductAvailabilities()
+		}, 10000)
 		return () => {
 			clearInterval(interval)
 		}

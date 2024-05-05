@@ -20,7 +20,9 @@ const QuantityAdjuster = ({
 		>
 			<div className="flex items-center">
 				<QuantityAdjustButton
-					onClick={() => { setQuantity(Math.max(0, quantity - 1)) }}
+					onClick={() => {
+						setQuantity(Math.max(0, quantity - 1))
+					}}
 					text="-"
 					disabled={disabled}
 				/>
@@ -37,10 +39,14 @@ const QuantityAdjuster = ({
 					type="text"
 					value={quantity}
 					readOnly
-					onFocus={(event) => { event.target.blur() }}
+					onFocus={(event) => {
+						event.target.blur()
+					}}
 				/>
 				<QuantityAdjustButton
-					onClick={() => { setQuantity(quantity + 1) }}
+					onClick={() => {
+						setQuantity(quantity + 1)
+					}}
 					text="+"
 					disabled={disabled}
 				/>

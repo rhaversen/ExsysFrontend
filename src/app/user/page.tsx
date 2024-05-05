@@ -92,7 +92,10 @@ export default function Page (): ReactElement {
 	const submitOrder = async (): Promise<void> => {
 		try {
 			const productsArray = Object.entries(quantities).map(
-				([product, quantity]) => ({ id: product, quantity })
+				([product, quantity]) => ({
+					id: product,
+					quantity
+				})
 			)
 
 			const data = {

@@ -1,7 +1,10 @@
 import { type OrderWindow, type Time } from '@/lib/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
-	const { from, to } = orderWindow
+	const {
+		from,
+		to
+	} = orderWindow
 
 	// Create Date objects for the 'from' and 'to' times in UTC
 	const fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
@@ -24,11 +27,17 @@ export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow 
 	}
 
 	// Return the new orderWindow object in UTC
-	return { from: fromInUTC, to: toInUTC }
+	return {
+		from: fromInUTC,
+		to: toInUTC
+	}
 }
 
 export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindow {
-	const { from, to } = orderWindow
+	const {
+		from,
+		to
+	} = orderWindow
 
 	// Get the current time in UTC
 	const now = new Date()

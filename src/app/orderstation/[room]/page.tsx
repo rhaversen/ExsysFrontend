@@ -68,11 +68,17 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	const submitOrder = async (): Promise<void> => {
 		try {
 			const productCart = Object.entries(cart.products).map(
-				([item, quantity]) => ({ id: item, quantity })
+				([item, quantity]) => ({
+					id: item,
+					quantity
+				})
 			)
 
 			const optionCart = Object.entries(cart.options).map(
-				([item, quantity]) => ({ id: item, quantity })
+				([item, quantity]) => ({
+					id: item,
+					quantity
+				})
 			)
 
 			const data = {

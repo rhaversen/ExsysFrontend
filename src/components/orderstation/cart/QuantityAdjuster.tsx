@@ -12,7 +12,9 @@ const QuantityAdjuster = ({
 		<div className={'inline-flex items-center border-2 px-1 py-1 rounded-full border-blue-500'}>
 			<div className="flex items-center">
 				<QuantityAdjustButton
-					onClick={() => { onQuantityChange(-1) }}
+					onClick={() => {
+						onQuantityChange(-1)
+					}}
 					text="-"
 				/>
 				<input
@@ -21,10 +23,14 @@ const QuantityAdjuster = ({
 					type="text"
 					value={quantity}
 					readOnly
-					onFocus={(event) => { event.target.blur() }}
+					onFocus={(event) => {
+						event.target.blur()
+					}}
 				/>
 				<QuantityAdjustButton
-					onClick={() => { onQuantityChange(1) }}
+					onClick={() => {
+						onQuantityChange(1)
+					}}
 					text="+"
 				/>
 			</div>

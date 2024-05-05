@@ -19,7 +19,9 @@ const Product = ({
 			<button
 				type="button"
 				className="cursor-pointer"
-				onClick={() => { onProductSelect(product) }}
+				onClick={() => {
+					onProductSelect(product)
+				}}
 				draggable="false"
 				disabled={disabled}
 			>

@@ -1,5 +1,5 @@
 import React, { type ReactElement, useState } from 'react'
-import { type ProductType, type OptionType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
 
