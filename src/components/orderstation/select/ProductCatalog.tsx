@@ -25,6 +25,7 @@ const ProductCatalog = ({
 		)
 	}, [products])
 
+	// Initial update of product availabilities
 	useEffect(() => {
 		updateProductAvailabilities()
 	}, [updateProductAvailabilities])

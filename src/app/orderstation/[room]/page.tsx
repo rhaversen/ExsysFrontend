@@ -41,16 +41,19 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		}
 	}, [API_URL, setProducts, setOptions])
 
+	// Fetch products and options on mount
 	useEffect(() => {
 		if (API_URL === undefined) return
 		fetchProductsAndOptions()
 	}, [API_URL, fetchProductsAndOptions])
 
+	// Check if any product is selected
 	useEffect(() => {
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
 		setFormIsValid(productSelected)
 	}, [cart])
 
+	// Calculate total price
 	useEffect(() => {
 		const price = (
 			Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
@@ -62,11 +65,16 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 
 	const handleCartChange = (_id: string, type: 'products' | 'options', change: number): void => {
+		// Copy the cart object
 		const newCart = { ...cart }
+		// If the item is not in the cart, add it with a quantity of 0
 		if (newCart[type][_id] === undefined) newCart[type][_id] = 0
+		// Change the quantity of the item
 		newCart[type][_id] += change
+		// If the quantity is 0 or less, remove the item from the cart
 		if (newCart[type][_id] <= 0) {
 			newCart[type] = Object.entries(newCart[type]).reduce<CartType[typeof type]>((acc, [key, value]) => {
+				// If the item is not the one to remove, add it to the accumulator
 				if (key !== _id) acc[key] = value
 				return acc
 			}, {})
