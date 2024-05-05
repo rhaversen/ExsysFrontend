@@ -36,7 +36,7 @@ const CartWindow = ({
 				? <div className="h-screen flex items-center justify-center">
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
-						<br/>
+						<br />
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>
