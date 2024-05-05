@@ -22,7 +22,6 @@ const Products = ({
 					id={product._id}
 					initialQuantity={quantities[product._id]}
 					name={product.name}
-					description={product.description}
 					price={product.price}
 					onQuantityChange={onQuantityChange}
 					disabled={!availabilities[product._id]}

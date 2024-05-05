@@ -6,7 +6,6 @@ const Product = ({
 	id,
 	initialQuantity,
 	name,
-	description,
 	price,
 	disabled,
 	orderWindow,
@@ -15,7 +14,6 @@ const Product = ({
 	id: string
 	initialQuantity: number
 	name: string
-	description: string
 	price: number
 	disabled: boolean
 	orderWindow: OrderWindow
@@ -37,7 +35,6 @@ const Product = ({
 		>
 			<div className="ml-10 flex-grow">
 				<h2 className="text-xl font-semibold">{name}</h2>
-				<p className="text-gray-600 mt-2">{description}</p>
 				<p className="text-gray-600 mt-2 text-sm">
 					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
 					{' - '}
