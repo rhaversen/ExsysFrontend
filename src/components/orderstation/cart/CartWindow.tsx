@@ -45,7 +45,7 @@ const CartWindow = ({
 					/>
 				</div>
 			}
-			<div className="h-2 text-black">
+			<div className="text-black text-center pt-5">
 				{`Samlet Pris: ${(
 					Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + products.find(product => product._id === _id)?.price! * quantity, 0) +
 					Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + options.find(option => option._id === _id)?.price! * quantity, 0)
