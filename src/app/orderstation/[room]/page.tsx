@@ -104,20 +104,24 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 	}
 
 	return (
-		<main>
-			<SelectionWindow
-				products={products}
-				options={options}
-				handleCartChange={handleCartChange}
-			/>
-			<CartWindow
-				products={products}
-				options={options}
-				cart={cart}
-				onCartChange={handleCartChange}
-				onSubmit={submitOrder}
-				formIsValid={formIsValid}
-			/>
+		<main className="flex h-screen">
+			<div className="flex-1 overflow-y-auto">
+				<SelectionWindow
+					products={products}
+					options={options}
+					handleCartChange={handleCartChange}
+				/>
+			</div>
+			<div className="w-[400px] h-screen overflow-y-auto">
+				<CartWindow
+					products={products}
+					options={options}
+					cart={cart}
+					onCartChange={handleCartChange}
+					onSubmit={submitOrder}
+					formIsValid={formIsValid}
+				/>
+			</div>
 		</main>
 	)
 }
