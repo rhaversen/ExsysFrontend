@@ -18,7 +18,8 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
 
-	const fetchProducts = useCallback(async () => {
+	const fetchProductsAndOptions = useCallback(async () => {
+		console.log('Fetching products and options')
 		try {
 			const response = await axios.get(API_URL + '/v1/products')
 			const products = response.data as ProductType[]
@@ -29,9 +30,6 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		} catch (error) {
 			console.error(error)
 		}
-	}, [API_URL, setProducts])
-
-	const fetchOptions = useCallback(async () => {
 		try {
 			const response = await axios.get(API_URL + '/v1/options')
 			const options = response.data as OptionType[]
@@ -39,13 +37,12 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		} catch (error) {
 			console.error(error)
 		}
-	}, [API_URL, setOptions])
+	}, [API_URL, setProducts, setOptions])
 
 	useEffect(() => {
 		if (API_URL === undefined) return
-		fetchProducts()
-		fetchOptions()
-	}, [API_URL, fetchProducts, fetchOptions])
+		fetchProductsAndOptions()
+	}, [API_URL, fetchProductsAndOptions])
 
 	useEffect(() => {
 		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
