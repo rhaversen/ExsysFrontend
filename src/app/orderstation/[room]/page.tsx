@@ -74,6 +74,7 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 		const newCart = { ...cart }
 		if (newCart[type][_id] === undefined) newCart[type][_id] = 0
 		newCart[type][_id] += change
+		if (newCart[type][_id] <= 0) delete newCart[type][_id]
 		setCart(newCart)
 	}
 
