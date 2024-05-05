@@ -132,6 +132,7 @@ export default function Page() {
 					/>
 				</div>
 				<SubmitButton
+					text='Bestil'
 					onClick={submitOrder}
 					disabled={!formIsValid}
 				/>

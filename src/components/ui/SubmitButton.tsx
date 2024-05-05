@@ -1,9 +1,11 @@
 import React from 'react'
 
 const SubmitButton = ({
+	text,
 	onClick,
 	disabled
 }: {
+	text: string,
 	onClick: () => void,
 	disabled: boolean
 }) => {
@@ -19,7 +21,7 @@ const SubmitButton = ({
 				onClick={onClick}
 				disabled={disabled}
 			>
-				Bestil
+				{text}
 			</button>
 		</div>
 	)

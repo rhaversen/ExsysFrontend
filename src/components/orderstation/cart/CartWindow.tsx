@@ -34,6 +34,7 @@ const CartWindow = ({
 				)} kr`}
 			</div>
 			<SubmitButton
+				text='Bestil'
 				disabled={!formIsValid}
 				onClick={onSubmit}
 			/>
