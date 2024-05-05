@@ -7,8 +7,8 @@ import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 
 export interface CartType {
-	products: Record<string, number>
-	options: Record<string, number>
+	products: Record<ProductType['_id'], number>
+	options: Record<OptionType['_id'], number>
 }
 
 export interface ProductType {
