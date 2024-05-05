@@ -60,7 +60,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 			Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
 		)
 		setPrice(price)
-	}, [cart])
+	}, [cart, options, products])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 
