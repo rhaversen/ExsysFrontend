@@ -13,7 +13,7 @@ const SubmitButton = ({
 		<div className="flex justify-center p-5">
 			<button
 				type="submit"
-				className={`font-bold py-2 px-20 rounded m-0 text-white 
+				className={`font-bold py-5 px-40 rounded m-0 text-white 
 				${disabled
 			? 'bg-blue-400 hover:bg-blue-400 cursor-not-allowed'
 			: 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 cursor-pointer'}
