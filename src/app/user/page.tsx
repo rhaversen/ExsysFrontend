@@ -12,7 +12,7 @@ import { type ProductType, type RoomType } from '@/lib/backendDataTypes'
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [products, setProducts] = useState([])
+	const [products, setProducts] = useState<ProductType[]>([])
 	const [quantities, setQuantities] = useState<Record<string, number>>({})
 	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
 	const [rooms, setRooms] = useState<Array<{ _id: string, name: string, description: string }>>([]) // Ensure rooms is an array of objects
@@ -26,30 +26,28 @@ export default function Page (): ReactElement {
 		const fetchProducts = async () => {
 			try {
 				const response = await axios.get(API_URL + '/v1/products')
-				setProducts(response.data)
-				setQuantities(
-					response.data.reduce(
-						(acc: any, product: { _id: string }) => ({
-							...acc,
-							[product._id]: 0
-						}),
-						{}
-					)
+				const products = response.data as ProductType[]
+				setProducts(products)
+
+				const quantities = products.reduce(
+					(acc: Record<string, number>, product) => ({
+						...acc,
+						[product._id]: 0
+					}),
+					{}
 				)
-				setAvailabilities(
-					response.data.reduce(
-						(
-							acc: any,
-							product: { _id: string, orderWindow: OrderWindow }
-						) => ({
-							...acc,
-							[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
-								product.orderWindow
-							))
-						}),
-						{}
-					)
+				setQuantities(quantities)
+
+				const availabilities = products.reduce(
+					(acc: Record<string, boolean>, product) => ({
+						...acc,
+						[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
+							product.orderWindow
+						))
+					}),
+					{}
 				)
+				setAvailabilities(availabilities)
 			} catch (error) {
 				console.error(error)
 			}
@@ -57,12 +55,9 @@ export default function Page (): ReactElement {
 
 		const fetchRooms = async () => {
 			try {
-				const response = await axios.get<Array<{
-					_id: string
-					name: string
-					description: string
-				}>>(API_URL + '/v1/rooms')
-				setRooms(response.data)
+				const response = await axios.get(API_URL + '/v1/rooms')
+				const rooms = response.data as RoomType[]
+				setRooms(rooms)
 			} catch (error) {
 				console.error('Failed to fetch rooms:', error)
 			}

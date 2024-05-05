@@ -9,7 +9,7 @@ import { type RoomType } from '@/lib/backendDataTypes'
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [rooms, setRooms] = useState<Array<{ _id: string, name: string, description: string }>>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
 
 	const router = useRouter()
 
@@ -18,12 +18,9 @@ export default function Page (): ReactElement {
 
 		const fetchRooms = async () => {
 			try {
-				const response = await axios.get<Array<{
-					_id: string
-					name: string
-					description: string
-				}>>(API_URL + '/v1/rooms')
-				setRooms(response.data)
+				const response = await axios.get(API_URL + '/v1/rooms')
+				const rooms = response.data as RoomType[]
+				setRooms(rooms)
 			} catch (error) {
 				console.error('Failed to fetch rooms:', error)
 			}

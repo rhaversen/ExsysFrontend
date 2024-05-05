@@ -5,7 +5,7 @@ import axios from 'axios'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
-import { type CartType, type OptionType, type ProductType, type OrderWindow } from '@/lib/backendDataTypes'
+import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
 
 export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -21,10 +21,11 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	const fetchProducts = useCallback(async () => {
 		try {
 			const response = await axios.get(API_URL + '/v1/products')
-			response.data.forEach((product: { orderWindow: OrderWindow }) => {
+			const products = response.data as ProductType[]
+			products.forEach((product) => {
 				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			})
-			setProducts(response.data)
+			setProducts(products)
 		} catch (error) {
 			console.error(error)
 		}
@@ -33,7 +34,8 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	const fetchOptions = useCallback(async () => {
 		try {
 			const response = await axios.get(API_URL + '/v1/options')
-			setOptions(response.data)
+			const options = response.data as OptionType[]
+			setOptions(options)
 		} catch (error) {
 			console.error(error)
 		}
