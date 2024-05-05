@@ -2,6 +2,7 @@ import Product from '@/components/orderstation/select/Product'
 import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { useInterval } from 'react-use'
 
 const ProductCatalog = ({
 	products,
@@ -28,14 +29,7 @@ const ProductCatalog = ({
 		updateProductAvailabilities()
 	}, [updateProductAvailabilities])
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			updateProductAvailabilities()
-		}, 10000)
-		return () => {
-			clearInterval(interval)
-		}
-	}, [products, updateProductAvailabilities])
+	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
 	return (
 		<div className="flex flex-wrap justify-center">
