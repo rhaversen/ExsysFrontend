@@ -15,7 +15,7 @@ export default function Page (): ReactElement {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [quantities, setQuantities] = useState<Record<string, number>>({})
 	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
-	const [rooms, setRooms] = useState<Array<{ _id: string, name: string, description: string }>>([]) // Ensure rooms is an array of objects
+	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 	const [formIsValid, setFormIsValid] = useState(false)
