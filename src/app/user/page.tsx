@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
-import SubmitButton from '@/components/order/SubmitButton'
+import SubmitButton from '@/components/ui/SubmitButton'
 import { OrderWindow, convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
