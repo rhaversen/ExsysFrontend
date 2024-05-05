@@ -12,11 +12,15 @@ const OptionsWindow = ({
 	onClose: () => void
 }) => {
 	return (
-		<button
-			onClick={onClose}
-			type='button'
-			className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<div className="bg-white rounded-3xl p-10">
+		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
+			<button
+				type="button"
+				className="absolute inset-0 w-full h-full"
+				onClick={onClose}
+			>
+				<span className="sr-only">Close</span>
+			</button>
+			<div className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
 				<h2 className="text-2xl font-bold mb-4 text-center text-black">Tilvalg</h2>
 				<div className="flex flex-wrap justify-center gap-4">
 					{productOptions.map((option) => (
@@ -37,7 +41,7 @@ const OptionsWindow = ({
 					/>
 				</div>
 			</div>
-		</button>
+		</div>
 	)
 }
 
