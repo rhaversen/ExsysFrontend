@@ -8,7 +8,7 @@ const ProductCatalog = ({
 	onProductSelect
 }: {
 	products: ProductType[]
-	onProductSelect: (product: ProductType) => void;
+	onProductSelect: (product: ProductType) => void
 }) => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<string, boolean>>({})
 
@@ -17,7 +17,7 @@ const ProductCatalog = ({
 			products.reduce(
 				(acc, product) => ({
 					...acc,
-					[product._id]: isCurrentTimeInOrderWindow(product.orderWindow),
+					[product._id]: isCurrentTimeInOrderWindow(product.orderWindow)
 				}),
 				{}
 			)
@@ -29,7 +29,7 @@ const ProductCatalog = ({
 	}, [updateProductAvailabilities])
 
 	useEffect(() => {
-		const interval = setInterval(() => updateProductAvailabilities(), 10000)
+		const interval = setInterval(() => { updateProductAvailabilities() }, 10000)
 		return () => {
 			clearInterval(interval)
 		}
@@ -50,4 +50,3 @@ const ProductCatalog = ({
 }
 
 export default ProductCatalog
-

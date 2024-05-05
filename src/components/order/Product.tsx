@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
-import { OrderWindow } from '@/lib/timeUtils'
+import { type OrderWindow } from '@/lib/timeUtils'
 
 const Product = ({
 	id,
@@ -10,7 +10,7 @@ const Product = ({
 	price,
 	disabled,
 	orderWindow,
-	onQuantityChange,
+	onQuantityChange
 }: {
 	id: string
 	initialQuantity: number

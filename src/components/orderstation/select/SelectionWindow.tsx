@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ProductType, OptionType } from '@/app/orderstation/[room]/page'
+import { type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
 
@@ -39,7 +39,9 @@ const SelectionWindow = ({
 				<OptionsWindow
 					productOptions={selectedProductOptions}
 					onOptionSelect={handleOptionSelect}
-					onClose={() => { setShowOptions(false) }}
+					onClose={() => {
+						setShowOptions(false)
+					}}
 				/>
 			)}
 		</div>

@@ -5,8 +5,8 @@ const SubmitButton = ({
 	onClick,
 	disabled
 }: {
-	text: string,
-	onClick: () => void,
+	text: string
+	onClick: () => void
 	disabled: boolean
 }) => {
 	return (

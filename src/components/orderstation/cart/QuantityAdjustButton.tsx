@@ -1,6 +1,6 @@
 const QuantityAdjustButton = ({
 	onClick,
-	text,
+	text
 }: {
 	onClick: () => void
 	text: string

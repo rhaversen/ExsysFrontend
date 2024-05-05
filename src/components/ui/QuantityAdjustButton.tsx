@@ -1,7 +1,7 @@
 const QuantityAdjustButton = ({
 	onClick,
 	text,
-	disabled,
+	disabled
 }: {
 	onClick: () => void
 	text: string

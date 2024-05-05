@@ -11,15 +11,15 @@ export const metadata: Metadata = {
 	},
 	description: 'Bestil mad fra Ny Skivehus Kantine',
 	alternates: {
-		canonical: 'https://www.kantine.nyskivehus.dk',
+		canonical: 'https://www.kantine.nyskivehus.dk'
 	},
 	icons: {
-		icon: '/favicon.ico',
+		icon: '/favicon.ico'
 	}
 }
 
-export default function RootLayout({
-	children,
+export default function RootLayout ({
+	children
 }: Readonly<{
 	children: React.ReactNode
 }>) {

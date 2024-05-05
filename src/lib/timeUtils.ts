@@ -1,19 +1,19 @@
 interface Time {
-	hour: number;
-	minute: number;
+	hour: number
+	minute: number
 }
 
 export interface OrderWindow {
-	from: Time;
-	to: Time;
+	from: Time
+	to: Time
 }
 
-export function convertOrderWindowToUTC(orderWindow: OrderWindow): OrderWindow {
+export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const { from, to } = orderWindow
 
 	// Create Date objects for the 'from' and 'to' times in UTC
-	let fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
-	let toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
+	const fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
+	const toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
 
 	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
 	if (fromDate > toDate) {
@@ -35,7 +35,7 @@ export function convertOrderWindowToUTC(orderWindow: OrderWindow): OrderWindow {
 	return { from: fromInUTC, to: toInUTC }
 }
 
-export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow {
+export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindow {
 	const { from, to } = orderWindow
 
 	// Get the current time in UTC
@@ -59,7 +59,8 @@ export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow
 			hour: fromDate.getHours(),
 			minute: fromDate.getMinutes()
 
-		}, to: {
+		},
+		to: {
 			hour: toDate.getHours(),
 			minute: toDate.getMinutes()
 
@@ -67,7 +68,7 @@ export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow
 	}
 }
 
-export function isCurrentTimeInOrderWindow(orderWindow: OrderWindow): boolean {
+export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 	const now = new Date()
 	const currentHour = now.getHours()
 	const currentMinute = now.getMinutes()

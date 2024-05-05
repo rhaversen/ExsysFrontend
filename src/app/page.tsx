@@ -3,7 +3,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function Page() {
+export default function Page () {
 	const router = useRouter()
 
 	return (
@@ -12,12 +12,12 @@ export default function Page() {
 			<div className="flex space-x-4">
 				<button
 					className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-					onClick={() => router.push('/orderstation')}>
+					onClick={() => { router.push('/orderstation') }}>
 					Bestillings Station
 				</button>
 				<button
 					className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-					onClick={() => router.push('/admin')}>
+					onClick={() => { router.push('/admin') }}>
 					Personale
 				</button>
 			</div>

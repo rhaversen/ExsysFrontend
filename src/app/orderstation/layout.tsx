@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 	}
 }
 
-export default function SelectRoomLayout({
+export default function SelectRoomLayout ({
 	children
 }: Readonly<{
 	children: React.ReactNode

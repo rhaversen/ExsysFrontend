@@ -9,7 +9,7 @@ const Item = ({
 	price,
 	type,
 	quantity,
-	onCartChange,
+	onCartChange
 }: {
 	imageURL?: string
 	id: string
@@ -19,14 +19,13 @@ const Item = ({
 	quantity: number
 	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
 }) => {
-
 	const handleQuantityChange = (change: number) => {
 		onCartChange(id, type, change)
 	}
 
 	return (
-		<div className='p-2 m-2 relative'>
-			<h3 className='font-bold text-black text-center'>
+		<div className="p-2 m-2 relative">
+			<h3 className="font-bold text-black text-center">
 				{name}
 			</h3>
 			<div className="flex flex-row items-center justify-center">
@@ -43,7 +42,7 @@ const Item = ({
 					quantity={quantity}
 					onQuantityChange={handleQuantityChange}
 				/>
-				<p className='italic text-gray-700 w-20 text-center'>{price === 0 ? 'Gratis' : `${price} kr`}</p>
+				<p className="italic text-gray-700 w-20 text-center">{price === 0 ? 'Gratis' : `${price} kr`}</p>
 			</div>
 		</div>
 	)

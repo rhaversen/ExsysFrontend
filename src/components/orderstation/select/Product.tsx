@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import { ProductType } from '@/app/orderstation/[room]/page'
+import { type ProductType } from '@/app/orderstation/[room]/page'
 
 const Product = ({
 	product,
@@ -12,14 +12,14 @@ const Product = ({
 	onProductSelect: (product: ProductType) => void
 }) => {
 	return (
-		<div className='p-2 m-2 relative'>
+		<div className="p-2 m-2 relative">
 			{disabled &&
 				<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10"/>
 			}
 			<button
-				type='button'
+				type="button"
 				className="cursor-pointer"
-				onClick={() => onProductSelect(product)}
+				onClick={() => { onProductSelect(product) }}
 				draggable="false"
 				disabled={disabled}
 			>

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 
@@ -27,14 +27,14 @@ export interface OptionType {
 	imageURL?: string
 }
 
-export default function Page({ params }: Readonly<{ params: { room: string } }>) {
+export default function Page ({ params }: Readonly<{ params: { room: string } }>) {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [cart, setCart] = useState<CartType>({
 		products: {},
-		options: {},
+		options: {}
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -97,7 +97,6 @@ export default function Page({ params }: Readonly<{ params: { room: string } }>)
 			console.log(data)
 
 			await axios.post(API_URL + '/v1/orders', data)
-
 		} catch (error) {
 			console.error(error)
 		}

@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Room from '@/components/orderstation/Room'
 
-export default function Page() {
+export default function Page () {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [rooms, setRooms] = useState<{ _id: string; name: string; description: string }[]>([])
+	const [rooms, setRooms] = useState<Array<{ _id: string, name: string, description: string }>>([])
 
 	const router = useRouter()
 
@@ -17,7 +17,11 @@ export default function Page() {
 
 		const fetchRooms = async () => {
 			try {
-				const response = await axios.get<{ _id: string; name: string; description: string; }[]>(API_URL + '/v1/rooms')
+				const response = await axios.get<Array<{
+					_id: string
+					name: string
+					description: string
+				}>>(API_URL + '/v1/rooms')
 				setRooms(response.data)
 			} catch (error) {
 				console.error('Failed to fetch rooms:', error)
@@ -32,9 +36,9 @@ export default function Page() {
 	}
 
 	return (
-		<main className='flex flex-col justify-center items-center h-screen'>
-			<h1 className='m-10 p-0 text-center text-black text-4xl'>Vælg et rum</h1>
-			<div className='flex flex-wrap justify-center items-center p-20'>
+		<main className="flex flex-col justify-center items-center h-screen">
+			<h1 className="m-10 p-0 text-center text-black text-4xl">Vælg et rum</h1>
+			<div className="flex flex-wrap justify-center items-center p-20">
 				{rooms.map((room) => (
 					<Room
 						key={room._id}

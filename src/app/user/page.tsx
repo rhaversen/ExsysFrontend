@@ -1,20 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/ui/SubmitButton'
-import { OrderWindow, convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow, type OrderWindow } from '@/lib/timeUtils'
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 
-export default function Page() {
+export default function Page () {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState([])
 	const [quantities, setQuantities] = useState<Record<string, number>>({})
 	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
-	const [rooms, setRooms] = useState<{ _id: string; name: string; description: string }[]>([]) // Ensure rooms is an array of objects
+	const [rooms, setRooms] = useState<Array<{ _id: string, name: string, description: string }>>([]) // Ensure rooms is an array of objects
 	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 	const [formIsValid, setFormIsValid] = useState(false)
@@ -30,7 +30,7 @@ export default function Page() {
 					response.data.reduce(
 						(acc: any, product: { _id: string }) => ({
 							...acc,
-							[product._id]: 0,
+							[product._id]: 0
 						}),
 						{}
 					)
@@ -39,12 +39,12 @@ export default function Page() {
 					response.data.reduce(
 						(
 							acc: any,
-							product: { _id: string; orderWindow: OrderWindow }
+							product: { _id: string, orderWindow: OrderWindow }
 						) => ({
 							...acc,
 							[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
 								product.orderWindow
-							)),
+							))
 						}),
 						{}
 					)
@@ -56,7 +56,11 @@ export default function Page() {
 
 		const fetchRooms = async () => {
 			try {
-				const response = await axios.get<{ _id: string; name: string; description: string; }[]>(API_URL + '/v1/rooms')
+				const response = await axios.get<Array<{
+					_id: string
+					name: string
+					description: string
+				}>>(API_URL + '/v1/rooms')
 				setRooms(response.data)
 			} catch (error) {
 				console.error('Failed to fetch rooms:', error)
@@ -81,7 +85,7 @@ export default function Page() {
 	const handleQuantityChange = (key: string, newQuantity: number) => {
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
-			[key]: newQuantity,
+			[key]: newQuantity
 		}))
 	}
 
@@ -104,7 +108,6 @@ export default function Page() {
 			console.log(data)
 
 			await axios.post(API_URL + '/v1/orders', data)
-
 		} catch (error) {
 			console.error(error)
 		}
@@ -132,7 +135,7 @@ export default function Page() {
 					/>
 				</div>
 				<SubmitButton
-					text='Bestil'
+					text="Bestil"
 					onClick={submitOrder}
 					disabled={!formIsValid}
 				/>

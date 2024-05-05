@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export function GET() {
+export function GET () {
 	return new NextResponse('OK')
 }

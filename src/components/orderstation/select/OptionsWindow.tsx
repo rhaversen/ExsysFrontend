@@ -1,5 +1,5 @@
 import React from 'react'
-import { OptionType } from '@/app/orderstation/[room]/page'
+import { type OptionType } from '@/app/orderstation/[room]/page'
 import Option from '@/components/orderstation/select/Option'
 
 const OptionsWindow = ({
@@ -22,7 +22,8 @@ const OptionsWindow = ({
 					{'Close'}
 				</span>
 			</button>
-			<div className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+			<div
+				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
 				<h2 className="text-2xl font-bold mb-4 text-center text-black">
 					{'Tilvalg'}
 				</h2>

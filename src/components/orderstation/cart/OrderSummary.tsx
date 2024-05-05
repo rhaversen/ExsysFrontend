@@ -1,5 +1,5 @@
 import React from 'react'
-import { ProductType, OptionType, CartType } from '@/app/orderstation/[room]/page'
+import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import Item from '@/components/orderstation/cart/Item'
 
 const OrderSummary = ({
@@ -22,14 +22,14 @@ const OrderSummary = ({
 			throw new Error(`Item with id ${id} not found`)
 		}
 		// Determine if the item is a product or an option
-		const type = (item._id in cart.products ? 'products' : 'options') as 'products' | 'options'
+		const type: 'products' | 'options' = item._id in cart.products ? 'products' : 'options'
 		return {
 			id,
 			name: item.name,
 			price: item.price,
 			type,
 			quantity,
-			imageURL: item.imageURL,
+			imageURL: item.imageURL
 		}
 	})
 

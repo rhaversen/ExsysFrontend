@@ -1,20 +1,20 @@
 import React from 'react'
 import Image from 'next/image'
-import { OptionType } from '@/app/orderstation/[room]/page'
+import { type OptionType } from '@/app/orderstation/[room]/page'
 
 const Option = ({
 	option,
-	onOptionSelect,
+	onOptionSelect
 }: {
 	option: OptionType
 	onOptionSelect: (option: OptionType) => void
 }) => {
 	return (
-		<div className='p-2 m-2 relative'>
+		<div className="p-2 m-2 relative">
 			<button
-				type='button'
+				type="button"
 				className="cursor-pointer"
-				onClick={() => onOptionSelect(option)}
+				onClick={() => { onOptionSelect(option) }}
 				draggable="false"
 			>
 				<div className="flex flex-row items-center justify-center">

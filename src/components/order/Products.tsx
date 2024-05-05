@@ -1,8 +1,8 @@
 import React from 'react'
 import Product from '@/components/order/Product'
-import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, type OrderWindow } from '@/lib/timeUtils'
 
-type ProductProps = {
+interface ProductProps {
 	_id: string
 	name: string
 	description: string
@@ -14,7 +14,7 @@ const Products = ({
 	products,
 	quantities,
 	availabilities,
-	onQuantityChange,
+	onQuantityChange
 }: {
 	products: ProductProps[]
 	quantities: Record<string, number>

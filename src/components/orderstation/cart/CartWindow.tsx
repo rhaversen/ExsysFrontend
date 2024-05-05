@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ProductType, OptionType } from '@/app/orderstation/[room]/page'
-import { CartType } from '@/app/orderstation/[room]/page'
+import { type CartType, type OptionType, type ProductType } from '@/app/orderstation/[room]/page'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
 
@@ -27,15 +26,15 @@ const CartWindow = ({
 	}, [cart])
 
 	return (
-		<div className='bg-gray-300 h-full flex flex-col'>
+		<div className="bg-gray-300 h-full flex flex-col">
 			<h2 className="text-2xl font-bold p-4 text-center text-black">
 				{'Din Bestilling'}
 			</h2>
-			{cartIsEmpty ?
-				<div className="h-screen flex items-center justify-center">
+			{cartIsEmpty
+				? <div className="h-screen flex items-center justify-center">
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
-						<br />
+						<br/>
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>
@@ -55,7 +54,7 @@ const CartWindow = ({
 				)} kr`}
 			</div>
 			<SubmitButton
-				text='Bestil'
+				text="Bestil"
 				disabled={!formIsValid}
 				onClick={onSubmit}
 			/>
