@@ -1,6 +1,6 @@
 'use client'
 
-import React, { type ReactElement, useEffect, useState, useCallback } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import Products from '@/components/order/Products'
 import SubmitButton from '@/components/ui/SubmitButton'
@@ -55,8 +55,12 @@ export default function Page (): ReactElement {
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
-		fetchRooms().catch((error) => { console.error('Error fetching rooms:', error) })
-		fetchProducts().catch((error) => { console.error('Error fetching products:', error) })
+		fetchRooms().catch((error) => {
+			console.error('Error fetching rooms:', error)
+		})
+		fetchProducts().catch((error) => {
+			console.error('Error fetching products:', error)
+		})
 	}, [API_URL, fetchRooms, fetchProducts])
 
 	useEffect(() => {

@@ -38,7 +38,9 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	// Fetch products and options on mount
 	useEffect(() => {
 		if (API_URL === undefined) return
-		fetchProductsAndOptions().catch((error) => { console.error('Error fetching products and options:', error) })
+		fetchProductsAndOptions().catch((error) => {
+			console.error('Error fetching products and options:', error)
+		})
 	}, [API_URL, fetchProductsAndOptions])
 
 	// Check if any product is selected
@@ -111,13 +113,16 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	}
 
 	const reset = (): void => {
-		setCart({ products: {}, options: {} })
+		setCart({
+			products: {},
+			options: {}
+		})
 		setShowOrderConfirmation(false)
 		setOrderStatus('loading')
 	}
 
 	return (
-		<main >
+		<main>
 			<div className="flex h-screen">
 				<div className="flex-1 overflow-y-auto">
 					<SelectionWindow
