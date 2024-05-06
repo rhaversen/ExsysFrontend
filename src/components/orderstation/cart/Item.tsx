@@ -43,7 +43,7 @@ const Item = ({
 					quantity={quantity}
 					onQuantityChange={handleQuantityChange}
 				/>
-				<p className="italic text-gray-700 w-12 h-12 mx-auto flex items-center justify-center">{price === 0 ? 'Gratis' : `${price} kr`}</p>
+				<p className="italic text-gray-700 w-12 h-12 mx-auto flex items-center justify-center">{price === 0 ? 'Gratis' : `${price * quantity} kr`}</p>
 			</div>
 		</div>
 	)
