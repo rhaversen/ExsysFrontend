@@ -1,11 +1,12 @@
+import { type RoomType } from '@/lib/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
 const Room = ({
 	room,
 	onRoomSelect
 }: {
-	room: { _id: string, name: string, description: string }
-	onRoomSelect: (roomId: string) => void
+	room: RoomType
+	onRoomSelect: (roomId: RoomType['_id']) => void
 }): ReactElement => {
 	return (
 		<button

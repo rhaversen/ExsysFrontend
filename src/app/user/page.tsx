@@ -7,7 +7,7 @@ import SubmitButton from '@/components/ui/SubmitButton'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
-import { type ProductType, type RoomType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -25,7 +25,7 @@ export default function Page (): ReactElement {
 		const products = response.data as ProductType[]
 		setProducts(products)
 		const quantities = products.reduce(
-			(acc: Record<string, number>, product) => ({
+			(acc: Record<ProductType['_id'], number>, product) => ({
 				...acc,
 				[product._id]: 0
 			}),
@@ -36,7 +36,7 @@ export default function Page (): ReactElement {
 
 	const updateAvailabilities = useCallback(() => {
 		const availabilities = products.reduce(
-			(acc: Record<string, boolean>, product) => ({
+			(acc: Record<ProductType['_id'], boolean>, product) => ({
 				...acc,
 				[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
 					product.orderWindow
@@ -78,14 +78,14 @@ export default function Page (): ReactElement {
 		setSelectedDate(date)
 	}
 
-	const handleQuantityChange = (key: string, newQuantity: number): void => {
+	const handleQuantityChange = (key: ProductType['_id'] | OptionType['_id'], newQuantity: number): void => {
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
 			[key]: newQuantity
 		}))
 	}
 
-	const handleRoomSelect = (roomId: string): void => {
+	const handleRoomSelect = (roomId: RoomType['_id']): void => {
 		setSelectedRoomId(roomId)
 	}
 

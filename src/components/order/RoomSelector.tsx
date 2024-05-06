@@ -1,11 +1,12 @@
+import { type RoomType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 
 const RoomSelector = ({
 	rooms,
 	onRoomSelect
 }: {
-	rooms: Array<{ _id: string, name: string, description: string }>
-	onRoomSelect: (roomId: string) => void
+	rooms: RoomType[]
+	onRoomSelect: (roomId: RoomType['_id']) => void
 }): ReactElement => {
 	const [selectedRoom, setSelectedRoom] = useState('') // Initialize with an empty string
 

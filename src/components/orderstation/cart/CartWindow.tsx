@@ -12,11 +12,11 @@ const CartWindow = ({
 	onSubmit,
 	formIsValid
 }: {
-	price: number
+	price: ProductType['price'] | OptionType['price']
 	products: ProductType[]
 	options: OptionType[]
 	cart: CartType
-	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
+	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 	onSubmit: () => void
 	formIsValid: boolean
 }): ReactElement => {
@@ -36,7 +36,7 @@ const CartWindow = ({
 				? <div className="h-screen flex items-center justify-center">
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
-						<br />
+						<br/>
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>

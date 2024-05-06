@@ -5,11 +5,11 @@ import axios from 'axios'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
-import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type CartType, type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import { useInterval } from 'react-use'
 
-export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
+export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -60,7 +60,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 
-	const handleCartChange = (_id: string, type: 'products' | 'options', change: number): void => {
+	const handleCartChange = (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
 		const newCart = { ...cart }
 		// If the item is not in the cart, add it with a quantity of 0

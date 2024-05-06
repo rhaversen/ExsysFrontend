@@ -1,6 +1,7 @@
 import React, { type ReactElement } from 'react'
 import Image from 'next/image'
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 
 const Item = ({
 	imageURL,
@@ -11,13 +12,13 @@ const Item = ({
 	quantity,
 	onCartChange
 }: {
-	imageURL?: string
-	id: string
-	name: string
-	price: number
+	imageURL?: ProductType['imageURL'] | OptionType['imageURL']
+	id: ProductType['_id'] | OptionType['_id']
+	name: ProductType['name'] | OptionType['name']
+	price: ProductType['price'] | OptionType['price']
 	type: 'products' | 'options'
 	quantity: number
-	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
+	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 }): ReactElement => {
 	const handleQuantityChange = (change: number): void => {
 		onCartChange(id, type, change)

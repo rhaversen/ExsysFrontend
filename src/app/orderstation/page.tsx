@@ -26,7 +26,7 @@ export default function Page (): ReactElement {
 		})
 	}, [API_URL, fetchRooms])
 
-	const handleRoomSelect = (roomId: string): void => {
+	const handleRoomSelect = (roomId: RoomType['_id']): void => {
 		router.push(`/orderstation/${roomId}`)
 	}
 

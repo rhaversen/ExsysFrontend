@@ -10,7 +10,7 @@ const SelectionWindow = ({
 }: {
 	products: ProductType[]
 	options: OptionType[]
-	handleCartChange: (_id: string, type: 'products' | 'options', change: number) => void
+	handleCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number) => void
 }): ReactElement => {
 	const [showOptions, setShowOptions] = useState(false)
 	const [selectedProductOptions, setSelectedProductOptions] = useState<OptionType[]>([])
