@@ -21,30 +21,21 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	const [price, setPrice] = useState(0)
 
 	const fetchProductsAndOptions = useCallback(async () => {
-		console.log('Fetching products and options')
-		try {
-			const response = await axios.get(API_URL + '/v1/products')
-			const products = response.data as ProductType[]
-			products.forEach((product) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			})
-			setProducts(products)
-		} catch (error) {
-			console.error(error)
-		}
-		try {
-			const response = await axios.get(API_URL + '/v1/options')
-			const options = response.data as OptionType[]
-			setOptions(options)
-		} catch (error) {
-			console.error(error)
-		}
+		const productsResponse = await axios.get(API_URL + '/v1/products')
+		const products = productsResponse.data as ProductType[]
+		products.forEach((product) => {
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+		})
+		setProducts(products)
+		const optionsResponse = await axios.get(API_URL + '/v1/options')
+		const options = optionsResponse.data as OptionType[]
+		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
 	// Fetch products and options on mount
 	useEffect(() => {
 		if (API_URL === undefined) return
-		fetchProductsAndOptions()
+		fetchProductsAndOptions().catch((error) => { console.error('Error fetching products and options:', error) })
 	}, [API_URL, fetchProductsAndOptions])
 
 	// Check if any product is selected

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { type ReactElement, useEffect, useState } from 'react'
+import React, { type ReactElement, useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Room from '@/components/orderstation/Room'
@@ -13,21 +13,16 @@ export default function Page (): ReactElement {
 
 	const router = useRouter()
 
+	const fetchRooms = useCallback(async () => {
+		const response = await axios.get(API_URL + '/v1/rooms')
+		const rooms = response.data as RoomType[]
+		setRooms(rooms)
+	}, [API_URL, setRooms])
+
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
-
-		const fetchRooms = async (): Promise<void> => {
-			try {
-				const response = await axios.get(API_URL + '/v1/rooms')
-				const rooms = response.data as RoomType[]
-				setRooms(rooms)
-			} catch (error) {
-				console.error('Failed to fetch rooms:', error)
-			}
-		}
-
-		fetchRooms()
-	}, [API_URL])
+		fetchRooms().catch((error) => { console.error('Error fetching rooms:', error) })
+	}, [API_URL, fetchRooms])
 
 	const handleRoomSelect = (roomId: string): void => {
 		router.push(`/orderstation/${roomId}`)
