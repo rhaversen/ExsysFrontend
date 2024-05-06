@@ -1,0 +1,19 @@
+<svg viewBox="-20 -20 240 240" width="200" height="200" color="#3b82f6" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="a">
+            <stop offset="0" stop-opacity="0" stop-color="currentColor"/>
+            <stop offset="1" stop-opacity=".5" stop-color="currentColor"/>
+        </linearGradient>
+        <linearGradient id="b">
+            <stop offset="0" stop-color="currentColor"/>
+            <stop offset="1" stop-opacity=".5" stop-color="currentColor"/>
+        </linearGradient>
+    </defs>
+    <g stroke-width="8">
+        <path stroke="url(#a)" d="M4 100a96 96 0 0 1 192 0" style="stroke-width:20px"/>
+        <path stroke="url(#b)" d="M196 100a96 96 0 0 1-192 0" style="stroke-width:20px"/>
+        <path stroke="currentColor" stroke-linecap="round" d="M4 100a96 96 0 0 1 0-2" style="stroke-width:20px"/>
+    </g>
+    <animateTransform from="0 0 0" to="360 0 0" attributeName="transform" type="rotate" repeatCount="indefinite" dur="1300ms"/>
+</svg>
