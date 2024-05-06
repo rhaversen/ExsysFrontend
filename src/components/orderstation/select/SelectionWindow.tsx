@@ -1,4 +1,4 @@
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useState } from 'react'
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
@@ -15,19 +15,19 @@ const SelectionWindow = ({
 	const [showOptions, setShowOptions] = useState(false)
 	const [selectedProductOptions, setSelectedProductOptions] = useState<OptionType[]>([])
 
-	const handleProductSelect = (product: ProductType): void => {
+	const handleProductSelect = useCallback((product: ProductType): void => {
 		if (product.options.length > 0) {
 			const productOptions = options.filter(option => product.options.includes(option._id))
 			setSelectedProductOptions(productOptions)
 			setShowOptions(true)
 		}
 		handleCartChange(product._id, 'products', 1)
-	}
+	}, [options, setSelectedProductOptions, setShowOptions, handleCartChange])
 
-	const handleOptionSelect = (option: OptionType): void => {
+	const handleOptionSelect = useCallback((option: OptionType): void => {
 		setShowOptions(false)
 		handleCartChange(option._id, 'options', 1)
-	}
+	}, [setShowOptions, handleCartChange])
 
 	return (
 		<div>

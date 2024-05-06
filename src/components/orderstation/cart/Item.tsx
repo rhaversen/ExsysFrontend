@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import React, { type ReactElement, useCallback } from 'react'
 import Image from 'next/image'
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
@@ -20,9 +20,9 @@ const Item = ({
 	quantity: number
 	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 }): ReactElement => {
-	const handleQuantityChange = (change: number): void => {
+	const handleQuantityChange = useCallback((change: number): void => {
 		onCartChange(id, type, change)
-	}
+	}, [onCartChange, id, type])
 
 	return (
 		<div className="p-2 m-2 relative">

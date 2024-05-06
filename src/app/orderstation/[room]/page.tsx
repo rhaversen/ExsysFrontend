@@ -75,7 +75,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
-	const handleCartChange = (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
+	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
 		const newCart = { ...cart }
 		// If the item is not in the cart, add it with a quantity of 0
@@ -91,9 +91,9 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			}, {})
 		}
 		setCart(newCart)
-	}
+	}, [cart, setCart])
 
-	const submitOrder = (): void => {
+	const submitOrder = useCallback((): void => {
 		setOrderStatus('loading')
 		setShowOrderConfirmation(true)
 
@@ -125,16 +125,16 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			setOrderStatus('error')
 			console.error(error)
 		})
-	}
+	}, [API_URL, cart, params.room, setOrderStatus, setShowOrderConfirmation])
 
-	const reset = (): void => {
+	const reset = useCallback((): void => {
 		setCart({
 			products: {},
 			options: {}
 		})
 		setShowOrderConfirmation(false)
 		setOrderStatus('loading')
-	}
+	}, [setCart, setShowOrderConfirmation, setOrderStatus])
 
 	return (
 		<main>
