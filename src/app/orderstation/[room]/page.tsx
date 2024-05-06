@@ -8,9 +8,11 @@ import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { type CartType, type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import { useInterval } from 'react-use'
+import { useRouter } from 'next/navigation'
 
 export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const router = useRouter()
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
@@ -42,6 +44,15 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			console.error('Error fetching products and options:', error)
 		})
 	}, [API_URL, fetchProductsAndOptions])
+
+	// Check if the room is valid
+	useEffect(() => {
+		if (API_URL === undefined) return
+		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
+			console.log('Invalid room:', params.room)
+			router.push('/orderstation')
+		})
+	}, [router, API_URL, params.room])
 
 	// Check if any product is selected
 	useEffect(() => {
