@@ -82,34 +82,32 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		setCart(newCart)
 	}
 
-	const submitOrder = async (): Promise<void> => {
-		try {
-			const productCart = Object.entries(cart.products).map(
-				([item, quantity]) => ({
-					id: item,
-					quantity
-				})
-			)
+	const submitOrder = (): void => {
+		const productCart = Object.entries(cart.products).map(
+			([item, quantity]) => ({
+				id: item,
+				quantity
+			})
+		)
 
-			const optionCart = Object.entries(cart.options).map(
-				([item, quantity]) => ({
-					id: item,
-					quantity
-				})
-			)
+		const optionCart = Object.entries(cart.options).map(
+			([item, quantity]) => ({
+				id: item,
+				quantity
+			})
+		)
 
-			const data = {
-				roomId: params.room,
-				products: productCart,
-				options: optionCart
-			}
-
-			console.log(data)
-
-			await axios.post(API_URL + '/v1/orders', data)
-		} catch (error) {
-			console.error(error)
+		const data = {
+			roomId: params.room,
+			products: productCart,
+			options: optionCart
 		}
+
+		console.log(data)
+
+		axios.post(API_URL + '/v1/orders', data).catch((error) => {
+			console.error(error)
+		})
 	}
 
 	return (
