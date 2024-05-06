@@ -37,11 +37,10 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
-	const validateRoomAndRedirect = useCallback(async () => {
-		const roomResponse = await axios.get(API_URL + '/v1/rooms/' + params.room)
-		if (roomResponse.status !== 200) {
+	const validateRoomAndRedirect = useCallback(() => {
+		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
 			router.push('/orderstation')
-		}
+		})
 	}, [API_URL, params.room, router])
 
 	// Fetch products and options on mount
@@ -55,9 +54,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	// Check if the room is valid
 	useEffect(() => {
 		if (API_URL === undefined) return
-		validateRoomAndRedirect().catch((error) => {
-			console.error('Error validating room:', error)
-		})
+		validateRoomAndRedirect()
 	}, [router, API_URL, validateRoomAndRedirect, params.room])
 
 	// Check if any product is selected
