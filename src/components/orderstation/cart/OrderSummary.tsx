@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useRef } from 'react'
+import React, { type ReactElement, useEffect, useRef, useState } from 'react'
 import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import Item from '@/components/orderstation/cart/Item'
 
@@ -13,6 +13,9 @@ const OrderSummary = ({
 	cart: CartType
 	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 }): ReactElement => {
+	const endOfCartRef = useRef<HTMLDivElement | null>(null)
+	const [prevCartItems, setPrevCartItems] = useState<Array<ProductType['_id']> | Array<OptionType['_id']>>([])
+
 	// Combine products and options into one array
 	const cartItems = [...Object.entries(cart.products), ...Object.entries(cart.options)].map(([id, quantity]) => {
 		// Find the item in either products or options
@@ -33,6 +36,14 @@ const OrderSummary = ({
 		}
 	})
 
+	useEffect(() => {
+		const currentCartItems = Object.keys(cart.products).concat(Object.keys(cart.options))
+		if (currentCartItems.some(item => !prevCartItems.includes(item))) {
+			endOfCartRef.current?.scrollIntoView({ behavior: 'smooth' })
+		}
+		setPrevCartItems(currentCartItems)
+	}, [prevCartItems, cart])
+
 	return (
 		<div>
 			{cartItems.map((item) => {
@@ -49,6 +60,7 @@ const OrderSummary = ({
 					/>
 				)
 			})}
+			<div ref={endOfCartRef}></div>
 		</div>
 	)
 }
