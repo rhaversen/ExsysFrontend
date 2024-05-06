@@ -13,10 +13,10 @@ export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState<ProductType[]>([])
-	const [quantities, setQuantities] = useState<Record<string, number>>({})
-	const [availabilities, setAvailabilities] = useState<Record<string, boolean>>({})
+	const [quantities, setQuantities] = useState<Record<ProductType['_id'] | OptionType['_id'], number>>({})
+	const [availabilities, setAvailabilities] = useState<Record<ProductType['_id'], boolean>>({})
 	const [rooms, setRooms] = useState<RoomType[]>([])
-	const [selectedRoomId, setSelectedRoomId] = useState<string>('')
+	const [selectedRoomId, setSelectedRoomId] = useState<RoomType['_id']>('')
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 	const [formIsValid, setFormIsValid] = useState(false)
 
