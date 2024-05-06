@@ -85,27 +85,25 @@ export default function Page (): ReactElement {
 		setSelectedRoomId(roomId)
 	}
 
-	const submitOrder = async (): Promise<void> => {
-		try {
-			const productsArray = Object.entries(quantities).map(
-				([product, quantity]) => ({
-					id: product,
-					quantity
-				})
-			)
+	const submitOrder = (): void => {
+		const productsArray = Object.entries(quantities).map(
+			([product, quantity]) => ({
+				id: product,
+				quantity
+			})
+		)
 
-			const data = {
-				requestedDeliveryDate: selectedDate.toISOString(),
-				products: productsArray,
-				roomId: selectedRoomId
-			}
-
-			console.log(data)
-
-			await axios.post(API_URL + '/v1/orders', data)
-		} catch (error) {
-			console.error(error)
+		const data = {
+			requestedDeliveryDate: selectedDate.toISOString(),
+			products: productsArray,
+			roomId: selectedRoomId
 		}
+
+		console.log(data)
+
+		axios.post(API_URL + '/v1/orders', data).catch((error) => {
+			console.error('Failed to submit order:', error)
+		})
 	}
 
 	return (
