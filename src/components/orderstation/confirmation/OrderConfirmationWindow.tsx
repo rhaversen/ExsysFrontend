@@ -45,12 +45,14 @@ const OrderConfirmationWindow = ({
 					)}
 				</p>
 				<div className="flex justify-center">
-					<Image
-						src="/order-confirmed.png"
-						alt="Order Confirmed"
-						width={200}
-						height={200}
-					/>
+					<div className="w-48 h-48 relative">
+						{orderStatus === 'loading' &&
+							<Image src="/loading.svg" alt="Loading" width={200} height={200} />}
+						{orderStatus === 'success' &&
+							<Image src="/checkmark.svg" alt="Order Confirmed" width={200} height={200} />}
+						{orderStatus === 'error' &&
+							<Image src="/questionmark.svg" alt="Error" width={200} height={200} />}
+					</div>
 				</div>
 				<div className="flex justify-center">
 					{orderStatus !== 'loading' &&
