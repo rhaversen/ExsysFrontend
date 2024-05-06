@@ -28,7 +28,9 @@ const OrderConfirmationWindow = ({
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black"
 			>
 				<h2 className="text-2xl font-bold mb-4 text-center">
-					Tak For Din Bestilling
+					{orderStatus === 'success' && 'Tak For Din Bestilling'}
+					{orderStatus === 'error' && 'Der Skete En Fejl'}
+					{orderStatus === 'loading' && 'Sender Bestilling...'}
 				</h2>
 				<p className="mb-4">{`Husk at overføre ${price} kr til (BOX)`}</p>
 				<p className="mb-4">Order Status: {orderStatus}</p>
