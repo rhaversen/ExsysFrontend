@@ -1,19 +1,14 @@
-interface Time {
-	hour: number;
-	minute: number;
-}
+import { type OrderWindow, type Time } from '@/lib/backendDataTypes'
 
-export interface OrderWindow {
-	from: Time;
-	to: Time;
-}
-
-export function convertOrderWindowToUTC(orderWindow: OrderWindow): OrderWindow {
-	const { from, to } = orderWindow
+export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
+	const {
+		from,
+		to
+	} = orderWindow
 
 	// Create Date objects for the 'from' and 'to' times in UTC
-	let fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
-	let toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
+	const fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
+	const toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
 
 	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
 	if (fromDate > toDate) {
@@ -32,38 +27,17 @@ export function convertOrderWindowToUTC(orderWindow: OrderWindow): OrderWindow {
 	}
 
 	// Return the new orderWindow object in UTC
-	return { from: fromInUTC, to: toInUTC }
+	return {
+		from: fromInUTC,
+		to: toInUTC
+	}
 }
 
-export function convertOrderWindowFromUTC(orderWindow: OrderWindow): OrderWindow {
-	const { from, to } = orderWindow
-
-	// Create Date objects for the 'from' and 'to' times in UTC
-	let fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
-	let toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
-
-	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
-	if (fromDate > toDate) {
-		toDate.setDate(toDate.getDate() + 1)
-	}
-
-	// Convert to local time
-	const fromInLocal = {
-		hour: fromDate.getHours(),
-		minute: fromDate.getMinutes()
-	}
-
-	const toInLocal = {
-		hour: toDate.getHours(),
-		minute: toDate.getMinutes()
-	}
-
-	// Return the new orderWindow object in local time
-	return { from: fromInLocal, to: toInLocal }
-}
-
-export function isCurrentTimeInUTCOrderWindow(orderWindow: OrderWindow): boolean {
-	const { from, to } = orderWindow
+export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindow {
+	const {
+		from,
+		to
+	} = orderWindow
 
 	// Get the current time in UTC
 	const now = new Date()
@@ -72,18 +46,48 @@ export function isCurrentTimeInUTCOrderWindow(orderWindow: OrderWindow): boolean
 	const currentDate = now.getUTCDate()
 
 	// Create Date objects for the 'from' and 'to' times in UTC
-	let fromDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, from.hour, from.minute))
-	let toDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, to.hour, to.minute))
+	const fromDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, from.hour, from.minute))
+	const toDate = new Date(Date.UTC(currentYear, currentMonth, currentDate, to.hour, to.minute))
 
 	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
 	if (fromDate > toDate) {
 		toDate.setDate(toDate.getDate() + 1)
 	}
 
-	// Check if the current time is within the order window
-	if (fromDate.getTime() <= now.getTime() && now.getTime() <= toDate.getTime()) {
-		return true
-	}
+	// Return the new orderWindow object in local time
+	return {
+		from: {
+			hour: fromDate.getHours(),
+			minute: fromDate.getMinutes()
 
-	return false
+		},
+		to: {
+			hour: toDate.getHours(),
+			minute: toDate.getMinutes()
+
+		}
+	}
+}
+
+export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
+	const now = new Date()
+	const currentHour = now.getHours()
+	const currentMinute = now.getMinutes()
+
+	const fromHour = orderWindow.from.hour
+	const fromMinute = orderWindow.from.minute
+	const toHour = orderWindow.to.hour
+	const toMinute = orderWindow.to.minute
+
+	// If from is after to, it spans over midnight
+	if (fromHour > toHour || (fromHour === toHour && fromMinute > toMinute)) {
+		// Check if current time is after from or before to
+		return (currentHour > fromHour || (currentHour === fromHour && currentMinute >= fromMinute)) ||
+			(currentHour < toHour || (currentHour === toHour && currentMinute < toMinute))
+	} else {
+		// Check if current time is within from and to
+		return (currentHour >= fromHour && currentHour <= toHour) &&
+			(currentHour === fromHour ? currentMinute >= fromMinute : true) &&
+			(currentHour === toHour ? currentMinute < toMinute : true)
+	}
 }

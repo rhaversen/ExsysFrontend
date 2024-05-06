@@ -1,26 +1,19 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import Product from '@/components/order/Product'
-import { OrderWindow, convertOrderWindowFromUTC } from '@/lib/timeUtils'
-
-type ProductProps = {
-	_id: string
-	name: string
-	description: string
-	price: number
-	orderWindow: OrderWindow
-}
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { type ProductType } from '@/lib/backendDataTypes'
 
 const Products = ({
 	products,
 	quantities,
 	availabilities,
-	onQuantityChange,
+	onQuantityChange
 }: {
-	products: ProductProps[]
+	products: ProductType[]
 	quantities: Record<string, number>
 	availabilities: Record<string, boolean>
 	onQuantityChange: (key: string, newQuantity: number) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div>
 			{products.map((product) => (
@@ -29,7 +22,6 @@ const Products = ({
 					id={product._id}
 					initialQuantity={quantities[product._id]}
 					name={product.name}
-					description={product.description}
 					price={product.price}
 					onQuantityChange={onQuantityChange}
 					disabled={!availabilities[product._id]}

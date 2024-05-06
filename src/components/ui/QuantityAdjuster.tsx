@@ -1,14 +1,15 @@
 import QuantityAdjustButton from '@/components/ui/QuantityAdjustButton'
+import { type ReactElement } from 'react'
 
 const QuantityAdjuster = ({
 	quantity = 0,
 	disabled,
-	setQuantity,
+	setQuantity
 }: {
 	quantity: number
 	disabled: boolean
 	setQuantity: (newQuantity: number) => void
-}) => {
+}): ReactElement => {
 	return (
 		<div
 			className={`inline-flex items-center border-2 px-1 py-1 rounded-full
@@ -19,12 +20,14 @@ const QuantityAdjuster = ({
 		>
 			<div className="flex items-center">
 				<QuantityAdjustButton
-					onClick={() => setQuantity(Math.max(0, quantity - 1))}
+					onClick={() => {
+						setQuantity(Math.max(0, quantity - 1))
+					}}
 					text="-"
 					disabled={disabled}
 				/>
 				<label htmlFor="quantityInput" className="sr-only">
-					Mængde
+					{'Mængde'}
 				</label>
 				<input
 					id="quantityInput"
@@ -36,10 +39,14 @@ const QuantityAdjuster = ({
 					type="text"
 					value={quantity}
 					readOnly
-					onFocus={(event) => event.target.blur()}
+					onFocus={(event) => {
+						event.target.blur()
+					}}
 				/>
 				<QuantityAdjustButton
-					onClick={() => setQuantity(quantity + 1)}
+					onClick={() => {
+						setQuantity(quantity + 1)
+					}}
 					text="+"
 					disabled={disabled}
 				/>

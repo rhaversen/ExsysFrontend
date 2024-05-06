@@ -1,29 +1,27 @@
-import React, { useState } from 'react'
+import React, { type ReactElement, useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
-import { OrderWindow } from '@/lib/timeUtils'
+import { type OrderWindow } from '@/lib/backendDataTypes'
 
 const Product = ({
 	id,
 	initialQuantity,
 	name,
-	description,
 	price,
 	disabled,
 	orderWindow,
-	onQuantityChange,
+	onQuantityChange
 }: {
 	id: string
 	initialQuantity: number
 	name: string
-	description: string
 	price: number
 	disabled: boolean
 	orderWindow: OrderWindow
 	onQuantityChange: (id: string, quantity: number) => void
-}) => {
+}): ReactElement => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
-	const handleQuantityChange = (newQuantity: number) => {
+	const handleQuantityChange = (newQuantity: number): void => {
 		setQuantity(newQuantity)
 		onQuantityChange(id, newQuantity)
 	}
@@ -37,7 +35,6 @@ const Product = ({
 		>
 			<div className="ml-10 flex-grow">
 				<h2 className="text-xl font-semibold">{name}</h2>
-				<p className="text-gray-600 mt-2">{description}</p>
 				<p className="text-gray-600 mt-2 text-sm">
 					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
 					{' - '}

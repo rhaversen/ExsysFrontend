@@ -1,13 +1,13 @@
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
-	title: 'Admin',
+	title: 'Bestil',
 	alternates: {
-		canonical: 'https://www.kantine.nyskivehus.dk/admin'
+		canonical: 'https://www.kantine.nyskivehus.dk/user'
 	}
 }
 
-export default function AdminLayout ({
+export default function UserLayout ({
 	children
 }: Readonly<{
 	children: React.ReactNode

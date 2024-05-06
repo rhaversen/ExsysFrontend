@@ -1,6 +1,6 @@
 {
-	"extends": "next/core-web-vitals",
-	"plugins": ["@typescript-eslint"],
+	"extends": ["eslint-config-love", "next/core-web-vitals"],
+	"plugins": ["import", "n", "promise", "@typescript-eslint"],
 	"rules": {
 		"@typescript-eslint/strict-boolean-expressions": "error",
 		"semi": ["error", "never"],
