@@ -53,11 +53,13 @@ const OrderConfirmationWindow = ({
 					/>
 				</div>
 				<div className="flex justify-center">
-					<SubmitButton
-						text="Ny Bestilling"
-						onClick={onClose}
-						disabled={orderStatus === 'loading'}
-					/>
+					{orderStatus !== 'loading' &&
+						<SubmitButton
+							text="Ny Bestilling"
+							onClick={onClose}
+							disabled={false}
+						/>
+					}
 				</div>
 			</div>
 		</div>
