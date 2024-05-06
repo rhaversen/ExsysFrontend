@@ -14,7 +14,7 @@ const Product = ({
 	return (
 		<div className="p-2 m-2 relative">
 			{disabled &&
-				<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10"/>
+				<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded"/>
 			}
 			<button
 				type="button"
