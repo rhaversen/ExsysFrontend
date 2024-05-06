@@ -39,24 +39,24 @@ const OrderConfirmationWindow = ({
 					{orderStatus === 'error' && (
 						<>
 							{'Der skete en fejl, prøv igen senere.'}
-							<br/>
+							<br />
 							{'Hvis problemet fortsætter, kontakt venligst personalet.'}
 						</>
 					)}
 				</p>
-				<div className="flex justify-center">
-					<SubmitButton
-						text="Ny Bestilling"
-						onClick={onClose}
-						disabled={orderStatus === 'loading'}
-					/>
-				</div>
 				<div className="flex justify-center">
 					<Image
 						src="/order-confirmed.png"
 						alt="Order Confirmed"
 						width={200}
 						height={200}
+					/>
+				</div>
+				<div className="flex justify-center">
+					<SubmitButton
+						text="Ny Bestilling"
+						onClick={onClose}
+						disabled={orderStatus === 'loading'}
 					/>
 				</div>
 			</div>
