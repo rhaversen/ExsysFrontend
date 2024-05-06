@@ -1,13 +1,16 @@
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
-	title: 'Admin',
+	title: {
+		template: '%s | Ny Skivehus Kantine',
+		default: 'Bestil'
+	},
 	alternates: {
-		canonical: 'https://www.kantine.nyskivehus.dk/admin'
+		canonical: 'https://www.kantine.nyskivehus.dk/orderstation'
 	}
 }
 
-export default function AdminLayout ({
+export default function OrderLayout ({
 	children
 }: Readonly<{
 	children: React.ReactNode

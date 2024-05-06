@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const DeliveryTimeSelector = ({
 	selectedDate,
@@ -6,16 +6,15 @@ const DeliveryTimeSelector = ({
 }: {
 	selectedDate: Date
 	onDateSelect: (date: Date) => void
-}) => {
+}): ReactElement => {
 	const [options, setOptions] = useState<Date[]>([])
 
-	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedTime = new Date(event.target.value)
 		onDateSelect(selectedTime)
-		console.log(selectedTime)
 	}
 
-	const formatTime = (date: Date) => {
+	const formatTime = (date: Date): string => {
 		const hours = date.getHours().toString().padStart(2, '0')
 		const minutes = date.getMinutes().toString().padStart(2, '0')
 		return `${hours}:${minutes}`
@@ -30,7 +29,7 @@ const DeliveryTimeSelector = ({
 			const hours = Math.floor(i / 4)
 			const minutes = (i % 4) * 15
 			const optionTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
-			if (optionTime.getTime() >= nextInterval.getTime()) {
+			if (optionTime.getTime() >= nextInterval.getTime() + 60 * 1000) {
 				options.push(optionTime)
 			}
 		}
