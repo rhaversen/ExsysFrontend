@@ -1,7 +1,8 @@
 import React, { type ReactElement, useEffect, useState } from 'react'
-import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { type CartType } from '@/lib/frontendDataTypes'
 
 const CartWindow = ({
 	price,

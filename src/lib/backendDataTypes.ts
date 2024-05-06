@@ -1,8 +1,3 @@
-export interface CartType {
-	products: Record<ProductType['_id'], number>
-	options: Record<OptionType['_id'], number>
-}
-
 export interface Time {
 	hour: number
 	minute: number
