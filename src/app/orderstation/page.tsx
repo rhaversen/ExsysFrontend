@@ -5,6 +5,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Room from '@/components/orderstation/Room'
 import { type RoomType } from '@/lib/backendDataTypes'
+import { useInterval } from 'react-use'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -29,6 +30,8 @@ export default function Page (): ReactElement {
 	const handleRoomSelect = (roomId: RoomType['_id']): void => {
 		router.push(`/orderstation/${roomId}`)
 	}
+
+	useInterval(fetchRooms, 1000 * 60 * 60) // Fetch rooms every hour
 
 	return (
 		<main className="flex flex-col justify-center items-center h-screen">
