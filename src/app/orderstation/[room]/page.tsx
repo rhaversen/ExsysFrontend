@@ -76,6 +76,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	}, [cart, options, products])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
+	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
 	const handleCartChange = (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
