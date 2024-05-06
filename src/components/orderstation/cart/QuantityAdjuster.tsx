@@ -19,7 +19,7 @@ const QuantityAdjuster = ({
 				/>
 				<input
 					aria-label="Mængde"
-					className={'w-16 bg-transparent text-center select-all text-blue-500'}
+					className={'w-10 bg-transparent text-center select-all text-blue-500'}
 					type="text"
 					value={quantity}
 					readOnly

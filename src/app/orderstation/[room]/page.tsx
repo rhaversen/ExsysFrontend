@@ -146,7 +146,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 						handleCartChange={handleCartChange}
 					/>
 				</div>
-				<div className="w-[400px] h-screen overflow-y-auto">
+				<div className="w-[300px] h-screen overflow-y-auto">
 					<CartWindow
 						price={price}
 						products={products}

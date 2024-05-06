@@ -61,7 +61,7 @@ const OrderSummary = ({
 	}, [cartItems, endOfCartRef])
 
 	return (
-		<div>
+		<div className="pt-2">
 			{cartItems.map((item) => {
 				return (
 					<Item

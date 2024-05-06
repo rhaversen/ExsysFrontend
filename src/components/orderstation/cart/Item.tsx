@@ -25,17 +25,17 @@ const Item = ({
 	}, [onCartChange, id, type])
 
 	return (
-		<div className="p-2 m-2 relative">
-			<h3 className="font-bold text-black text-center">
+		<div className="pb-5">
+			<h3 className="font-bold text-black text-center pb-1">
 				{name}
 			</h3>
-			<div className="flex flex-row items-center justify-center">
+			<div className="flex flex-row items-center justify-between">
 				<Image
 					width={80}
 					height={80}
 					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`}
 					alt={name}
-					className="w-20 h-20 object-cover text-black"
+					className="w-12 h-12 object-cover text-black mx-auto"
 					draggable="false"
 					priority // Load image immediately
 				/>
@@ -43,7 +43,7 @@ const Item = ({
 					quantity={quantity}
 					onQuantityChange={handleQuantityChange}
 				/>
-				<p className="italic text-gray-700 w-20 text-center">{price === 0 ? 'Gratis' : `${price} kr`}</p>
+				<p className="italic text-gray-700 w-12 h-12 mx-auto flex items-center justify-center">{price === 0 ? 'Gratis' : `${price} kr`}</p>
 			</div>
 		</div>
 	)
