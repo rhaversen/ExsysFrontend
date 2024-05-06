@@ -18,6 +18,8 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		options: {}
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
+	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
+	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading'>('loading')
 	const [price, setPrice] = useState(0)
 
 	const fetchProductsAndOptions = useCallback(async () => {
@@ -74,6 +76,9 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	}
 
 	const submitOrder = (): void => {
+		setOrderStatus('loading')
+		setShowOrderConfirmation(true)
+
 		const productCart = Object.entries(cart.products).map(
 			([item, quantity]) => ({
 				id: item,
@@ -96,7 +101,10 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 
 		console.log(data)
 
-		axios.post(API_URL + '/v1/orders', data).catch((error) => {
+		axios.post(API_URL + '/v1/orders', data).then(() => {
+			setOrderStatus('success')
+		}).catch((error) => {
+			setOrderStatus('error')
 			console.error(error)
 		})
 	}
