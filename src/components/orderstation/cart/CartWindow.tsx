@@ -49,14 +49,13 @@ const CartWindow = ({
 					/>
 				</div>
 			}
-			<div className="text-black text-center pt-5">
-				{`Samlet Pris: ${price} kr`}
+			<div className="bottom-0 flex justify-center">
+				<SubmitButton
+					text={(!cartIsEmpty && formIsValid) ? `Bestil for ${price} kr` : 'Vælg produkter'}
+					disabled={!formIsValid}
+					onClick={onSubmit}
+				/>
 			</div>
-			<SubmitButton
-				text="Bestil"
-				disabled={!formIsValid}
-				onClick={onSubmit}
-			/>
 		</div>
 	)
 }
