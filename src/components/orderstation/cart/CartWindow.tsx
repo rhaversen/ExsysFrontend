@@ -29,7 +29,7 @@ const CartWindow = ({
 
 	return (
 		<div className="bg-gray-300 h-full flex flex-col">
-			<h2 className="text-2xl font-bold p-4 text-center text-black">
+			<h2 className="text-2xl font-bold p-4 shadow-md text-center text-black">
 				{'Din Bestilling'}
 			</h2>
 			{cartIsEmpty
@@ -40,7 +40,7 @@ const CartWindow = ({
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>
-				: <div className="no-scrollbar overflow-y-auto flex-1 shadow-lg pb-20">
+				: <div className="no-scrollbar overflow-y-auto flex-1 shadow-lg">
 					<OrderSummary
 						products={products}
 						options={options}
