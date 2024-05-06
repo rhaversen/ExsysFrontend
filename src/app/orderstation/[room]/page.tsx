@@ -6,6 +6,7 @@ import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import { useInterval } from 'react-use'
 
 export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
@@ -109,24 +110,41 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		})
 	}
 
+	const reset = (): void => {
+		setCart({ products: {}, options: {} })
+		setShowOrderConfirmation(false)
+		setOrderStatus('loading')
+	}
+
 	return (
-		<main className="flex h-screen">
-			<div className="flex-1 overflow-y-auto">
-				<SelectionWindow
-					products={products}
-					options={options}
-					handleCartChange={handleCartChange}
-				/>
+		<main >
+			<div className="flex h-screen">
+				<div className="flex-1 overflow-y-auto">
+					<SelectionWindow
+						products={products}
+						options={options}
+						handleCartChange={handleCartChange}
+					/>
+				</div>
+				<div className="w-[400px] h-screen overflow-y-auto">
+					<CartWindow
+						price={price}
+						products={products}
+						options={options}
+						cart={cart}
+						onCartChange={handleCartChange}
+						onSubmit={submitOrder}
+						formIsValid={formIsValid}
+					/>
+				</div>
 			</div>
-			<div className="w-[400px] h-screen overflow-y-auto">
-				<CartWindow
-					products={products}
-					options={options}
-					cart={cart}
-					onCartChange={handleCartChange}
-					onSubmit={submitOrder}
-					formIsValid={formIsValid}
-				/>
+			<div>
+				{showOrderConfirmation &&
+					<OrderConfirmationWindow
+						price={price}
+						orderStatus={orderStatus}
+						onClose={reset}
+					/>}
 			</div>
 		</main>
 	)
