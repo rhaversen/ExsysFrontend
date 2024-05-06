@@ -13,15 +13,17 @@ const OrderConfirmationWindow = ({
 }): ReactElement => {
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full text-black"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
+			{orderStatus !== 'loading' &&
+				<button
+					type="button"
+					className="absolute inset-0 w-full h-full text-black"
+					onClick={onClose}
+				>
+					<span className="sr-only">
+						{'Close'}
+					</span>
+				</button>
+			}
 			<div
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black"
 			>
