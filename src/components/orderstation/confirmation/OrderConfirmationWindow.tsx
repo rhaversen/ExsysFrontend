@@ -35,6 +35,15 @@ const OrderConfirmationWindow = ({
 				<p className="mb-4 flex justify-center">
 					{orderStatus === 'success' && `Husk at overføre ${price} kr til (BOX)`}
 				</p>
+				<p className="mb-4 flex justify-center text-center">
+					{orderStatus === 'error' && (
+						<>
+							{'Der skete en fejl, prøv igen senere.'}
+							<br/>
+							{'Hvis problemet fortsætter, kontakt venligst personalet.'}
+						</>
+					)}
+				</p>
 				<div className="flex justify-center">
 					<SubmitButton
 						text="Ny Bestilling"
