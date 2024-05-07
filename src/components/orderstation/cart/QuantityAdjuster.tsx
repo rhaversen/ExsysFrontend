@@ -9,7 +9,7 @@ const QuantityAdjuster = ({
 	onQuantityChange: (change: number) => void
 }): ReactElement => {
 	return (
-		<div className={'inline-flex items-center border-2 px-1 py-1 rounded-full border-blue-500'}>
+		<div className={'inline-flex items-center ring-2 ring-blue-500 rounded-full ring-inset'}>
 			<div className="flex items-center">
 				<QuantityAdjustButton
 					onClick={() => {
