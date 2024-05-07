@@ -41,7 +41,7 @@ const CartWindow = ({
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>
-				: <div className="no-scrollbar overflow-y-auto flex-1 shadow-lg">
+				: <div className="no-scrollbar overflow-y-auto flex-1">
 					<OrderSummary
 						products={products}
 						options={options}
