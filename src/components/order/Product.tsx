@@ -1,6 +1,6 @@
 import React, { type ReactElement, useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
-import { type OrderWindow } from '@/lib/backendDataTypes'
+import { type OrderWindow, type ProductType } from '@/lib/backendDataTypes'
 
 const Product = ({
 	id,
@@ -11,13 +11,13 @@ const Product = ({
 	orderWindow,
 	onQuantityChange
 }: {
-	id: string
+	id: ProductType['_id']
 	initialQuantity: number
-	name: string
-	price: number
+	name: ProductType['name']
+	price: ProductType['price']
 	disabled: boolean
 	orderWindow: OrderWindow
-	onQuantityChange: (id: string, quantity: number) => void
+	onQuantityChange: (id: ProductType['_id'], quantity: number) => void
 }): ReactElement => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
