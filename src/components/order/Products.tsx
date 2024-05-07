@@ -1,7 +1,7 @@
 import React, { type ReactElement } from 'react'
 import Product from '@/components/order/Product'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 
 const Products = ({
 	products,
@@ -10,9 +10,9 @@ const Products = ({
 	onQuantityChange
 }: {
 	products: ProductType[]
-	quantities: Record<string, number>
-	availabilities: Record<string, boolean>
-	onQuantityChange: (key: string, newQuantity: number) => void
+	quantities: Record<ProductType['_id'] | OptionType['_id'], number>
+	availabilities: Record<ProductType['_id'], boolean>
+	onQuantityChange: (key: ProductType['_id'] | OptionType['_id'], newQuantity: number) => void
 }): ReactElement => {
 	return (
 		<div>
