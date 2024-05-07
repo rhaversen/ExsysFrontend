@@ -1,7 +1,8 @@
 import React, { type ReactElement, useEffect, useState } from 'react'
-import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import OrderSummary from '@/components/orderstation/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { type CartType } from '@/lib/frontendDataTypes'
 
 const CartWindow = ({
 	price,
@@ -12,11 +13,11 @@ const CartWindow = ({
 	onSubmit,
 	formIsValid
 }: {
-	price: number
+	price: ProductType['price'] | OptionType['price']
 	products: ProductType[]
 	options: OptionType[]
 	cart: CartType
-	onCartChange: (_id: string, type: 'products' | 'options', quantity: number) => void
+	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 	onSubmit: () => void
 	formIsValid: boolean
 }): ReactElement => {
@@ -29,18 +30,18 @@ const CartWindow = ({
 
 	return (
 		<div className="bg-gray-300 h-full flex flex-col">
-			<h2 className="text-2xl font-bold p-4 text-center text-black">
+			<h2 className="text-2xl font-bold p-4 shadow-md text-center text-black">
 				{'Din Bestilling'}
 			</h2>
 			{cartIsEmpty
 				? <div className="h-screen flex items-center justify-center">
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
-						<br />
+						<br/>
 						{'Vælg produkter på vinduet til venstre'}
 					</p>
 				</div>
-				: <div className="overflow-y-auto flex-1 shadow-inner">
+				: <div className="no-scrollbar overflow-y-auto flex-1">
 					<OrderSummary
 						products={products}
 						options={options}
@@ -49,14 +50,13 @@ const CartWindow = ({
 					/>
 				</div>
 			}
-			<div className="text-black text-center pt-5">
-				{`Samlet Pris: ${price} kr`}
+			<div className="bottom-0 flex justify-center">
+				<SubmitButton
+					text={(!cartIsEmpty && formIsValid) ? `Bestil for ${price} kr` : 'Vælg produkter'}
+					disabled={!formIsValid}
+					onClick={onSubmit}
+				/>
 			</div>
-			<SubmitButton
-				text="Bestil"
-				disabled={!formIsValid}
-				onClick={onSubmit}
-			/>
 		</div>
 	)
 }

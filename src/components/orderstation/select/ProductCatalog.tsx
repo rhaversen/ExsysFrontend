@@ -11,7 +11,7 @@ const ProductCatalog = ({
 	products: ProductType[]
 	onProductSelect: (product: ProductType) => void
 }): ReactElement => {
-	const [productAvailabilities, setProductAvailabilities] = useState<Record<string, boolean>>({})
+	const [productAvailabilities, setProductAvailabilities] = useState<Record<ProductType['_id'], boolean>>({})
 
 	const updateProductAvailabilities = useCallback(() => {
 		setProductAvailabilities(

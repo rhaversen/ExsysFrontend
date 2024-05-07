@@ -5,12 +5,15 @@ import axios from 'axios'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
-import { type CartType, type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import { useInterval } from 'react-use'
+import { useRouter } from 'next/navigation'
+import { type CartType } from '@/lib/frontendDataTypes'
 
-export default function Page ({ params }: Readonly<{ params: { room: string } }>): ReactElement {
+export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const router = useRouter()
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
@@ -35,6 +38,12 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
+	const validateRoomAndRedirect = useCallback(() => {
+		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
+			router.push('/orderstation')
+		})
+	}, [API_URL, params.room, router])
+
 	// Fetch products and options on mount
 	useEffect(() => {
 		if (API_URL === undefined) return
@@ -42,6 +51,12 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 			console.error('Error fetching products and options:', error)
 		})
 	}, [API_URL, fetchProductsAndOptions])
+
+	// Check if the room is valid
+	useEffect(() => {
+		if (API_URL === undefined) return
+		validateRoomAndRedirect()
+	}, [router, API_URL, validateRoomAndRedirect, params.room])
 
 	// Check if any product is selected
 	useEffect(() => {
@@ -59,8 +74,9 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 	}, [cart, options, products])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
+	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
-	const handleCartChange = (_id: string, type: 'products' | 'options', change: number): void => {
+	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
 		const newCart = { ...cart }
 		// If the item is not in the cart, add it with a quantity of 0
@@ -76,9 +92,9 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 			}, {})
 		}
 		setCart(newCart)
-	}
+	}, [cart, setCart])
 
-	const submitOrder = (): void => {
+	const submitOrder = useCallback((): void => {
 		setOrderStatus('loading')
 		setShowOrderConfirmation(true)
 
@@ -110,16 +126,16 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 			setOrderStatus('error')
 			console.error(error)
 		})
-	}
+	}, [API_URL, cart, params.room, setOrderStatus, setShowOrderConfirmation])
 
-	const reset = (): void => {
+	const reset = useCallback((): void => {
 		setCart({
 			products: {},
 			options: {}
 		})
 		setShowOrderConfirmation(false)
 		setOrderStatus('loading')
-	}
+	}, [setCart, setShowOrderConfirmation, setOrderStatus])
 
 	return (
 		<main>
@@ -131,7 +147,7 @@ export default function Page ({ params }: Readonly<{ params: { room: string } }>
 						handleCartChange={handleCartChange}
 					/>
 				</div>
-				<div className="w-[400px] h-screen overflow-y-auto">
+				<div className="w-[300px] h-screen overflow-y-auto">
 					<CartWindow
 						price={price}
 						products={products}
