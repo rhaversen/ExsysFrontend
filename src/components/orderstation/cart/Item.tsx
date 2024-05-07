@@ -25,7 +25,7 @@ const Item = ({
 	}, [onCartChange, id, type])
 
 	return (
-		<div className="pb-5">
+		<div className="py-3 shadow-md">
 			<h3 className="font-bold text-black text-center pb-1">
 				{name}
 			</h3>
