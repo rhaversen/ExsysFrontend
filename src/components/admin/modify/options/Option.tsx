@@ -38,6 +38,7 @@ const Option = ({
 			onOptionDeleted(option._id)
 		}).catch((error) => {
 			console.error('Error deleting option:', error)
+			setNewOption(option)
 		})
 	}
 
@@ -66,7 +67,6 @@ const Option = ({
 	const handleCompleteEdit = (): void => {
 		console.log('Completing edit')
 		patchOption(option, newOption)
-		setNewOption(newOption)
 		setIsEditing(false)
 	}
 
