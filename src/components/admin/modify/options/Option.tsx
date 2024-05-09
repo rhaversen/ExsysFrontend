@@ -1,9 +1,9 @@
 import { type OptionType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
-import Image from 'next/image'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
+import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
 
 const Option = ({
@@ -103,78 +103,13 @@ const Option = ({
 						handleImageChange(v)
 					}}
 				/>
-				{isEditing &&
-					<div className="flex flex-row">
-						<button
-							onClick={() => {
-								setShowDeleteConfirmation(true)
-							}}
-							type='button'
-							className="w-5 h-5"
-
-						>
-							<span className="sr-only">
-								{'Delete'}
-							</span>
-							<Image
-								width={20}
-								height={20}
-								className="w-full h-full"
-								src="/admin/modify/delete.svg"
-								alt="Delete"
-							/>
-						</button>
-						<button
-							onClick={handleUndoEdit}
-							type='button'
-							className="w-10 h-10"
-						>
-							<span className="sr-only">
-								{'Undo changes'}
-							</span>
-							<Image
-								width={40}
-								height={40}
-								className="w-full h-full"
-								src="/admin/modify/trashcan.svg"
-								alt="Undo"
-							/>
-						</button>
-						<button
-							onClick={handleCompleteEdit}
-							type='button'
-							className="w-10 h-10"
-						>
-							<span className="sr-only">
-								{'Complete changes'}
-							</span>
-							<Image
-								width={40}
-								height={40}
-								className="w-full h-full"
-								src="/admin/modify/checkmark.svg"
-								alt="Accept"
-							/>
-						</button>
-					</div>
-				}
-				{!isEditing &&
-					<button
-						onClick={() => {
-							setIsEditing(true)
-						}}
-						type='button'
-						className="w-10 h-10"
-					>
-						<Image
-							width={40}
-							height={40}
-							className="w-full h-full"
-							src="/admin/modify/pen.svg"
-							alt="Edit" />
-						<span className="sr-only">Edit</span>
-					</button>
-				}
+				<EditingControls
+					isEditing={isEditing}
+					setIsEditing={setIsEditing}
+					handleUndoEdit={handleUndoEdit}
+					handleCompleteEdit={handleCompleteEdit}
+					setShowDeleteConfirmation={setShowDeleteConfirmation}
+				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion
 						itemName={option.name}
