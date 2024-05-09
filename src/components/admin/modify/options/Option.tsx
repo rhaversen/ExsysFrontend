@@ -7,9 +7,13 @@ import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
 
 const Option = ({
-	option
+	option,
+	onOptionPatched,
+	onOptionDeleted
 }: {
 	option: OptionType
+	onOptionPatched: (option: OptionType) => void
+	onOptionDeleted: (id: OptionType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -20,6 +24,7 @@ const Option = ({
 	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
 		axios.patch(`${API_URL}/v1/options/${option._id}`, optionPatch).then((response) => {
 			console.log('Option updated:', response.data)
+			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			console.error('Error updating option:', error)
 		})
@@ -30,6 +35,7 @@ const Option = ({
 			data: { confirmDeletion }
 		}).then(() => {
 			console.log('Option deleted')
+			onOptionDeleted(option._id)
 		}).catch((error) => {
 			console.error('Error deleting option:', error)
 		})
