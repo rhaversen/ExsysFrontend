@@ -64,6 +64,11 @@ const Option = ({
 		setIsEditing(false)
 	}
 
+	const handleDeleteOption = (confirmDeletion: boolean): void => {
+		console.log('Deleting option')
+		deleteOption(option, confirmDeletion)
+	}
+
 	return (
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
@@ -116,9 +121,9 @@ const Option = ({
 						onClose={() => {
 							setShowDeleteConfirmation(false)
 						}}
-						onSubmit={(confirm: boolean) => {
+						onSubmit={(confirmDeletion: boolean) => {
 							setShowDeleteConfirmation(false)
-							deleteOption(option, confirm)
+							handleDeleteOption(confirmDeletion)
 						}}
 					/>
 				}
