@@ -44,18 +44,27 @@ const Option = ({
 
 	const handleNameChange = (v: string): void => {
 		console.log('Name change:', v)
-		setNewOption({ ...newOption, name: v })
+		setNewOption({
+			...newOption,
+			name: v
+		})
 	}
 
 	const handlePriceChange = (v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		console.log('Price change:', v)
-		setNewOption({ ...newOption, price: Number(v) })
+		setNewOption({
+			...newOption,
+			price: Number(v)
+		})
 	}
 
 	const handleImageChange = (v: string): void => {
 		console.log('Image change:', v)
-		setNewOption({ ...newOption, imageURL: v })
+		setNewOption({
+			...newOption,
+			imageURL: v
+		})
 	}
 
 	const handleUndoEdit = (): void => {
