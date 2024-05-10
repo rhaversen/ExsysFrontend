@@ -5,11 +5,9 @@ import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
 
 const SelectionWindow = ({
 	products,
-	options,
 	handleCartChange
 }: {
 	products: ProductType[]
-	options: OptionType[]
 	handleCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number) => void
 }): ReactElement => {
 	const [showOptions, setShowOptions] = useState(false)
@@ -21,7 +19,7 @@ const SelectionWindow = ({
 			setShowOptions(true)
 		}
 		handleCartChange(product._id, 'products', 1)
-	}, [options, setSelectedProductOptions, setShowOptions, handleCartChange])
+	}, [setSelectedProductOptions, setShowOptions, handleCartChange])
 
 	const handleOptionSelect = useCallback((option: OptionType): void => {
 		setShowOptions(false)
