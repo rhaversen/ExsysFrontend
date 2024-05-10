@@ -9,7 +9,7 @@ const ItemList = ({
 	header: string
 	buttonText: string
 	onAdd: () => void
-	children: ReactNode
+	children: ReactNode[]
 }): ReactElement => {
 	return (
 		<div className="flex flex-col h-full">
