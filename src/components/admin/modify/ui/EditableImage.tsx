@@ -19,7 +19,7 @@ const EditableImage = ({
 	const [showImageList, setShowImageList] = useState(false)
 
 	return (
-		<div className="mt-4">
+		<div className="mt-1">
 			<button
 				type="button"
 				className={editable
@@ -44,7 +44,7 @@ const EditableImage = ({
 					height={200}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
 					alt={'Item Image'}
-					className="w-48 h-48 object-cover text-black"
+					className="w-40 h-40 object-cover text-black"
 					draggable="false"
 					priority // Load image immediately
 				/>
