@@ -1,9 +1,10 @@
-import { type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
+import Options from '@/components/admin/modify/productOptions/Options'
 import axios from 'axios'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 
@@ -231,6 +232,25 @@ const Product = ({
 					edited={newProduct.imageURL !== product.imageURL}
 					onChange={(v: string) => {
 						handleImageChange(v)
+					}}
+				/>
+				{product.options.length > 0 &&
+					<p className='italic text-gray-500'>{'Tilvalg:'}</p>
+				}
+				{product.options.length === 0 && !isEditing &&
+					<p className='italic text-gray-500'>{'Ingen Tilvalg'}</p>
+				}
+				{product.options.length === 0 && isEditing &&
+					<p className='italic text-gray-500'>{'Tilføj Tilvalg:'}</p>
+				}
+				<Options
+					options={product.options}
+					editable={isEditing}
+					onDelete={(v: OptionType) => {
+						console.log('Deleting option:', v)
+					}}
+					onAddOption={(v: OptionType) => {
+						console.log('Adding option:', v)
 					}}
 				/>
 				<EditingControls
