@@ -76,6 +76,7 @@ const Option = ({
 	const handleCompleteEdit = (): void => {
 		console.log('Completing edit')
 		patchOption(option, newOption)
+		setNewOption(option)
 		setIsEditing(false)
 	}
 
