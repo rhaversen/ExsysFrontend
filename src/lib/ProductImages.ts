@@ -1,2 +1,1 @@
-export const ProductImages = [
-] as string[]
+export const ProductImages = [] as string[]

@@ -19,12 +19,12 @@ const EditableImage = ({
 	const [showImageList, setShowImageList] = useState(false)
 
 	return (
-		<div className='mt-4'>
+		<div className="mt-4">
 			<button
 				type="button"
 				className={editable
 					? `cursor-pointer border-2 rounded-md px-1 py-0.5 pr-1.5 transition-colors duration-200 ease-in-out focus:outline-none
-                    ${edited
+					${edited
 			? 'border-orange-400 hover:border-orange-600 focus:border-orange-700'
 			: 'border-blue-500 hover:border-blue-600 focus:border-blue-700'
 		}`
