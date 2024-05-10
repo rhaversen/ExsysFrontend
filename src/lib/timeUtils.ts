@@ -1,4 +1,4 @@
-import { type OrderWindow, type Time } from '@/lib/backendDataTypes'
+import { type OrderWindow } from '@/lib/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const {
@@ -6,30 +6,32 @@ export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow 
 		to
 	} = orderWindow
 
-	// Create Date objects for the 'from' and 'to' times in UTC
-	const fromDate = new Date(Date.UTC(1970, 0, 1, from.hour, from.minute))
-	const toDate = new Date(Date.UTC(1970, 0, 1, to.hour, to.minute))
+	// Create Date objects for the 'from' and 'to' times in local time
+	const fromDate = new Date()
+	fromDate.setHours(from.hour, from.minute, 0, 0)
+
+	const toDate = new Date()
+	toDate.setHours(to.hour, to.minute, 0, 0)
 
 	// If 'from' time is later than 'to' time, adjust the 'to' date to the next day
 	if (fromDate > toDate) {
 		toDate.setDate(toDate.getDate() + 1)
 	}
 
-	// Convert to UTC
-	const fromInUTC: Time = {
-		hour: fromDate.getUTCHours(),
-		minute: fromDate.getUTCMinutes()
-	}
-
-	const toInUTC: Time = {
-		hour: toDate.getUTCHours(),
-		minute: toDate.getUTCMinutes()
-	}
+	// Convert the Date objects to UTC
+	const fromUTCDate = new Date(fromDate.toUTCString())
+	const toUTCDate = new Date(toDate.toUTCString())
 
 	// Return the new orderWindow object in UTC
 	return {
-		from: fromInUTC,
-		to: toInUTC
+		from: {
+			hour: fromUTCDate.getUTCHours(),
+			minute: fromUTCDate.getUTCMinutes()
+		},
+		to: {
+			hour: toUTCDate.getUTCHours(),
+			minute: toUTCDate.getUTCMinutes()
+		}
 	}
 }
 
