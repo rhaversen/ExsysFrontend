@@ -17,8 +17,7 @@ const SelectionWindow = ({
 
 	const handleProductSelect = useCallback((product: ProductType): void => {
 		if (product.options.length > 0) {
-			const productOptions = options.filter(option => product.options.includes(option._id))
-			setSelectedProductOptions(productOptions)
+			setSelectedProductOptions(product.options)
 			setShowOptions(true)
 		}
 		handleCartChange(product._id, 'products', 1)
