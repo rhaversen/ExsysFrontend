@@ -16,13 +16,13 @@ const EditingControls = ({
 }): ReactElement => {
 	if (isEditing) {
 		return (
-			<div className="flex flex-row">
+			<div className="flex flex-row gap-5">
 				<button
 					onClick={() => {
 						setShowDeleteConfirmation(true)
 					}}
 					type="button"
-					className="w-5 h-5"
+					className="w-5 h-5 mx-2.5 place-self-center hover:bounceOrig"
 				>
 					<span className="sr-only">Delete</span>
 					<Image
@@ -36,7 +36,7 @@ const EditingControls = ({
 				<button
 					onClick={handleUndoEdit}
 					type="button"
-					className="w-10 h-10"
+					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:-rotate-180"
 				>
 					<span className="sr-only">Undo changes</span>
 					<Image
@@ -50,7 +50,7 @@ const EditingControls = ({
 				<button
 					onClick={handleCompleteEdit}
 					type="button"
-					className="w-10 h-10"
+					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:rotate-12 hover:scale-125"
 				>
 					<span className="sr-only">Complete changes</span>
 					<Image
@@ -75,7 +75,7 @@ const EditingControls = ({
 				<Image
 					width={40}
 					height={40}
-					className="w-full h-full"
+					className="w-full h-full place-self-center transition-transform duration-300 transform hover:scale-125 hover:-rotate-45"
 					src="/admin/modify/pen.svg"
 					alt="Edit"
 				/>
