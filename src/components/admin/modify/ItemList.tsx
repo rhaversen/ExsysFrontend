@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import React, { type ReactElement, type ReactNode } from 'react'
 
 const ItemList = ({
 	header,
@@ -9,7 +9,7 @@ const ItemList = ({
 	header: string
 	buttonText: string
 	onAdd: () => void
-	children: React.ReactNode
+	children: ReactNode
 }): ReactElement => {
 	return (
 		<div className="flex flex-col h-full">
