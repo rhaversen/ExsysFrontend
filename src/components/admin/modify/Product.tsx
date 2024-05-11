@@ -128,6 +128,20 @@ const Product = ({
 		})
 	}
 
+	const handleAddOption = (v: OptionType): void => {
+		setNewProduct({
+			...newProduct,
+			options: [...newProduct.options, v]
+		})
+	}
+
+	const handleDeleteOption = (v: OptionType): void => {
+		setNewProduct({
+			...newProduct,
+			options: newProduct.options.filter((option) => option !== v)
+		})
+	}
+
 	const handleUndoEdit = (): void => {
 		setNewProduct(product)
 		setIsEditing(false)
@@ -233,7 +247,7 @@ const Product = ({
 					options={product.options}
 					editable={isEditing}
 					onDelete={(v: OptionType) => {
-						console.log('Deleting option:', v)
+						handleDeleteOption(v)
 					}}
 					onAddOption={(v: OptionType) => {
 						console.log('Adding option:', v)
