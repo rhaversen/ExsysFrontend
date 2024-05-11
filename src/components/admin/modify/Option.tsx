@@ -23,7 +23,6 @@ const Option = ({
 
 	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
 		axios.patch(`${API_URL}/v1/options/${option._id}`, optionPatch).then((response) => {
-			console.log('Option updated:', response.data)
 			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			console.error('Error updating option:', error)
@@ -34,7 +33,6 @@ const Option = ({
 		axios.delete(`${API_URL}/v1/options/${option._id}`, {
 			data: { confirm }
 		}).then(() => {
-			console.log('Option deleted')
 			onOptionDeleted(option._id)
 		}).catch((error) => {
 			console.error('Error deleting option:', error)
@@ -43,7 +41,6 @@ const Option = ({
 	}
 
 	const handleNameChange = (v: string): void => {
-		console.log('Name change:', v)
 		setNewOption({
 			...newOption,
 			name: v
@@ -52,7 +49,6 @@ const Option = ({
 
 	const handlePriceChange = (v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
-		console.log('Price change:', v)
 		setNewOption({
 			...newOption,
 			price: Number(v)
@@ -60,7 +56,6 @@ const Option = ({
 	}
 
 	const handleImageChange = (v: string): void => {
-		console.log('Image change:', v)
 		setNewOption({
 			...newOption,
 			imageURL: v
@@ -68,20 +63,17 @@ const Option = ({
 	}
 
 	const handleUndoEdit = (): void => {
-		console.log('Undoing edit')
 		setNewOption(option)
 		setIsEditing(false)
 	}
 
 	const handleCompleteEdit = (): void => {
-		console.log('Completing edit')
 		patchOption(option, newOption)
 		setNewOption(option)
 		setIsEditing(false)
 	}
 
 	const handleDeleteOption = (confirm: boolean): void => {
-		console.log('Deleting option')
 		deleteOption(option, confirm)
 	}
 

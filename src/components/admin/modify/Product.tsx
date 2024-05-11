@@ -24,17 +24,12 @@ const Product = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
-		console.log('Order window:', productPatch.orderWindow)
-		console.log('Order window UTC:', convertOrderWindowToUTC(productPatch.orderWindow))
-		console.log('Product patch:', productPatch)
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productPatchUTC = {
 			...productPatch,
 			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
 		}
-		console.log('Product patch UTC:', productPatchUTC)
 		axios.patch(`${API_URL}/v1/products/${product._id}`, productPatchUTC).then((response) => {
-			console.log('Product updated:', response.data)
 			onProductPatched(response.data as ProductType)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
@@ -45,7 +40,6 @@ const Product = ({
 		axios.delete(`${API_URL}/v1/products/${product._id}`, {
 			data: { confirm }
 		}).then(() => {
-			console.log('Product deleted')
 			onProductDeleted(product._id)
 		}).catch((error) => {
 			console.error('Error deleting product:', error)
@@ -54,7 +48,6 @@ const Product = ({
 	}
 
 	const handleNameChange = (v: string): void => {
-		console.log('Name change:', v)
 		setNewProduct({
 			...newProduct,
 			name: v
@@ -63,7 +56,6 @@ const Product = ({
 
 	const handlePriceChange = (v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
-		console.log('Price change:', v)
 		setNewProduct({
 			...newProduct,
 			price: Number(v)
@@ -71,7 +63,6 @@ const Product = ({
 	}
 
 	const handleImageChange = (v: string): void => {
-		console.log('Image change:', v)
 		setNewProduct({
 			...newProduct,
 			imageURL: v
@@ -80,7 +71,6 @@ const Product = ({
 
 	const handleOrderWindowFromMinuteChange = (v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
-		console.log('Order window from minute change:', v)
 		setNewProduct({
 			...newProduct,
 			orderWindow: {
@@ -95,7 +85,6 @@ const Product = ({
 
 	const handleOrderWindowFromHourChange = (v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
-		console.log('Order window from hour change:', v)
 		setNewProduct({
 			...newProduct,
 			orderWindow: {
@@ -110,7 +99,6 @@ const Product = ({
 
 	const handleOrderWindowToMinuteChange = (v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
-		console.log('Order window to minute change:', v)
 		setNewProduct({
 			...newProduct,
 			orderWindow: {
@@ -125,7 +113,6 @@ const Product = ({
 
 	const handleOrderWindowToHourChange = (v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
-		console.log('Order window to hour change:', v)
 		setNewProduct({
 			...newProduct,
 			orderWindow: {
@@ -139,20 +126,17 @@ const Product = ({
 	}
 
 	const handleUndoEdit = (): void => {
-		console.log('Undoing edit')
 		setNewProduct(product)
 		setIsEditing(false)
 	}
 
 	const handleCompleteEdit = (): void => {
-		console.log('Completing edit')
 		patchProduct(product, newProduct)
 		setNewProduct(product)
 		setIsEditing(false)
 	}
 
 	const handleDeleteProduct = (confirm: boolean): void => {
-		console.log('Deleting product')
 		deleteProduct(product, confirm)
 	}
 

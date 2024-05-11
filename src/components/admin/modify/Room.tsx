@@ -22,7 +22,6 @@ const Room = ({
 
 	const patchRoom = (room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
 		axios.patch(`${API_URL}/v1/rooms/${room._id}`, roomPatch).then((response) => {
-			console.log('Room updated:', response.data)
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
 			console.error('Error updating room:', error)
@@ -33,7 +32,6 @@ const Room = ({
 		axios.delete(`${API_URL}/v1/rooms/${room._id}`, {
 			data: { confirm }
 		}).then(() => {
-			console.log('Room deleted')
 			onRoomDeleted(room._id)
 		}).catch((error) => {
 			console.error('Error deleting room:', error)
@@ -42,7 +40,6 @@ const Room = ({
 	}
 
 	const handleNameChange = (v: string): void => {
-		console.log('Name change:', v)
 		setNewRoom({
 			...newRoom,
 			name: v
@@ -50,7 +47,6 @@ const Room = ({
 	}
 
 	const handleDescriptionChange = (v: string): void => {
-		console.log('Description change:', v)
 		setNewRoom({
 			...newRoom,
 			description: v
@@ -58,20 +54,17 @@ const Room = ({
 	}
 
 	const handleUndoEdit = (): void => {
-		console.log('Undoing edit')
 		setNewRoom(room)
 		setIsEditing(false)
 	}
 
 	const handleCompleteEdit = (): void => {
-		console.log('Completing edit', newRoom)
 		patchRoom(room, newRoom)
 		setNewRoom(room)
 		setIsEditing(false)
 	}
 
 	const handleDeleteRoom = (confirm: boolean): void => {
-		console.log('Deleting room')
 		deleteRoom(room, confirm)
 	}
 
