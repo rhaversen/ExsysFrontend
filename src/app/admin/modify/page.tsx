@@ -58,10 +58,10 @@ export default function Page (): ReactElement {
 							<Product
 								product={product}
 								onProductPatched={(product) => {
-									console.log('Product patched:', product)
+									setProducts((products) => products.map((p) => p._id === product._id ? product : p))
 								}}
 								onProductDeleted={(id) => {
-									console.log('Product deleted:', id)
+									setProducts((products) => products.filter((p) => p._id !== id))
 								}}
 							/>
 						</div>
@@ -80,10 +80,10 @@ export default function Page (): ReactElement {
 							<Option
 								option={option}
 								onOptionPatched={(option) => {
-									console.log('Option patched:', option)
+									setOptions((options) => options.map((o) => o._id === option._id ? option : o))
 								}}
 								onOptionDeleted={(id) => {
-									console.log('Option deleted:', id)
+									setOptions((options) => options.filter((o) => o._id !== id))
 								}}
 							/>
 						</div>
@@ -102,10 +102,10 @@ export default function Page (): ReactElement {
 							<Room
 								room={room}
 								onRoomPatched={(room) => {
-									console.log('Room patched:', room)
+									setRooms((rooms) => rooms.map((r) => r._id === room._id ? room : r))
 								}}
 								onRoomDeleted={(id) => {
-									console.log('Room deleted:', id)
+									setRooms((rooms) => rooms.filter((r) => r._id !== id))
 								}}
 							/>
 						</div>
