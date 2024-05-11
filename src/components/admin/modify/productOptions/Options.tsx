@@ -3,24 +3,24 @@ import { type ReactElement } from 'react'
 import Option from '@/components/admin/modify/productOptions/Option'
 
 const Options = ({
-	options,
+	selectedOptions,
 	editable,
-	onDelete,
+	onDeleteOption,
 	onAddOption
 }: {
-	options: OptionType[]
+	selectedOptions: OptionType[]
 	editable: boolean
-	onDelete: (v: OptionType) => void
+	onDeleteOption: (v: OptionType) => void
 	onAddOption: (v: OptionType) => void
 }): ReactElement => {
 	return (
 		<div className='flex flex-row flex-wrap'>
-			{options.map((option) => (
+			{selectedOptions.map((option) => (
 				<Option
 					key={option._id}
 					option={option}
 					editable={editable}
-					onDelete={onDelete}
+					onDelete={onDeleteOption}
 				/>
 			))}
 			{editable &&
