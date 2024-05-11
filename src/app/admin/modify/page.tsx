@@ -40,7 +40,7 @@ export default function Page (): ReactElement {
 		})
 	}, [API_URL, fetchProductsOptionsRooms])
 
-	useInterval(fetchProductsOptionsRooms, 1000 * 60 * 60) // Fetch products and options every hour
+	useInterval(fetchProductsOptionsRooms, 1000 * 60 * 60) // Fetch products, options and rooms every hour
 
 	return (
 		<main className="fixed">
