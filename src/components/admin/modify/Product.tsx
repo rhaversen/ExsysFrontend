@@ -10,10 +10,12 @@ import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 
 const Product = ({
 	product,
+	options,
 	onProductPatched,
 	onProductDeleted
 }: {
 	product: ProductType
+	options: OptionType[]
 	onProductPatched: (product: ProductType) => void
 	onProductDeleted: (id: ProductType['_id']) => void
 }): ReactElement => {

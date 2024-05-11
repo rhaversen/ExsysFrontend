@@ -56,6 +56,7 @@ export default function Page (): ReactElement {
 						<div className="min-w-64"
 							key={product._id}>
 							<Product
+								options={options}
 								product={product}
 								onProductPatched={(product) => {
 									setProducts((products) => products.map((p) => p._id === product._id ? product : p))
