@@ -244,7 +244,7 @@ const Product = ({
 					<p className='italic text-gray-500'>{'Tilføj Tilvalg:'}</p>
 				}
 				<Options
-					selectedOptions={product.options}
+					selectedOptions={newProduct.options}
 					editable={isEditing}
 					onDeleteOption={(v: OptionType) => {
 						handleDeleteOption(v)
