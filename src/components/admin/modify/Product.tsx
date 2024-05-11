@@ -41,9 +41,9 @@ const Product = ({
 		})
 	}
 
-	const deleteProduct = (product: ProductType, confirmDeletion: boolean): void => {
+	const deleteProduct = (product: ProductType, confirm: boolean): void => {
 		axios.delete(`${API_URL}/v1/products/${product._id}`, {
-			data: { confirmDeletion }
+			data: { confirm }
 		}).then(() => {
 			console.log('Product deleted')
 			onProductDeleted(product._id)
@@ -151,9 +151,9 @@ const Product = ({
 		setIsEditing(false)
 	}
 
-	const handleDeleteProduct = (confirmDeletion: boolean): void => {
+	const handleDeleteProduct = (confirm: boolean): void => {
 		console.log('Deleting product')
-		deleteProduct(product, confirmDeletion)
+		deleteProduct(product, confirm)
 	}
 
 	return (
@@ -266,9 +266,9 @@ const Product = ({
 						onClose={() => {
 							setShowDeleteConfirmation(false)
 						}}
-						onSubmit={(confirmDeletion: boolean) => {
+						onSubmit={(confirm: boolean) => {
 							setShowDeleteConfirmation(false)
-							handleDeleteProduct(confirmDeletion)
+							handleDeleteProduct(confirm)
 						}}
 					/>
 				}

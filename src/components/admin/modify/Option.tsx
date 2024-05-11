@@ -30,9 +30,9 @@ const Option = ({
 		})
 	}
 
-	const deleteOption = (option: OptionType, confirmDeletion: boolean): void => {
+	const deleteOption = (option: OptionType, confirm: boolean): void => {
 		axios.delete(`${API_URL}/v1/options/${option._id}`, {
-			data: { confirmDeletion }
+			data: { confirm }
 		}).then(() => {
 			console.log('Option deleted')
 			onOptionDeleted(option._id)
@@ -80,9 +80,9 @@ const Option = ({
 		setIsEditing(false)
 	}
 
-	const handleDeleteOption = (confirmDeletion: boolean): void => {
+	const handleDeleteOption = (confirm: boolean): void => {
 		console.log('Deleting option')
-		deleteOption(option, confirmDeletion)
+		deleteOption(option, confirm)
 	}
 
 	return (
@@ -137,9 +137,9 @@ const Option = ({
 						onClose={() => {
 							setShowDeleteConfirmation(false)
 						}}
-						onSubmit={(confirmDeletion: boolean) => {
+						onSubmit={(confirm: boolean) => {
 							setShowDeleteConfirmation(false)
-							handleDeleteOption(confirmDeletion)
+							handleDeleteOption(confirm)
 						}}
 					/>
 				}

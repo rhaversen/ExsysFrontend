@@ -29,9 +29,9 @@ const Room = ({
 		})
 	}
 
-	const deleteRoom = (room: RoomType, confirmDeletion: boolean): void => {
+	const deleteRoom = (room: RoomType, confirm: boolean): void => {
 		axios.delete(`${API_URL}/v1/rooms/${room._id}`, {
-			data: { confirmDeletion }
+			data: { confirm }
 		}).then(() => {
 			console.log('Room deleted')
 			onRoomDeleted(room._id)
@@ -70,9 +70,9 @@ const Room = ({
 		setIsEditing(false)
 	}
 
-	const handleDeleteRoom = (confirmDeletion: boolean): void => {
+	const handleDeleteRoom = (confirm: boolean): void => {
 		console.log('Deleting room')
-		deleteRoom(room, confirmDeletion)
+		deleteRoom(room, confirm)
 	}
 
 	return (
@@ -116,9 +116,9 @@ const Room = ({
 					onClose={() => {
 						setShowDeleteConfirmation(false)
 					}}
-					onSubmit={(confirmDeletion: boolean) => {
+					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteRoom(confirmDeletion)
+						handleDeleteRoom(confirm)
 					}}
 				/>
 			}
