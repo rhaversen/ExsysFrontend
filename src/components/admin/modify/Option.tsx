@@ -26,6 +26,7 @@ const Option = ({
 			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			console.error('Error updating option:', error)
+			setNewOption(option)
 		})
 	}
 
@@ -69,7 +70,6 @@ const Option = ({
 
 	const handleCompleteEdit = (): void => {
 		patchOption(option, newOption)
-		setNewOption(option)
 		setIsEditing(false)
 	}
 

@@ -25,6 +25,7 @@ const Room = ({
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
 			console.error('Error updating room:', error)
+			setNewRoom(room)
 		})
 	}
 
@@ -60,7 +61,6 @@ const Room = ({
 
 	const handleCompleteEdit = (): void => {
 		patchRoom(room, newRoom)
-		setNewRoom(room)
 		setIsEditing(false)
 	}
 

@@ -33,6 +33,7 @@ const Product = ({
 			onProductPatched(response.data as ProductType)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
+			setNewProduct(product)
 		})
 	}
 
@@ -132,7 +133,6 @@ const Product = ({
 
 	const handleCompleteEdit = (): void => {
 		patchProduct(product, newProduct)
-		setNewProduct(product)
 		setIsEditing(false)
 	}
 
