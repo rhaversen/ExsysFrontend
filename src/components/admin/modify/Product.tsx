@@ -5,6 +5,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import Options from '@/components/admin/modify/productOptions/Options'
+import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 
@@ -24,6 +25,7 @@ const Product = ({
 	const [isEditing, setIsEditing] = useState(false)
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+	const [showOptions, setShowOptions] = useState(false)
 
 	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
@@ -249,9 +251,7 @@ const Product = ({
 					onDeleteOption={(v: OptionType) => {
 						handleDeleteOption(v)
 					}}
-					onAddOption={(v: OptionType) => {
-						console.log('Adding option:', v)
-					}}
+					showOptions={() => setShowOptions(true)}
 				/>
 				<EditingControls
 					isEditing={isEditing}
@@ -269,6 +269,22 @@ const Product = ({
 						onSubmit={(confirm: boolean) => {
 							setShowDeleteConfirmation(false)
 							handleDeleteProduct(confirm)
+						}}
+					/>
+				}
+				{showOptions &&
+					<OptionsWindow
+						productName={newProduct.name}
+						options={options}
+						productOptions={newProduct.options}
+						onAddOption={(v: OptionType) => {
+							handleAddOption(v)
+						}}
+						onDeleteOption={(v: OptionType) => {
+							handleDeleteOption(v)
+						}}
+						onClose={() => {
+							setShowOptions(false)
 						}}
 					/>
 				}

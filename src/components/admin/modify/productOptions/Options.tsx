@@ -6,12 +6,12 @@ const Options = ({
 	selectedOptions,
 	editable,
 	onDeleteOption,
-	onAddOption
+	showOptions
 }: {
 	selectedOptions: OptionType[]
 	editable: boolean
 	onDeleteOption: (v: OptionType) => void
-	onAddOption: (v: OptionType) => void
+	showOptions: () => void
 }): ReactElement => {
 	return (
 		<div className='flex flex-row flex-wrap'>
@@ -29,7 +29,7 @@ const Options = ({
 						type="button"
 						className="cursor-pointer"
 						onClick={() => {
-							onAddOption(options[0])
+							showOptions()
 						}}
 					>
 						<div className='text-blue-500 px-3 items-center'>{' + '}</div>
