@@ -140,7 +140,7 @@ const Product = ({
 	const handleDeleteOption = (v: OptionType): void => {
 		setNewProduct({
 			...newProduct,
-			options: newProduct.options.filter((option) => option !== v)
+			options: newProduct.options.filter((option) => option._id !== v._id)
 		})
 	}
 
