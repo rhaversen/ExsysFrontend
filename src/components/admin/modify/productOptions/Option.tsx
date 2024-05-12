@@ -22,7 +22,7 @@ const Option = ({
 						onDelete(option)
 					}}
 				>
-					<p className='sr-only'>Delete</p>
+					<p className="sr-only">Delete</p>
 					<Image
 						src="/admin/modify/trashcan.svg"
 						alt="Delete"

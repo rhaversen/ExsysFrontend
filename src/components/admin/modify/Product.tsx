@@ -237,13 +237,13 @@ const Product = ({
 					}}
 				/>
 				{product.options.length > 0 &&
-					<p className='italic text-gray-500'>{'Tilvalg:'}</p>
+					<p className="italic text-gray-500">{'Tilvalg:'}</p>
 				}
 				{product.options.length === 0 && !isEditing &&
-					<p className='italic text-gray-500'>{'Ingen Tilvalg'}</p>
+					<p className="italic text-gray-500">{'Ingen Tilvalg'}</p>
 				}
 				{product.options.length === 0 && isEditing &&
-					<p className='italic text-gray-500'>{'Tilføj Tilvalg:'}</p>
+					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
 				<Options
 					selectedOptions={newProduct.options}
@@ -251,7 +251,9 @@ const Product = ({
 					onDeleteOption={(v: OptionType) => {
 						handleDeleteOption(v)
 					}}
-					showOptions={() => { setShowOptions(true) }}
+					showOptions={() => {
+						setShowOptions(true)
+					}}
 				/>
 				<EditingControls
 					isEditing={isEditing}

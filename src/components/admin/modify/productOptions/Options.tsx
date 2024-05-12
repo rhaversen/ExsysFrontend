@@ -14,7 +14,7 @@ const Options = ({
 	showOptions: () => void
 }): ReactElement => {
 	return (
-		<div className='flex flex-row flex-wrap'>
+		<div className="flex flex-row flex-wrap">
 			{selectedOptions.map((option) => (
 				<Option
 					key={option._id}
@@ -32,7 +32,7 @@ const Options = ({
 							showOptions()
 						}}
 					>
-						<div className='text-blue-500 px-3 items-center'>{' + '}</div>
+						<div className="text-blue-500 px-3 items-center">{' + '}</div>
 					</button>
 				</div>
 			}

@@ -41,11 +41,13 @@ const OptionsWindow = ({
 					{options.map((option) => (
 						<div key={option._id} className="flex flex-wrap flex-row items-center p-1 mb-2 text-black">
 							<input
-								title='Add Option'
+								title="Add Option"
 								type="checkbox"
-								className='cursor-pointer'
+								className="cursor-pointer"
 								checked={productOptions.map((option) => option._id).includes(option._id)}
-								onChange={() => { handleToggle(option) }}
+								onChange={() => {
+									handleToggle(option)
+								}}
 							/>
 							<span className="ml-2">{option.name}</span>
 						</div>
