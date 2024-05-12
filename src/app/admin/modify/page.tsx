@@ -9,6 +9,9 @@ import ItemList from '@/components/admin/modify/ItemList'
 import Product from '@/components/admin/modify/Product'
 import Option from '@/components/admin/modify/Option'
 import Room from '@/components/admin/modify/Room'
+import AddProduct from '@/components/admin/modify/AddProduct'
+import AddOption from '@/components/admin/modify/AddOption'
+import AddRoom from '@/components/admin/modify/AddRoom'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -16,6 +19,9 @@ export default function Page (): ReactElement {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [showAddRoom, setShowAddRoom] = useState(false)
+	const [showAddOption, setShowAddOption] = useState(false)
+	const [showAddProduct, setShowAddProduct] = useState(false)
 
 	const fetchProductsOptionsRooms = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products')
@@ -49,7 +55,7 @@ export default function Page (): ReactElement {
 					header="Produkter"
 					buttonText="Nyt Produkt"
 					onAdd={() => {
-						console.log('Add product')
+						setShowAddProduct(true)
 					}}
 				>
 					{products.map((product) => (
@@ -72,7 +78,7 @@ export default function Page (): ReactElement {
 					header="Tilvalg"
 					buttonText="Nyt Tilvalg"
 					onAdd={() => {
-						console.log('Add option')
+						setShowAddOption(true)
 					}}
 				>
 					{options.map((option) => (
@@ -94,7 +100,7 @@ export default function Page (): ReactElement {
 					header="Rum"
 					buttonText="Nyt Rum"
 					onAdd={() => {
-						console.log('Add room')
+						setShowAddRoom(true)
 					}}
 				>
 					{rooms.map((room) => (
@@ -113,6 +119,37 @@ export default function Page (): ReactElement {
 					))}
 				</ItemList>
 			</div>
+			{showAddProduct &&
+				<AddProduct
+					options={options}
+					onProductPosted={function (product: ProductType): void {
+						setProducts((products) => [...products, product])
+					}}
+					onClose={function (): void {
+						setShowAddProduct(false)
+					}}
+				/>
+			}
+			{showAddOption &&
+				<AddOption
+					onOptionPosted={function (option: OptionType): void {
+						setOptions((options) => [...options, option])
+					}}
+					onClose={function (): void {
+						setShowAddOption(false)
+					}}
+				/>
+			}
+			{showAddRoom &&
+				<AddRoom
+					onRoomPosted={function (room: RoomType): void {
+						setRooms((rooms) => [...rooms, room])
+					}}
+					onClose={function (): void {
+						setShowAddRoom(false)
+					}}
+				/>
+			}
 		</main>
 	)
 }
