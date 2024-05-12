@@ -33,7 +33,7 @@ const ProductCatalog = ({
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
 	return (
-		<div className="flex flex-wrap justify-center">
+		<div className="flex flex-wrap justify-between mx-5">
 			{products.map((product) => (
 				<Product
 					key={product._id}

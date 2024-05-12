@@ -143,7 +143,6 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 				<div className="flex-1 overflow-y-auto">
 					<SelectionWindow
 						products={products}
-						options={options}
 						handleCartChange={handleCartChange}
 					/>
 				</div>
