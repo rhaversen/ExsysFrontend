@@ -251,7 +251,7 @@ const Product = ({
 					onDeleteOption={(v: OptionType) => {
 						handleDeleteOption(v)
 					}}
-					showOptions={() => setShowOptions(true)}
+					showOptions={() => { setShowOptions(true) }}
 				/>
 				<EditingControls
 					isEditing={isEditing}
