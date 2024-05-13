@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { type RoomType, type OptionType, type OrderType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
 
 export default function Page (): ReactElement {
@@ -48,8 +48,11 @@ export default function Page (): ReactElement {
 		}
 	}, [getOrders, getProducts, getOptions, getRooms])
 
-	const updateOrders = useCallback(async (orderIds: OrderType['_id'], status: OrderType['status']) => {
-		const response = await axios.patch(API_URL + '/v1/orders', { orderIds, status })
+	const updateOrders = useCallback(async (orderIds: Array<OrderType['_id']>, status: OrderType['status']) => {
+		const response = await axios.patch(API_URL + '/v1/orders', {
+			orderIds,
+			status
+		})
 		const data = response.data as OrderType[]
 		// Only update the orders that were changed
 		setOrders((prevOrders) => {
