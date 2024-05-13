@@ -14,6 +14,7 @@ export default function Page (): ReactElement {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [roomOrders, setRoomOrders] = useState<Record<RoomType['_id'], OrderTypeWithNames[]>>({})
 
 	const getOrders = useCallback(async () => {
 		const response = await axios.get(API_URL + '/v1/orders')
@@ -81,9 +82,31 @@ export default function Page (): ReactElement {
 		})
 	}, [API_URL, setOrders])
 
+	const groupOrdersByRoom = useCallback(() => {
+		const roomOrders: Record<RoomType['_id'], OrderTypeWithNames[]> = {}
+		ordersWithNames.forEach((order) => {
+			const room = rooms.find((room) => room._id === order.roomId)
+			if (room === undefined) return
+			const roomName = room.name
+			if (roomOrders[roomName] === undefined) {
+				roomOrders[roomName] = []
+			}
+			roomOrders[roomName].push(order)
+		})
+		return roomOrders
+	}, [ordersWithNames, rooms])
+
+	const handleOrderUpdate = useCallback((orderIds: Array<OrderType['_id']>, status: OrderType['status']) => {
+		updateOrders(orderIds, status).catch(console.error)
+	}, [updateOrders])
+
 	useEffect(() => {
 		fetchData().catch(console.error)
 	}, [fetchData])
+
+	useEffect(() => {
+		setRoomOrders(groupOrdersByRoom())
+	}, [setRoomOrders, groupOrdersByRoom])
 
 	useEffect(() => {
 		setOrdersWithNames(addNamesToOrders())
