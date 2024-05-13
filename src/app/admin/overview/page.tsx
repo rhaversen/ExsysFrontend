@@ -113,7 +113,7 @@ export default function Page (): ReactElement {
 		setOrdersWithNames(addNamesToOrders())
 	}, [setOrdersWithNames, addNamesToOrders])
 
-	useInterval(getOrders, 1000 * 60) // Fetch orders every minute
+	useInterval(getOrders, 1000 * 10) // Fetch orders 10 seconds
 	useInterval(getProducts, 1000 * 60 * 60) // Fetch products every hour
 	useInterval(getOptions, 1000 * 60 * 60) // Fetch options every hour
 	useInterval(getRooms, 1000 * 60 * 60) // Fetch rooms every hour
