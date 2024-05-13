@@ -18,7 +18,12 @@ export default function Page (): ReactElement {
 	const [roomOrders, setRoomOrders] = useState<Record<RoomType['_id'], OrderTypeWithNames[]>>({})
 
 	const getOrders = useCallback(async () => {
-		const response = await axios.get(API_URL + '/v1/orders')
+		const fromDate = new Date()
+		fromDate.setHours(0, 0, 0, 0)
+		const toDate = new Date()
+		toDate.setHours(24, 0, 0, 0)
+
+		const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}`)
 		const data = response.data as OrderType[]
 		setOrders(data)
 	}, [API_URL])
