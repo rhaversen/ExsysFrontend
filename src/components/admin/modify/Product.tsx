@@ -33,7 +33,7 @@ const Product = ({
 			...productPatch,
 			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
 		}
-		axios.patch(`${API_URL}/v1/products/${product._id}`, productPatchUTC).then((response) => {
+		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC).then((response) => {
 			onProductPatched(response.data as ProductType)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
@@ -42,7 +42,7 @@ const Product = ({
 	}
 
 	const deleteProduct = (product: ProductType, confirm: boolean): void => {
-		axios.delete(`${API_URL}/v1/products/${product._id}`, {
+		axios.delete(API_URL + `/v1/products/${product._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onProductDeleted(product._id)
