@@ -36,4 +36,5 @@ export interface OrderType {
 	options: Array<{ id: OptionType['_id'], quantity: number }>
 	roomId: RoomType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
+	createdAt: string
 }
