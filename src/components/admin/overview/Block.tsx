@@ -12,10 +12,11 @@ const Block = ({
 	timeBlock: string
 	onOrderUpdate: (orderIds: Array<OrderType['_id']>, status: OrderType['status']) => void
 }): ReactElement => {
-	const [groupedOrders, setGroupedOrders] = useState<Record<string, number>>({})
+	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
+	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
 	const [orderStatus, setOrderStatus] = useState<OrderType['status']>(orders[0].status)
 
-	const countOrders = useCallback(() => {
+	const countOrders = useCallback((orders: OrderTypeWithNames[]) => {
 		const counts: Record<string, number> = {}
 		orders.forEach((order) => {
 			order.products.forEach((product) => {
@@ -32,7 +33,7 @@ const Block = ({
 			})
 		})
 		return counts
-	}, [orders])
+	}, [])
 
 	const determineOrderStatus = useCallback(() => {
 		// Set the status to the most severe status (pending > confirmed > delivered)
@@ -47,8 +48,15 @@ const Block = ({
 	}, [orders])
 
 	useEffect(() => {
-		setGroupedOrders(countOrders())
-	}, [setGroupedOrders, countOrders])
+		const pending = orders.filter((order) => order.status === 'pending')
+		const confirmed = orders.filter((order) => order.status === 'confirmed')
+
+		const pendingOrdersCount = countOrders(pending)
+		const confirmedOrdersCount = countOrders(confirmed)
+
+		setPendingOrders(pendingOrdersCount)
+		setConfirmedOrders(confirmedOrdersCount)
+	}, [orders, setPendingOrders, setConfirmedOrders, countOrders])
 
 	useEffect(() => {
 		setOrderStatus(determineOrderStatus())
@@ -59,14 +67,22 @@ const Block = ({
 	}
 
 	return (
-		<div className="text-slate-800 border-2 border-slate-800 rounded-md mb-2 p-2">
+		<div
+			className={`text-slate-800 border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md mb-2 p-2`}>
 			<h3 className="text-center text-xl ">{timeBlock}</h3>
-			{Object.keys(groupedOrders).toSorted().map((name) => (
-				<p key={name}>
-					{groupedOrders[name]} {name}
-				</p>
-			))}
-			<p>{orderStatus}</p>
+			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
+				const confirmedCount = confirmedOrders[name] ?? 0
+				const pendingCount = pendingOrders[name] ?? 0
+				const totalCount = pendingCount + confirmedCount
+				const diff = pendingCount
+				const diffText = diff > 0 ? ` (+${diff})` : diff < 0 ? ` (-${Math.abs(diff)})` : ''
+
+				return (
+					<p key={name}>
+						{totalCount} {name}{diffText}
+					</p>
+				)
+			})}
 			<div className="flex justify-evenly mt-2">
 				<button onClick={() => {
 					handleOrderUpdate('confirmed')
