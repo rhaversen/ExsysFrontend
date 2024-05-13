@@ -59,8 +59,7 @@ export default function Page (): ReactElement {
 					}}
 				>
 					{products.map((product) => (
-						<div className="min-w-64"
-							key={product._id}>
+						<div className="min-w-64" key={product._id}>
 							<Product
 								options={options}
 								product={product}
@@ -82,8 +81,7 @@ export default function Page (): ReactElement {
 					}}
 				>
 					{options.map((option) => (
-						<div className="min-w-64 h-full"
-							key={option._id}>
+						<div className="min-w-64 h-full" key={option._id}>
 							<Option
 								option={option}
 								onOptionPatched={(option) => {
@@ -104,8 +102,7 @@ export default function Page (): ReactElement {
 					}}
 				>
 					{rooms.map((room) => (
-						<div className="min-w-64"
-							key={room._id}>
+						<div className="min-w-64" key={room._id}>
 							<Room
 								room={room}
 								onRoomPatched={(room) => {
