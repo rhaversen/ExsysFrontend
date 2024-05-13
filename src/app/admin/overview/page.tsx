@@ -4,11 +4,13 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import axios from 'axios'
 import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
+import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [orders, setOrders] = useState<OrderType[]>([])
+	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
@@ -48,6 +50,20 @@ export default function Page (): ReactElement {
 		}
 	}, [getOrders, getProducts, getOptions, getRooms])
 
+	const addNamesToOrders = useCallback(() => {
+		return orders.map((order) => ({
+			...order,
+			products: order.products.map((product) => ({
+				...product,
+				name: products.find((p) => p._id === product.id)?.name ?? 'Ukendt vare'
+			})),
+			options: order.options.map((option) => ({
+				...option,
+				name: options.find((o) => o._id === option.id)?.name ?? 'Ukendt vare'
+			}))
+		}))
+	}, [orders, products, options])
+
 	const updateOrders = useCallback(async (orderIds: Array<OrderType['_id']>, status: OrderType['status']) => {
 		const response = await axios.patch(API_URL + '/v1/orders', {
 			orderIds,
@@ -68,6 +84,10 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		fetchData().catch(console.error)
 	}, [fetchData])
+
+	useEffect(() => {
+		setOrdersWithNames(addNamesToOrders())
+	}, [setOrdersWithNames, addNamesToOrders])
 
 	useInterval(getOrders, 1000 * 60) // Fetch orders every minute
 	useInterval(getProducts, 1000 * 60 * 60) // Fetch products every hour
