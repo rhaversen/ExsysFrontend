@@ -18,7 +18,7 @@ const Room = ({
 	})
 
 	const postRoom = (room: Omit<RoomType, '_id'>): void => {
-		axios.post(`${API_URL}/v1/rooms`, room).then((response) => {
+		axios.post(API_URL + '/v1/rooms', room).then((response) => {
 			onRoomPosted(response.data as RoomType)
 			onClose()
 		}).catch((error) => {

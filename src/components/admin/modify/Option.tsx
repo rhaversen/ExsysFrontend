@@ -22,7 +22,7 @@ const Option = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
-		axios.patch(`${API_URL}/v1/options/${option._id}`, optionPatch).then((response) => {
+		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch).then((response) => {
 			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			console.error('Error updating option:', error)
@@ -31,7 +31,7 @@ const Option = ({
 	}
 
 	const deleteOption = (option: OptionType, confirm: boolean): void => {
-		axios.delete(`${API_URL}/v1/options/${option._id}`, {
+		axios.delete(API_URL + `/v1/options/${option._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onOptionDeleted(option._id)
