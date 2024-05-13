@@ -1,4 +1,4 @@
-import { type OptionType, type ProductType } from './backendDataTypes'
+import { type OptionType, type OrderType, type ProductType } from './backendDataTypes'
 
 export interface CartItemType {
 	id: ProductType['_id'] | OptionType['_id']
@@ -13,4 +13,9 @@ export interface CartItemType {
 export interface CartType {
 	products: Record<ProductType['_id'], number>
 	options: Record<OptionType['_id'], number>
+}
+
+export interface OrderTypeWithNames extends OrderType {
+	products: Array<{ id: ProductType['_id'], name: string, quantity: number }>
+	options: Array<{ id: OptionType['_id'], name: string, quantity: number }>
 }
