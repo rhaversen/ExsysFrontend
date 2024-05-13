@@ -29,3 +29,11 @@ export interface RoomType {
 	name: string
 	description: string
 }
+
+export interface OrderType {
+	_id: string
+	products: Array<{ ProductId: ProductType['_id'], quantity: number }>
+	options: Array<{ OptionId: OptionType['_id'], quantity: number }>
+	room: RoomType
+	status: 'pending' | 'confirmed' | 'delivered'
+}
