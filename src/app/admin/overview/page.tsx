@@ -4,6 +4,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import axios from 'axios'
 import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
+import RoomCol from '@/components/admin/overview/RoomCol'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 
 export default function Page (): ReactElement {
@@ -119,6 +120,17 @@ export default function Page (): ReactElement {
 
 	return (
 		<main>
+			<h1 className="text-center text-3xl font-bold text-slate-800">Ordre Oversigt</h1>
+			<div className="flex flex-row justify-between">
+				{rooms.map((room) => (
+					<RoomCol
+						key={room._id}
+						room={room}
+						orders={roomOrders[room.name] ?? []}
+						onOrderUpdate={handleOrderUpdate}
+					/>
+				))}
+			</div>
 		</main>
 	)
 }
