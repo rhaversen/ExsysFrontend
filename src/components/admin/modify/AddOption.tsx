@@ -20,7 +20,7 @@ const Option = ({
 	})
 
 	const postOption = (option: Omit<OptionType, '_id'>): void => {
-		axios.post(`${API_URL}/v1/options`, option).then((response) => {
+		axios.post(API_URL + '/v1/options', option).then((response) => {
 			onOptionPosted(response.data as OptionType)
 			onClose()
 		}).catch((error) => {

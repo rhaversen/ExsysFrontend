@@ -21,7 +21,7 @@ const Room = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	const patchRoom = (room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
-		axios.patch(`${API_URL}/v1/rooms/${room._id}`, roomPatch).then((response) => {
+		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
 			console.error('Error updating room:', error)
@@ -30,7 +30,7 @@ const Room = ({
 	}
 
 	const deleteRoom = (room: RoomType, confirm: boolean): void => {
-		axios.delete(`${API_URL}/v1/rooms/${room._id}`, {
+		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onRoomDeleted(room._id)
