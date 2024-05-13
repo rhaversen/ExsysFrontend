@@ -32,8 +32,8 @@ export interface RoomType {
 
 export interface OrderType {
 	_id: string
-	products: Array<{ ProductId: ProductType['_id'], quantity: number }>
-	options: Array<{ OptionId: OptionType['_id'], quantity: number }>
+	products: Array<{ id: ProductType['_id'], quantity: number }>
+	options: Array<{ id: OptionType['_id'], quantity: number }>
 	room: RoomType
 	status: 'pending' | 'confirmed' | 'delivered'
 }
