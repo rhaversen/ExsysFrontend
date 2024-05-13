@@ -83,6 +83,11 @@ export default function Page (): ReactElement {
 			const newOrders = [...prevOrders]
 			data.forEach((newOrder) => {
 				const index = newOrders.findIndex((order) => order._id === newOrder._id)
+				if (index === -1) return
+				if (newOrder.status === 'delivered') {
+					newOrders.splice(index, 1)
+					return
+				}
 				newOrders[index] = newOrder
 			})
 			return newOrders
