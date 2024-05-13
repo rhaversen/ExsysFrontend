@@ -14,25 +14,25 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 
 	const getOrders = useCallback(async () => {
-		const response = await axios.get(API_URL + '/orders')
+		const response = await axios.get(API_URL + '/v1/orders')
 		const data = response.data as OrderType[]
 		setOrders(data)
 	}, [API_URL])
 
 	const getProducts = useCallback(async () => {
-		const response = await axios.get(API_URL + '/products')
+		const response = await axios.get(API_URL + '/v1/products')
 		const data = response.data as ProductType[]
 		setProducts(data)
 	}, [API_URL])
 
 	const getOptions = useCallback(async () => {
-		const response = await axios.get(API_URL + '/options')
+		const response = await axios.get(API_URL + '/v1/options')
 		const data = response.data as OptionType[]
 		setOptions(data)
 	}, [API_URL])
 
 	const getRooms = useCallback(async () => {
-		const response = await axios.get(API_URL + '/rooms')
+		const response = await axios.get(API_URL + '/v1/rooms')
 		const data = response.data as RoomType[]
 		setRooms(data)
 	}, [API_URL])
@@ -49,7 +49,7 @@ export default function Page (): ReactElement {
 	}, [getOrders, getProducts, getOptions, getRooms])
 
 	const updateOrders = useCallback(async (orderIds: OrderType['_id'], status: OrderType['status']) => {
-		const response = await axios.patch(API_URL + '/orders', { orderIds, status })
+		const response = await axios.patch(API_URL + '/v1/orders', { orderIds, status })
 		const data = response.data as OrderType[]
 		// Only update the orders that were changed
 		setOrders((prevOrders) => {
