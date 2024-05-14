@@ -28,7 +28,7 @@ const Product = ({
 	const [showOptions, setShowOptions] = useState(false)
 
 	useEffect(() => {
-		// Delete options fron newProduct that are not in options
+		// Delete options from newProduct that are not in options
 		setNewProduct(n => {
 			return {
 				...n,
