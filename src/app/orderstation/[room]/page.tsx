@@ -38,11 +38,15 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
+	const redirectToRoomSelection = useCallback(() => {
+		router.push('/orderstation')
+	}, [router])
+
 	const validateRoomAndRedirect = useCallback(() => {
 		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
-			router.push('/orderstation')
+			redirectToRoomSelection()
 		})
-	}, [API_URL, params.room, router])
+	}, [API_URL, params.room, redirectToRoomSelection])
 
 	// Fetch products and options on mount
 	useEffect(() => {
