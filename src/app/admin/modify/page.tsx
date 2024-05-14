@@ -89,6 +89,12 @@ export default function Page (): ReactElement {
 								}}
 								onOptionDeleted={(id) => {
 									setOptions((options) => options.filter((o) => o._id !== id))
+									setProducts((products) =>
+										products.map((product) => ({
+											...product,
+											options: product.options.filter((option) => option._id !== id)
+										}))
+									)
 								}}
 							/>
 						</div>

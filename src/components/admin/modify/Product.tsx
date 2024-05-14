@@ -1,5 +1,5 @@
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useState, useEffect } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
@@ -7,7 +7,7 @@ import EditingControls from '@/components/admin/modify/ui/EditControls'
 import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 
 const Product = ({
 	product,
@@ -27,6 +27,16 @@ const Product = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
 
+	useEffect(() => {
+		// Delete options fron newProduct that are not in options
+		setNewProduct(n => {
+			return {
+				...n,
+				options: n.options.filter((option) => options.map((option) => option._id).includes(option._id))
+			}
+		})
+	}, [options])
+
 	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productPatchUTC = {
@@ -34,6 +44,8 @@ const Product = ({
 			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
 		}
 		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC).then((response) => {
+			const product = response.data as ProductType
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			onProductPatched(response.data as ProductType)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
@@ -159,7 +171,7 @@ const Product = ({
 	}
 
 	return (
-		<div className={`p-2 m-2 ${isEditing ? 'mp-10' : ''}`}>
+		<div className='p-2 m-2'>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-black">
@@ -197,7 +209,8 @@ const Product = ({
 						onChange={(v: string) => {
 							handleOrderWindowFromHourChange(v)
 						}}
-					/>:
+					/>
+					<div className='px-0.5'>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
 						italic={false}
@@ -207,7 +220,7 @@ const Product = ({
 							handleOrderWindowFromMinuteChange(v)
 						}}
 					/>
-					{' - '}
+					<div className='px-1'>-</div>
 					<EditableField
 						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
 						italic={false}
@@ -216,7 +229,8 @@ const Product = ({
 						onChange={(v: string) => {
 							handleOrderWindowToHourChange(v)
 						}}
-					/>:
+					/>
+					<div className='px-0.5'>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
 						italic={false}
