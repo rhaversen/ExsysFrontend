@@ -40,8 +40,9 @@ const Product = ({
 						{product.orderWindow.to.hour.toString().padStart(2, '0')}:{product.orderWindow.to.minute.toString().padStart(2, '0')}
 					</div>
 					<Image
-						width={200}
-						height={200}
+						width={100}
+						height={100}
+						quality={80}
 						src={`${product.imageURL === undefined || product.imageURL === '' ? '/none.svg' : product.imageURL}`}
 						alt={product.name}
 						className="w-48 h-48 object-cover text-black"
