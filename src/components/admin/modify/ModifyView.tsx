@@ -36,7 +36,7 @@ const ModifyView = (): ReactElement => {
 		const roomsResponse = await axios.get(API_URL + '/v1/rooms')
 		const rooms = roomsResponse.data as RoomType[]
 		setRooms(rooms)
-	}, [API_URL, setProducts, setOptions])
+	}, [API_URL, setProducts, setOptions, setRooms])
 
 	// Fetch products and options on mount
 	useEffect(() => {
