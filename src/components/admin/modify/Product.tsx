@@ -1,5 +1,5 @@
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useState, useEffect } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
@@ -26,6 +26,16 @@ const Product = ({
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
+
+	useEffect(() => {
+		// Delete options fron newProduct that are not in options
+		setNewProduct(n => {
+			return {
+				...n,
+				options: n.options.filter((option) => options.map((option) => option._id).includes(option._id))
+			}
+		})
+	}, [options])
 
 	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
