@@ -27,7 +27,7 @@ const ImageList = ({
 						<button
 							key={imageURL}
 							type="button"
-							className="w-20 h-20 bg-gray-300 rounded-md"
+							className="w-20 h-20 rounded-md"
 							onClick={() => {
 								onSelect(imageURL)
 							}}
@@ -38,7 +38,7 @@ const ImageList = ({
 							<Image
 								width={80}
 								height={80}
-								src={`/productImages/${imageURL}`}
+								src={imageURL}
 								alt={imageURL}
 								className="w-full h-full object-cover"
 							/>
