@@ -133,7 +133,7 @@ const OverviewView = (): ReactElement => {
 		<div>
 			<h1 className="text-center text-3xl font-bold text-slate-800">Ordre Oversigt</h1>
 			<div className="flex flex-row justify-between">
-				{rooms.map((room) => (
+				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
 					<RoomCol
 						key={room._id}
 						room={room}
