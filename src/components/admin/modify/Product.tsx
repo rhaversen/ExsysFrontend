@@ -7,7 +7,7 @@ import EditingControls from '@/components/admin/modify/ui/EditControls'
 import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 
 const Product = ({
 	product,
@@ -34,6 +34,8 @@ const Product = ({
 			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
 		}
 		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC).then((response) => {
+			const product = response.data as ProductType
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			onProductPatched(response.data as ProductType)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
