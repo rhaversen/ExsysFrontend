@@ -83,7 +83,7 @@ const Block = ({
 					</p>
 				)
 			})}
-			<div className="flex justify-evenly mt-2">
+			<div className="mt-2">
 				{orderStatus === 'pending' &&
 					<button type="button" className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
