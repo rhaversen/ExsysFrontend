@@ -39,7 +39,7 @@ const RoomCol = ({
 
 	return (
 		<div className="border-2 border-gray-300 rounded-3xl">
-			<h2 className="text-slate-900 font-bold text-2xl text-center m-2">{room.name}</h2>
+			<h2 className="text-gray-900 font-bold text-2xl text-center m-2">{room.name}</h2>
 			{Object.keys(ordersByTimeBlock).map((timeBlock) => (
 				<Block
 					key={timeBlock}

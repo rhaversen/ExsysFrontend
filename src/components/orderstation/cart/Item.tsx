@@ -26,7 +26,7 @@ const Item = ({
 
 	return (
 		<div className="py-3 shadow-md">
-			<h3 className="font-bold text-black text-center pb-1">
+			<h3 className="font-bold text-gray-800 text-center pb-1">
 				{name}
 			</h3>
 			<div className="flex flex-row items-center justify-between">
@@ -36,7 +36,7 @@ const Item = ({
 					quality={40}
 					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`}
 					alt={name}
-					className="w-12 h-12 object-cover text-black mx-auto"
+					className="w-12 h-12 object-cover text-gray-800 mx-auto"
 					draggable="false"
 					priority // Load image immediately
 				/>
@@ -44,7 +44,7 @@ const Item = ({
 					quantity={quantity}
 					onQuantityChange={handleQuantityChange}
 				/>
-				<p className="italic text-gray-700 w-12 h-12 mx-auto flex items-center justify-center">{price === 0 ? 'Gratis' : `${price * quantity} kr`}</p>
+				<p className="italic text-gray-800 w-12 h-12 mx-auto flex items-center justify-center">{price === 0 ? 'Gratis' : `${price * quantity} kr`}</p>
 			</div>
 		</div>
 	)

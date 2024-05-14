@@ -14,7 +14,7 @@ const ItemList = ({
 	return (
 		<div className="flex flex-row w-screen pr-10 my-auto">
 			<div className="flex flex-col m-5">
-				<h2 className="text-2xl min-w-40 font-bold p-4 text-center text-black">
+				<h2 className="text-2xl min-w-40 font-bold p-4 text-center text-gray-800">
 					{header}
 				</h2>
 				<button

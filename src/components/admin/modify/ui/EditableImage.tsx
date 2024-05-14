@@ -45,7 +45,7 @@ const EditableImage = ({
 					quality={50}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
 					alt={'Item Image'}
-					className="w-40 h-40 object-cover text-black"
+					className="w-40 h-40 object-cover text-gray-800"
 					draggable="false"
 					priority // Load image immediately
 				/>
