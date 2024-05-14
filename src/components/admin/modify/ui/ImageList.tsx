@@ -22,12 +22,13 @@ const ImageList = ({
 			</button>
 			<div
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+				<h3 className='text-black text-center text-2xl font-bold'>Vælg Billede</h3>
 				<div className="flex flex-wrap justify-center gap-4">
 					{ProductImages.map((imageURL) => (
 						<button
 							key={imageURL}
 							type="button"
-							className="w-20 h-20 rounded-md"
+							className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 							onClick={() => {
 								onSelect(imageURL)
 							}}
@@ -36,14 +37,35 @@ const ImageList = ({
 								{'Select image'}
 							</span>
 							<Image
-								width={80}
-								height={80}
+								width={70}
+								height={70}
+								quality={30}
 								src={imageURL}
 								alt={imageURL}
 								className="w-full h-full object-cover"
 							/>
 						</button>
 					))}
+					<button
+						key={'none'}
+						type="button"
+						className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
+						onClick={() => {
+							onSelect('/none.svg')
+						}}
+					>
+						<span className="sr-only">
+							{'Select image'}
+						</span>
+						<Image
+							width={70}
+							height={70}
+							quality={30}
+							src={'/none.svg'}
+							alt={'none'}
+							className="w-full h-full object-cover"
+						/>
+					</button>
 				</div>
 				<button
 					type="button"
