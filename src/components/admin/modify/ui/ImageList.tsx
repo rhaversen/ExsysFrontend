@@ -58,6 +58,9 @@ const ImageList = ({
 							{'Select image'}
 						</span>
 						<Image
+							width={70}
+							height={70}
+							quality={30}
 							src={'/none.svg'}
 							alt={'none'}
 							className="w-full h-full object-cover"
