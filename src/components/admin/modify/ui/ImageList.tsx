@@ -28,7 +28,7 @@ const ImageList = ({
 						<button
 							key={imageURL}
 							type="button"
-							className="w-32 h-32 rounded-md hover:border-2 border-blue-500"
+							className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 							onClick={() => {
 								onSelect(imageURL)
 							}}
@@ -49,7 +49,7 @@ const ImageList = ({
 					<button
 						key={'none'}
 						type="button"
-						className="w-32 h-32 rounded-md hover:border-2 border-blue-500"
+						className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 						onClick={() => {
 							onSelect('/none.svg')
 						}}
