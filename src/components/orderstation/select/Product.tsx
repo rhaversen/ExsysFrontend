@@ -45,7 +45,7 @@ const Product = ({
 						quality={80}
 						src={`${product.imageURL === undefined || product.imageURL === '' ? '/none.svg' : product.imageURL}`}
 						alt={product.name}
-						className="w-48 h-48 object-cover text-black"
+						className="w-64 h-64 object-cover text-black"
 						draggable="false"
 						priority // Load image immediately
 					/>

@@ -28,7 +28,7 @@ const ImageList = ({
 						<button
 							key={imageURL}
 							type="button"
-							className="w-20 h-20 rounded-md"
+							className="w-32 h-32 rounded-md hover:border-2 border-blue-500"
 							onClick={() => {
 								onSelect(imageURL)
 							}}
