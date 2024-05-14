@@ -24,7 +24,7 @@ const ModifyView = (): ReactElement => {
 	const [showAddProduct, setShowAddProduct] = useState(false)
 
 	const fetchProductsOptionsRooms = useCallback(async () => {
-        const optionsResponse = await axios.get(API_URL + '/v1/options')
+		const optionsResponse = await axios.get(API_URL + '/v1/options')
 		const options = optionsResponse.data as OptionType[]
 		setOptions(options)
 		const productsResponse = await axios.get(API_URL + '/v1/products')
