@@ -46,6 +46,23 @@ const ImageList = ({
 							/>
 						</button>
 					))}
+					<button
+						key={'none'}
+						type="button"
+						className="w-32 h-32 rounded-md hover:border-2 border-blue-500"
+						onClick={() => {
+							onSelect('/none.svg')
+						}}
+					>
+						<span className="sr-only">
+							{'Select image'}
+						</span>
+						<Image
+							src={'/none.svg'}
+							alt={'none'}
+							className="w-full h-full object-cover"
+						/>
+					</button>
 				</div>
 				<button
 					type="button"
