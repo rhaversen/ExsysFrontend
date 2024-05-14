@@ -55,7 +55,7 @@ const EditableImage = ({
 						setShowImageList(false)
 					}}
 					onSelect={(imageURL: string) => {
-						setEditingURL('/productImages/' + imageURL)
+						setEditingURL(imageURL)
 						onChange(imageURL)
 						setShowImageList(false)
 					}}
