@@ -85,15 +85,17 @@ const Block = ({
 			})}
 			<div className="flex justify-evenly mt-2">
 				{orderStatus === 'pending' &&
-					<button type='button' className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full" onClick={() => {
-						handleOrderUpdate('confirmed')
-					}}>Marker som læst
+					<button type="button" className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
+						onClick={() => {
+							handleOrderUpdate('confirmed')
+						}}>Marker som læst
 					</button>
 				}
 				{orderStatus === 'confirmed' &&
-					<button type='button' className="rounded bg-orange-500 p-2 hover:bg-orange-600 w-full" onClick={() => {
-						handleOrderUpdate('delivered')
-					}}>Marker som leveret
+					<button type="button" className="rounded bg-orange-500 p-2 hover:bg-orange-600 w-full"
+						onClick={() => {
+							handleOrderUpdate('delivered')
+						}}>Marker som leveret
 					</button>
 				}
 			</div>
