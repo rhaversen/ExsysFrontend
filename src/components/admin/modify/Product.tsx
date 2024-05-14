@@ -209,7 +209,8 @@ const Product = ({
 						onChange={(v: string) => {
 							handleOrderWindowFromHourChange(v)
 						}}
-					/>:
+					/>
+					<div className='px-0.5'>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
 						italic={false}
@@ -219,7 +220,7 @@ const Product = ({
 							handleOrderWindowFromMinuteChange(v)
 						}}
 					/>
-					{' - '}
+					<div className='px-1'>-</div>
 					<EditableField
 						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
 						italic={false}
@@ -228,7 +229,8 @@ const Product = ({
 						onChange={(v: string) => {
 							handleOrderWindowToHourChange(v)
 						}}
-					/>:
+					/>
+					<div className='px-0.5'>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
 						italic={false}
