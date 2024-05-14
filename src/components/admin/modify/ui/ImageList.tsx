@@ -38,7 +38,7 @@ const ImageList = ({
 							<Image
 								width={80}
 								height={80}
-								src={`/productImages/${imageURL}`}
+								src={imageURL}
 								alt={imageURL}
 								className="w-full h-full object-cover"
 							/>
