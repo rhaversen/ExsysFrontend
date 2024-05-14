@@ -24,15 +24,15 @@ const ModifyView = (): ReactElement => {
 	const [showAddProduct, setShowAddProduct] = useState(false)
 
 	const fetchProductsOptionsRooms = useCallback(async () => {
+        const optionsResponse = await axios.get(API_URL + '/v1/options')
+		const options = optionsResponse.data as OptionType[]
+		setOptions(options)
 		const productsResponse = await axios.get(API_URL + '/v1/products')
 		const products = productsResponse.data as ProductType[]
 		products.forEach((product) => {
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 		})
 		setProducts(products)
-		const optionsResponse = await axios.get(API_URL + '/v1/options')
-		const options = optionsResponse.data as OptionType[]
-		setOptions(options)
 		const roomsResponse = await axios.get(API_URL + '/v1/rooms')
 		const rooms = roomsResponse.data as RoomType[]
 		setRooms(rooms)
