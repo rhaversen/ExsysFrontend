@@ -10,6 +10,7 @@ import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [fetching, setFetching] = useState<boolean>(true)
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -48,6 +49,7 @@ const OverviewView = (): ReactElement => {
 	}, [API_URL])
 
 	const fetchData = useCallback(async () => {
+		setFetching(true)
 		try {
 			await getRooms()
 			await getProducts()
@@ -56,6 +58,7 @@ const OverviewView = (): ReactElement => {
 		} catch (error) {
 			console.error(error)
 		}
+		setFetching(false)
 	}, [getOrders, getProducts, getOptions, getRooms])
 
 	const addNamesToOrders = useCallback(() => {
@@ -131,8 +134,9 @@ const OverviewView = (): ReactElement => {
 
 	return (
 		<div>
-			<h1 className="text-center text-3xl font-bold text-slate-800">Ordre Oversigt</h1>
-			<div className="flex flex-row justify-between">
+			{fetching && <p className='flex justify-center p-10 font-bold text-gray-900 text-2xl'>Henter Order...</p>}
+			{orders.length === 0 && !fetching && <p className='flex justify-center p-10 font-bold text-gray-900 text-2xl'>Ingen Ordrer 😊</p>}
+			<div className="flex flex-row flex-wrap justify-evenly">
 				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
 					<RoomCol
 						key={room._id}
