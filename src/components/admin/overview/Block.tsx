@@ -68,7 +68,7 @@ const Block = ({
 
 	return (
 		<div
-		className={`text-gray-800 border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md mb-2 p-2`}>
+			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}>
 			<h3 className="text-center text-xl ">{timeBlock}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
 				const confirmedCount = confirmedOrders[name] ?? 0

@@ -50,7 +50,7 @@ const ModifyView = (): ReactElement => {
 
 	return (
 		<div className="fixed">
-			<div className="flex flex-col h-screen justify-between p-5">
+			<div className="flex flex-col gap-5 p-5">
 				<ItemList
 					header="Produkter"
 					buttonText="Nyt Produkt"
