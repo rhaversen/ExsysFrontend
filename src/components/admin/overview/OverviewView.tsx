@@ -7,7 +7,7 @@ import { useInterval } from 'react-use'
 import RoomCol from '@/components/admin/overview/RoomCol'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 
-export default function Page (): ReactElement {
+const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [orders, setOrders] = useState<OrderType[]>([])
@@ -130,7 +130,7 @@ export default function Page (): ReactElement {
 	useInterval(getRooms, 1000 * 60 * 60) // Fetch rooms every hour
 
 	return (
-		<main>
+		<div>
 			<h1 className="text-center text-3xl font-bold text-slate-800">Ordre Oversigt</h1>
 			<div className="flex flex-row justify-between">
 				{rooms.map((room) => (
@@ -142,6 +142,8 @@ export default function Page (): ReactElement {
 					/>
 				))}
 			</div>
-		</main>
+		</div>
 	)
 }
+
+export default OverviewView

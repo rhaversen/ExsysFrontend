@@ -13,7 +13,7 @@ import AddProduct from '@/components/admin/modify/AddProduct'
 import AddOption from '@/components/admin/modify/AddOption'
 import AddRoom from '@/components/admin/modify/AddRoom'
 
-export default function Page (): ReactElement {
+const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -49,7 +49,7 @@ export default function Page (): ReactElement {
 	useInterval(fetchProductsOptionsRooms, 1000 * 60 * 60) // Fetch products, options and rooms every hour
 
 	return (
-		<main className="fixed">
+		<div className="fixed">
 			<div className="flex flex-col h-screen justify-between p-5">
 				<ItemList
 					header="Produkter"
@@ -153,6 +153,8 @@ export default function Page (): ReactElement {
 					}}
 				/>
 			}
-		</main>
+		</div>
 	)
 }
+
+export default ModifyView
