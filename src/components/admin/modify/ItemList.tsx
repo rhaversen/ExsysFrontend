@@ -25,7 +25,7 @@ const ItemList = ({
 					{buttonText}
 				</button>
 			</div>
-			<div className="no-scrollbar shadow-inner flex flex-row overflow-x-auto flex-1 bg-gray-300 rounded-xl">
+			<div className="no-scrollbar shadow-inner pl-10 flex flex-row overflow-x-auto flex-1 bg-gray-300 rounded-xl">
 				{children}
 			</div>
 		</div>

@@ -31,8 +31,9 @@ const Item = ({
 			</h3>
 			<div className="flex flex-row items-center justify-between">
 				<Image
-					width={80}
-					height={80}
+					width={40}
+					height={40}
+					quality={40}
 					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`}
 					alt={name}
 					className="w-12 h-12 object-cover text-black mx-auto"

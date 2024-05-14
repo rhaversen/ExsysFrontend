@@ -40,8 +40,9 @@ const EditableImage = ({
 					{'Edit Image'}
 				</span>
 				<Image
-					width={200}
-					height={200}
+					width={90}
+					height={90}
+					quality={50}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
 					alt={'Item Image'}
 					className="w-40 h-40 object-cover text-black"
