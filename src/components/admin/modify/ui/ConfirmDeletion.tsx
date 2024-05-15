@@ -27,9 +27,9 @@ const ConfirmDeletion = ({
 				</span>
 			</button>
 			<div className="bg-white rounded-3xl p-10 absolute">
-				<h2 className="text-lg font-bold text-black">{`Er du sikker på du vil slette ${itemName}?`}</h2>
+				<h2 className="text-lg font-bold text-gray-800">{`Er du sikker på du vil slette ${itemName}?`}</h2>
 				<div className="flex items-center justify-center p-4">
-					<label className="text-black gap-2 flex justify-center cursor-pointer">
+					<label className="text-gray-800 gap-2 flex justify-center cursor-pointer">
 						<input
 							type="checkbox"
 							checked={confirmDeletion}

@@ -30,7 +30,7 @@ const CartWindow = ({
 
 	return (
 		<div className="bg-gray-300 h-full flex flex-col">
-			<h2 className="text-2xl font-bold p-4 shadow-md text-center text-black">
+			<h2 className="text-2xl font-bold p-4 shadow-md text-center text-gray-800">
 				{'Din Bestilling'}
 			</h2>
 			{cartIsEmpty

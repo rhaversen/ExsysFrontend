@@ -7,9 +7,10 @@ import { useInterval } from 'react-use'
 import RoomCol from '@/components/admin/overview/RoomCol'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 
-export default function Page (): ReactElement {
+const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [fetching, setFetching] = useState<boolean>(true)
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -48,6 +49,7 @@ export default function Page (): ReactElement {
 	}, [API_URL])
 
 	const fetchData = useCallback(async () => {
+		setFetching(true)
 		try {
 			await getRooms()
 			await getProducts()
@@ -56,6 +58,7 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			console.error(error)
 		}
+		setFetching(false)
 	}, [getOrders, getProducts, getOptions, getRooms])
 
 	const addNamesToOrders = useCallback(() => {
@@ -130,10 +133,12 @@ export default function Page (): ReactElement {
 	useInterval(getRooms, 1000 * 60 * 60) // Fetch rooms every hour
 
 	return (
-		<main>
-			<h1 className="text-center text-3xl font-bold text-slate-800">Ordre Oversigt</h1>
-			<div className="flex flex-row justify-between">
-				{rooms.map((room) => (
+		<div>
+			{fetching && <p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Henter Order...</p>}
+			{orders.length === 0 && !fetching &&
+				<p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Ingen Ordrer 😊</p>}
+			<div className="flex flex-row flex-wrap justify-evenly">
+				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
 					<RoomCol
 						key={room._id}
 						room={room}
@@ -142,6 +147,8 @@ export default function Page (): ReactElement {
 					/>
 				))}
 			</div>
-		</main>
+		</div>
 	)
 }
+
+export default OverviewView

@@ -16,7 +16,7 @@ const OrderConfirmationWindow = ({
 			{orderStatus !== 'loading' &&
 				<button
 					type="button"
-					className="absolute inset-0 w-full h-full text-black"
+					className="absolute inset-0 w-full h-full text-gray-800"
 					onClick={onClose}
 				>
 					<span className="sr-only">
@@ -25,7 +25,7 @@ const OrderConfirmationWindow = ({
 				</button>
 			}
 			<div
-				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black"
+				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-800"
 			>
 				<h2 className="text-2xl font-bold mb-4 text-center">
 					{orderStatus === 'success' && 'Tak For Din Bestilling'}

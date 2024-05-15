@@ -62,7 +62,7 @@ const Room = ({
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
 					<div className="flex flex-col items-center justify-center">
-						<div className="font-bold p-2 text-black">
+						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								text={room.name}
 								italic={false}
@@ -73,7 +73,7 @@ const Room = ({
 								}}
 							/>
 						</div>
-						<div className="text-gray-700">
+						<div className="text-gray-800">
 							<EditableField
 								text={room.description}
 								italic={true}

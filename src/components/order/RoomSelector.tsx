@@ -24,9 +24,9 @@ const RoomSelector = ({
 				value={selectedRoom}
 				onChange={handleRoomChange}
 			>
-				<option value="" disabled className="bg-white text-black">{'Vælg rum'}</option>
+				<option value="" disabled className="bg-white text-gray-800">{'Vælg rum'}</option>
 				{rooms.map((room) => (
-					<option key={room._id} value={room._id} className="bg-white text-black">
+					<option key={room._id} value={room._id} className="bg-white text-gray-800">
 						{room.name}
 					</option>
 				))}

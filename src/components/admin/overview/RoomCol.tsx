@@ -38,18 +38,16 @@ const RoomCol = ({
 	}, [setOrdersByTimeBlock, groupOrdersByTimeBlock])
 
 	return (
-		<div className="w-full h-full border-2 border-gray-300 rounded-3xl">
-			<h2 className="text-slate-900 font-bold text-2xl text-center m-2">{room.name}</h2>
-			<div className="flex flex-col m-2">
-				{Object.keys(ordersByTimeBlock).map((timeBlock) => (
-					<Block
-						key={timeBlock}
-						timeBlock={timeBlock}
-						orders={ordersByTimeBlock[timeBlock]}
-						onOrderUpdate={onOrderUpdate}
-					/>
-				))}
-			</div>
+		<div className="m-2 h-full border-2 border-gray-400 rounded-3xl">
+			<h2 className="text-gray-800 font-bold text-2xl text-center m-2">{room.name}</h2>
+			{Object.keys(ordersByTimeBlock).map((timeBlock) => (
+				<Block
+					key={timeBlock}
+					timeBlock={timeBlock}
+					orders={ordersByTimeBlock[timeBlock]}
+					onOrderUpdate={onOrderUpdate}
+				/>
+			))}
 		</div>
 	)
 }

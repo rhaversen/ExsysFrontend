@@ -35,7 +35,7 @@ export default function Page (): ReactElement {
 
 	return (
 		<main className="flex flex-col justify-center items-center h-screen">
-			<h1 className="m-10 p-0 text-center text-black text-4xl">Vælg et rum</h1>
+			<h1 className="m-10 p-0 text-center text-gray-800 text-4xl">Vælg et rum</h1>
 			<div className="flex flex-wrap justify-center items-center p-20">
 				{rooms.map((room) => (
 					<Room
