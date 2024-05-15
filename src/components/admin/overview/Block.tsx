@@ -105,7 +105,9 @@ const Block = ({
 					<button
 						type="button"
 						className="absolute inset-0 w-full h-full"
-						onClick={() => { setShowConfirmDelivered(false) }}
+						onClick={() => {
+							setShowConfirmDelivered(false)
+						}}
 					>
 						<span className="sr-only">
 							{'Close'}
@@ -118,14 +120,18 @@ const Block = ({
 							<button
 								type="button"
 								className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
-								onClick={() => { setShowConfirmDelivered(false) }}
+								onClick={() => {
+									setShowConfirmDelivered(false)
+								}}
 							>
 								{'Annuller'}
 							</button>
 							<button
 								type="button"
 								className="bg-orange-500 hover:bg-orange-600 text-white rounded-md py-2 px-4"
-								onClick={() => { handleOrderUpdate('delivered') }}
+								onClick={() => {
+									handleOrderUpdate('delivered')
+								}}
 							>
 								{'Marker som leveret'}
 							</button>
