@@ -14,7 +14,7 @@ const QuantityAdjuster = ({
 		<div
 			className={`inline-flex items-center border-2 px-1 py-1 rounded-full
 			${disabled
-			? 'border-gray-400'
+			? 'border-gray-500'
 			: 'border-blue-500'}
 				`}
 		>
@@ -31,7 +31,7 @@ const QuantityAdjuster = ({
 				</label>
 				<input
 					id="quantityInput"
-					className={`w-16 bg-transparent text-center text-black select-all
+					className={`w-16 bg-transparent text-center text-gray-800 select-all
 					${disabled
 			? 'text-gray-500'
 			: 'text-blue-500'}`

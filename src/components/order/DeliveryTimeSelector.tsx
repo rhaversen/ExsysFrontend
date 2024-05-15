@@ -46,7 +46,7 @@ const DeliveryTimeSelector = ({
 			>
 				{options.map((date) => {
 					return (
-						<option key={date.toISOString()} value={date.toISOString()} className="bg-white text-black">
+						<option key={date.toISOString()} value={date.toISOString()} className="bg-white text-gray-800">
 							{formatTime(date)}
 						</option>
 					)

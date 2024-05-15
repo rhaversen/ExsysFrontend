@@ -163,7 +163,7 @@ const AddProduct = ({
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
 					<div className="flex flex-row items-center justify-center">
-						<div className="font-bold p-2 text-black">
+						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								text={product.name}
 								italic={false}
@@ -174,7 +174,7 @@ const AddProduct = ({
 								}}
 							/>
 						</div>
-						<div className="flex flex-row italic items-center text-gray-700">
+						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
 								text={product.price.toString()}
 								italic={true}
@@ -189,7 +189,7 @@ const AddProduct = ({
 							</div>
 						</div>
 					</div>
-					<div className="flex flex-row text-gray-700">
+					<div className="flex flex-row text-gray-800">
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
 							italic={false}

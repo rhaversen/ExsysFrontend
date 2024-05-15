@@ -81,7 +81,7 @@ const Option = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-row items-center justify-center">
-					<div className="font-bold p-2 text-black">
+					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newOption.name}
 							italic={false}
@@ -92,7 +92,7 @@ const Option = ({
 							}}
 						/>
 					</div>
-					<div className="flex flex-row italic items-center text-gray-700">
+					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
 							text={newOption.price.toString()}
 							italic={true}
