@@ -15,6 +15,7 @@ const Block = ({
 	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
 	const [orderStatus, setOrderStatus] = useState<OrderType['status']>(orders[0].status)
+	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
 
 	const countOrders = useCallback((orders: OrderTypeWithNames[]) => {
 		const counts: Record<string, number> = {}
@@ -68,7 +69,7 @@ const Block = ({
 
 	return (
 		<div
-			className={`text-slate-800 border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md mb-2 p-2`}>
+			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}>
 			<h3 className="text-center text-xl ">{timeBlock}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
 				const confirmedCount = confirmedOrders[name] ?? 0
@@ -83,7 +84,7 @@ const Block = ({
 					</p>
 				)
 			})}
-			<div className="flex justify-evenly mt-2">
+			<div className="mt-2">
 				{orderStatus === 'pending' &&
 					<button type="button" className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
@@ -94,11 +95,52 @@ const Block = ({
 				{orderStatus === 'confirmed' &&
 					<button type="button" className="rounded bg-orange-500 p-2 hover:bg-orange-600 w-full"
 						onClick={() => {
-							handleOrderUpdate('delivered')
+							setShowConfirmDelivered(true)
 						}}>Marker som leveret
 					</button>
 				}
 			</div>
+			{showConfirmDelivered &&
+				<div className='fixed inset-0 flex items-center justify-center bg-black/50 z-10'>
+					<button
+						type="button"
+						className="absolute inset-0 w-full h-full"
+						onClick={() => {
+							setShowConfirmDelivered(false)
+						}}
+					>
+						<span className="sr-only">
+							{'Close'}
+						</span>
+					</button>
+					<div className="absolute bg-white rounded-3xl p-10">
+						<h2 className="text-lg text-center font-bold text-gray-800">{'Er du sikker på du vil markere ordren som leveret?'}</h2>
+						<h3 className="text-md text-center font-bold text-gray-800">{'Denne handling kan ikke gøres om'}</h3>
+						<div className="flex justify-center pt-5 gap-4">
+							<button
+								type="button"
+								className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
+								onClick={() => {
+									setShowConfirmDelivered(false)
+								}}
+							>
+								{'Annuller'}
+							</button>
+							<button
+								type="button"
+								className="bg-orange-500 hover:bg-orange-600 text-white rounded-md py-2 px-4"
+								onClick={() => {
+									handleOrderUpdate('delivered')
+								}}
+							>
+								{'Marker som leveret'}
+							</button>
+
+						</div>
+					</div>
+
+				</div>
+			}
 		</div>
 	)
 }

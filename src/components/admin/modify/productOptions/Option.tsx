@@ -12,7 +12,7 @@ const Option = ({
 	onDelete: (v: OptionType) => void
 }): ReactElement => {
 	return (
-		<div className="flex items-center justify-between w-auto bg-gray-200 text-black m-1 rounded-full px-2 py-1">
+		<div className="flex items-center justify-between w-auto bg-gray-200 text-gray-800 m-1 rounded-full px-2 py-1">
 			<p className="text-center text-sm font-semibold">{option.name}</p>
 			{editable && (
 				<button

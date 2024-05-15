@@ -30,12 +30,12 @@ const Product = ({
 		<div
 			className={`p-10 mx-auto shadow-md flex flex-row items-center space-x-5 ${disabled
 				? 'text-gray-500 bg-gray-400 bg-opacity-50'
-				: 'text-black'
+				: 'text-gray-800'
 			}`}
 		>
 			<div className="ml-10 flex-grow">
 				<h2 className="text-xl font-semibold">{name}</h2>
-				<p className="text-gray-600 mt-2 text-sm">
+				<p className="text-gray-800 mt-2 text-sm">
 					{orderWindow.from.hour.toString().padStart(2, '0')}:{orderWindow.from.minute.toString().padStart(2, '0')}
 					{' - '}
 					{orderWindow.to.hour.toString().padStart(2, '0')}:{orderWindow.to.minute.toString().padStart(2, '0')}

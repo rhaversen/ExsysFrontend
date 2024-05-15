@@ -25,6 +25,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading'>('loading')
 	const [price, setPrice] = useState(0)
+	const [roomName, setRoomName] = useState('')
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products')
@@ -38,11 +39,15 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
+	const redirectToRoomSelection = useCallback(() => {
+		router.push('/orderstation')
+	}, [router])
+
 	const validateRoomAndRedirect = useCallback(() => {
 		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
-			router.push('/orderstation')
+			redirectToRoomSelection()
 		})
-	}, [API_URL, params.room, router])
+	}, [API_URL, params.room, redirectToRoomSelection])
 
 	// Fetch products and options on mount
 	useEffect(() => {
@@ -72,6 +77,16 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		)
 		setPrice(price)
 	}, [cart, options, products])
+
+	// Get room name
+	useEffect(() => {
+		axios.get(API_URL + '/v1/rooms/' + params.room).then((response) => {
+			const room = response.data as RoomType
+			setRoomName(room.name)
+		}).catch((error) => {
+			console.error('Error fetching room name:', error)
+		})
+	}, [API_URL, params.room])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
@@ -141,6 +156,15 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		<main>
 			<div className="flex h-screen">
 				<div className="flex-1 overflow-y-auto">
+					<div className='flex flex-row justify-center p-1'>
+						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + roomName}</h1>
+						<button onClick={redirectToRoomSelection}
+							className="ml-2 px-2 text-decoration-line: underline text-blue-500 rounded-md"
+							type='button'
+						>
+							Skift Rum
+						</button>
+					</div>
 					<SelectionWindow
 						products={products}
 						handleCartChange={handleCartChange}

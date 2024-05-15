@@ -12,9 +12,13 @@ import Room from '@/components/admin/modify/Room'
 import AddProduct from '@/components/admin/modify/AddProduct'
 import AddOption from '@/components/admin/modify/AddOption'
 import AddRoom from '@/components/admin/modify/AddRoom'
+import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 
-export default function Page (): ReactElement {
+const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+	const views = ['Produkter', 'Tilvalg', 'Rum']
+	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
@@ -24,19 +28,19 @@ export default function Page (): ReactElement {
 	const [showAddProduct, setShowAddProduct] = useState(false)
 
 	const fetchProductsOptionsRooms = useCallback(async () => {
+		const optionsResponse = await axios.get(API_URL + '/v1/options')
+		const options = optionsResponse.data as OptionType[]
+		setOptions(options)
 		const productsResponse = await axios.get(API_URL + '/v1/products')
 		const products = productsResponse.data as ProductType[]
 		products.forEach((product) => {
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 		})
 		setProducts(products)
-		const optionsResponse = await axios.get(API_URL + '/v1/options')
-		const options = optionsResponse.data as OptionType[]
-		setOptions(options)
 		const roomsResponse = await axios.get(API_URL + '/v1/rooms')
 		const rooms = roomsResponse.data as RoomType[]
 		setRooms(rooms)
-	}, [API_URL, setProducts, setOptions])
+	}, [API_URL, setProducts, setOptions, setRooms])
 
 	// Fetch products and options on mount
 	useEffect(() => {
@@ -49,10 +53,17 @@ export default function Page (): ReactElement {
 	useInterval(fetchProductsOptionsRooms, 1000 * 60 * 60) // Fetch products, options and rooms every hour
 
 	return (
-		<main className="fixed">
-			<div className="flex flex-col h-screen justify-between p-5">
+		<div>
+			<ViewSelectionBar
+				subBar={true}
+				views={views}
+				selectedView={selectedView}
+				setSelectedView={setSelectedView}
+			/>
+			{selectedView === null &&
+				<p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Vælg en kategori</p>}
+			{selectedView === 'Produkter' &&
 				<ItemList
-					header="Produkter"
 					buttonText="Nyt Produkt"
 					onAdd={() => {
 						setShowAddProduct(true)
@@ -73,8 +84,9 @@ export default function Page (): ReactElement {
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Tilvalg' &&
 				<ItemList
-					header="Tilvalg"
 					buttonText="Nyt Tilvalg"
 					onAdd={() => {
 						setShowAddOption(true)
@@ -100,8 +112,9 @@ export default function Page (): ReactElement {
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Rum' &&
 				<ItemList
-					header="Rum"
 					buttonText="Nyt Rum"
 					onAdd={() => {
 						setShowAddRoom(true)
@@ -121,7 +134,7 @@ export default function Page (): ReactElement {
 						</div>
 					))}
 				</ItemList>
-			</div>
+			}
 			{showAddProduct &&
 				<AddProduct
 					options={options}
@@ -153,6 +166,8 @@ export default function Page (): ReactElement {
 					}}
 				/>
 			}
-		</main>
+		</div>
 	)
 }
+
+export default ModifyView

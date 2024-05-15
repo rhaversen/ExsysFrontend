@@ -1,5 +1,5 @@
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState, useEffect } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
@@ -28,7 +28,7 @@ const Product = ({
 	const [showOptions, setShowOptions] = useState(false)
 
 	useEffect(() => {
-		// Delete options fron newProduct that are not in options
+		// Delete options from newProduct that are not in options
 		setNewProduct(n => {
 			return {
 				...n,
@@ -174,7 +174,7 @@ const Product = ({
 		<div className='p-2 m-2'>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-row items-center justify-center">
-					<div className="font-bold p-2 text-black">
+					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newProduct.name}
 							italic={false}
@@ -185,7 +185,7 @@ const Product = ({
 							}}
 						/>
 					</div>
-					<div className="flex flex-row italic items-center text-gray-700">
+					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
 							text={newProduct.price.toString()}
 							italic={true}
@@ -200,7 +200,7 @@ const Product = ({
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-row text-gray-700">
+				<div className="flex flex-row text-gray-800">
 					<EditableField
 						text={newProduct.orderWindow.from.hour.toString().padStart(2, '0')}
 						italic={false}
