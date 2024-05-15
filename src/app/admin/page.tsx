@@ -12,6 +12,7 @@ export default function Page (): ReactElement {
 	return (
 		<main>
 			<ViewSelectionBar
+				subBar={false}
 				views={views}
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
