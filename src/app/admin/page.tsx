@@ -6,7 +6,7 @@ import OverviewView from '@/components/admin/overview/OverviewView'
 import ModifyView from '@/components/admin/modify/ModifyView'
 
 export default function Page (): ReactElement {
-	const views = ['Ordre Oversigt', 'Rediger Produkter']
+	const views = ['Ordre Oversigt', 'Rediger Katalog']
 	const [selectedView, setSelectedView] = useState('Ordre Oversigt')
 
 	return (
@@ -18,7 +18,7 @@ export default function Page (): ReactElement {
 				setSelectedView={setSelectedView}
 			/>
 			{selectedView === 'Ordre Oversigt' && <OverviewView />}
-			{selectedView === 'Rediger Produkter' && <ModifyView />}
+			{selectedView === 'Rediger Katalog' && <ModifyView />}
 		</main>
 	)
 }
