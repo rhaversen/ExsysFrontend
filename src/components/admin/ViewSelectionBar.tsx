@@ -8,7 +8,7 @@ const ViewSelectionBar = ({
 }: {
 	subBar: boolean
 	views: string[]
-	selectedView: string
+	selectedView: string | null
 	setSelectedView: (view: string) => void
 
 }): ReactElement => {
