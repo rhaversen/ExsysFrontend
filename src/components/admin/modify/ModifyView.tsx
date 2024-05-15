@@ -12,9 +12,13 @@ import Room from '@/components/admin/modify/Room'
 import AddProduct from '@/components/admin/modify/AddProduct'
 import AddOption from '@/components/admin/modify/AddOption'
 import AddRoom from '@/components/admin/modify/AddRoom'
+import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 
 const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+	const views = ['Produkter', 'Tilvalg', 'Rum']
+	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
@@ -49,10 +53,16 @@ const ModifyView = (): ReactElement => {
 	useInterval(fetchProductsOptionsRooms, 1000 * 60 * 60) // Fetch products, options and rooms every hour
 
 	return (
-		<div className="fixed">
-			<div className="flex flex-col gap-5 p-5">
+		<div>
+			<ViewSelectionBar
+				subBar={true}
+				views={views}
+				selectedView={selectedView}
+				setSelectedView={setSelectedView}
+			/>
+			{selectedView === null && <p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Vælg en kategori</p>}
+			{selectedView === 'Produkter' &&
 				<ItemList
-					header="Produkter"
 					buttonText="Nyt Produkt"
 					onAdd={() => {
 						setShowAddProduct(true)
@@ -73,8 +83,9 @@ const ModifyView = (): ReactElement => {
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Tilvalg' &&
 				<ItemList
-					header="Tilvalg"
 					buttonText="Nyt Tilvalg"
 					onAdd={() => {
 						setShowAddOption(true)
@@ -100,8 +111,9 @@ const ModifyView = (): ReactElement => {
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Rum' &&
 				<ItemList
-					header="Rum"
 					buttonText="Nyt Rum"
 					onAdd={() => {
 						setShowAddRoom(true)
@@ -121,7 +133,7 @@ const ModifyView = (): ReactElement => {
 						</div>
 					))}
 				</ItemList>
-			</div>
+			}
 			{showAddProduct &&
 				<AddProduct
 					options={options}
