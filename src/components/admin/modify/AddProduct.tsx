@@ -42,7 +42,9 @@ const AddProduct = ({
 			orderWindow: convertOrderWindowToUTC(product.orderWindow)
 		}
 		axios.post(API_URL + '/v1/products', productUTC).then((response) => {
-			onProductPosted(response.data as ProductType)
+			const product = response.data as ProductType
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating product:', error)
