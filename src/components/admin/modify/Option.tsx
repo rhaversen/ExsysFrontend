@@ -5,6 +5,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Option = ({
 	option,
@@ -17,6 +18,7 @@ const Option = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [isEditing, setIsEditing] = useState(false)
 	const [newOption, setNewOption] = useState<OptionType>(option)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -27,6 +29,7 @@ const Option = ({
 		}).catch((error) => {
 			console.error('Error updating option:', error)
 			setNewOption(option)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -38,6 +41,7 @@ const Option = ({
 		}).catch((error) => {
 			console.error('Error deleting option:', error)
 			setNewOption(option)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -136,6 +140,14 @@ const Option = ({
 					/>
 				}
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

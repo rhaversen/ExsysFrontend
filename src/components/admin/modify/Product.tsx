@@ -8,6 +8,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Product = ({
 	product,
@@ -22,6 +23,7 @@ const Product = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [isEditing, setIsEditing] = useState(false)
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -50,6 +52,7 @@ const Product = ({
 		}).catch((error) => {
 			console.error('Error updating product:', error)
 			setNewProduct(product)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -61,6 +64,7 @@ const Product = ({
 		}).catch((error) => {
 			console.error('Error deleting product:', error)
 			setNewProduct(product)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -305,6 +309,14 @@ const Product = ({
 					/>
 				}
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

@@ -4,6 +4,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Room = ({
 	room,
@@ -16,6 +17,7 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [isEditing, setIsEditing] = useState(false)
 	const [newRoom, setNewRoom] = useState<RoomType>(room)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -26,6 +28,7 @@ const Room = ({
 		}).catch((error) => {
 			console.error('Error updating room:', error)
 			setNewRoom(room)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -37,6 +40,7 @@ const Room = ({
 		}).catch((error) => {
 			console.error('Error deleting room:', error)
 			setNewRoom(room)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -113,6 +117,14 @@ const Room = ({
 						setShowDeleteConfirmation(false)
 						handleDeleteRoom(confirm)
 					}}
+				/>
+			}
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
 				/>
 			}
 		</div>
