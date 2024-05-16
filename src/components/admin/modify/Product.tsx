@@ -48,7 +48,7 @@ const Product = ({
 		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC).then((response) => {
 			const product = response.data as ProductType
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			onProductPatched(response.data as ProductType)
+			onProductPatched(product)
 		}).catch((error) => {
 			console.error('Error updating product:', error)
 			setNewProduct(product)
