@@ -175,7 +175,7 @@ const Product = ({
 	}
 
 	return (
-		<div className='p-2 m-2'>
+		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">

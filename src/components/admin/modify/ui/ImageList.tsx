@@ -22,7 +22,7 @@ const ImageList = ({
 			</button>
 			<div
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-				<h3 className='text-gray-800 text-center text-2xl font-bold'>Vælg Billede</h3>
+				<h3 className="text-gray-800 text-center text-2xl font-bold">Vælg Billede</h3>
 				<div className="flex flex-wrap justify-center gap-4">
 					{ProductImages.map((imageURL) => (
 						<button

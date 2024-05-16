@@ -11,7 +11,7 @@ const ItemList = ({
 }): ReactElement => {
 	return (
 		<div>
-			<div className='flex justify-center'>
+			<div className="flex justify-center">
 				<button
 					type="button"
 					className="w-1/4 m-5 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
