@@ -6,6 +6,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const AddProduct = ({
 	options,
@@ -18,6 +19,7 @@ const AddProduct = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [product, setProduct] = useState<Omit<ProductType, '_id'>>({
 		name: '',
 		price: 0,
@@ -48,6 +50,7 @@ const AddProduct = ({
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating product:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -289,6 +292,14 @@ const AddProduct = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

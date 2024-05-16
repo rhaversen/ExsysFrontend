@@ -2,6 +2,7 @@ import { type RoomType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Room = ({
 	onRoomPosted,
@@ -12,6 +13,7 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
 		name: '',
 		description: ''
@@ -23,6 +25,7 @@ const Room = ({
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating room:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -103,6 +106,14 @@ const Room = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

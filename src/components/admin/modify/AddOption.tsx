@@ -3,6 +3,7 @@ import React, { type ReactElement, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Option = ({
 	onOptionPosted,
@@ -13,6 +14,7 @@ const Option = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
 		name: '',
 		price: 0,
@@ -25,6 +27,7 @@ const Option = ({
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating option:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -125,6 +128,14 @@ const Option = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }
