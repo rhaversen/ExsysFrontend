@@ -15,7 +15,7 @@ const Product = ({
 		<div className="p-2 mx-auto">
 			<div className="relative">
 				{disabled &&
-					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded" />
+					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded"/>
 				}
 				<button
 					type="button"
