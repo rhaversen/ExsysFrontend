@@ -5,7 +5,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const AddProduct = ({
