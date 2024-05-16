@@ -35,7 +35,7 @@ const EditableField = ({
 				/>
 			}
 			{!editable &&
-				<p className={`${italic ? 'italic' : ''} p-0 m-0 text-center border-0 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? 'border-green-500 hover:border-green-600 focus:border-green-700' : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}>
+				<p className={`${italic ? 'italic' : ''} p-0 m-0 text-center border-0 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto border-blue-500 hover:border-blue-600 focus:border-blue-700`}>
 					{text}
 				</p>
 			}
