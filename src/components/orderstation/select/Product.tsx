@@ -15,7 +15,7 @@ const Product = ({
 		<div className="p-2 mx-auto">
 			<div className="relative">
 				{disabled &&
-					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded" />
+					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded"/>
 				}
 				<button
 					type="button"
@@ -36,7 +36,7 @@ const Product = ({
 					</div>
 					<div className={`${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
 						{product.orderWindow.from.hour.toString().padStart(2, '0')}:{product.orderWindow.from.minute.toString().padStart(2, '0')}
-						{' - '}
+						{' — '}
 						{product.orderWindow.to.hour.toString().padStart(2, '0')}:{product.orderWindow.to.minute.toString().padStart(2, '0')}
 					</div>
 					<Image

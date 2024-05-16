@@ -101,7 +101,7 @@ const Block = ({
 				}
 			</div>
 			{showConfirmDelivered &&
-				<div className='fixed inset-0 flex items-center justify-center bg-black/50 z-10'>
+				<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
 					<button
 						type="button"
 						className="absolute inset-0 w-full h-full"

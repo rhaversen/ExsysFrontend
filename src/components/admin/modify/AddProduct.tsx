@@ -1,11 +1,12 @@
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const AddProduct = ({
 	options,
@@ -18,6 +19,7 @@ const AddProduct = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [product, setProduct] = useState<Omit<ProductType, '_id'>>({
 		name: '',
 		price: 0,
@@ -34,6 +36,23 @@ const AddProduct = ({
 		options: []
 	})
 	const [showOptions, setShowOptions] = useState(false)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const postProduct = (product: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
@@ -42,10 +61,13 @@ const AddProduct = ({
 			orderWindow: convertOrderWindowToUTC(product.orderWindow)
 		}
 		axios.post(API_URL + '/v1/products', productUTC).then((response) => {
-			onProductPosted(response.data as ProductType)
+			const product = response.data as ProductType
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating product:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -167,10 +189,20 @@ const AddProduct = ({
 							<EditableField
 								text={product.name}
 								italic={false}
+								validations={[{
+									validate: (v: string) => v.length > 0,
+									message: 'Navn skal udfyldes'
+								}, {
+									validate: (v: string) => v.length <= 15,
+									message: 'Navn må maks være 15 tegn'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('name', v)
 								}}
 							/>
 						</div>
@@ -178,10 +210,20 @@ const AddProduct = ({
 							<EditableField
 								text={product.price.toString()}
 								italic={true}
+								validations={[{
+									validate: (v: string) => !isNaN(Number(v)),
+									message: 'Pris skal være et tal'
+								}, {
+									validate: (v: string) => Number(v) >= 0,
+									message: 'Pris skal være positiv'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handlePriceChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('price', v)
 								}}
 							/>
 							<div className="pl-1">
@@ -193,38 +235,66 @@ const AddProduct = ({
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
 							italic={false}
+							validations={[{
+								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+								message: 'Time skal være mellem 0 og 24'
+							}]}
 							editable={true}
 							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowFromHourChange(v)
 							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('fromHour', v)
+							}}
 						/>:
 						<EditableField
 							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
 							italic={false}
+							validations={[{
+								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+								message: 'Minutter skal være mellem 0 og 60'
+							}]}
 							editable={true}
 							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowFromMinuteChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('fromMinute', v)
 							}}
 						/>
 						{' - '}
 						<EditableField
 							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
 							italic={false}
+							validations={[{
+								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+								message: 'Time skal være mellem 0 og 24'
+							}]}
 							editable={true}
 							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowToHourChange(v)
 							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('toHour', v)
+							}}
 						/>:
 						<EditableField
 							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
 							italic={false}
+							validations={[{
+								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+								message: 'Minutter skal være mellem 0 og 60'
+							}]}
 							editable={true}
 							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowToMinuteChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('toMinute', v)
 							}}
 						/>
 					</div>
@@ -273,6 +343,7 @@ const AddProduct = ({
 				<div className="flex flex-row justify-center gap-4">
 					<button
 						type="button"
+						disabled={!formIsValid}
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
 						onClick={handleCancelPost}
 					>
@@ -287,6 +358,14 @@ const AddProduct = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

@@ -3,12 +3,14 @@ import Image from 'next/image'
 
 const EditingControls = ({
 	isEditing,
+	formIsValid,
 	setIsEditing,
 	handleUndoEdit,
 	handleCompleteEdit,
 	setShowDeleteConfirmation
 }: {
 	isEditing: boolean
+	formIsValid: boolean
 	setIsEditing: (isEditing: boolean) => void
 	handleUndoEdit: () => void
 	handleCompleteEdit: () => void
@@ -47,20 +49,32 @@ const EditingControls = ({
 						alt="Undo"
 					/>
 				</button>
-				<button
-					onClick={handleCompleteEdit}
-					type="button"
-					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:rotate-12 hover:scale-125"
-				>
-					<span className="sr-only">Complete changes</span>
-					<Image
-						width={40}
-						height={40}
-						className="w-full h-full"
-						src="/admin/modify/checkmark.svg"
-						alt="Accept"
-					/>
-				</button>
+				<div className="w-10 h-10 relative">
+					{!formIsValid && (
+						<Image
+							width={40}
+							height={40}
+							className="absolute top-0 left-0 w-full h-full z-10"
+							src="/none.svg"
+							alt="Invalid form"
+						/>
+					)}
+					<button
+						onClick={handleCompleteEdit}
+						type="button"
+						disabled={!formIsValid}
+						className={`w-full h-full place-self-center transition-transform duration-300 transform ${formIsValid ? 'hover:rotate-12 hover:scale-125' : 'scale-90'}`}
+					>
+						<span className="sr-only">Complete changes</span>
+						<Image
+							width={40}
+							height={40}
+							className="w-full h-full"
+							src="/admin/modify/checkmark.svg"
+							alt="Accept"
+						/>
+					</button>
+				</div>
 			</div>
 		)
 	} else {

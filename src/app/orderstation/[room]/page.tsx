@@ -156,11 +156,11 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		<main>
 			<div className="flex h-screen">
 				<div className="flex-1 overflow-y-auto">
-					<div className='flex flex-row justify-center p-1'>
+					<div className="flex flex-row justify-center p-1">
 						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + roomName}</h1>
 						<button onClick={redirectToRoomSelection}
 							className="ml-2 px-2 text-decoration-line: underline text-blue-500 rounded-md"
-							type='button'
+							type="button"
 						>
 							Skift Rum
 						</button>
