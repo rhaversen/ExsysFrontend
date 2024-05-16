@@ -19,24 +19,23 @@ const ErrorWindow = ({
 		setTimeout(() => {
 			onClose()
 		}, errorBounceIn)
-	}, [onClose])
+	}, [onClose, setShowError])
 
 	const handleStartTimeout = useCallback((): void => {
+		setTimeoutAnimation(true)
 		const timeoutId = setTimeout(handleClose, timeOut)
 		setTimeOutId(timeoutId)
-		setTimeoutAnimation(true)
 	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
 
 	const handleStopTimeout = useCallback((): void => {
-		clearTimeout(timeOutId)
 		setTimeoutAnimation(false)
+		clearTimeout(timeOutId)
 	}, [timeOutId, setTimeoutAnimation])
 
 	useEffect(() => {
-		handleStartTimeout()
 		setShowError(true)
-		setTimeoutAnimation(true)
-	}, [handleStartTimeout, setShowError, setTimeoutAnimation])
+		handleStartTimeout()
+	}, [handleStartTimeout, setShowError])
 
 	return (
 		<div
@@ -58,7 +57,7 @@ const ErrorWindow = ({
 				<button
 					type="button"
 					className="text-3xl p-3"
-					onClick={onClose}
+					onClick={handleClose}
 				>
 					X
 				</button>
