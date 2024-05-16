@@ -21,31 +21,32 @@ const ErrorWindow = ({
 		}, errorBounceIn)
 	}, [onClose])
 
-	const handleMouseLeave = useCallback((): void => {
+	const handleStartTimeout = useCallback((): void => {
 		const timeoutId = setTimeout(handleClose, timeOut)
 		setTimeOutId(timeoutId)
 		setTimeoutAnimation(true)
 	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
 
-	const handleMouseEnter = useCallback((): void => {
+	const handleStopTimeout = useCallback((): void => {
 		clearTimeout(timeOutId)
 		setTimeoutAnimation(false)
 	}, [timeOutId, setTimeoutAnimation])
 
 	useEffect(() => {
+		handleStartTimeout()
 		setShowError(true)
 		setTimeoutAnimation(true)
-	}, [])
+	}, [handleStartTimeout, setShowError, setTimeoutAnimation])
 
 	return (
 		<div
 			className={`fixed top-5 right-0 rounded-l-lg shadow-lg bg-red-800 z-50 transition-transform duration-[${errorBounceIn}ms] origin-right ease-in-out ${showError ? 'translate-x-0' : 'translate-x-full'}`}
 			role="alert"
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
+			onMouseEnter={handleStopTimeout}
+			onMouseLeave={handleStartTimeout}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter') {
-					handleMouseEnter()
+					handleStopTimeout()
 				}
 			}}
 		>
@@ -63,7 +64,7 @@ const ErrorWindow = ({
 				</button>
 			</div>
 			<div
-				className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-[5000ms]' : 'duration-0'} origin-right ease-linear transform ${timeoutAnimation && 'translate-x-full'}`}/>
+				className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-[5000ms]' : 'duration-0'} origin-right ease-linear transform ${timeoutAnimation && 'translate-x-full'}`} />
 		</div>
 	)
 }
