@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from 'react'
+import React, { type ReactElement, useEffect, useState, useCallback } from 'react'
 
 const ErrorWindow = ({
 	errorMessage,
@@ -14,25 +14,23 @@ const ErrorWindow = ({
 	const [showError, setShowError] = useState(false)
 	const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>()
 
-	const handleClose = (): void => {
+	const handleClose = useCallback((): void => {
 		setShowError(false)
 		setTimeout(() => {
 			onClose()
 		}, errorBounceIn)
-	}
+	}, [onClose])
 
-	const handleMouseLeave = (): void => {
-		// startTimeout
-		const timeoutid = setTimeout(handleClose, timeOut)
-		setTimeOutId(timeoutid)
+	const handleMouseLeave = useCallback((): void => {
+		const timeoutId = setTimeout(handleClose, timeOut)
+		setTimeOutId(timeoutId)
 		setTimeoutAnimation(true)
-	}
+	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
 
-	const handleMouseEnter = (): void => {
-		// stopTimeout
+	const handleMouseEnter = useCallback((): void => {
 		clearTimeout(timeOutId)
 		setTimeoutAnimation(false)
-	}
+	}, [timeOutId, setTimeoutAnimation])
 
 	useEffect(() => {
 		setShowError(true)
