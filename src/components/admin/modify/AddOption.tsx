@@ -1,8 +1,9 @@
 import { type OptionType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Option = ({
 	onOptionPosted,
@@ -13,11 +14,29 @@ const Option = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
 		name: '',
 		price: 0,
 		imageURL: ''
 	})
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const postOption = (option: Omit<OptionType, '_id'>): void => {
 		axios.post(API_URL + '/v1/options', option).then((response) => {
@@ -25,6 +44,7 @@ const Option = ({
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating option:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -76,10 +96,20 @@ const Option = ({
 							<EditableField
 								text={option.name}
 								italic={false}
+								validations={[{
+									validate: (v) => v.length > 0,
+									message: 'Navn skal udfyldes'
+								}, {
+									validate: (v) => v.length <= 20,
+									message: 'Navn kan højest have 20 tegn'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('name', v)
 								}}
 							/>
 						</div>
@@ -87,10 +117,20 @@ const Option = ({
 							<EditableField
 								text={option.price.toString()}
 								italic={true}
+								validations={[{
+									validate: (v) => !isNaN(Number(v)),
+									message: 'Prisen skal være et tal'
+								}, {
+									validate: (v) => Number(v) >= 0,
+									message: 'Prisen skal være positiv'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handlePriceChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('price', v)
 								}}
 							/>
 							<div className="pl-1">
@@ -118,6 +158,7 @@ const Option = ({
 					</button>
 					<button
 						type="button"
+						disabled={!formIsValid}
 						className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
 						onClick={handleCompletePost}
 					>
@@ -125,6 +166,14 @@ const Option = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }

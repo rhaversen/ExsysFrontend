@@ -17,8 +17,8 @@ export default function Page (): ReactElement {
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{selectedView === 'Ordre Oversigt' && <OverviewView />}
-			{selectedView === 'Rediger Katalog' && <ModifyView />}
+			{selectedView === 'Ordre Oversigt' && <OverviewView/>}
+			{selectedView === 'Rediger Katalog' && <ModifyView/>}
 		</main>
 	)
 }

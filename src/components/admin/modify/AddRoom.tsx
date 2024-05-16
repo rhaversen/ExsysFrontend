@@ -1,7 +1,8 @@
 import { type RoomType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import axios from 'axios'
+import ErrorWindow from '@/components/ui/ErrorWindow'
 
 const Room = ({
 	onRoomPosted,
@@ -12,10 +13,28 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
 	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
 		name: '',
 		description: ''
 	})
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const postRoom = (room: Omit<RoomType, '_id'>): void => {
 		axios.post(API_URL + '/v1/rooms', room).then((response) => {
@@ -23,6 +42,7 @@ const Room = ({
 			onClose()
 		}).catch((error) => {
 			console.error('Error updating room:', error)
+			setBackendErrorMessages(error.response.data.error as string)
 		})
 	}
 
@@ -66,10 +86,17 @@ const Room = ({
 							<EditableField
 								text={room.name}
 								italic={false}
+								validations={[{
+									validate: (v: string) => v.length > 0,
+									message: 'Navn skal udfyldes'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('name', v)
 								}}
 							/>
 						</div>
@@ -77,10 +104,17 @@ const Room = ({
 							<EditableField
 								text={room.description}
 								italic={true}
+								validations={[{
+									validate: (v: string) => v.length > 0,
+									message: 'Beskrivelse skal udfyldes'
+								}]}
 								editable={true}
 								edited={false}
 								onChange={(v: string) => {
 									handleDescriptionChange(v)
+								}}
+								onValidationChange={(v: boolean) => {
+									handleValidationChange('description', v)
 								}}
 							/>
 						</div>
@@ -89,6 +123,7 @@ const Room = ({
 				<div className="flex flex-row justify-center gap-4">
 					<button
 						type="button"
+						disabled={!formIsValid}
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
 						onClick={handleCancelPost}
 					>
@@ -103,6 +138,14 @@ const Room = ({
 					</button>
 				</div>
 			</div>
+			{backendErrorMessages !== null &&
+				<ErrorWindow
+					onClose={() => {
+						setBackendErrorMessages(null)
+					}}
+					errorMessage={backendErrorMessages}
+				/>
+			}
 		</div>
 	)
 }
