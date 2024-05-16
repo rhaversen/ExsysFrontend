@@ -39,7 +39,7 @@ const OrderConfirmationWindow = ({
 					{orderStatus === 'error' && (
 						<>
 							{'Der skete en fejl, prøv igen senere.'}
-							<br />
+							<br/>
 							{'Hvis problemet fortsætter, kontakt venligst personalet.'}
 						</>
 					)}
@@ -47,11 +47,11 @@ const OrderConfirmationWindow = ({
 				<div className="flex justify-center">
 					<div className="w-48 h-48 relative">
 						{orderStatus === 'loading' &&
-							<Image src="/orderStation/loading.svg" alt="Loading" width={200} height={200} />}
+							<Image src="/orderStation/loading.svg" alt="Loading" width={200} height={200}/>}
 						{orderStatus === 'success' &&
-							<Image src="/orderStation/checkmark.svg" alt="Order Confirmed" width={200} height={200} />}
+							<Image src="/orderStation/checkmark.svg" alt="Order Confirmed" width={200} height={200}/>}
 						{orderStatus === 'error' &&
-							<Image src="/orderStation/questionmark.svg" alt="Error" width={200} height={200} />}
+							<Image src="/orderStation/questionmark.svg" alt="Error" width={200} height={200}/>}
 					</div>
 				</div>
 				<div className="flex justify-center">

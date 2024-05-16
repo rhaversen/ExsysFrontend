@@ -134,9 +134,9 @@ const OverviewView = (): ReactElement => {
 
 	return (
 		<div>
-			{fetching && <p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Henter Order...</p>}
+			{fetching && <p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Henter Order...</p>}
 			{orders.length === 0 && !fetching &&
-				<p className='flex justify-center p-10 font-bold text-gray-800 text-2xl'>Ingen Ordrer 😊</p>}
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Ingen Ordrer 😊</p>}
 			<div className="flex flex-row flex-wrap justify-evenly">
 				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
 					<RoomCol
