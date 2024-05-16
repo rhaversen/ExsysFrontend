@@ -40,7 +40,8 @@ const ErrorWindow = ({
 	}, [])
 
 	return (
-		<div className={`fixed top-5 right-0 rounded-l-lg shadow-lg bg-red-800 z-50 transition-transform duration-[${errorBounceIn}ms] origin-right ease-in-out ${showError ? 'translate-x-0' : 'translate-x-full'}`}
+		<div
+			className={`fixed top-5 right-0 rounded-l-lg shadow-lg bg-red-800 z-50 transition-transform duration-[${errorBounceIn}ms] origin-right ease-in-out ${showError ? 'translate-x-0' : 'translate-x-full'}`}
 			role="alert"
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
@@ -60,10 +61,11 @@ const ErrorWindow = ({
 					className="text-3xl p-3"
 					onClick={onClose}
 				>
-                    X
+					X
 				</button>
 			</div>
-			<div className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-[5000ms]' : 'duration-0'} origin-right ease-linear transform ${timeoutAnimation && 'translate-x-full'}`} />
+			<div
+				className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-[5000ms]' : 'duration-0'} origin-right ease-linear transform ${timeoutAnimation && 'translate-x-full'}`}/>
 		</div>
 	)
 }
