@@ -1,5 +1,5 @@
 import { type RoomType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
@@ -21,6 +21,29 @@ const Room = ({
 	const [isEditing, setIsEditing] = useState(false)
 	const [newRoom, setNewRoom] = useState<RoomType>(room)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
+	useEffect(() => {
+		if (isEditing) return
+		setFormIsValid(true)
+	}, [isEditing])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const patchRoom = (room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
 		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
@@ -80,10 +103,17 @@ const Room = ({
 						<EditableField
 							text={newRoom.name}
 							italic={false}
+							validations={[{
+								validate: (v: string) => v.length > 0,
+								message: 'Navn skal udfyldes'
+							}]}
 							editable={isEditing}
 							edited={newRoom.name !== room.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('name', v)
 							}}
 						/>
 					</div>
@@ -91,10 +121,17 @@ const Room = ({
 						<EditableField
 							text={newRoom.description}
 							italic={true}
+							validations={[{
+								validate: (v: string) => v.length > 0,
+								message: 'Beskrivelse skal udfyldes'
+							}]}
 							editable={isEditing}
 							edited={newRoom.description !== room.description}
 							onChange={(v: string) => {
 								handleDescriptionChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('description', v)
 							}}
 						/>
 					</div>
@@ -105,6 +142,7 @@ const Room = ({
 					handleUndoEdit={handleUndoEdit}
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
+					formIsValid={formIsValid}
 				/>
 			</div>
 			{showDeleteConfirmation &&

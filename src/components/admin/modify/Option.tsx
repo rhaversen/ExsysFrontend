@@ -1,5 +1,5 @@
 import { type OptionType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
@@ -22,6 +22,29 @@ const Option = ({
 	const [isEditing, setIsEditing] = useState(false)
 	const [newOption, setNewOption] = useState<OptionType>(option)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
+	useEffect(() => {
+		if (isEditing) return
+		setFormIsValid(true)
+	}, [isEditing])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
 		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch).then((response) => {
@@ -89,10 +112,20 @@ const Option = ({
 						<EditableField
 							text={newOption.name}
 							italic={false}
+							validations={[{
+								validate: (v) => v.length > 0,
+								message: 'Navn skal udfyldes'
+							}, {
+								validate: (v) => v.length <= 20,
+								message: 'Navn kan højest have 20 tegn'
+							}]}
 							editable={isEditing}
 							edited={newOption.name !== option.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('name', v)
 							}}
 						/>
 					</div>
@@ -100,10 +133,20 @@ const Option = ({
 						<EditableField
 							text={newOption.price.toString()}
 							italic={true}
+							validations={[{
+								validate: (v) => !isNaN(Number(v)),
+								message: 'Prisen skal være et tal'
+							}, {
+								validate: (v) => Number(v) >= 0,
+								message: 'Prisen skal være positiv'
+							}]}
 							editable={isEditing}
 							edited={newOption.price !== option.price}
 							onChange={(v: string) => {
 								handlePriceChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('price', v)
 							}}
 						/>
 						<div className="pl-1">
@@ -126,6 +169,7 @@ const Option = ({
 					handleUndoEdit={handleUndoEdit}
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
+					formIsValid={formIsValid}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion

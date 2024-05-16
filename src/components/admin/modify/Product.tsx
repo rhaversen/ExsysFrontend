@@ -1,5 +1,5 @@
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
@@ -28,6 +28,8 @@ const Product = ({
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
+	const [formIsValid, setFormIsValid] = useState(true)
 
 	useEffect(() => {
 		// Delete options from newProduct that are not in options
@@ -38,6 +40,27 @@ const Product = ({
 			}
 		})
 	}, [options])
+
+	// Update formIsValid when fieldValidations change
+	useEffect(() => {
+		const formIsValid = Object.values(fieldValidations).every((v) => v)
+		setFormIsValid(formIsValid)
+	}, [fieldValidations])
+
+	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
+	useEffect(() => {
+		if (isEditing) return
+		setFormIsValid(true)
+	}, [isEditing])
+
+	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+		setFieldValidations((prev) => {
+			return {
+				...prev,
+				[fieldId]: v
+			}
+		})
+	}, [])
 
 	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
@@ -182,10 +205,20 @@ const Product = ({
 						<EditableField
 							text={newProduct.name}
 							italic={false}
+							validations={[{
+								validate: (v: string) => v.length > 0,
+								message: 'Navn skal udfyldes'
+							}, {
+								validate: (v: string) => v.length <= 15,
+								message: 'Navn må maks være 15 tegn'
+							}]}
 							editable={isEditing}
 							edited={newProduct.name !== product.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('name', v)
 							}}
 						/>
 					</div>
@@ -193,10 +226,20 @@ const Product = ({
 						<EditableField
 							text={newProduct.price.toString()}
 							italic={true}
+							validations={[{
+								validate: (v: string) => !isNaN(Number(v)),
+								message: 'Pris skal være et tal'
+							}, {
+								validate: (v: string) => Number(v) >= 0,
+								message: 'Pris skal være positiv'
+							}]}
 							editable={isEditing}
 							edited={newProduct.price !== product.price}
 							onChange={(v: string) => {
 								handlePriceChange(v)
+							}}
+							onValidationChange={(v: boolean) => {
+								handleValidationChange('price', v)
 							}}
 						/>
 						<div className="pl-1">
@@ -208,40 +251,68 @@ const Product = ({
 					<EditableField
 						text={newProduct.orderWindow.from.hour.toString().padStart(2, '0')}
 						italic={false}
+						validations={[{
+							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+							message: 'Time skal være mellem 0 og 24'
+						}]}
 						editable={isEditing}
 						edited={newProduct.orderWindow.from.hour !== product.orderWindow.from.hour}
 						onChange={(v: string) => {
 							handleOrderWindowFromHourChange(v)
+						}}
+						onValidationChange={(v: boolean) => {
+							handleValidationChange('fromHour', v)
 						}}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
 						italic={false}
+						validations={[{
+							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+							message: 'Minutter skal være mellem 0 og 60'
+						}]}
 						editable={isEditing}
 						edited={newProduct.orderWindow.from.minute !== product.orderWindow.from.minute}
 						onChange={(v: string) => {
 							handleOrderWindowFromMinuteChange(v)
+						}}
+						onValidationChange={(v: boolean) => {
+							handleValidationChange('fromMinute', v)
 						}}
 					/>
 					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>{'—'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
 						italic={false}
+						validations={[{
+							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+							message: 'Time skal være mellem 0 og 24'
+						}]}
 						editable={isEditing}
 						edited={newProduct.orderWindow.to.hour !== product.orderWindow.to.hour}
 						onChange={(v: string) => {
 							handleOrderWindowToHourChange(v)
+						}}
+						onValidationChange={(v: boolean) => {
+							handleValidationChange('toHour', v)
 						}}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
 						italic={false}
+						validations={[{
+							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+							message: 'Minutter skal være mellem 0 og 60'
+						}]}
 						editable={isEditing}
 						edited={newProduct.orderWindow.to.minute !== product.orderWindow.to.minute}
 						onChange={(v: string) => {
 							handleOrderWindowToMinuteChange(v)
+						}}
+						onValidationChange={(v: boolean) => {
+							handleValidationChange('toMinute', v)
 						}}
 					/>
 				</div>
@@ -279,6 +350,7 @@ const Product = ({
 					handleUndoEdit={handleUndoEdit}
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
+					formIsValid={formIsValid}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion

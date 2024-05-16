@@ -19,3 +19,8 @@ export interface OrderTypeWithNames extends OrderType {
 	products: Array<{ id: ProductType['_id'], name: string, quantity: number }>
 	options: Array<{ id: OptionType['_id'], name: string, quantity: number }>
 }
+
+export interface Validation {
+	validate: (value: string) => boolean
+	message: string
+}
