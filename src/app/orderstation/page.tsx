@@ -27,9 +27,9 @@ export default function Page (): ReactElement {
 		})
 	}, [API_URL, fetchRooms])
 
-	const handleRoomSelect = (roomId: RoomType['_id']): void => {
+	const handleRoomSelect = useCallback((roomId: RoomType['_id']): void => {
 		router.push(`/orderstation/${roomId}`)
-	}
+	}, [router])
 
 	useInterval(fetchRooms, 1000 * 60 * 60) // Fetch rooms every hour
 

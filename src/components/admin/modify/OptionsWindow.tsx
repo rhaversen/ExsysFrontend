@@ -1,5 +1,5 @@
 import { type OptionType } from '@/lib/backendDataTypes'
-import { type ReactElement } from 'react'
+import { type ReactElement, useCallback } from 'react'
 
 const OptionsWindow = ({
 	productName,
@@ -16,13 +16,13 @@ const OptionsWindow = ({
 	onDeleteOption: (v: OptionType) => void
 	onClose: () => void
 }): ReactElement => {
-	const handleToggle = (option: OptionType): void => {
+	const handleToggle = useCallback((option: OptionType): void => {
 		if (productOptions.map((option) => option._id).includes(option._id)) {
 			onDeleteOption(option)
 		} else {
 			onAddOption(option)
 		}
-	}
+	}, [productOptions, onAddOption, onDeleteOption])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

@@ -36,7 +36,7 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = (room: Omit<RoomType, '_id'>): void => {
+	const postRoom = useCallback((room: Omit<RoomType, '_id'>): void => {
 		axios.post(API_URL + '/v1/rooms', room).then((response) => {
 			onRoomPosted(response.data as RoomType)
 			onClose()
@@ -44,29 +44,29 @@ const Room = ({
 			console.error('Error updating room:', error)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onRoomPosted, onClose])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setRoom({
 			...room,
 			name: v
 		})
-	}
+	}, [room])
 
-	const handleDescriptionChange = (v: string): void => {
+	const handleDescriptionChange = useCallback((v: string): void => {
 		setRoom({
 			...room,
 			description: v
 		})
-	}
+	}, [room])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postRoom(room)
-	}
+	}, [postRoom, room])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

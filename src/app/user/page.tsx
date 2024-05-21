@@ -74,22 +74,22 @@ export default function Page (): ReactElement {
 		setFormIsValid(productSelected && roomSelected && dateSelected)
 	}, [quantities, selectedRoomId, selectedDate])
 
-	const handleDateSelect = (date: Date): void => {
+	const handleDateSelect = useCallback((date: Date): void => {
 		setSelectedDate(date)
-	}
+	}, [setSelectedDate])
 
-	const handleQuantityChange = (key: ProductType['_id'] | OptionType['_id'], newQuantity: number): void => {
+	const handleQuantityChange = useCallback((key: ProductType['_id'] | OptionType['_id'], newQuantity: number): void => {
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
 			[key]: newQuantity
 		}))
-	}
+	}, [setQuantities])
 
-	const handleRoomSelect = (roomId: RoomType['_id']): void => {
+	const handleRoomSelect = useCallback((roomId: RoomType['_id']): void => {
 		setSelectedRoomId(roomId)
-	}
+	}, [setSelectedRoomId])
 
-	const submitOrder = (): void => {
+	const submitOrder = useCallback((): void => {
 		const productsArray = Object.entries(quantities).map(
 			([product, quantity]) => ({
 				id: product,
@@ -108,7 +108,7 @@ export default function Page (): ReactElement {
 		axios.post(API_URL + '/v1/orders', data).catch((error) => {
 			console.error('Failed to submit order:', error)
 		})
-	}
+	}, [quantities, selectedDate, selectedRoomId, API_URL])
 
 	return (
 		<main className="bg-white flex flex-col h-screen overflow-hidden mx-auto shadow-lg max-w-screen-lg">

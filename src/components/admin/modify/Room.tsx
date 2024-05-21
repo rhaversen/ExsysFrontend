@@ -45,7 +45,7 @@ const Room = ({
 		})
 	}, [])
 
-	const patchRoom = (room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
+	const patchRoom = useCallback((room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
 		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
@@ -53,9 +53,9 @@ const Room = ({
 			setNewRoom(room)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onRoomPatched])
 
-	const deleteRoom = (room: RoomType, confirm: boolean): void => {
+	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
 			data: { confirm }
 		}).then(() => {
@@ -65,35 +65,35 @@ const Room = ({
 			setNewRoom(room)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onRoomDeleted])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setNewRoom({
 			...newRoom,
 			name: v
 		})
-	}
+	}, [newRoom])
 
-	const handleDescriptionChange = (v: string): void => {
+	const handleDescriptionChange = useCallback((v: string): void => {
 		setNewRoom({
 			...newRoom,
 			description: v
 		})
-	}
+	}, [newRoom])
 
-	const handleUndoEdit = (): void => {
+	const handleUndoEdit = useCallback((): void => {
 		setNewRoom(room)
 		setIsEditing(false)
-	}
+	}, [room])
 
-	const handleCompleteEdit = (): void => {
+	const handleCompleteEdit = useCallback((): void => {
 		patchRoom(room, newRoom)
 		setIsEditing(false)
-	}
+	}, [patchRoom, room, newRoom])
 
-	const handleDeleteRoom = (confirm: boolean): void => {
+	const handleDeleteRoom = useCallback((confirm: boolean): void => {
 		deleteRoom(room, confirm)
-	}
+	}, [deleteRoom, room])
 
 	return (
 		<div className="p-2 m-2">

@@ -54,7 +54,7 @@ const AddProduct = ({
 		})
 	}, [])
 
-	const postProduct = (product: Omit<ProductType, '_id'>): void => {
+	const postProduct = useCallback((product: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productUTC = {
 			...product,
@@ -69,31 +69,31 @@ const AddProduct = ({
 			console.error('Error updating product:', error)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onProductPosted, onClose])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setProduct({
 			...product,
 			name: v
 		})
-	}
+	}, [product])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setProduct({
 			...product,
 			price: Number(v)
 		})
-	}
+	}, [product])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setProduct({
 			...product,
 			imageURL: v
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowFromMinuteChange = (v: string): void => {
+	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -105,9 +105,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowFromHourChange = (v: string): void => {
+	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -119,9 +119,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowToMinuteChange = (v: string): void => {
+	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -133,9 +133,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowToHourChange = (v: string): void => {
+	const handleOrderWindowToHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -147,29 +147,29 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleAddOption = (v: OptionType): void => {
+	const handleAddOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
 			options: [...product.options, v]
 		})
-	}
+	}, [product])
 
-	const handleDeleteOption = (v: OptionType): void => {
+	const handleDeleteOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
 			options: product.options.filter((option) => option._id !== v._id)
 		})
-	}
+	}, [product])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postProduct(product)
-	}
+	}, [product, postProduct])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

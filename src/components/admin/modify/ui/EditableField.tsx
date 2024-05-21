@@ -23,12 +23,6 @@ const EditableField = ({
 
 	const [validationError, setValidationError] = useState<string | null>(null)
 
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-		const value = e.target.value
-		onChange(value)
-		checkValidations(value)
-	}
-
 	const checkValidations = useCallback((v: string): void => {
 		const validationFailed = validations?.some(({ validate }) => !validate(v))
 		if (validationFailed !== undefined && validationFailed) {
@@ -42,6 +36,12 @@ const EditableField = ({
 			onValidationChange !== undefined && onValidationChange(true)
 		}
 	}, [validations, onValidationChange])
+
+	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+		const value = e.target.value
+		onChange(value)
+		checkValidations(value)
+	}, [onChange, checkValidations])
 
 	// Reset validation errors when not editable (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
 	useEffect(() => {

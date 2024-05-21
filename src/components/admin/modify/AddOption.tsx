@@ -38,7 +38,7 @@ const Option = ({
 		})
 	}, [])
 
-	const postOption = (option: Omit<OptionType, '_id'>): void => {
+	const postOption = useCallback((option: Omit<OptionType, '_id'>): void => {
 		axios.post(API_URL + '/v1/options', option).then((response) => {
 			onOptionPosted(response.data as OptionType)
 			onClose()
@@ -46,37 +46,37 @@ const Option = ({
 			console.error('Error updating option:', error)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onOptionPosted, onClose])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setOption({
 			...option,
 			name: v
 		})
-	}
+	}, [option])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setOption({
 			...option,
 			price: Number(v)
 		})
-	}
+	}, [option])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setOption({
 			...option,
 			imageURL: v
 		})
-	}
+	}, [option])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postOption(option)
-	}
+	}, [option, postOption])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

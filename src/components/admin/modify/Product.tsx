@@ -62,7 +62,7 @@ const Product = ({
 		})
 	}, [])
 
-	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
+	const patchProduct = useCallback((product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productPatchUTC = {
 			...productPatch,
@@ -77,43 +77,41 @@ const Product = ({
 			setNewProduct(product)
 			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onProductPatched])
 
-	const deleteProduct = (product: ProductType, confirm: boolean): void => {
+	const deleteProduct = useCallback((product: ProductType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onProductDeleted(product._id)
 		}).catch((error) => {
-			console.error('Error deleting product:', error)
 			setNewProduct(product)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onProductDeleted])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setNewProduct({
 			...newProduct,
 			name: v
 		})
-	}
+	}, [newProduct])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setNewProduct({
 			...newProduct,
 			price: Number(v)
 		})
-	}
+	}, [newProduct])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setNewProduct({
 			...newProduct,
 			imageURL: v
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowFromMinuteChange = (v: string): void => {
+	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -125,9 +123,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowFromHourChange = (v: string): void => {
+	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -139,9 +137,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowToMinuteChange = (v: string): void => {
+	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -153,9 +151,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowToHourChange = (v: string): void => {
+	const handleOrderWindowToHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -167,35 +165,35 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleAddOption = (v: OptionType): void => {
+	const handleAddOption = useCallback((v: OptionType): void => {
 		setNewProduct({
 			...newProduct,
 			options: [...newProduct.options, v]
 		})
-	}
+	}, [newProduct])
 
-	const handleDeleteOption = (v: OptionType): void => {
+	const handleDeleteOption = useCallback((v: OptionType): void => {
 		setNewProduct({
 			...newProduct,
 			options: newProduct.options.filter((option) => option._id !== v._id)
 		})
-	}
+	}, [newProduct])
 
-	const handleUndoEdit = (): void => {
+	const handleUndoEdit = useCallback((): void => {
 		setNewProduct(product)
 		setIsEditing(false)
-	}
+	}, [product])
 
-	const handleCompleteEdit = (): void => {
+	const handleCompleteEdit = useCallback((): void => {
 		patchProduct(product, newProduct)
 		setIsEditing(false)
-	}
+	}, [product, newProduct, patchProduct])
 
-	const handleDeleteProduct = (confirm: boolean): void => {
+	const handleDeleteProduct = useCallback((confirm: boolean): void => {
 		deleteProduct(product, confirm)
-	}
+	}, [product, deleteProduct])
 
 	return (
 		<div className="p-2 m-2">
