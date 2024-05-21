@@ -58,7 +58,9 @@ const ModifyView = ({
 			{selectedView === 'Produkter' &&
 				<ItemList
 					buttonText="Nyt Produkt"
-					onAdd={() => { setShowAddProduct(true) }}
+					onAdd={() => {
+						setShowAddProduct(true)
+					}}
 				>
 					{products.map((product) => (
 						<div className="min-w-64" key={product._id}>
@@ -75,7 +77,9 @@ const ModifyView = ({
 			{selectedView === 'Tilvalg' &&
 				<ItemList
 					buttonText="Nyt Tilvalg"
-					onAdd={() => { setShowAddOption(true) }}
+					onAdd={() => {
+						setShowAddOption(true)
+					}}
 				>
 					{options.map((option) => (
 						<div className="min-w-64 h-full" key={option._id}>
@@ -91,7 +95,9 @@ const ModifyView = ({
 			{selectedView === 'Rum' &&
 				<ItemList
 					buttonText="Nyt Rum"
-					onAdd={() => { setShowAddRoom(true) }}
+					onAdd={() => {
+						setShowAddRoom(true)
+					}}
 				>
 					{rooms.map((room) => (
 						<div className="min-w-64" key={room._id}>
@@ -108,19 +114,25 @@ const ModifyView = ({
 				<AddProduct
 					options={options}
 					onProductPosted={onAddedProduct}
-					onClose={() => { setShowAddProduct(false) }}
+					onClose={() => {
+						setShowAddProduct(false)
+					}}
 				/>
 			}
 			{showAddOption &&
 				<AddOption
 					onOptionPosted={onAddedOption}
-					onClose={() => { setShowAddOption(false) }}
+					onClose={() => {
+						setShowAddOption(false)
+					}}
 				/>
 			}
 			{showAddRoom &&
 				<AddRoom
 					onRoomPosted={onAddedRoom}
-					onClose={() => { setShowAddRoom(false) }}
+					onClose={() => {
+						setShowAddRoom(false)
+					}}
 				/>
 			}
 		</div>

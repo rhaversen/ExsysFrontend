@@ -43,7 +43,7 @@ const ImageList = ({
 								src={imageURL}
 								alt={imageURL}
 								draggable="false"
-								placeholder = 'blur'
+								placeholder='blur'
 								blurDataURL='/orderStation/loading.svg'
 								className="w-full h-full object-cover"
 							/>

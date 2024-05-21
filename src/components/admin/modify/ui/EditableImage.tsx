@@ -47,7 +47,7 @@ const EditableImage = ({
 					alt={'Item Image'}
 					className="w-40 h-40 object-cover text-gray-800"
 					draggable="false"
-					placeholder = 'blur'
+					placeholder='blur'
 					blurDataURL='/orderStation/loading.svg'
 					priority // Load image immediately
 				/>
