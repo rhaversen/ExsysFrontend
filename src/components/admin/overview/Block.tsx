@@ -2,16 +2,19 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 
 import { type OrderType } from '@/lib/backendDataTypes'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
+import axios from 'axios'
 
 const Block = ({
 	orders,
 	timeBlock,
-	onOrderUpdate
+	onUpdatedOrders
 }: {
 	orders: OrderTypeWithNames[]
 	timeBlock: string
-	onOrderUpdate: (orderIds: Array<OrderType['_id']>, status: OrderType['status']) => void
+	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
+	const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
 	const [orderStatus, setOrderStatus] = useState<OrderType['status']>(orders[0].status)
@@ -48,6 +51,17 @@ const Block = ({
 		return 'delivered'
 	}, [orders])
 
+	const patchOrders = useCallback((status: OrderType['status']) => {
+		axios.patch(API_URL + '/v1/orders', {
+			orders: orders.map((order) => order._id),
+			status
+		}).then((response) => {
+			const data = response.data as OrderType[]
+			onUpdatedOrders(data)
+		}).catch((error: any) => {
+		})
+	}, [API_URL, orders, onUpdatedOrders])
+
 	useEffect(() => {
 		const pending = orders.filter((order) => order.status === 'pending')
 		const confirmed = orders.filter((order) => order.status === 'confirmed')
@@ -62,10 +76,6 @@ const Block = ({
 	useEffect(() => {
 		setOrderStatus(determineOrderStatus())
 	}, [setOrderStatus, determineOrderStatus])
-
-	const handleOrderUpdate = (status: OrderType['status']): void => {
-		onOrderUpdate(orders.map((order) => order._id), status)
-	}
 
 	return (
 		<div
@@ -88,7 +98,7 @@ const Block = ({
 				{orderStatus === 'pending' &&
 					<button type="button" className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
-							handleOrderUpdate('confirmed')
+							patchOrders('confirmed')
 						}}>Marker som læst
 					</button>
 				}
@@ -130,7 +140,7 @@ const Block = ({
 								type="button"
 								className="bg-orange-500 hover:bg-orange-600 text-white rounded-md py-2 px-4"
 								onClick={() => {
-									handleOrderUpdate('delivered')
+									patchOrders('delivered')
 								}}
 							>
 								{'Marker som leveret'}
