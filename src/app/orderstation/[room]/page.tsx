@@ -1,16 +1,16 @@
 'use client'
 
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import axios from 'axios'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import CartWindow from '@/components/orderstation/cart/CartWindow'
-import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
-import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
-import { useInterval } from 'react-use'
-import { useRouter } from 'next/navigation'
-import { type CartType } from '@/lib/frontendDataTypes'
+import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
+import { type CartType } from '@/lib/frontendDataTypes'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { useInterval } from 'react-use'
 
 export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

@@ -1,7 +1,7 @@
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import Item from '@/components/orderstation/cart/Item'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
 import { type CartItemType, type CartType } from '@/lib/frontendDataTypes'
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 const OrderSummary = ({
 	products,

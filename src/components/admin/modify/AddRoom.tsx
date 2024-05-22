@@ -1,8 +1,8 @@
-import { type RoomType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import axios from 'axios'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type RoomType } from '@/lib/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Room = ({
 	onRoomPosted,
@@ -19,7 +19,10 @@ const Room = ({
 		name: '',
 		description: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false, description: false })
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({
+		name: false,
+		description: false
+	})
 	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change

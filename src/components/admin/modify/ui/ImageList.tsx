@@ -1,6 +1,6 @@
 import { ProductImages } from '@/lib/ProductImages'
-import { type ReactElement } from 'react'
 import Image from 'next/image'
+import { type ReactElement } from 'react'
 
 const ImageList = ({
 	onClose,

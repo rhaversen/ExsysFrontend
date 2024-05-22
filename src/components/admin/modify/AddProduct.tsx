@@ -1,12 +1,12 @@
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import OptionsWindow from '@/components/admin/modify/OptionsWindow'
+import Options from '@/components/admin/modify/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import Options from '@/components/admin/modify/productOptions/Options'
-import OptionsWindow from '@/components/admin/modify/OptionsWindow'
-import axios from 'axios'
-import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const AddProduct = ({
 	options,

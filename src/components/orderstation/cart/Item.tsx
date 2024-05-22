@@ -1,7 +1,7 @@
-import React, { type ReactElement, useCallback } from 'react'
 import Image from 'next/image'
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
 import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import React, { type ReactElement, useCallback } from 'react'
 
 const Item = ({
 	imageURL,

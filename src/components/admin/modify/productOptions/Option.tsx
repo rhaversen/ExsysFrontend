@@ -1,6 +1,6 @@
-import React, { type ReactElement } from 'react'
-import Image from 'next/image'
 import { type OptionType } from '@/lib/backendDataTypes'
+import Image from 'next/image'
+import React, { type ReactElement } from 'react'
 
 const Option = ({
 	option,

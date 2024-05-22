@@ -1,9 +1,9 @@
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 import { type OrderType } from '@/lib/backendDataTypes'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 import axios from 'axios'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Block = ({
 	orders,

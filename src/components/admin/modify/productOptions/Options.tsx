@@ -1,6 +1,6 @@
+import Option from '@/components/admin/modify/productOptions/Option'
 import { type OptionType } from '@/lib/backendDataTypes'
 import { type ReactElement } from 'react'
-import Option from '@/components/admin/modify/productOptions/Option'
 
 const Options = ({
 	selectedOptions,
