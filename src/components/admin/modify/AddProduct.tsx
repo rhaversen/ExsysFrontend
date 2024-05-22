@@ -355,7 +355,6 @@ const AddProduct = ({
 				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
-						disabled={!formIsValid}
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
 						onClick={handleCancelPost}
 					>
@@ -363,7 +362,8 @@ const AddProduct = ({
 					</button>
 					<button
 						type="button"
-						className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
+						disabled={!formIsValid}
+						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
 						onClick={handleCompletePost}
 					>
 						{'Færdig'}
