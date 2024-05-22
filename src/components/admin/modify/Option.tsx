@@ -110,6 +110,7 @@ const Option = ({
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newOption.name}
+							placeholder={'Navn'}
 							italic={false}
 							validations={[{
 								validate: (v) => v.length > 0,
@@ -131,6 +132,7 @@ const Option = ({
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
 							text={newOption.price.toString()}
+							placeholder={'Pris'}
 							italic={true}
 							validations={[{
 								validate: (v) => !isNaN(Number(v)),

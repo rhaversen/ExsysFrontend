@@ -190,6 +190,7 @@ const AddProduct = ({
 						<div className="font-bold text-gray-800">
 							<EditableField
 								text={product.name}
+								placeholder='Navn'
 								italic={false}
 								validations={[{
 									validate: (v: string) => v.length > 0,
@@ -211,6 +212,7 @@ const AddProduct = ({
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
 								text={product.price.toString()}
+								placeholder='Pris'
 								italic={true}
 								validations={[{
 									validate: (v: string) => !isNaN(Number(v)),
@@ -237,6 +239,7 @@ const AddProduct = ({
 					<div className="flex flex-row text-gray-800">
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
+							placeholder='Time'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -254,6 +257,7 @@ const AddProduct = ({
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
+							placeholder='Minut'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -271,6 +275,7 @@ const AddProduct = ({
 						<div className={'text-xl px-1'}>{'—'}</div>
 						<EditableField
 							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
+							placeholder='Time'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -288,6 +293,7 @@ const AddProduct = ({
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
+							placeholder='Minut'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,

@@ -86,6 +86,7 @@ const Room = ({
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								text={room.name}
+								placeholder={'Navn'}
 								italic={false}
 								validations={[{
 									validate: (v: string) => v.length > 0,
@@ -104,6 +105,7 @@ const Room = ({
 						<div className="text-gray-800">
 							<EditableField
 								text={room.description}
+								placeholder={'Beskrivelse'}
 								italic={true}
 								validations={[{
 									validate: (v: string) => v.length > 0,

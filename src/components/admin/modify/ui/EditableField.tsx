@@ -4,6 +4,7 @@ import React, { type ReactElement, useCallback, useEffect, useRef, useState } fr
 
 const EditableField = ({
 	text,
+	placeholder,
 	italic,
 	editable,
 	edited,
@@ -12,6 +13,7 @@ const EditableField = ({
 	onValidationChange
 }: {
 	text: string
+	placeholder: string
 	italic: boolean
 	editable: boolean
 	edited: boolean
@@ -56,6 +58,7 @@ const EditableField = ({
 					ref={ref}
 					type="text"
 					value={text}
+					placeholder={placeholder}
 					onChange={handleInputChange}
 					onBlur={handleInputChange}
 					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? `${validationError !== null ? 'border-red-500 hover:border-red-600 focus:border-red-700' : 'border-green-500 hover:border-green-600 focus:border-green-700'} ` : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}
