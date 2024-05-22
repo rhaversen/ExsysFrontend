@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import AsyncImage from '@/components/ui/AsyncImage'
 import { type ProductType } from '@/lib/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
@@ -39,15 +39,15 @@ const Product = ({
 						{' — '}
 						{product.orderWindow.to.hour.toString().padStart(2, '0')}:{product.orderWindow.to.minute.toString().padStart(2, '0')}
 					</div>
-					<Image
+					<AsyncImage
+						className='w-64 h-64'
 						width={100}
 						height={100}
 						quality={80}
 						src={`${product.imageURL === undefined || product.imageURL === '' ? '/none.svg' : product.imageURL}`}
 						alt={product.name}
-						className="w-64 h-64 object-cover text-gray-800"
-						draggable="false"
-						priority // Load image immediately
+						draggable={false}
+						priority={true}
 					/>
 				</button>
 			</div>

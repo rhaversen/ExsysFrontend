@@ -1,6 +1,6 @@
 import ImageList from '@/components/admin/modify/ui/ImageList'
 import React, { type ReactElement, useState } from 'react'
-import Image from 'next/image'
+import AsyncImage from '@/components/ui/AsyncImage'
 
 const EditableImage = ({
 	defaultURL,
@@ -38,17 +38,15 @@ const EditableImage = ({
 				<span className="sr-only">
 					{'Edit Image'}
 				</span>
-				<Image
+				<AsyncImage
+					className='w-48 h-48'
 					width={90}
 					height={90}
 					quality={50}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
 					alt={editingURL?.split('/').pop() ?? 'Item Image'}
-					className="w-40 h-40 object-cover text-gray-800"
-					draggable="false"
-					placeholder='blur'
-					blurDataURL='/orderStation/loading.svg'
-					priority // Load image immediately
+					draggable={false}
+					priority={true}
 				/>
 			</button>
 			{showImageList && (

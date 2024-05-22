@@ -1,3 +1,4 @@
+import AsyncImage from '@/components/ui/AsyncImage'
 import { ProductImages } from '@/lib/ProductImages'
 import Image from 'next/image'
 import { type ReactElement } from 'react'
@@ -36,16 +37,15 @@ const ImageList = ({
 							<span className="sr-only">
 								{'Select image'}
 							</span>
-							<Image
+							<AsyncImage
+								className='w-full h-full'
 								width={70}
 								height={70}
 								quality={30}
 								src={imageURL}
 								alt={imageURL?.split('/').pop() ?? 'Item Image'}
-								draggable="false"
-								placeholder='blur'
-								blurDataURL='/orderStation/loading.svg'
-								className="w-full h-full object-cover"
+								draggable={false}
+								priority={true}
 							/>
 						</button>
 					))}
