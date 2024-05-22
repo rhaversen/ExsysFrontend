@@ -186,8 +186,8 @@ const AddProduct = ({
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
 					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-					<div className="flex flex-row items-center justify-center">
-						<div className="font-bold p-2 text-gray-800">
+					<div className="flex flex-row items-center gap-2 justify-center">
+						<div className="font-bold text-gray-800">
 							<EditableField
 								text={product.name}
 								italic={false}
@@ -250,7 +250,8 @@ const AddProduct = ({
 							onValidationChange={(v: boolean) => {
 								handleValidationChange('fromHour', v)
 							}}
-						/>:
+						/>
+						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
 							italic={false}
@@ -267,7 +268,7 @@ const AddProduct = ({
 								handleValidationChange('fromMinute', v)
 							}}
 						/>
-						{' - '}
+						<div className={'text-xl px-1'}>{'—'}</div>
 						<EditableField
 							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
 							italic={false}
@@ -283,7 +284,8 @@ const AddProduct = ({
 							onValidationChange={(v: boolean) => {
 								handleValidationChange('toHour', v)
 							}}
-						/>:
+						/>
+						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
 							italic={false}
@@ -312,10 +314,10 @@ const AddProduct = ({
 						}}
 					/>
 					{product.options.length > 0 &&
-						<p className="italic text-gray-500">{'Tilvalg:'}</p>
+						<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
 					}
 					{product.options.length === 0 &&
-						<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
+						<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
 					}
 					<Options
 						selectedOptions={product.options}
@@ -344,7 +346,7 @@ const AddProduct = ({
 						/>
 					}
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
 						disabled={!formIsValid}

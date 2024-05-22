@@ -121,7 +121,7 @@ const Room = ({
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
 						disabled={!formIsValid}

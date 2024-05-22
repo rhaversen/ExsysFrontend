@@ -93,7 +93,7 @@ const Option = ({
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
 					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-					<div className="flex flex-row items-center justify-center">
+					<div className="flex flex-row items-center gap-2 justify-center">
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								text={option.name}
@@ -151,7 +151,7 @@ const Option = ({
 						}}
 					/>
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
