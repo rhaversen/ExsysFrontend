@@ -184,6 +184,8 @@ const AddProduct = ({
 			</button>
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
+					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
 					<div className="flex flex-row items-center justify-center">
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
@@ -231,6 +233,7 @@ const AddProduct = ({
 							</div>
 						</div>
 					</div>
+					<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
 					<div className="flex flex-row text-gray-800">
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
@@ -298,6 +301,7 @@ const AddProduct = ({
 							}}
 						/>
 					</div>
+					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
 						defaultURL={product.imageURL}
 						newURL={product.imageURL}
