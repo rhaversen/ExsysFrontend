@@ -9,6 +9,7 @@ const EditableField = ({
 	editable,
 	edited,
 	validations,
+	minSize,
 	onChange,
 	onValidationChange
 }: {
@@ -18,6 +19,7 @@ const EditableField = ({
 	editable: boolean
 	edited: boolean
 	validations?: Validation[]
+	minSize?: number
 	onChange: (v: string) => void
 	onValidationChange?: (v: boolean) => void
 }): ReactElement => {
@@ -63,7 +65,7 @@ const EditableField = ({
 					onBlur={handleInputChange}
 					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? `${validationError !== null ? 'border-red-500 hover:border-red-600 focus:border-red-700' : 'border-green-500 hover:border-green-600 focus:border-green-700'} ` : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}
 					readOnly={!editable}
-					size={Math.max(text.length, 1)}
+					size={Math.max(text.length, minSize ?? 1, 1)}
 					aria-label={text}
 				/>
 			}

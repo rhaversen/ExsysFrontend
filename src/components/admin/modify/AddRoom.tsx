@@ -88,6 +88,7 @@ const Room = ({
 								text={room.name}
 								placeholder={'Navn'}
 								italic={false}
+								minSize={10}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Navn skal udfyldes'
@@ -107,6 +108,7 @@ const Room = ({
 								text={room.description}
 								placeholder={'Beskrivelse'}
 								italic={true}
+								minSize={10}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Beskrivelse skal udfyldes'

@@ -192,6 +192,7 @@ const AddProduct = ({
 								text={product.name}
 								placeholder='Navn'
 								italic={false}
+								minSize={5}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Navn skal udfyldes'
