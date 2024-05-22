@@ -6,7 +6,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const AddProduct = ({
 	options,
@@ -19,7 +19,8 @@ const AddProduct = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [product, setProduct] = useState<Omit<ProductType, '_id'>>({
 		name: '',
 		price: 0,
@@ -66,10 +67,9 @@ const AddProduct = ({
 			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating product:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}, [API_URL, onProductPosted, onClose])
+	}, [API_URL, onProductPosted, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setProduct({
@@ -358,14 +358,6 @@ const AddProduct = ({
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }

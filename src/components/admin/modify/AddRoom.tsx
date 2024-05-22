@@ -2,7 +2,7 @@ import { type RoomType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Room = ({
 	onRoomPosted,
@@ -13,7 +13,8 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
 		name: '',
 		description: ''
@@ -41,10 +42,9 @@ const Room = ({
 			onRoomPosted(response.data as RoomType)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating room:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}, [API_URL, onRoomPosted, onClose])
+	}, [API_URL, onRoomPosted, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setRoom({
@@ -138,14 +138,6 @@ const Room = ({
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }

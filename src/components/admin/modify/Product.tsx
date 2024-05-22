@@ -8,7 +8,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Product = ({
 	product,
@@ -23,7 +23,8 @@ const Product = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [isEditing, setIsEditing] = useState(false)
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -73,11 +74,10 @@ const Product = ({
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			onProductPatched(product)
 		}).catch((error) => {
-			console.error('Error updating product:', error)
+			addError(error)
 			setNewProduct(product)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}, [API_URL, onProductPatched])
+	}, [API_URL, onProductPatched, addError])
 
 	const deleteProduct = useCallback((product: ProductType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
@@ -85,9 +85,10 @@ const Product = ({
 		}).then(() => {
 			onProductDeleted(product._id)
 		}).catch((error) => {
+			addError(error)
 			setNewProduct(product)
 		})
-	}, [API_URL, onProductDeleted])
+	}, [API_URL, onProductDeleted, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewProduct({
@@ -379,14 +380,6 @@ const Product = ({
 					/>
 				}
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }

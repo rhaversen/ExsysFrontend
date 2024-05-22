@@ -4,7 +4,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Room = ({
 	room,
@@ -17,7 +17,8 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [isEditing, setIsEditing] = useState(false)
 	const [newRoom, setNewRoom] = useState<RoomType>(room)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -49,11 +50,10 @@ const Room = ({
 		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
-			console.error('Error updating room:', error)
+			addError(error)
 			setNewRoom(room)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}, [API_URL, onRoomPatched])
+	}, [API_URL, onRoomPatched, addError])
 
 	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
@@ -61,11 +61,10 @@ const Room = ({
 		}).then(() => {
 			onRoomDeleted(room._id)
 		}).catch((error) => {
-			console.error('Error deleting room:', error)
+			addError(error)
 			setNewRoom(room)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}, [API_URL, onRoomDeleted])
+	}, [API_URL, onRoomDeleted, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewRoom({
@@ -155,14 +154,6 @@ const Room = ({
 						setShowDeleteConfirmation(false)
 						handleDeleteRoom(confirm)
 					}}
-				/>
-			}
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
 				/>
 			}
 		</div>

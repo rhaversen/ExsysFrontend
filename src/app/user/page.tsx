@@ -8,9 +8,12 @@ import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/tim
 import RoomSelector from '@/components/order/RoomSelector'
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+	const { addError } = useError()
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [quantities, setQuantities] = useState<Record<ProductType['_id'] | OptionType['_id'], number>>({})
@@ -56,12 +59,12 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null) return
 		fetchRooms().catch((error) => {
-			console.error('Error fetching rooms:', error)
+			addError(error)
 		})
 		fetchProducts().catch((error) => {
-			console.error('Error fetching products:', error)
+			addError(error)
 		})
-	}, [API_URL, fetchRooms, fetchProducts])
+	}, [API_URL, fetchRooms, fetchProducts, addError])
 
 	useEffect(() => {
 		updateAvailabilities()
@@ -106,9 +109,9 @@ export default function Page (): ReactElement {
 		console.log(data)
 
 		axios.post(API_URL + '/v1/orders', data).catch((error) => {
-			console.error('Failed to submit order:', error)
+			addError(error)
 		})
-	}, [quantities, selectedDate, selectedRoomId, API_URL])
+	}, [quantities, selectedDate, selectedRoomId, API_URL, addError])
 
 	return (
 		<main className="bg-white flex flex-col h-screen overflow-hidden mx-auto shadow-lg max-w-screen-lg">

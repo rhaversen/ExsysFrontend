@@ -3,6 +3,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import { type OrderType } from '@/lib/backendDataTypes'
 import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 import axios from 'axios'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Block = ({
 	orders,
@@ -14,6 +15,7 @@ const Block = ({
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 
 	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
@@ -59,8 +61,9 @@ const Block = ({
 			const data = response.data as OrderType[]
 			onUpdatedOrders(data)
 		}).catch((error: any) => {
+			addError(error)
 		})
-	}, [API_URL, orders, onUpdatedOrders])
+	}, [API_URL, orders, onUpdatedOrders, addError])
 
 	useEffect(() => {
 		const pending = orders.filter((order) => order.status === 'pending')

@@ -7,10 +7,12 @@ import ModifyView from '@/components/admin/modify/ModifyView'
 import axios from 'axios'
 import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const views = ['Ordre Oversigt', 'Rediger Katalog']
+	const { addError } = useError()
 
 	const [selectedView, setSelectedView] = useState('Ordre Oversigt')
 
@@ -70,9 +72,10 @@ export default function Page (): ReactElement {
 			getOptions(),
 			getOrders()
 		]).catch((error: any) => {
+			addError(error)
 		})
 		setFetching(false)
-	}, [getOrders, getProducts, getOptions, getRooms])
+	}, [getOrders, getProducts, getOptions, getRooms, addError])
 
 	const handleOrdersUpdate = useCallback((orders: OrderType[]) => {
 		// Only update the orders that were changed

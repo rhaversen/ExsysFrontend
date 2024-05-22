@@ -3,7 +3,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Option = ({
 	onOptionPosted,
@@ -14,7 +14,8 @@ const Option = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
 		name: '',
 		price: 0,
@@ -43,10 +44,9 @@ const Option = ({
 			onOptionPosted(response.data as OptionType)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating option:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}, [API_URL, onOptionPosted, onClose])
+	}, [API_URL, onOptionPosted, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setOption({
@@ -166,14 +166,6 @@ const Option = ({
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }
