@@ -53,7 +53,7 @@ const ErrorWindow = ({
 
 	return (
 		<div
-			className={`fixed top-5 right-0 rounded-l-lg shadow-lg bg-red-800 z-50 transition-transform duration-[${errorBounceIn}ms] origin-right ease-in-out ${showError ? 'translate-x-0' : 'translate-x-full'}`}
+			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right ${showError ? `translate-x-0 transition-transform duration-[${errorBounceIn}ms] ease-out` : `translate-x-full transition-transform duration-[${errorBounceIn}ms] ease-in`}`}
 			role="alert"
 			onMouseEnter={handleStopTimeout}
 			onMouseLeave={handleStartTimeout}
