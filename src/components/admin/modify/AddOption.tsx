@@ -94,7 +94,7 @@ const Option = ({
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
 					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
 					<div className="flex flex-row items-center gap-2 justify-center">
-						<div className="font-bold p-2 text-gray-800">
+						<div className="font-bold text-gray-800">
 							<EditableField
 								text={option.name}
 								placeholder='Navn'
