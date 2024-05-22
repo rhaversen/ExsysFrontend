@@ -340,16 +340,18 @@ const Product = ({
 				{product.options.length === 0 && isEditing &&
 					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
-				<Options
-					selectedOptions={newProduct.options}
-					editable={isEditing}
-					onDeleteOption={(v: OptionType) => {
-						handleDeleteOption(v)
-					}}
-					showOptions={() => {
-						setShowOptions(true)
-					}}
-				/>
+				<div className='flex flex-row flex-wrap max-w-52'>
+					<Options
+						selectedOptions={newProduct.options}
+						editable={isEditing}
+						onDeleteOption={(v: OptionType) => {
+							handleDeleteOption(v)
+						}}
+						showOptions={() => {
+							setShowOptions(true)
+						}}
+					/>
+				</div>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
