@@ -41,11 +41,6 @@ const ErrorWindow = ({
 		setTimeOutId(timeoutId)
 	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
 
-	const handleStopTimeout = useCallback((): void => {
-		setTimeoutAnimation(false)
-		clearTimeout(timeOutId)
-	}, [timeOutId, setTimeoutAnimation])
-
 	useEffect(() => {
 		setShowError(true)
 		handleStartTimeout()
@@ -55,13 +50,6 @@ const ErrorWindow = ({
 		<div
 			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right ${showError ? `translate-x-0 transition-transform duration-[${errorBounceIn}ms] ease-out` : `translate-x-full transition-transform duration-[${errorBounceIn}ms] ease-in`}`}
 			role="alert"
-			onMouseEnter={handleStopTimeout}
-			onMouseLeave={handleStartTimeout}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter') {
-					handleStopTimeout()
-				}
-			}}
 		>
 			<div className="flex flex-row p-2">
 				<div className="flex flex-col justify-center items-center">
