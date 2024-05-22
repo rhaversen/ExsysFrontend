@@ -37,18 +37,23 @@ const ErrorWindow = ({
 		}, errorBounceIn + deRenderDelay)
 	}, [onClose, setShowError, errorBounceIn])
 
-	const handleStartTimeout = useCallback((): void => {
+	const handleStartTimeout = useCallback((): () => void => {
 		setTimeoutAnimation(true)
 		const timeoutId = setTimeout(handleClose, timeOut)
-		setTimeOutId(timeoutId)
-	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [timeOut, handleClose, setTimeoutAnimation])
 
 	useEffect(() => {
-		const showTimeout = setTimeout((): void => {
+		const timeoutId = setTimeout((): void => {
 			setShowError(true)
 			handleStartTimeout()
 		}, renderDelay)
 
+		return () => {
+			clearTimeout(timeoutId)
+		}
 	}, [handleStartTimeout, setShowError, renderDelay])
 
 	return (
