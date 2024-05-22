@@ -43,7 +43,7 @@ const EditableImage = ({
 					height={90}
 					quality={50}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
-					alt={'Item Image'}
+					alt={editingURL?.split('/').pop() ?? 'Item Image'}
 					className="w-40 h-40 object-cover text-gray-800"
 					draggable="false"
 					placeholder='blur'
