@@ -8,7 +8,9 @@ const ErrorWindow = ({
 	error: unknown
 	onClose: () => void
 }): ReactElement => {
-	const timeOut = 5000
+	const renderDelay = 50
+	const deRenderDelay = 200
+	const timeOut = 5000 + renderDelay
 	const errorBounceIn = 100
 
 	const [timeoutAnimation, setTimeoutAnimation] = useState(false)
@@ -32,8 +34,8 @@ const ErrorWindow = ({
 		setShowError(false)
 		setTimeout(() => {
 			onClose()
-		}, errorBounceIn)
-	}, [onClose, setShowError])
+		}, errorBounceIn + deRenderDelay)
+	}, [onClose, setShowError, errorBounceIn])
 
 	const handleStartTimeout = useCallback((): void => {
 		setTimeoutAnimation(true)
@@ -42,9 +44,12 @@ const ErrorWindow = ({
 	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
 
 	useEffect(() => {
-		setShowError(true)
-		handleStartTimeout()
-	}, [handleStartTimeout, setShowError])
+		const showTimeout = setTimeout((): void => {
+			setShowError(true)
+			handleStartTimeout()
+		}, renderDelay)
+
+	}, [handleStartTimeout, setShowError, renderDelay])
 
 	return (
 		<div
