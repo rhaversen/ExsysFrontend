@@ -10,10 +10,12 @@
 			<stop offset="1" stop-opacity=".5" stop-color="currentColor"/>
 		</linearGradient>
 	</defs>
-	<g stroke-width="8">
+	<g stroke-width="8" style="transform-origin:100px 100px;animation:rotate 1.3s linear infinite">
 		<path stroke="url(#a)" d="M4 100a96 96 0 0 1 192 0" style="stroke-width:20px"/>
 		<path stroke="url(#b)" d="M196 100a96 96 0 0 1-192 0" style="stroke-width:20px"/>
 		<path stroke="currentColor" stroke-linecap="round" d="M4 100a96 96 0 0 1 0-2" style="stroke-width:20px"/>
 	</g>
-	<animateTransform from="0 0 0" to="360 0 0" attributeName="transform" type="rotate" repeatCount="indefinite" dur="1300ms"/>
+	<style>
+        @keyframes rotate{0%{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+	</style>
 </svg>
