@@ -1,4 +1,4 @@
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useState } from 'react'
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 import { type OrderWindow, type ProductType } from '@/lib/backendDataTypes'
 
@@ -21,10 +21,10 @@ const Product = ({
 }): ReactElement => {
 	const [quantity, setQuantity] = useState(initialQuantity)
 
-	const handleQuantityChange = (newQuantity: number): void => {
+	const handleQuantityChange = useCallback((newQuantity: number): void => {
 		setQuantity(newQuantity)
 		onQuantityChange(id, newQuantity)
-	}
+	}, [id, onQuantityChange])
 
 	return (
 		<div

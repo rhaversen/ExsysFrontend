@@ -1,5 +1,5 @@
 import { type RoomType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useCallback, useState } from 'react'
 
 const RoomSelector = ({
 	rooms,
@@ -10,11 +10,11 @@ const RoomSelector = ({
 }): ReactElement => {
 	const [selectedRoom, setSelectedRoom] = useState('') // Initialize with an empty string
 
-	const handleRoomChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const handleRoomChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedRoom = event.target.value // Get the value of the selected option
 		setSelectedRoom(selectedRoom)
 		onRoomSelect(selectedRoom)
-	}
+	}, [onRoomSelect])
 
 	return (
 		<div className="p-5">

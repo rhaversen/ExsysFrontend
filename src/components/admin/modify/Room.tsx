@@ -4,7 +4,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Room = ({
 	room,
@@ -17,7 +17,8 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [isEditing, setIsEditing] = useState(false)
 	const [newRoom, setNewRoom] = useState<RoomType>(room)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -45,55 +46,53 @@ const Room = ({
 		})
 	}, [])
 
-	const patchRoom = (room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
+	const patchRoom = useCallback((room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
 		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
-			console.error('Error updating room:', error)
+			addError(error)
 			setNewRoom(room)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onRoomPatched, addError])
 
-	const deleteRoom = (room: RoomType, confirm: boolean): void => {
+	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onRoomDeleted(room._id)
 		}).catch((error) => {
-			console.error('Error deleting room:', error)
+			addError(error)
 			setNewRoom(room)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onRoomDeleted, addError])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setNewRoom({
 			...newRoom,
 			name: v
 		})
-	}
+	}, [newRoom])
 
-	const handleDescriptionChange = (v: string): void => {
+	const handleDescriptionChange = useCallback((v: string): void => {
 		setNewRoom({
 			...newRoom,
 			description: v
 		})
-	}
+	}, [newRoom])
 
-	const handleUndoEdit = (): void => {
+	const handleUndoEdit = useCallback((): void => {
 		setNewRoom(room)
 		setIsEditing(false)
-	}
+	}, [room])
 
-	const handleCompleteEdit = (): void => {
+	const handleCompleteEdit = useCallback((): void => {
 		patchRoom(room, newRoom)
 		setIsEditing(false)
-	}
+	}, [patchRoom, room, newRoom])
 
-	const handleDeleteRoom = (confirm: boolean): void => {
+	const handleDeleteRoom = useCallback((confirm: boolean): void => {
 		deleteRoom(room, confirm)
-	}
+	}, [deleteRoom, room])
 
 	return (
 		<div className="p-2 m-2">
@@ -102,7 +101,9 @@ const Room = ({
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newRoom.name}
+							placeholder={'Navn'}
 							italic={false}
+							minSize={10}
 							validations={[{
 								validate: (v: string) => v.length > 0,
 								message: 'Navn skal udfyldes'
@@ -120,7 +121,9 @@ const Room = ({
 					<div className="text-gray-800">
 						<EditableField
 							text={newRoom.description}
+							placeholder={'Beskrivelse'}
 							italic={true}
+							minSize={10}
 							validations={[{
 								validate: (v: string) => v.length > 0,
 								message: 'Beskrivelse skal udfyldes'
@@ -155,14 +158,6 @@ const Room = ({
 						setShowDeleteConfirmation(false)
 						handleDeleteRoom(confirm)
 					}}
-				/>
-			}
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
 				/>
 			}
 		</div>

@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const DeliveryTimeSelector = ({
 	selectedDate,
@@ -9,16 +9,16 @@ const DeliveryTimeSelector = ({
 }): ReactElement => {
 	const [options, setOptions] = useState<Date[]>([])
 
-	const handleTimeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const handleTimeChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>): void => {
 		const selectedTime = new Date(event.target.value)
 		onDateSelect(selectedTime)
-	}
+	}, [onDateSelect])
 
-	const formatTime = (date: Date): string => {
+	const formatTime = useCallback((date: Date): string => {
 		const hours = date.getHours().toString().padStart(2, '0')
 		const minutes = date.getMinutes().toString().padStart(2, '0')
 		return `${hours}:${minutes}`
-	}
+	}, [])
 
 	// Populate options with an array of dates
 	useEffect(() => {

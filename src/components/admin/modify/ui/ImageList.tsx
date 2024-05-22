@@ -42,6 +42,9 @@ const ImageList = ({
 								quality={30}
 								src={imageURL}
 								alt={imageURL}
+								draggable="false"
+								placeholder='blur'
+								blurDataURL='/orderStation/loading.svg'
 								className="w-full h-full object-cover"
 							/>
 						</button>
