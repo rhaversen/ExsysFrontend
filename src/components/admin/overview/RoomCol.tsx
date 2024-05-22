@@ -6,11 +6,11 @@ import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
 const RoomCol = ({
 	room,
 	orders,
-	onOrderUpdate
+	onUpdatedOrders
 }: {
 	room: RoomType
 	orders: OrderTypeWithNames[]
-	onOrderUpdate: (orderIds: Array<OrderType['_id']>, status: OrderType['status']) => void
+	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
 	const [ordersByTimeBlock, setOrdersByTimeBlock] = useState<Record<string, OrderTypeWithNames[]>>({})
 
@@ -45,7 +45,7 @@ const RoomCol = ({
 					key={timeBlock}
 					timeBlock={timeBlock}
 					orders={ordersByTimeBlock[timeBlock]}
-					onOrderUpdate={onOrderUpdate}
+					onUpdatedOrders={onUpdatedOrders}
 				/>
 			))}
 		</div>

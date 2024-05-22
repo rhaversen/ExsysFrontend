@@ -3,7 +3,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Option = ({
 	onOptionPosted,
@@ -14,14 +14,15 @@ const Option = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
 		name: '',
 		price: 0,
 		imageURL: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false })
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
@@ -38,45 +39,44 @@ const Option = ({
 		})
 	}, [])
 
-	const postOption = (option: Omit<OptionType, '_id'>): void => {
+	const postOption = useCallback((option: Omit<OptionType, '_id'>): void => {
 		axios.post(API_URL + '/v1/options', option).then((response) => {
 			onOptionPosted(response.data as OptionType)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating option:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}
+	}, [API_URL, onOptionPosted, onClose, addError])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setOption({
 			...option,
 			name: v
 		})
-	}
+	}, [option])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setOption({
 			...option,
 			price: Number(v)
 		})
-	}
+	}, [option])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setOption({
 			...option,
 			imageURL: v
 		})
-	}
+	}, [option])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postOption(option)
-	}
+	}, [option, postOption])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -91,10 +91,13 @@ const Option = ({
 			</button>
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
-					<div className="flex flex-row items-center justify-center">
-						<div className="font-bold p-2 text-gray-800">
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
+					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
+					<div className="flex flex-row items-center gap-2 justify-center">
+						<div className="font-bold text-gray-800">
 							<EditableField
 								text={option.name}
+								placeholder='Navn'
 								italic={false}
 								validations={[{
 									validate: (v) => v.length > 0,
@@ -116,6 +119,7 @@ const Option = ({
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
 								text={option.price.toString()}
+								placeholder='Pris'
 								italic={true}
 								validations={[{
 									validate: (v) => !isNaN(Number(v)),
@@ -138,6 +142,7 @@ const Option = ({
 							</div>
 						</div>
 					</div>
+					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
 						defaultURL={option.imageURL}
 						newURL={option.imageURL}
@@ -148,7 +153,7 @@ const Option = ({
 						}}
 					/>
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
@@ -159,21 +164,13 @@ const Option = ({
 					<button
 						type="button"
 						disabled={!formIsValid}
-						className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
+						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
 						onClick={handleCompletePost}
 					>
 						{'Færdig'}
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }
