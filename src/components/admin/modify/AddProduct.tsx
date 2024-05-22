@@ -37,8 +37,8 @@ const AddProduct = ({
 		options: []
 	})
 	const [showOptions, setShowOptions] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false })
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {

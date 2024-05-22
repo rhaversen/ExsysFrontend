@@ -19,8 +19,8 @@ const Room = ({
 		name: '',
 		description: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false, description: false })
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
