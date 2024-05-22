@@ -1,5 +1,5 @@
 import Product from '@/components/orderstation/select/Product'
-import { type ProductType } from '@/lib/backendDataTypes'
+import { type ProductType } from '@/types/backendDataTypes'
 import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'

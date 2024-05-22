@@ -1,5 +1,5 @@
 import Option from '@/components/orderstation/select/Option'
-import { type OptionType } from '@/lib/backendDataTypes'
+import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
 const OptionsWindow = ({

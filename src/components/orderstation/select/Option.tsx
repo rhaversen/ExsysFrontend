@@ -1,5 +1,5 @@
 import AsyncImage from '@/components/ui/AsyncImage'
-import { type OptionType } from '@/lib/backendDataTypes'
+import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
 const Option = ({

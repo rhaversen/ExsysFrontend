@@ -1,6 +1,6 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OrderType } from '@/lib/backendDataTypes'
-import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
+import { type OrderType } from '@/types/backendDataTypes'
+import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 

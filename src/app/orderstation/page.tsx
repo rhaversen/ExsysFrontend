@@ -2,7 +2,7 @@
 
 import Room from '@/components/orderstation/Room'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType } from '@/lib/backendDataTypes'
+import { type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'

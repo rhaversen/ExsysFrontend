@@ -1,5 +1,5 @@
 import Option from '@/components/admin/modify/productOptions/Option'
-import { type OptionType } from '@/lib/backendDataTypes'
+import { type OptionType } from '@/types/backendDataTypes'
 import { type ReactElement } from 'react'
 
 const Options = ({

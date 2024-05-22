@@ -8,7 +8,7 @@ import Option from '@/components/admin/modify/Option'
 import Product from '@/components/admin/modify/Product'
 import Room from '@/components/admin/modify/Room'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
-import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 
 const ModifyView = ({

@@ -1,6 +1,6 @@
 import Item from '@/components/orderstation/cart/Item'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import { type CartItemType, type CartType } from '@/lib/frontendDataTypes'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type CartItemType, type CartType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 const OrderSummary = ({

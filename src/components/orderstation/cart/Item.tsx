@@ -1,6 +1,6 @@
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback } from 'react'
 
 const Item = ({

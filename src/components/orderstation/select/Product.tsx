@@ -1,5 +1,5 @@
 import AsyncImage from '@/components/ui/AsyncImage'
-import { type ProductType } from '@/lib/backendDataTypes'
+import { type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
 const Product = ({

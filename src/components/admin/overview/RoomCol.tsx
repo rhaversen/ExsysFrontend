@@ -1,6 +1,6 @@
 import Block from '@/components/admin/overview/Block'
-import { type OrderType, type RoomType } from '@/lib/backendDataTypes'
-import { type OrderTypeWithNames } from '@/lib/frontendDataTypes'
+import { type OrderType, type RoomType } from '@/types/backendDataTypes'
+import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const RoomCol = ({

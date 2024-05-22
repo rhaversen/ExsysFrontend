@@ -1,5 +1,5 @@
 import Product from '@/components/order/Product'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import React, { type ReactElement } from 'react'
 
