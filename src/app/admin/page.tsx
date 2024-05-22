@@ -8,6 +8,7 @@ import axios from 'axios'
 import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -41,6 +42,10 @@ export default function Page (): ReactElement {
 		try {
 			const productsResponse = await axios.get(API_URL + '/v1/products')
 			const products = productsResponse.data as ProductType[]
+			// Convert orderWindow to local time for all products
+			products.forEach((product) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			})
 			setProducts(products)
 		} catch (error: any) {
 		}
