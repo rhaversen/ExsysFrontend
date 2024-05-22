@@ -8,7 +8,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Product = ({
 	product,
@@ -23,7 +23,8 @@ const Product = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [isEditing, setIsEditing] = useState(false)
 	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -62,7 +63,7 @@ const Product = ({
 		})
 	}, [])
 
-	const patchProduct = (product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
+	const patchProduct = useCallback((product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productPatchUTC = {
 			...productPatch,
@@ -73,47 +74,45 @@ const Product = ({
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			onProductPatched(product)
 		}).catch((error) => {
-			console.error('Error updating product:', error)
+			addError(error)
 			setNewProduct(product)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onProductPatched, addError])
 
-	const deleteProduct = (product: ProductType, confirm: boolean): void => {
+	const deleteProduct = useCallback((product: ProductType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
 			data: { confirm }
 		}).then(() => {
 			onProductDeleted(product._id)
 		}).catch((error) => {
-			console.error('Error deleting product:', error)
+			addError(error)
 			setNewProduct(product)
-			setBackendErrorMessages(error.response.data.error as string)
 		})
-	}
+	}, [API_URL, onProductDeleted, addError])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setNewProduct({
 			...newProduct,
 			name: v
 		})
-	}
+	}, [newProduct])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setNewProduct({
 			...newProduct,
 			price: Number(v)
 		})
-	}
+	}, [newProduct])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setNewProduct({
 			...newProduct,
 			imageURL: v
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowFromMinuteChange = (v: string): void => {
+	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -125,9 +124,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowFromHourChange = (v: string): void => {
+	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -139,9 +138,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowToMinuteChange = (v: string): void => {
+	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -153,9 +152,9 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleOrderWindowToHourChange = (v: string): void => {
+	const handleOrderWindowToHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setNewProduct({
 			...newProduct,
@@ -167,35 +166,35 @@ const Product = ({
 				}
 			}
 		})
-	}
+	}, [newProduct])
 
-	const handleAddOption = (v: OptionType): void => {
+	const handleAddOption = useCallback((v: OptionType): void => {
 		setNewProduct({
 			...newProduct,
 			options: [...newProduct.options, v]
 		})
-	}
+	}, [newProduct])
 
-	const handleDeleteOption = (v: OptionType): void => {
+	const handleDeleteOption = useCallback((v: OptionType): void => {
 		setNewProduct({
 			...newProduct,
 			options: newProduct.options.filter((option) => option._id !== v._id)
 		})
-	}
+	}, [newProduct])
 
-	const handleUndoEdit = (): void => {
+	const handleUndoEdit = useCallback((): void => {
 		setNewProduct(product)
 		setIsEditing(false)
-	}
+	}, [product])
 
-	const handleCompleteEdit = (): void => {
+	const handleCompleteEdit = useCallback((): void => {
 		patchProduct(product, newProduct)
 		setIsEditing(false)
-	}
+	}, [product, newProduct, patchProduct])
 
-	const handleDeleteProduct = (confirm: boolean): void => {
+	const handleDeleteProduct = useCallback((confirm: boolean): void => {
 		deleteProduct(product, confirm)
-	}
+	}, [product, deleteProduct])
 
 	return (
 		<div className="p-2 m-2">
@@ -204,7 +203,9 @@ const Product = ({
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newProduct.name}
+							placeholder='Navn'
 							italic={false}
+							minSize={5}
 							validations={[{
 								validate: (v: string) => v.length > 0,
 								message: 'Navn skal udfyldes'
@@ -225,6 +226,7 @@ const Product = ({
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
 							text={newProduct.price.toString()}
+							placeholder='Pris'
 							italic={true}
 							validations={[{
 								validate: (v: string) => !isNaN(Number(v)),
@@ -250,6 +252,7 @@ const Product = ({
 				<div className="flex flex-row text-gray-800">
 					<EditableField
 						text={newProduct.orderWindow.from.hour.toString().padStart(2, '0')}
+						placeholder='Time'
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -267,6 +270,7 @@ const Product = ({
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
+						placeholder='Minut'
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -284,6 +288,7 @@ const Product = ({
 					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>{'—'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
+						placeholder='Time'
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -301,6 +306,7 @@ const Product = ({
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
+						placeholder='Minut'
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -381,14 +387,6 @@ const Product = ({
 					/>
 				}
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }

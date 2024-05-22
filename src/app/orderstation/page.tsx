@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Room from '@/components/orderstation/Room'
 import { type RoomType } from '@/lib/backendDataTypes'
 import { useInterval } from 'react-use'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -13,6 +14,7 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 
 	const router = useRouter()
+	const { addError } = useError()
 
 	const fetchRooms = useCallback(async () => {
 		const response = await axios.get(API_URL + '/v1/rooms')
@@ -23,13 +25,13 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
 		fetchRooms().catch((error) => {
-			console.error('Error fetching rooms:', error)
+			addError(error)
 		})
-	}, [API_URL, fetchRooms])
+	}, [API_URL, fetchRooms, addError])
 
-	const handleRoomSelect = (roomId: RoomType['_id']): void => {
+	const handleRoomSelect = useCallback((roomId: RoomType['_id']): void => {
 		router.push(`/orderstation/${roomId}`)
-	}
+	}, [router])
 
 	useInterval(fetchRooms, 1000 * 60 * 60) // Fetch rooms every hour
 

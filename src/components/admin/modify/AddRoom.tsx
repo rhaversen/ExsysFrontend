@@ -2,7 +2,7 @@ import { type RoomType } from '@/lib/backendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import axios from 'axios'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Room = ({
 	onRoomPosted,
@@ -13,13 +13,14 @@ const Room = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
 		name: '',
 		description: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false, description: false })
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
@@ -36,37 +37,36 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = (room: Omit<RoomType, '_id'>): void => {
+	const postRoom = useCallback((room: Omit<RoomType, '_id'>): void => {
 		axios.post(API_URL + '/v1/rooms', room).then((response) => {
 			onRoomPosted(response.data as RoomType)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating room:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}
+	}, [API_URL, onRoomPosted, onClose, addError])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setRoom({
 			...room,
 			name: v
 		})
-	}
+	}, [room])
 
-	const handleDescriptionChange = (v: string): void => {
+	const handleDescriptionChange = useCallback((v: string): void => {
 		setRoom({
 			...room,
 			description: v
 		})
-	}
+	}, [room])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postRoom(room)
-	}
+	}, [postRoom, room])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -82,10 +82,13 @@ const Room = ({
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
 					<div className="flex flex-col items-center justify-center">
+						<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								text={room.name}
+								placeholder={'Navn'}
 								italic={false}
+								minSize={10}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Navn skal udfyldes'
@@ -103,7 +106,9 @@ const Room = ({
 						<div className="text-gray-800">
 							<EditableField
 								text={room.description}
+								placeholder={'Beskrivelse'}
 								italic={true}
+								minSize={10}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Beskrivelse skal udfyldes'
@@ -120,10 +125,9 @@ const Room = ({
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
-						disabled={!formIsValid}
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
 						onClick={handleCancelPost}
 					>
@@ -131,21 +135,14 @@ const Room = ({
 					</button>
 					<button
 						type="button"
-						className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
+						disabled={!formIsValid}
+						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
 						onClick={handleCompletePost}
 					>
 						{'Færdig'}
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }

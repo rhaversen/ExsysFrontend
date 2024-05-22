@@ -10,10 +10,12 @@ import OrderConfirmationWindow from '@/components/orderstation/confirmation/Orde
 import { useInterval } from 'react-use'
 import { useRouter } from 'next/navigation'
 import { type CartType } from '@/lib/frontendDataTypes'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
+	const { addError } = useError()
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
@@ -53,9 +55,9 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	useEffect(() => {
 		if (API_URL === undefined) return
 		fetchProductsAndOptions().catch((error) => {
-			console.error('Error fetching products and options:', error)
+			addError(error)
 		})
-	}, [API_URL, fetchProductsAndOptions])
+	}, [API_URL, fetchProductsAndOptions, addError])
 
 	// Check if the room is valid
 	useEffect(() => {
@@ -84,9 +86,9 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			const room = response.data as RoomType
 			setRoomName(room.name)
 		}).catch((error) => {
-			console.error('Error fetching room name:', error)
+			addError(error)
 		})
-	}, [API_URL, params.room])
+	}, [API_URL, params.room, addError, setRoomName])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
@@ -138,10 +140,10 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		axios.post(API_URL + '/v1/orders', data).then(() => {
 			setOrderStatus('success')
 		}).catch((error) => {
+			addError(error)
 			setOrderStatus('error')
-			console.error(error)
 		})
-	}, [API_URL, cart, params.room, setOrderStatus, setShowOrderConfirmation])
+	}, [API_URL, cart, params.room, setOrderStatus, setShowOrderConfirmation, addError])
 
 	const reset = useCallback((): void => {
 		setCart({

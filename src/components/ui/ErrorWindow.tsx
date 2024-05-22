@@ -1,53 +1,65 @@
+import { AxiosError } from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const ErrorWindow = ({
-	errorMessage,
+	error,
 	onClose
 }: {
-	errorMessage: string
+	error: unknown
 	onClose: () => void
 }): ReactElement => {
-	const timeOut = 5000
+	const renderDelay = 50
+	const deRenderDelay = 200
+	const timeOut = 5000 + renderDelay
 	const errorBounceIn = 100
 
 	const [timeoutAnimation, setTimeoutAnimation] = useState(false)
 	const [showError, setShowError] = useState(false)
-	const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>()
+
+	const errorMessage = ((): string => {
+		if (error === undefined || error === null) return ''
+		if (typeof error === 'string') return error
+		if (typeof error === 'object') {
+			if (error instanceof AxiosError) {
+				if (error.response?.data !== undefined && error.response?.data !== '') return error.response.data.error
+				if (error.message !== undefined && error.message !== '') return error.message
+				return JSON.stringify(error)
+			}
+			if (error instanceof Error) return error.message
+		}
+		return JSON.stringify(error)
+	})()
 
 	const handleClose = useCallback((): void => {
 		setShowError(false)
 		setTimeout(() => {
 			onClose()
-		}, errorBounceIn)
-	}, [onClose, setShowError])
+		}, errorBounceIn + deRenderDelay)
+	}, [onClose, setShowError, errorBounceIn])
 
-	const handleStartTimeout = useCallback((): void => {
+	const handleStartTimeout = useCallback((): () => void => {
 		setTimeoutAnimation(true)
 		const timeoutId = setTimeout(handleClose, timeOut)
-		setTimeOutId(timeoutId)
-	}, [timeOut, handleClose, setTimeOutId, setTimeoutAnimation])
-
-	const handleStopTimeout = useCallback((): void => {
-		setTimeoutAnimation(false)
-		clearTimeout(timeOutId)
-	}, [timeOutId, setTimeoutAnimation])
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [timeOut, handleClose, setTimeoutAnimation])
 
 	useEffect(() => {
-		setShowError(true)
-		handleStartTimeout()
-	}, [handleStartTimeout, setShowError])
+		const timeoutId = setTimeout((): void => {
+			setShowError(true)
+			handleStartTimeout()
+		}, renderDelay)
+
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [handleStartTimeout, setShowError, renderDelay])
 
 	return (
 		<div
-			className={`fixed top-5 right-0 rounded-l-lg shadow-lg bg-red-800 z-50 transition-transform duration-[${errorBounceIn}ms] origin-right ease-in-out ${showError ? 'translate-x-0' : 'translate-x-full'}`}
+			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right ${showError ? `translate-x-0 transition-transform duration-[${errorBounceIn}ms] ease-out` : `translate-x-full transition-transform duration-[${errorBounceIn}ms] ease-in`}`}
 			role="alert"
-			onMouseEnter={handleStopTimeout}
-			onMouseLeave={handleStartTimeout}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter') {
-					handleStopTimeout()
-				}
-			}}
 		>
 			<div className="flex flex-row p-2">
 				<div className="flex flex-col justify-center items-center">

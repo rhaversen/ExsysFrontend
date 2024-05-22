@@ -1,4 +1,4 @@
-import { type ReactElement, useState } from 'react'
+import { type ReactElement, useCallback, useState } from 'react'
 
 const ConfirmDeletion = ({
 	itemName,
@@ -11,9 +11,9 @@ const ConfirmDeletion = ({
 }): ReactElement => {
 	const [confirmDeletion, setConfirmDeletion] = useState(false)
 
-	const handleSubmit = (): void => {
+	const handleSubmit = useCallback((): void => {
 		onSubmit(confirmDeletion)
-	}
+	}, [confirmDeletion, onSubmit])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

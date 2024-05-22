@@ -6,7 +6,7 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import axios from 'axios'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import ErrorWindow from '@/components/ui/ErrorWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const AddProduct = ({
 	options,
@@ -19,7 +19,8 @@ const AddProduct = ({
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [backendErrorMessages, setBackendErrorMessages] = useState<string | null>(null)
+	const { addError } = useError()
+
 	const [product, setProduct] = useState<Omit<ProductType, '_id'>>({
 		name: '',
 		price: 0,
@@ -36,8 +37,8 @@ const AddProduct = ({
 		options: []
 	})
 	const [showOptions, setShowOptions] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false })
+	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
@@ -54,7 +55,7 @@ const AddProduct = ({
 		})
 	}, [])
 
-	const postProduct = (product: Omit<ProductType, '_id'>): void => {
+	const postProduct = useCallback((product: Omit<ProductType, '_id'>): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productUTC = {
 			...product,
@@ -66,34 +67,33 @@ const AddProduct = ({
 			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
-			console.error('Error updating product:', error)
-			setBackendErrorMessages(error.response.data.error as string)
+			addError(error)
 		})
-	}
+	}, [API_URL, onProductPosted, onClose, addError])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setProduct({
 			...product,
 			name: v
 		})
-	}
+	}, [product])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setProduct({
 			...product,
 			price: Number(v)
 		})
-	}
+	}, [product])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setProduct({
 			...product,
 			imageURL: v
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowFromMinuteChange = (v: string): void => {
+	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -105,9 +105,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowFromHourChange = (v: string): void => {
+	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -119,9 +119,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowToMinuteChange = (v: string): void => {
+	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -133,9 +133,9 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleOrderWindowToHourChange = (v: string): void => {
+	const handleOrderWindowToHourChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9]/g, '')
 		setProduct({
 			...product,
@@ -147,29 +147,29 @@ const AddProduct = ({
 				}
 			}
 		})
-	}
+	}, [product])
 
-	const handleAddOption = (v: OptionType): void => {
+	const handleAddOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
 			options: [...product.options, v]
 		})
-	}
+	}, [product])
 
-	const handleDeleteOption = (v: OptionType): void => {
+	const handleDeleteOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
 			options: product.options.filter((option) => option._id !== v._id)
 		})
-	}
+	}, [product])
 
-	const handleCancelPost = (): void => {
+	const handleCancelPost = useCallback((): void => {
 		onClose()
-	}
+	}, [onClose])
 
-	const handleCompletePost = (): void => {
+	const handleCompletePost = useCallback((): void => {
 		postProduct(product)
-	}
+	}, [product, postProduct])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -184,11 +184,15 @@ const AddProduct = ({
 			</button>
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
-					<div className="flex flex-row items-center justify-center">
-						<div className="font-bold p-2 text-gray-800">
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
+					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
+					<div className="flex flex-row items-center gap-2 justify-center">
+						<div className="font-bold text-gray-800">
 							<EditableField
 								text={product.name}
+								placeholder='Navn'
 								italic={false}
+								minSize={5}
 								validations={[{
 									validate: (v: string) => v.length > 0,
 									message: 'Navn skal udfyldes'
@@ -209,6 +213,7 @@ const AddProduct = ({
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
 								text={product.price.toString()}
+								placeholder='Pris'
 								italic={true}
 								validations={[{
 									validate: (v: string) => !isNaN(Number(v)),
@@ -231,9 +236,11 @@ const AddProduct = ({
 							</div>
 						</div>
 					</div>
+					<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
 					<div className="flex flex-row text-gray-800">
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
+							placeholder='Time'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -247,9 +254,11 @@ const AddProduct = ({
 							onValidationChange={(v: boolean) => {
 								handleValidationChange('fromHour', v)
 							}}
-						/>:
+						/>
+						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
+							placeholder='Minut'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -264,9 +273,10 @@ const AddProduct = ({
 								handleValidationChange('fromMinute', v)
 							}}
 						/>
-						{' - '}
+						<div className={'text-xl px-1'}>{'—'}</div>
 						<EditableField
 							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
+							placeholder='Time'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -280,9 +290,11 @@ const AddProduct = ({
 							onValidationChange={(v: boolean) => {
 								handleValidationChange('toHour', v)
 							}}
-						/>:
+						/>
+						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
+							placeholder='Minut'
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -298,6 +310,7 @@ const AddProduct = ({
 							}}
 						/>
 					</div>
+					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
 						defaultURL={product.imageURL}
 						newURL={product.imageURL}
@@ -308,10 +321,10 @@ const AddProduct = ({
 						}}
 					/>
 					{product.options.length > 0 &&
-						<p className="italic text-gray-500">{'Tilvalg:'}</p>
+						<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
 					}
 					{product.options.length === 0 &&
-						<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
+						<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
 					}
 					<Options
 						selectedOptions={product.options}
@@ -340,10 +353,9 @@ const AddProduct = ({
 						/>
 					}
 				</div>
-				<div className="flex flex-row justify-center gap-4">
+				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
 						type="button"
-						disabled={!formIsValid}
 						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
 						onClick={handleCancelPost}
 					>
@@ -351,21 +363,14 @@ const AddProduct = ({
 					</button>
 					<button
 						type="button"
-						className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
+						disabled={!formIsValid}
+						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
 						onClick={handleCompletePost}
 					>
 						{'Færdig'}
 					</button>
 				</div>
 			</div>
-			{backendErrorMessages !== null &&
-				<ErrorWindow
-					onClose={() => {
-						setBackendErrorMessages(null)
-					}}
-					errorMessage={backendErrorMessages}
-				/>
-			}
 		</div>
 	)
 }
