@@ -1,15 +1,15 @@
 'use client'
 
-import React, { type ReactElement, useState } from 'react'
-import { type OptionType, type ProductType, type RoomType } from '@/lib/backendDataTypes'
-import ItemList from '@/components/admin/modify/ItemList'
-import Product from '@/components/admin/modify/Product'
-import Option from '@/components/admin/modify/Option'
-import Room from '@/components/admin/modify/Room'
-import AddProduct from '@/components/admin/modify/AddProduct'
 import AddOption from '@/components/admin/modify/AddOption'
+import AddProduct from '@/components/admin/modify/AddProduct'
 import AddRoom from '@/components/admin/modify/AddRoom'
+import ItemList from '@/components/admin/modify/ItemList'
+import Option from '@/components/admin/modify/Option'
+import Product from '@/components/admin/modify/Product'
+import Room from '@/components/admin/modify/Room'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
+import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 
 const ModifyView = ({
 	products,

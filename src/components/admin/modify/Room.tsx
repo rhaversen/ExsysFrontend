@@ -1,10 +1,10 @@
-import { type RoomType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import EditableField from '@/components/admin/modify/ui/EditableField'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
+import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import axios from 'axios'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type RoomType } from '@/types/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Room = ({
 	room,

@@ -1,7 +1,7 @@
-import React, { type ReactElement, useCallback, useState } from 'react'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
 import OptionsWindow from '@/components/orderstation/select/OptionsWindow'
+import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useCallback, useState } from 'react'
 
 const SelectionWindow = ({
 	products,
