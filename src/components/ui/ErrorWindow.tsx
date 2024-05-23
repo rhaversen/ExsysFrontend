@@ -61,7 +61,7 @@ const ErrorWindow = ({
 			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right transition-transform duration-[${errorBounceIn}ms] ${showError ? 'translate-x-0 ease-out' : 'translate-x-full ease-in'}`}
 			role="alert"
 		>
-			<div className="flex flex-row p-2">
+			<div className="right-0 top-5 flex flex-row p-2">
 				<div className="flex flex-col justify-center items-center">
 					<h1 className="text-xl font-bold text-white">Der skete en fejl</h1>
 					<p className="text-lg text-white">{errorMessage}</p>
