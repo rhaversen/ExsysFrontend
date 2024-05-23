@@ -1,4 +1,4 @@
-import { type OrderWindow } from '@/lib/backendDataTypes'
+import { type OrderWindow } from '@/types/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const {

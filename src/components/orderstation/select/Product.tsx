@@ -1,6 +1,6 @@
+import AsyncImage from '@/components/ui/AsyncImage'
+import { type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
-import Image from 'next/image'
-import { type ProductType } from '@/lib/backendDataTypes'
 
 const Product = ({
 	product,
@@ -15,7 +15,7 @@ const Product = ({
 		<div className="p-2 mx-auto">
 			<div className="relative">
 				{disabled &&
-					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded" />
+					<div className="absolute top-0 left-0 w-full h-full bg-gray-700 opacity-50 z-10 rounded"/>
 				}
 				<button
 					type="button"
@@ -39,15 +39,15 @@ const Product = ({
 						{' — '}
 						{product.orderWindow.to.hour.toString().padStart(2, '0')}:{product.orderWindow.to.minute.toString().padStart(2, '0')}
 					</div>
-					<Image
+					<AsyncImage
+						className='w-64 h-64'
 						width={100}
 						height={100}
 						quality={80}
 						src={`${product.imageURL === undefined || product.imageURL === '' ? '/none.svg' : product.imageURL}`}
 						alt={product.name}
-						className="w-64 h-64 object-cover text-gray-800"
-						draggable="false"
-						priority // Load image immediately
+						draggable={false}
+						priority={true}
 					/>
 				</button>
 			</div>

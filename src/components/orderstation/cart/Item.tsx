@@ -1,7 +1,7 @@
-import React, { type ReactElement, useCallback } from 'react'
-import Image from 'next/image'
 import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
+import AsyncImage from '@/components/ui/AsyncImage'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useCallback } from 'react'
 
 const Item = ({
 	imageURL,
@@ -30,15 +30,15 @@ const Item = ({
 				{name}
 			</h3>
 			<div className="flex flex-row items-center justify-between">
-				<Image
+				<AsyncImage
+					className='w-12 h-12'
 					width={40}
 					height={40}
 					quality={40}
 					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`}
 					alt={name}
-					className="w-12 h-12 object-cover text-gray-800 mx-auto"
-					draggable="false"
-					priority // Load image immediately
+					draggable={false}
+					priority={true}
 				/>
 				<QuantityAdjuster
 					quantity={quantity}

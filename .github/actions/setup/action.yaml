@@ -4,11 +4,11 @@ description: "Sets up Node.js and installs dependencies"
 runs:
     using: "composite"
     steps:
-        - name: Setup Node.js environment
-          uses: actions/setup-node@v4
-          with:
-              node-version: "lts/*"
+        -   name: Setup Node.js environment
+            uses: actions/setup-node@v4
+            with:
+                node-version: "lts/*"
 
-        - name: Install Dependencies
-          run: npm install
-          shell: bash
+        -   name: Install Dependencies
+            run: npm install
+            shell: bash

@@ -1,14 +1,14 @@
-import { type OptionType, type ProductType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import OptionsWindow from '@/components/admin/modify/OptionsWindow'
+import Options from '@/components/admin/modify/productOptions/Options'
+import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import Options from '@/components/admin/modify/productOptions/Options'
-import OptionsWindow from '@/components/admin/modify/OptionsWindow'
-import axios from 'axios'
-import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Product = ({
 	product,
@@ -340,16 +340,18 @@ const Product = ({
 				{product.options.length === 0 && isEditing &&
 					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
-				<Options
-					selectedOptions={newProduct.options}
-					editable={isEditing}
-					onDeleteOption={(v: OptionType) => {
-						handleDeleteOption(v)
-					}}
-					showOptions={() => {
-						setShowOptions(true)
-					}}
-				/>
+				<div className='flex flex-row flex-wrap max-w-52'>
+					<Options
+						selectedOptions={newProduct.options}
+						editable={isEditing}
+						onDeleteOption={(v: OptionType) => {
+							handleDeleteOption(v)
+						}}
+						showOptions={() => {
+							setShowOptions(true)
+						}}
+					/>
+				</div>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

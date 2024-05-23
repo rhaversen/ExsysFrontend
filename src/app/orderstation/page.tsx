@@ -1,12 +1,12 @@
 'use client'
 
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Room from '@/components/orderstation/Room'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import Room from '@/components/orderstation/Room'
-import { type RoomType } from '@/lib/backendDataTypes'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
