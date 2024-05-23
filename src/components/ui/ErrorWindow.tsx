@@ -58,7 +58,7 @@ const ErrorWindow = ({
 
 	return (
 		<div
-			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right ${showError ? `translate-x-0 transition-transform duration-[${errorBounceIn}ms] ease-out` : `translate-x-full transition-transform duration-[${errorBounceIn}ms] ease-in`}`}
+			className={`mb-2 rounded-l-lg shadow-lg bg-red-800 z-50 origin-right transition-transform duration-[${errorBounceIn}ms] ${showError ? 'translate-x-0 ease-out' : 'translate-x-full ease-in'}`}
 			role="alert"
 		>
 			<div className="flex flex-row p-2">
