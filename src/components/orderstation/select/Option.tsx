@@ -1,6 +1,6 @@
+import AsyncImage from '@/components/ui/AsyncImage'
+import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
-import Image from 'next/image'
-import { type OptionType } from '@/lib/backendDataTypes'
 
 const Option = ({
 	option,
@@ -25,15 +25,15 @@ const Option = ({
 						{option.price === 0 ? 'Gratis' : `${option.price} kr`}
 					</p>
 				</div>
-				<Image
+				<AsyncImage
+					className='w-48 h-48'
 					width={100}
 					height={100}
 					quality={80}
 					src={`${option.imageURL === undefined || option.imageURL === '' ? '/none.svg' : option.imageURL}`}
 					alt={option.name}
-					className="w-48 h-48 object-cover text-gray-800"
-					draggable="false"
-					priority // Load image immediately
+					draggable={false}
+					priority={true}
 				/>
 			</button>
 		</div>

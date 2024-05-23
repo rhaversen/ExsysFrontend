@@ -1,8 +1,8 @@
 'use client'
 
-import React, { type ReactNode, useCallback, useState } from 'react'
-import { ErrorContext, type ErrorInfo } from '@/contexts/ErrorContext/ErrorContext'
 import ErrorWindow from '@/components/ui/ErrorWindow'
+import { ErrorContext, type ErrorInfo } from '@/contexts/ErrorContext/ErrorContext'
+import React, { type ReactNode, useCallback, useState } from 'react'
 
 interface ErrorProviderProps {
 	children: ReactNode
@@ -26,7 +26,7 @@ const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 				{errors.map((error) => (
 					<ErrorWindow key={error.id} error={error.error} onClose={() => {
 						removeError(error.id)
-					}} />
+					}}/>
 				))}
 			</div>
 		</ErrorContext.Provider>

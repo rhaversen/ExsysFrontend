@@ -1,6 +1,6 @@
-import React, { type ReactElement, useState } from 'react'
-import Image from 'next/image'
 import ImageList from '@/components/admin/modify/ui/ImageList'
+import AsyncImage from '@/components/ui/AsyncImage'
+import React, { type ReactElement, useState } from 'react'
 
 const EditableImage = ({
 	defaultURL,
@@ -22,13 +22,12 @@ const EditableImage = ({
 		<div className="mt-1">
 			<button
 				type="button"
-				className={editable
-					? `cursor-pointer border-2 rounded-md px-1 py-0.5 pr-1.5 transition-colors duration-200 ease-in-out focus:outline-none
+				className={`
+					${editable && 'cursor-pointer border-2 rounded-md px-1 py-0.5 pr-1.5 transition-colors duration-200 ease-in-out focus:outline-none'}
 					${edited
 			? 'border-green-400 hover:border-green-600 focus:border-green-700'
 			: 'border-blue-500 hover:border-blue-600 focus:border-blue-700'
 		}`
-					: ''
 				}
 				onClick={() => {
 					setShowImageList(true)
@@ -39,17 +38,15 @@ const EditableImage = ({
 				<span className="sr-only">
 					{'Edit Image'}
 				</span>
-				<Image
+				<AsyncImage
+					className='w-48 h-48'
 					width={90}
 					height={90}
 					quality={50}
 					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
-					alt={'Item Image'}
-					className="w-40 h-40 object-cover text-gray-800"
-					draggable="false"
-					placeholder='blur'
-					blurDataURL='/orderStation/loading.svg'
-					priority // Load image immediately
+					alt={editingURL?.split('/').pop() ?? 'Item Image'}
+					draggable={false}
+					priority={true}
 				/>
 			</button>
 			{showImageList && (

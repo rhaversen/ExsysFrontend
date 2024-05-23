@@ -1,4 +1,4 @@
-import { type OptionType } from '@/lib/backendDataTypes'
+import { type OptionType } from '@/types/backendDataTypes'
 import { type ReactElement, useCallback } from 'react'
 
 const OptionsWindow = ({

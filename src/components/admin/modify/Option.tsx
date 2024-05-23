@@ -1,11 +1,11 @@
-import { type OptionType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import axios from 'axios'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type OptionType } from '@/types/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Option = ({
 	option,

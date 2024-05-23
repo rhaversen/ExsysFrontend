@@ -1,7 +1,7 @@
 'use client'
 
-import React, { type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
+import React, { type ReactElement } from 'react'
 
 export default function Page (): ReactElement {
 	const router = useRouter()

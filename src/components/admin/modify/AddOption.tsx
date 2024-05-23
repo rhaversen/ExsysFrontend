@@ -1,9 +1,9 @@
-import { type OptionType } from '@/lib/backendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import axios from 'axios'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type OptionType } from '@/types/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Option = ({
 	onOptionPosted,
