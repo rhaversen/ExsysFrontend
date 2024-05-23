@@ -312,8 +312,7 @@ const AddProduct = ({
 					</div>
 					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
-						defaultURL={product.imageURL}
-						newURL={product.imageURL}
+						URL={product.imageURL}
 						editable={true}
 						edited={false}
 						onChange={(v: string) => {

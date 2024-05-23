@@ -323,8 +323,7 @@ const Product = ({
 					/>
 				</div>
 				<EditableImage
-					defaultURL={product.imageURL}
-					newURL={newProduct.imageURL}
+					URL={newProduct.imageURL}
 					editable={isEditing}
 					edited={newProduct.imageURL !== product.imageURL}
 					onChange={(v: string) => {

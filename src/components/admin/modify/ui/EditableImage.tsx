@@ -3,19 +3,16 @@ import AsyncImage from '@/components/ui/AsyncImage'
 import React, { type ReactElement, useState } from 'react'
 
 const EditableImage = ({
-	defaultURL,
-	newURL,
+	URL,
 	editable,
 	edited,
 	onChange
 }: {
-	defaultURL: string | undefined
-	newURL?: string
+	URL: string | undefined
 	editable: boolean
 	edited: boolean
 	onChange: (v: string) => void
 }): ReactElement => {
-	const [editingURL, setEditingURL] = useState(newURL ?? defaultURL)
 	const [showImageList, setShowImageList] = useState(false)
 
 	return (
@@ -43,8 +40,8 @@ const EditableImage = ({
 					width={90}
 					height={90}
 					quality={50}
-					src={`${editingURL === undefined || editingURL === '' ? '/none.svg' : editingURL}`}
-					alt={editingURL?.split('/').pop() ?? 'Item Image'}
+					src={`${URL === undefined || URL === '' ? '/none.svg' : URL}`}
+					alt={URL?.split('/').pop() ?? 'Item Image'}
 					draggable={false}
 					priority={true}
 				/>
@@ -55,7 +52,6 @@ const EditableImage = ({
 						setShowImageList(false)
 					}}
 					onSelect={(imageURL: string) => {
-						setEditingURL(imageURL)
 						onChange(imageURL)
 						setShowImageList(false)
 					}}

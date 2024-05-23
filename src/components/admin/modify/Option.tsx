@@ -156,8 +156,7 @@ const Option = ({
 					</div>
 				</div>
 				<EditableImage
-					defaultURL={option.imageURL}
-					newURL={newOption.imageURL}
+					URL={newOption.imageURL}
 					editable={isEditing}
 					edited={newOption.imageURL !== option.imageURL}
 					onChange={(v: string) => {
