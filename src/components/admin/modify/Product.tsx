@@ -339,7 +339,7 @@ const Product = ({
 				{product.options.length === 0 && isEditing &&
 					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
-				<div className='flex flex-row flex-wrap max-w-52'>
+				<div className="flex flex-row flex-wrap max-w-52">
 					<Options
 						selectedOptions={newProduct.options}
 						editable={isEditing}

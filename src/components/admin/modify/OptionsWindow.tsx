@@ -36,7 +36,9 @@ const OptionsWindow = ({
 				</span>
 			</button>
 			<div className="absolute bg-white rounded-3xl p-10">
-				<h2 className="text-lg font-bold text-gray-800">{`Tilføj tilvalg til ${productName}`}</h2>
+				<h2 className="text-lg font-bold text-gray-800">
+					{`Tilføj tilvalg til ${productName}`}
+				</h2>
 				<div className="bg-white p-2 rounded">
 					{options.map((option) => (
 						<div
