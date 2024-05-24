@@ -54,7 +54,7 @@ const EditableField = ({
 	}, [editable])
 
 	return (
-		<div>
+		<div className="flex flex-row items-center">
 			{editable &&
 				<input
 					ref={ref}

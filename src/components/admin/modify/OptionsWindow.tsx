@@ -35,7 +35,7 @@ const OptionsWindow = ({
 					{'Close'}
 				</span>
 			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
+			<div className="absolute bg-white rounded-3xl p-10 flex flex-col items-center">
 				<h2 className="text-lg font-bold text-gray-800">
 					{`Tilføj tilvalg til ${productName}`}
 				</h2>
@@ -48,7 +48,7 @@ const OptionsWindow = ({
 							<input
 								title="Add Option"
 								type="checkbox"
-								className="cursor-pointer"
+								className="cursor-pointer w-5 h-5"
 								checked={productOptions.map((option) => option._id).includes(option._id)}
 								onChange={() => {
 									handleToggle(option)
