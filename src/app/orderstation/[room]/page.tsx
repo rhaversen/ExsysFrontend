@@ -4,9 +4,9 @@ import CartWindow from '@/components/orderstation/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -160,7 +160,8 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 				<div className="flex-1 overflow-y-auto">
 					<div className="flex flex-row justify-center p-1">
 						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + roomName}</h1>
-						<button onClick={redirectToRoomSelection}
+						<button
+							onClick={redirectToRoomSelection}
 							className="ml-2 px-2 text-decoration-line: underline text-blue-500 rounded-md"
 							type="button"
 						>
