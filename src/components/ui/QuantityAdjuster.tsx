@@ -26,7 +26,10 @@ const QuantityAdjuster = ({
 					text="-"
 					disabled={disabled}
 				/>
-				<label htmlFor="quantityInput" className="sr-only">
+				<label
+					htmlFor="quantityInput"
+					className="sr-only"
+				>
 					{'Mængde'}
 				</label>
 				<input

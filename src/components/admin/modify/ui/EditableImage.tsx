@@ -36,7 +36,7 @@ const EditableImage = ({
 					{'Edit Image'}
 				</span>
 				<AsyncImage
-					className='w-48 h-48'
+					className="w-48 h-48"
 					width={90}
 					height={90}
 					quality={50}
