@@ -33,11 +33,21 @@ const Product = ({
 	const [formIsValid, setFormIsValid] = useState(true)
 
 	useEffect(() => {
-		// Delete options from newProduct that are not in options
 		setNewProduct(n => {
+			// Filter out options that are not in the options array
+			const filteredOptions = n.options.filter((option) =>
+				options.map((opt) => opt._id).includes(option._id)
+			)
+
+			// Update the remaining options with new data from the options array
+			const updatedOptions = filteredOptions.map((option) => {
+				const newOption = options.find((o) => o._id === option._id)
+				return newOption ?? option
+			})
+
 			return {
 				...n,
-				options: n.options.filter((option) => options.map((option) => option._id).includes(option._id))
+				options: updatedOptions
 			}
 		})
 	}, [options])
