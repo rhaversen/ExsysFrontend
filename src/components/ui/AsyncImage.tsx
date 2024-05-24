@@ -30,7 +30,7 @@ const AsyncImage = ({
 					width={width}
 					height={height}
 					quality={quality}
-					src='/orderStation/loading.svg'
+					src="/orderStation/loading.svg"
 					alt="Loading..."
 					priority
 					className={`h-full w-full transition-opacity duration-300 ease-in-out ${loadingLoaded ? 'opacity-100' : 'opacity-0'}`}

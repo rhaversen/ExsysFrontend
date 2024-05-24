@@ -23,7 +23,8 @@ const OptionsWindow = ({
 				</span>
 			</button>
 			<div
-				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+			>
 				<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
 					{'Tilvalg'}
 				</h2>

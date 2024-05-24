@@ -3,8 +3,8 @@ import Options from '@/components/admin/modify/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -190,7 +190,7 @@ const AddProduct = ({
 						<div className="font-bold text-gray-800">
 							<EditableField
 								text={product.name}
-								placeholder='Navn'
+								placeholder="Navn"
 								italic={false}
 								minSize={5}
 								validations={[{
@@ -213,7 +213,7 @@ const AddProduct = ({
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
 								text={product.price.toString()}
-								placeholder='Pris'
+								placeholder="Pris"
 								italic={true}
 								validations={[{
 									validate: (v: string) => !isNaN(Number(v)),
@@ -240,7 +240,7 @@ const AddProduct = ({
 					<div className="flex flex-row text-gray-800">
 						<EditableField
 							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
-							placeholder='Time'
+							placeholder="Time"
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -258,7 +258,7 @@ const AddProduct = ({
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
-							placeholder='Minut'
+							placeholder="Minut"
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -276,7 +276,7 @@ const AddProduct = ({
 						<div className={'text-xl px-1'}>{'—'}</div>
 						<EditableField
 							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
-							placeholder='Time'
+							placeholder="Time"
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -294,7 +294,7 @@ const AddProduct = ({
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
 							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
-							placeholder='Minut'
+							placeholder="Minut"
 							italic={false}
 							validations={[{
 								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -312,8 +312,7 @@ const AddProduct = ({
 					</div>
 					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
-						defaultURL={product.imageURL}
-						newURL={product.imageURL}
+						URL={product.imageURL}
 						editable={true}
 						edited={false}
 						onChange={(v: string) => {

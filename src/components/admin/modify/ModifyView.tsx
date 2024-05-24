@@ -63,7 +63,10 @@ const ModifyView = ({
 					}}
 				>
 					{products.map((product) => (
-						<div className="min-w-64" key={product._id}>
+						<div
+							className="min-w-64"
+							key={product._id}
+						>
 							<Product
 								options={options}
 								product={product}
@@ -82,7 +85,10 @@ const ModifyView = ({
 					}}
 				>
 					{options.map((option) => (
-						<div className="min-w-64 h-full" key={option._id}>
+						<div
+							className="min-w-64 h-full"
+							key={option._id}
+						>
 							<Option
 								option={option}
 								onOptionPatched={onUpdatedOption}
@@ -100,7 +106,10 @@ const ModifyView = ({
 					}}
 				>
 					{rooms.map((room) => (
-						<div className="min-w-64" key={room._id}>
+						<div
+							className="min-w-64"
+							key={room._id}
+						>
 							<Room
 								room={room}
 								onRoomPatched={onUpdatedRoom}
