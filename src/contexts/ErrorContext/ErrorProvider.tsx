@@ -12,7 +12,10 @@ const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 	const [errors, setErrors] = useState<ErrorInfo[]>([])
 
 	const addError = useCallback((error: unknown) => {
-		setErrors(prevErrors => [...prevErrors, { id: Date.now(), error }])
+		setErrors(prevErrors => [...prevErrors, {
+			id: Date.now(),
+			error
+		}])
 	}, [])
 
 	const removeError = useCallback((id: number) => {
@@ -20,13 +23,23 @@ const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 	}, [])
 
 	return (
-		<ErrorContext.Provider value={{ errors, addError, removeError }}>
+		<ErrorContext.Provider
+			value={{
+				errors,
+				addError,
+				removeError
+			}}
+		>
 			{children}
-			<div className="fixed top-5 right-0 flex flex-col z-50">
+			<div className="fixed top-5 right-0 z-50">
 				{errors.map((error) => (
-					<ErrorWindow key={error.id} error={error.error} onClose={() => {
-						removeError(error.id)
-					}}/>
+					<ErrorWindow
+						key={error.id}
+						error={error.error}
+						onClose={() => {
+							removeError(error.id)
+						}}
+					/>
 				))}
 			</div>
 		</ErrorContext.Provider>

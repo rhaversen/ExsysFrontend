@@ -5,8 +5,8 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -33,11 +33,21 @@ const Product = ({
 	const [formIsValid, setFormIsValid] = useState(true)
 
 	useEffect(() => {
-		// Delete options from newProduct that are not in options
 		setNewProduct(n => {
+			// Filter out options that are not in the options array
+			const filteredOptions = n.options.filter((option) =>
+				options.map((opt) => opt._id).includes(option._id)
+			)
+
+			// Update the remaining options with new data from the options array
+			const updatedOptions = filteredOptions.map((option) => {
+				const newOption = options.find((o) => o._id === option._id)
+				return newOption ?? option
+			})
+
 			return {
 				...n,
-				options: n.options.filter((option) => options.map((option) => option._id).includes(option._id))
+				options: updatedOptions
 			}
 		})
 	}, [options])
@@ -203,7 +213,7 @@ const Product = ({
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							text={newProduct.name}
-							placeholder='Navn'
+							placeholder="Navn"
 							italic={false}
 							minSize={5}
 							validations={[{
@@ -226,7 +236,7 @@ const Product = ({
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
 							text={newProduct.price.toString()}
-							placeholder='Pris'
+							placeholder="Pris"
 							italic={true}
 							validations={[{
 								validate: (v: string) => !isNaN(Number(v)),
@@ -252,7 +262,7 @@ const Product = ({
 				<div className="flex flex-row text-gray-800">
 					<EditableField
 						text={newProduct.orderWindow.from.hour.toString().padStart(2, '0')}
-						placeholder='Time'
+						placeholder="Time"
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -270,7 +280,7 @@ const Product = ({
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
-						placeholder='Minut'
+						placeholder="Minut"
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -288,7 +298,7 @@ const Product = ({
 					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>{'—'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
-						placeholder='Time'
+						placeholder="Time"
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
@@ -306,7 +316,7 @@ const Product = ({
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
 						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
-						placeholder='Minut'
+						placeholder="Minut"
 						italic={false}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
@@ -323,8 +333,7 @@ const Product = ({
 					/>
 				</div>
 				<EditableImage
-					defaultURL={product.imageURL}
-					newURL={newProduct.imageURL}
+					URL={newProduct.imageURL}
 					editable={isEditing}
 					edited={newProduct.imageURL !== product.imageURL}
 					onChange={(v: string) => {
@@ -340,7 +349,7 @@ const Product = ({
 				{product.options.length === 0 && isEditing &&
 					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
-				<div className='flex flex-row flex-wrap max-w-52'>
+				<div className="flex flex-row flex-wrap max-w-52">
 					<Options
 						selectedOptions={newProduct.options}
 						editable={isEditing}

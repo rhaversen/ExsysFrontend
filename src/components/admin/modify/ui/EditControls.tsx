@@ -84,12 +84,12 @@ const EditingControls = ({
 					setIsEditing(true)
 				}}
 				type="button"
-				className="w-10 h-10"
+				className="w-1/2 h-10 border-2 border-blue-500 rounded-full m-5"
 			>
 				<Image
 					width={40}
 					height={40}
-					className="w-full h-full place-self-center transition-transform duration-300 transform hover:scale-125 hover:-rotate-45"
+					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
 					src="/admin/modify/pen.svg"
 					alt="Edit"
 				/>

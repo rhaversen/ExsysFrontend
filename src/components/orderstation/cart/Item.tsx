@@ -31,7 +31,7 @@ const Item = ({
 			</h3>
 			<div className="flex flex-row items-center justify-between">
 				<AsyncImage
-					className='w-12 h-12'
+					className="w-12 h-12"
 					width={40}
 					height={40}
 					quality={40}

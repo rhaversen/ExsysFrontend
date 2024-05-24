@@ -63,7 +63,7 @@ const OverviewView = ({
 	return (
 		<div>
 			{isFetching &&
-				<div className='flex justify-center flex-row'>
+				<div className="flex justify-center flex-row">
 					<p className="p-10 font-bold text-gray-800 text-2xl">Henter Order...</p>
 				</div>
 			}
@@ -72,7 +72,8 @@ const OverviewView = ({
 			}
 			{orders.length === 0 &&
 				<div
-					className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center'>
+					className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center"
+				>
 					<Image
 						src="/orderStation/loading.svg"
 						alt="loading"

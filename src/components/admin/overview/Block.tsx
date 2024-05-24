@@ -81,7 +81,8 @@ const Block = ({
 
 	return (
 		<div
-			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}>
+			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}
+		>
 			<h3 className="text-center text-xl ">{timeBlock}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
 				const confirmedCount = confirmedOrders[name] ?? 0
@@ -98,17 +99,25 @@ const Block = ({
 			})}
 			<div className="mt-2">
 				{orderStatus === 'pending' &&
-					<button type="button" className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
+					<button
+						type="button"
+						className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
 							patchOrders('confirmed')
-						}}>Marker som læst
+						}}
+					>
+						Marker som læst
 					</button>
 				}
 				{orderStatus === 'confirmed' &&
-					<button type="button" className="rounded bg-orange-500 p-2 hover:bg-orange-600 w-full"
+					<button
+						type="button"
+						className="rounded bg-orange-500 p-2 hover:bg-orange-600 w-full"
 						onClick={() => {
 							setShowConfirmDelivered(true)
-						}}>Marker som leveret
+						}}
+					>
+						Marker som leveret
 					</button>
 				}
 			</div>
