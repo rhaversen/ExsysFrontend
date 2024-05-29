@@ -25,18 +25,18 @@ const EditableField = ({
 }): ReactElement => {
 	const ref = useRef<HTMLInputElement>(null)
 
-	const [validationError, setValidationError] = useState<string | null>(null)
+	const [validationErrors, setValidationErrors] = useState<string[] | null>(null)
 
 	const checkValidations = useCallback((v: string): void => {
 		const validationFailed = validations?.some(({ validate }) => !validate(v))
 		if (validationFailed !== undefined && validationFailed) {
-			const failedValidation = validations?.find(({ validate }) => !validate(v))
-			if (failedValidation !== undefined) {
-				setValidationError(failedValidation.message)
+			const failedValidations = validations?.filter(({ validate }) => !validate(v))
+			if (failedValidations !== undefined) {
+				setValidationErrors(failedValidations.map(({ message }) => message))
 				onValidationChange !== undefined && onValidationChange(false)
 			}
 		} else {
-			setValidationError(null)
+			setValidationErrors(null)
 			onValidationChange !== undefined && onValidationChange(true)
 		}
 	}, [validations, onValidationChange])
@@ -50,7 +50,7 @@ const EditableField = ({
 	// Reset validation errors when not editable (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
 	useEffect(() => {
 		if (editable) return
-		setValidationError(null)
+		setValidationErrors(null)
 	}, [editable])
 
 	return (
@@ -63,7 +63,7 @@ const EditableField = ({
 					placeholder={placeholder}
 					onChange={handleInputChange}
 					onBlur={handleInputChange}
-					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? `${validationError !== null ? 'border-red-500 hover:border-red-600 focus:border-red-700' : 'border-green-500 hover:border-green-600 focus:border-green-700'} ` : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}
+					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? `${validationErrors !== null ? 'border-red-500 hover:border-red-600 focus:border-red-700' : 'border-green-500 hover:border-green-600 focus:border-green-700'} ` : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}
 					readOnly={!editable}
 					size={Math.max(text.length, minSize ?? 1, 1)}
 					aria-label={text}
@@ -74,9 +74,9 @@ const EditableField = ({
 					{text}
 				</p>
 			}
-			{validationError !== null &&
+			{validationErrors !== null &&
 				<ValidationErrorWindow
-					message={validationError}
+					messages={validationErrors}
 				/>
 			}
 		</div>
