@@ -21,7 +21,7 @@ const Option = ({
 		price: 0,
 		imageURL: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false })
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
@@ -30,11 +30,11 @@ const Option = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -96,31 +96,31 @@ const Option = ({
 					<div className="flex flex-row items-center gap-2 justify-center">
 						<div className="font-bold text-gray-800">
 							<EditableField
-								text={option.name}
+								fieldName="name"
 								placeholder="Navn"
 								italic={false}
+								required={true}
+								minSize={5}
 								validations={[{
-									validate: (v) => v.length > 0,
-									message: 'Navn skal udfyldes'
-								}, {
 									validate: (v) => v.length <= 20,
 									message: 'Navn kan højest have 20 tegn'
 								}]}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('name', v)
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
-								text={option.price.toString()}
+								fieldName="price"
 								placeholder="Pris"
 								italic={true}
+								required={true}
+								minSize={2}
 								validations={[{
 									validate: (v) => !isNaN(Number(v)),
 									message: 'Prisen skal være et tal'
@@ -129,12 +129,11 @@ const Option = ({
 									message: 'Prisen skal være positiv'
 								}]}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handlePriceChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('price', v)
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 							<div className="pl-1">
