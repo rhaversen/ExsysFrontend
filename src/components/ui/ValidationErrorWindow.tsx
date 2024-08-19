@@ -6,7 +6,7 @@ const ValidationErrorWindow = ({
 	messages: string[]
 }): ReactElement => {
 	return (
-		<div className="pt-1 fixed transform translate-y-full not-italic z-10">
+		<div className="pt-1 absolute transform translate-y-full not-italic z-100">
 			<div className="px-1 rounded-md bg-red-800 text-white font-bold flex flex-col">
 				{messages.map((message, i) => (
 					<p key={i + message} className="text-sm">
