@@ -19,10 +19,7 @@ const Room = ({
 		name: '',
 		description: ''
 	})
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({
-		name: false,
-		description: false
-	})
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
@@ -31,11 +28,11 @@ const Room = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -88,41 +85,41 @@ const Room = ({
 						<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								text={room.name}
-								placeholder={'Navn'}
+								fieldName='name'
+								placeholder='Navn'
 								italic={false}
 								minSize={10}
-								validations={[{
-									validate: (v: string) => v.length > 0,
-									message: 'Navn skal udfyldes'
-								}]}
+								required={true}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('name', v)
+								validations={[{
+									validate: (v: string) => v.length <= 20,
+									message: 'Navn må maks være 20 tegn'
+								}]}
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>
 						<div className="text-gray-800">
 							<EditableField
-								text={room.description}
-								placeholder={'Beskrivelse'}
+								fieldName='description'
+								placeholder='Beskrivelse'
 								italic={true}
 								minSize={10}
-								validations={[{
-									validate: (v: string) => v.length > 0,
-									message: 'Beskrivelse skal udfyldes'
-								}]}
+								required={true}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handleDescriptionChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('description', v)
+								validations={[{
+									validate: (v: string) => v.length <= 20,
+									message: 'Navn må maks være 20 tegn'
+								}]}
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>

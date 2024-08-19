@@ -37,7 +37,7 @@ const AddProduct = ({
 		options: []
 	})
 	const [showOptions, setShowOptions] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({ name: false })
+	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
 	// Update formIsValid when fieldValidations change
@@ -46,11 +46,11 @@ const AddProduct = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -189,32 +189,31 @@ const AddProduct = ({
 					<div className="flex flex-row items-center gap-2 justify-center">
 						<div className="font-bold text-gray-800">
 							<EditableField
-								text={product.name}
+								fieldName="name"
 								placeholder="Navn"
 								italic={false}
 								minSize={5}
+								required={true}
 								validations={[{
-									validate: (v: string) => v.length > 0,
-									message: 'Navn skal udfyldes'
-								}, {
 									validate: (v: string) => v.length <= 15,
 									message: 'Navn må maks være 15 tegn'
 								}]}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handleNameChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('name', v)
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>
 						<div className="flex flex-row italic items-center text-gray-800">
 							<EditableField
-								text={product.price.toString()}
+								fieldName="price"
 								placeholder="Pris"
 								italic={true}
+								required={true}
+								minSize={2}
 								validations={[{
 									validate: (v: string) => !isNaN(Number(v)),
 									message: 'Pris skal være et tal'
@@ -223,12 +222,11 @@ const AddProduct = ({
 									message: 'Pris skal være positiv'
 								}]}
 								editable={true}
-								edited={false}
 								onChange={(v: string) => {
 									handlePriceChange(v)
 								}}
-								onValidationChange={(v: boolean) => {
-									handleValidationChange('price', v)
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
 								}}
 							/>
 							<div className="pl-1">
@@ -239,74 +237,103 @@ const AddProduct = ({
 					<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
 					<div className="flex flex-row text-gray-800">
 						<EditableField
-							text={product.orderWindow.from.hour.toString().padStart(2, '0')}
+							fieldName="fromHour"
+							initialText={product.orderWindow.from.hour.toString()}
 							placeholder="Time"
 							italic={false}
+							required={true}
 							validations={[{
-								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+								validate: (v: string) => !isNaN(Number(v)),
+								message: 'Time skal være et tal'
+							}, {
+								validate: (v: string) => {
+									const num = Number(v)
+									return isNaN(num) || (num >= 0 && num < 24)
+								},
 								message: 'Time skal være mellem 0 og 24'
 							}]}
 							editable={true}
-							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowFromHourChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('fromHour', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
-							text={product.orderWindow.from.minute.toString().padStart(2, '0')}
+							fieldName="fromMinute"
+							initialText={product.orderWindow.from.minute.toString()}
 							placeholder="Minut"
 							italic={false}
+							required={true}
 							validations={[{
-								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+								validate: (v: string) => !isNaN(Number(v)),
+								message: 'Minutter skal være et tal'
+							}, {
+								validate: (v: string) => {
+									const num = Number(v)
+									return isNaN(num) || (num >= 0 && num < 60)
+								},
 								message: 'Minutter skal være mellem 0 og 60'
 							}]}
 							editable={true}
-							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowFromMinuteChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('fromMinute', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 						<div className={'text-xl px-1'}>{'—'}</div>
 						<EditableField
-							text={product.orderWindow.to.hour.toString().padStart(2, '0')}
+							fieldName="toHour"
+							initialText={product.orderWindow.to.hour.toString()}
 							placeholder="Time"
 							italic={false}
+							required={true}
 							validations={[{
-								validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
+								validate: (v: string) => !isNaN(Number(v)),
+								message: 'Time skal være et tal'
+							}, {
+								validate: (v: string) => {
+									const num = Number(v)
+									return isNaN(num) || (num >= 0 && num < 24)
+								},
 								message: 'Time skal være mellem 0 og 24'
+
 							}]}
 							editable={true}
-							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowToHourChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('toHour', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 						<div className={'font-bold text-xl px-1'}>{':'}</div>
 						<EditableField
-							text={product.orderWindow.to.minute.toString().padStart(2, '0')}
+							fieldName="toMinute"
+							initialText={product.orderWindow.to.minute.toString()}
 							placeholder="Minut"
 							italic={false}
+							required={true}
 							validations={[{
-								validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
+								validate: (v: string) => !isNaN(Number(v)),
+								message: 'Minutter skal være et tal'
+							}, {
+								validate: (v: string) => {
+									const num = Number(v)
+									return isNaN(num) || (num >= 0 && num < 60)
+								},
 								message: 'Minutter skal være mellem 0 og 60'
 							}]}
 							editable={true}
-							edited={false}
 							onChange={(v: string) => {
 								handleOrderWindowToMinuteChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('toMinute', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 					</div>

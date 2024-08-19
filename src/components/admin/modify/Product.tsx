@@ -58,17 +58,11 @@ const Product = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
-	useEffect(() => {
-		if (isEditing) return
-		setFormIsValid(true)
-	}, [isEditing])
-
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -212,32 +206,33 @@ const Product = ({
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
-							text={newProduct.name}
+							fieldName='name'
+							initialText={product.name}
 							placeholder="Navn"
 							italic={false}
 							minSize={5}
+							required={true}
 							validations={[{
-								validate: (v: string) => v.length > 0,
-								message: 'Navn skal udfyldes'
-							}, {
 								validate: (v: string) => v.length <= 15,
 								message: 'Navn må maks være 15 tegn'
 							}]}
 							editable={isEditing}
-							edited={newProduct.name !== product.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('name', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 					</div>
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
-							text={newProduct.price.toString()}
+							fieldName='price'
+							initialText={product.price.toString()}
 							placeholder="Pris"
 							italic={true}
+							minSize={2}
+							required={true}
 							validations={[{
 								validate: (v: string) => !isNaN(Number(v)),
 								message: 'Pris skal være et tal'
@@ -246,12 +241,11 @@ const Product = ({
 								message: 'Pris skal være positiv'
 							}]}
 							editable={isEditing}
-							edited={newProduct.price !== product.price}
 							onChange={(v: string) => {
 								handlePriceChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('price', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 						<div className="pl-1">
@@ -261,74 +255,80 @@ const Product = ({
 				</div>
 				<div className="flex flex-row text-gray-800">
 					<EditableField
-						text={newProduct.orderWindow.from.hour.toString().padStart(2, '0')}
+						fieldName='fromHour'
+						initialText={product.orderWindow.from.hour.toString().padStart(2, '0')}
 						placeholder="Time"
 						italic={false}
+						required={true}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
 							message: 'Time skal være mellem 0 og 24'
 						}]}
 						editable={isEditing}
-						edited={newProduct.orderWindow.from.hour !== product.orderWindow.from.hour}
 						onChange={(v: string) => {
 							handleOrderWindowFromHourChange(v)
 						}}
-						onValidationChange={(v: boolean) => {
-							handleValidationChange('fromHour', v)
+						onValidationChange={(fieldName: string, v: boolean) => {
+							handleValidationChange(fieldName, v)
 						}}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
-						text={newProduct.orderWindow.from.minute.toString().padStart(2, '0')}
+						fieldName='fromMinute'
+						initialText={product.orderWindow.from.minute.toString().padStart(2, '0')}
 						placeholder="Minut"
 						italic={false}
+						required={true}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
 							message: 'Minutter skal være mellem 0 og 60'
 						}]}
 						editable={isEditing}
-						edited={newProduct.orderWindow.from.minute !== product.orderWindow.from.minute}
 						onChange={(v: string) => {
 							handleOrderWindowFromMinuteChange(v)
 						}}
-						onValidationChange={(v: boolean) => {
-							handleValidationChange('fromMinute', v)
+						onValidationChange={(fieldName: string, v: boolean) => {
+							handleValidationChange(fieldName, v)
 						}}
 					/>
-					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>{'—'}</div>
+					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>
+						{'—'}
+					</div>
 					<EditableField
-						text={newProduct.orderWindow.to.hour.toString().padStart(2, '0')}
+						fieldName='toHour'
+						initialText={product.orderWindow.to.hour.toString().padStart(2, '0')}
 						placeholder="Time"
 						italic={false}
+						required={true}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
 							message: 'Time skal være mellem 0 og 24'
 						}]}
 						editable={isEditing}
-						edited={newProduct.orderWindow.to.hour !== product.orderWindow.to.hour}
 						onChange={(v: string) => {
 							handleOrderWindowToHourChange(v)
 						}}
-						onValidationChange={(v: boolean) => {
-							handleValidationChange('toHour', v)
+						onValidationChange={(fieldName: string, v: boolean) => {
+							handleValidationChange(fieldName, v)
 						}}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
-						text={newProduct.orderWindow.to.minute.toString().padStart(2, '0')}
+						fieldName='toMinute'
+						initialText={product.orderWindow.to.minute.toString().padStart(2, '0')}
 						placeholder="Minut"
 						italic={false}
+						required={true}
 						validations={[{
 							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
 							message: 'Minutter skal være mellem 0 og 60'
 						}]}
 						editable={isEditing}
-						edited={newProduct.orderWindow.to.minute !== product.orderWindow.to.minute}
 						onChange={(v: string) => {
 							handleOrderWindowToMinuteChange(v)
 						}}
-						onValidationChange={(v: boolean) => {
-							handleValidationChange('toMinute', v)
+						onValidationChange={(fieldName: string, v: boolean) => {
+							handleValidationChange(fieldName, v)
 						}}
 					/>
 				</div>

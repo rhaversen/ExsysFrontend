@@ -2,81 +2,90 @@ import ValidationErrorWindow from '@/components/ui/ValidationErrorWindow'
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
+const validateField = (value: string, validations: Validation[], required: boolean = false): string[] => {
+	const errors: string[] = []
+	if (required && value.length === 0) {
+		errors.push('Dette felt er påkrævet')
+	}
+	validations.forEach(validation => {
+		if (!validation.validate(value)) {
+			errors.push(validation.message)
+		}
+	})
+	return errors
+}
+
 const EditableField = ({
-	text,
+	fieldName,
+	initialText = '',
 	placeholder,
 	italic,
 	editable,
-	edited,
 	validations,
-	minSize,
+	required = false,
+	minSize = 1,
 	onChange,
 	onValidationChange
 }: {
-	text: string
+	fieldName: string
+	initialText?: string
 	placeholder: string
 	italic: boolean
 	editable: boolean
-	edited: boolean
-	validations?: Validation[]
+	validations: Validation[]
+	required?: boolean
 	minSize?: number
-	onChange: (v: string) => void
-	onValidationChange?: (v: boolean) => void
+	onChange: (value: string) => void
+	onValidationChange: (fieldName: string, isValid: boolean) => void
 }): ReactElement => {
-	const ref = useRef<HTMLInputElement>(null)
+	const [text, setText] = useState<string>(initialText)
+	const [errors, setErrors] = useState<string[]>([])
+	const inputRef = useRef<HTMLInputElement>(null)
 
-	const [validationError, setValidationError] = useState<string | null>(null)
+	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+		const newValue = event.target.value
+		setText(newValue)
+		onChange(newValue)
+		const newErrors = validateField(newValue, validations, required)
+		setErrors(newErrors)
+		onValidationChange(fieldName, newErrors.length === 0)
+	}, [onChange, validations, required, fieldName, onValidationChange])
 
-	const checkValidations = useCallback((v: string): void => {
-		const validationFailed = validations?.some(({ validate }) => !validate(v))
-		if (validationFailed !== undefined && validationFailed) {
-			const failedValidation = validations?.find(({ validate }) => !validate(v))
-			if (failedValidation !== undefined) {
-				setValidationError(failedValidation.message)
-				onValidationChange !== undefined && onValidationChange(false)
-			}
-		} else {
-			setValidationError(null)
-			onValidationChange !== undefined && onValidationChange(true)
-		}
-	}, [validations, onValidationChange])
-
-	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-		const value = e.target.value
-		onChange(value)
-		checkValidations(value)
-	}, [onChange, checkValidations])
-
-	// Reset validation errors when not editable (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
+	// Reset text when no longer editable
 	useEffect(() => {
-		if (editable) return
-		setValidationError(null)
-	}, [editable])
+		if (!editable) {
+			setText(initialText)
+		}
+	}, [editable, initialText])
+
+	useEffect(() => {
+		setErrors(validateField(text, validations, required))
+	}, [text, validations, required])
 
 	return (
 		<div className="flex flex-row items-center">
 			{editable &&
 				<input
-					ref={ref}
+					ref={inputRef}
 					type="text"
 					value={text}
 					placeholder={placeholder}
-					onChange={handleInputChange}
-					onBlur={handleInputChange}
-					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto ${edited ? `${validationError !== null ? 'border-red-500 hover:border-red-600 focus:border-red-700' : 'border-green-500 hover:border-green-600 focus:border-green-700'} ` : 'border-blue-500 hover:border-blue-600 focus:border-blue-700'}`}
+					onChange={handleChange}
+					onBlur={handleChange}
+					className={`${italic ? 'italic' : ''} border-blue-500 text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none`}
 					readOnly={!editable}
 					size={Math.max(text.length, minSize ?? 1, 1)}
 					aria-label={text}
 				/>
 			}
 			{!editable &&
-				<p className={`${italic ? 'italic' : ''} p-0 m-0 text-center border-0 rounded-md cursor-text transition-colors duration-200 ease-in-out focus:outline-none w-auto border-blue-500 hover:border-blue-600 focus:border-blue-700`}>
+				<p className={`${italic ? 'italic' : ''} p-0 m-0 text-center border-0 cursor-text focus:outline-none w-auto`}>
 					{text}
 				</p>
 			}
-			{validationError !== null &&
+			{errors !== null &&
 				<ValidationErrorWindow
-					message={validationError}
+					messages={errors}
 				/>
 			}
 		</div>

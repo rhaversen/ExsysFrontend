@@ -31,17 +31,11 @@ const Room = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
-	useEffect(() => {
-		if (isEditing) return
-		setFormIsValid(true)
-	}, [isEditing])
-
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -100,41 +94,43 @@ const Room = ({
 				<div className="flex flex-col items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
-							text={newRoom.name}
-							placeholder={'Navn'}
+							fieldName='name'
+							initialText={room.name}
+							placeholder='Navn'
 							italic={false}
 							minSize={10}
+							required={true}
 							validations={[{
-								validate: (v: string) => v.length > 0,
-								message: 'Navn skal udfyldes'
+								validate: (v: string) => v.length <= 20,
+								message: 'Navn må maks være 20 tegn'
 							}]}
 							editable={isEditing}
-							edited={newRoom.name !== room.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('name', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 					</div>
 					<div className="text-gray-800">
 						<EditableField
-							text={newRoom.description}
-							placeholder={'Beskrivelse'}
+							fieldName='description'
+							initialText={room.description}
+							placeholder='Beskrivelse'
 							italic={true}
 							minSize={10}
+							required={true}
 							validations={[{
-								validate: (v: string) => v.length > 0,
-								message: 'Beskrivelse skal udfyldes'
+								validate: (v: string) => v.length <= 20,
+								message: 'Navn må maks være 20 tegn'
 							}]}
 							editable={isEditing}
-							edited={newRoom.description !== room.description}
 							onChange={(v: string) => {
 								handleDescriptionChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('description', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 					</div>

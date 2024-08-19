@@ -32,17 +32,11 @@ const Option = ({
 		setFormIsValid(formIsValid)
 	}, [fieldValidations])
 
-	// Reset validation errors when not editing (e.g. when editing is cancelled or completed, meaning validation errors are no longer relevant)
-	useEffect(() => {
-		if (isEditing) return
-		setFormIsValid(true)
-	}, [isEditing])
-
-	const handleValidationChange = useCallback((fieldId: string, v: boolean): void => {
+	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
 		setFieldValidations((prev) => {
 			return {
 				...prev,
-				[fieldId]: v
+				[fieldName]: v
 			}
 		})
 	}, [])
@@ -109,31 +103,32 @@ const Option = ({
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
-							text={newOption.name}
+							fieldName={'name'}
+							initialText={option.name}
 							placeholder={'Navn'}
 							italic={false}
+							minSize={5}
+							required={true}
 							validations={[{
-								validate: (v) => v.length > 0,
-								message: 'Navn skal udfyldes'
-							}, {
 								validate: (v) => v.length <= 20,
 								message: 'Navn kan højest have 20 tegn'
 							}]}
 							editable={isEditing}
-							edited={newOption.name !== option.name}
 							onChange={(v: string) => {
 								handleNameChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('name', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 					</div>
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
-							text={newOption.price.toString()}
+							fieldName={'price'}
+							initialText={option.price.toString()}
 							placeholder={'Pris'}
 							italic={true}
+							minSize={2}
 							validations={[{
 								validate: (v) => !isNaN(Number(v)),
 								message: 'Prisen skal være et tal'
@@ -142,12 +137,11 @@ const Option = ({
 								message: 'Prisen skal være positiv'
 							}]}
 							editable={isEditing}
-							edited={newOption.price !== option.price}
 							onChange={(v: string) => {
 								handlePriceChange(v)
 							}}
-							onValidationChange={(v: boolean) => {
-								handleValidationChange('price', v)
+							onValidationChange={(fieldName: string, v: boolean) => {
+								handleValidationChange(fieldName, v)
 							}}
 						/>
 						<div className="pl-1">
