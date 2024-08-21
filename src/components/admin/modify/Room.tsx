@@ -41,7 +41,7 @@ const Room = ({
 	}, [])
 
 	const patchRoom = useCallback((room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
-		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch).then((response) => {
+		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
 			addError(error)
@@ -51,7 +51,7 @@ const Room = ({
 
 	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
-			data: { confirm }
+			data: { confirm }, withCredentials: true
 		}).then(() => {
 			onRoomDeleted(room._id)
 		}).catch((error) => {

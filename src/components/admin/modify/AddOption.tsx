@@ -40,7 +40,7 @@ const Option = ({
 	}, [])
 
 	const postOption = useCallback((option: Omit<OptionType, '_id'>): void => {
-		axios.post(API_URL + '/v1/options', option).then((response) => {
+		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
 			onOptionPosted(response.data as OptionType)
 			onClose()
 		}).catch((error) => {

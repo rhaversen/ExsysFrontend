@@ -17,7 +17,7 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 
 	const fetchRooms = useCallback(async () => {
-		const response = await axios.get(API_URL + '/v1/rooms')
+		const response = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
 		const rooms = response.data as RoomType[]
 		setRooms(rooms)
 	}, [API_URL, setRooms])
