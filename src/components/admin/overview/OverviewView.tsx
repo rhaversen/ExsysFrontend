@@ -1,7 +1,7 @@
 'use client'
 
 import RoomCol from '@/components/admin/overview/RoomCol'
-import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -11,6 +11,7 @@ const OverviewView = ({
 	products,
 	options,
 	rooms,
+	activities,
 	isFetching,
 	onUpdatedOrders
 }: {
@@ -18,6 +19,7 @@ const OverviewView = ({
 	products: ProductType[]
 	options: OptionType[]
 	rooms: RoomType[]
+	activities: ActivityType[]
 	isFetching: boolean
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
@@ -39,10 +41,16 @@ const OverviewView = ({
 	}, [orders, products, options])
 
 	const groupOrdersByRoom = useCallback(() => {
-		const roomOrders: Record<RoomType['_id'], OrderTypeWithNames[]> = {}
+		const roomOrders: Record<string, OrderTypeWithNames[]> = {} // Use string for room name indexing
 		ordersWithNames.forEach((order) => {
-			const room = rooms.find((room) => room._id === order.roomId)
-			if (room === undefined) return
+			// Find the activity corresponding to the order
+			const activity = activities.find(activity => activity._id === order.activityId)
+			if (activity === undefined) return // Skip if no activity found
+
+			// Find the room using the roomId from the found activity
+			const room = rooms.find(room => room._id === activity.roomId)
+			if (room === undefined) return // Skip if no room found
+
 			const roomName = room.name
 			if (roomOrders[roomName] === undefined) {
 				roomOrders[roomName] = []
@@ -50,7 +58,7 @@ const OverviewView = ({
 			roomOrders[roomName].push(order)
 		})
 		return roomOrders
-	}, [ordersWithNames, rooms])
+	}, [ordersWithNames, rooms, activities]) // Include activities in the dependency array
 
 	useEffect(() => {
 		setRoomOrders(groupOrdersByRoom())
@@ -89,6 +97,7 @@ const OverviewView = ({
 					<RoomCol
 						key={room._id}
 						room={room}
+						activities={activities}
 						orders={roomOrders[room.name] ?? []}
 						onUpdatedOrders={onUpdatedOrders}
 					/>

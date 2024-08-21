@@ -5,7 +5,7 @@ import OverviewView from '@/components/admin/overview/OverviewView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
@@ -21,6 +21,7 @@ export default function Page (): ReactElement {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
 
 	const [fetching, setFetching] = useState<boolean>(true)
 
@@ -69,18 +70,28 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL])
 
+	const getActivities = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/activities', { withCredentials: true })
+			const data = response.data as ActivityType[]
+			setActivities(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
 	const fetchData = useCallback(() => {
 		setFetching(true)
 		Promise.all([
 			getRooms(),
 			getProducts(),
 			getOptions(),
-			getOrders()
+			getOrders(),
+			getActivities()
 		]).catch((error: any) => {
 			addError(error)
 		})
 		setFetching(false)
-	}, [getOrders, getProducts, getOptions, getRooms, addError])
+	}, [getOrders, getProducts, getOptions, getRooms, addError, getActivities])
 
 	const handleOrdersUpdate = useCallback((orders: OrderType[]) => {
 		// Only update the orders that were changed
@@ -176,6 +187,7 @@ export default function Page (): ReactElement {
 					products={products}
 					options={options}
 					rooms={rooms}
+					activities={activities}
 					isFetching={fetching}
 					onUpdatedOrders={handleOrdersUpdate}
 				/>
