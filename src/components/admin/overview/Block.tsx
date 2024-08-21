@@ -109,7 +109,7 @@ const Block = ({
 
 				return (
 					<p key={name}>
-						{totalCount} {name}{diffText}
+						{totalCount} x {name}{diffText}
 					</p>
 				)
 			})}
