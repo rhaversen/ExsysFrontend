@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 
-export default function Page ({ params }: Readonly<{ params: { activityId: ActivityType['_id'] } }>): ReactElement {
+export default function Page ({ params }: Readonly<{ params: { activity: ActivityType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
 	const { addError } = useError()
@@ -46,10 +46,10 @@ export default function Page ({ params }: Readonly<{ params: { activityId: Activ
 	}, [router])
 
 	const validateActivityAndRedirect = useCallback(() => {
-		axios.get(API_URL + '/v1/activities/' + params.activityId, { withCredentials: true }).catch(() => {
+		axios.get(API_URL + '/v1/activities/' + params.activity, { withCredentials: true }).catch(() => {
 			redirectToActivitySelection()
 		})
-	}, [API_URL, params.activityId, redirectToActivitySelection])
+	}, [API_URL, params.activity, redirectToActivitySelection])
 
 	// Fetch products and options on mount
 	useEffect(() => {
@@ -63,7 +63,7 @@ export default function Page ({ params }: Readonly<{ params: { activityId: Activ
 	useEffect(() => {
 		if (API_URL === undefined) return
 		validateActivityAndRedirect()
-	}, [router, API_URL, validateActivityAndRedirect, params.activityId])
+	}, [router, API_URL, validateActivityAndRedirect, params.activity])
 
 	// Check if any product is selected
 	useEffect(() => {
@@ -82,13 +82,13 @@ export default function Page ({ params }: Readonly<{ params: { activityId: Activ
 
 	// Get activity name
 	useEffect(() => {
-		axios.get(API_URL + '/v1/activities/' + params.activityId, { withCredentials: true }).then((response) => {
+		axios.get(API_URL + '/v1/activities/' + params.activity, { withCredentials: true }).then((response) => {
 			const activity = response.data as ActivityType
 			setActivityName(activity.name)
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, params.activityId, addError, setActivityName])
+	}, [API_URL, params.activity, addError, setActivityName])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
@@ -130,7 +130,7 @@ export default function Page ({ params }: Readonly<{ params: { activityId: Activ
 		)
 
 		const data = {
-			activityId: params.activityId,
+			activityId: params.activity,
 			products: productCart,
 			options: optionCart
 		}
@@ -143,7 +143,7 @@ export default function Page ({ params }: Readonly<{ params: { activityId: Activ
 			addError(error)
 			setOrderStatus('error')
 		})
-	}, [API_URL, cart, params.activityId, setOrderStatus, setShowOrderConfirmation, addError])
+	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError])
 
 	const reset = useCallback((): void => {
 		setCart({
