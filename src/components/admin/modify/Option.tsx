@@ -42,7 +42,7 @@ const Option = ({
 	}, [])
 
 	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
-		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch).then((response) => {
+		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch, { withCredentials: true }).then((response) => {
 			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			addError(error)
@@ -51,9 +51,7 @@ const Option = ({
 	}
 
 	const deleteOption = (option: OptionType, confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/options/${option._id}`, {
-			data: { confirm }
-		}).then(() => {
+		axios.delete(API_URL + `/v1/options/${option._id}`, { data: { confirm }, withCredentials: true }).then(() => {
 			onOptionDeleted(option._id)
 		}).catch((error) => {
 			addError(error)

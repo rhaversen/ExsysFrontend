@@ -24,7 +24,7 @@ export default function Page (): ReactElement {
 	const [formIsValid, setFormIsValid] = useState(false)
 
 	const fetchProducts = useCallback(async () => {
-		const response = await axios.get(API_URL + '/v1/products')
+		const response = await axios.get(API_URL + '/v1/products', { withCredentials: true })
 		const products = response.data as ProductType[]
 		setProducts(products)
 		const quantities = products.reduce(
@@ -51,7 +51,7 @@ export default function Page (): ReactElement {
 	}, [products, setAvailabilities])
 
 	const fetchRooms = useCallback(async () => {
-		const response = await axios.get(API_URL + '/v1/rooms')
+		const response = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
 		const rooms = response.data as RoomType[]
 		setRooms(rooms)
 	}, [API_URL, setRooms])
@@ -108,7 +108,7 @@ export default function Page (): ReactElement {
 
 		console.log(data)
 
-		axios.post(API_URL + '/v1/orders', data).catch((error) => {
+		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).catch((error) => {
 			addError(error)
 		})
 	}, [quantities, selectedDate, selectedRoomId, API_URL, addError])

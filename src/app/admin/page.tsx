@@ -31,7 +31,7 @@ export default function Page (): ReactElement {
 		toDate.setHours(24, 0, 0, 0)
 
 		try {
-			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed`)
+			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed`, { withCredentials: true })
 			const data = response.data as OrderType[]
 			setOrders(data)
 		} catch (error: any) {
@@ -40,7 +40,7 @@ export default function Page (): ReactElement {
 
 	const getProducts = useCallback(async () => {
 		try {
-			const productsResponse = await axios.get(API_URL + '/v1/products')
+			const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
 			const products = productsResponse.data as ProductType[]
 			// Convert orderWindow to local time for all products
 			products.forEach((product) => {
@@ -53,7 +53,7 @@ export default function Page (): ReactElement {
 
 	const getOptions = useCallback(async () => {
 		try {
-			const response = await axios.get(API_URL + '/v1/options')
+			const response = await axios.get(API_URL + '/v1/options', { withCredentials: true })
 			const data = response.data as OptionType[]
 			setOptions(data)
 		} catch (error: any) {
@@ -62,7 +62,7 @@ export default function Page (): ReactElement {
 
 	const getRooms = useCallback(async () => {
 		try {
-			const roomsResponse = await axios.get(API_URL + '/v1/rooms')
+			const roomsResponse = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
 			const rooms = roomsResponse.data as RoomType[]
 			setRooms(rooms)
 		} catch (error: any) {

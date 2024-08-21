@@ -30,13 +30,13 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	const [roomName, setRoomName] = useState('')
 
 	const fetchProductsAndOptions = useCallback(async () => {
-		const productsResponse = await axios.get(API_URL + '/v1/products')
+		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
 		const products = productsResponse.data as ProductType[]
 		products.forEach((product) => {
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 		})
 		setProducts(products)
-		const optionsResponse = await axios.get(API_URL + '/v1/options')
+		const optionsResponse = await axios.get(API_URL + '/v1/options', { withCredentials: true })
 		const options = optionsResponse.data as OptionType[]
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
@@ -46,7 +46,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	}, [router])
 
 	const validateRoomAndRedirect = useCallback(() => {
-		axios.get(API_URL + '/v1/rooms/' + params.room).catch(() => {
+		axios.get(API_URL + '/v1/rooms/' + params.room, { withCredentials: true }).catch(() => {
 			redirectToRoomSelection()
 		})
 	}, [API_URL, params.room, redirectToRoomSelection])
@@ -82,7 +82,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 
 	// Get room name
 	useEffect(() => {
-		axios.get(API_URL + '/v1/rooms/' + params.room).then((response) => {
+		axios.get(API_URL + '/v1/rooms/' + params.room, { withCredentials: true }).then((response) => {
 			const room = response.data as RoomType
 			setRoomName(room.name)
 		}).catch((error) => {
@@ -137,7 +137,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 
 		console.log(data)
 
-		axios.post(API_URL + '/v1/orders', data).then(() => {
+		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).then(() => {
 			setOrderStatus('success')
 		}).catch((error) => {
 			addError(error)

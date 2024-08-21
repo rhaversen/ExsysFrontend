@@ -73,7 +73,7 @@ const Product = ({
 			...productPatch,
 			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
 		}
-		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC).then((response) => {
+		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC, { withCredentials: true }).then((response) => {
 			const product = response.data as ProductType
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			onProductPatched(product)
@@ -85,7 +85,7 @@ const Product = ({
 
 	const deleteProduct = useCallback((product: ProductType, confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
-			data: { confirm }
+			data: { confirm }, withCredentials: true
 		}).then(() => {
 			onProductDeleted(product._id)
 		}).catch((error) => {
