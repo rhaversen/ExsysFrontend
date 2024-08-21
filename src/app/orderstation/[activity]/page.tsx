@@ -5,7 +5,7 @@ import OrderConfirmationWindow from '@/components/orderstation/confirmation/Orde
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type KioskType, type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
@@ -28,6 +28,20 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading'>('loading')
 	const [price, setPrice] = useState(0)
 	const [activityName, setActivityName] = useState('')
+	const [numberOfActivities, setNumberOfActivities] = useState(0)
+
+	const fetchNumberOfActivities = useCallback(async () => {
+		const [kioskResponse, activitiesResponse] = await Promise.all([
+			axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true }),
+			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+		])
+
+		const kiosk = kioskResponse.data as KioskType
+		const activities = activitiesResponse.data as ActivityType[]
+
+		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity._id))
+		setNumberOfActivities(kioskActivities.length)
+	}, [API_URL, setNumberOfActivities])
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
@@ -90,6 +104,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		})
 	}, [API_URL, params.activity, addError, setActivityName])
 
+	// Fetch number of activities for kiosk
+	useEffect(() => {
+		if (API_URL === undefined) return
+		fetchNumberOfActivities().catch((error) => {
+			addError(error)
+		})
+	}, [API_URL, fetchNumberOfActivities, addError])
+
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
@@ -146,13 +168,16 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError])
 
 	const reset = useCallback((): void => {
+		if (numberOfActivities > 1) {
+			router.push('/orderstation')
+		}
 		setCart({
 			products: {},
 			options: {}
 		})
 		setShowOrderConfirmation(false)
 		setOrderStatus('loading')
-	}, [setCart, setShowOrderConfirmation, setOrderStatus])
+	}, [setCart, setShowOrderConfirmation, setOrderStatus, router, numberOfActivities])
 
 	return (
 		<main>
