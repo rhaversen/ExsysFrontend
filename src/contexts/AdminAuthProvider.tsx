@@ -12,7 +12,7 @@ export default function KioskAuthProvider ({ children }: { children: ReactNode }
 		try {
 			await axios.get(`${API_URL}/v1/auth/is-authenticated`, { withCredentials: true })
 		} catch {
-			router.push('/login-kiosk')
+			router.push('/login-admin')
 		}
 	}, [API_URL, router])
 
