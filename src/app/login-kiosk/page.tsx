@@ -10,8 +10,7 @@ export default function Page (): ReactElement {
 
 	const login = useCallback(async (credentials: any) => {
 		try {
-			const response = await axios.post(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
-			console.log(response.status)
+			await axios.post(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			router.push('/orderstation')
 		} catch (error: any) {
 			console.error(error)
@@ -25,7 +24,6 @@ export default function Page (): ReactElement {
 			kioskTag: String(formData.get('kioskTag')),
 			password: formData.get('password')
 		}
-		console.log(credentials)
 		login(credentials).catch(console.error)
 	}, [login])
 

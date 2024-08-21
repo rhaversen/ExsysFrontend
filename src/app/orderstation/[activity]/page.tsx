@@ -157,8 +157,6 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			options: optionCart
 		}
 
-		console.log(data)
-
 		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).then(() => {
 			setOrderStatus('success')
 		}).catch((error) => {
