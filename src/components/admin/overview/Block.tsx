@@ -66,8 +66,9 @@ const Block = ({
 	const patchOrders = useCallback((status: OrderType['status']) => {
 		axios.patch(API_URL + '/v1/orders', {
 			orderIds: orders.map((order) => order._id),
-			status,
-			withCredentials: true
+			status
+		}, {
+			withCredentials: true // Move this to the Axios configuration object
 		}).then((response) => {
 			const data = response.data as OrderType[]
 			onUpdatedOrders(data)
