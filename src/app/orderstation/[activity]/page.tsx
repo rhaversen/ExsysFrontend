@@ -39,7 +39,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		const kiosk = kioskResponse.data as KioskType
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity._id))
+		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity))
 		setNumberOfActivities(kioskActivities.length)
 	}, [API_URL, setNumberOfActivities])
 

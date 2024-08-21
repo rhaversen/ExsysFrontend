@@ -48,7 +48,7 @@ const OverviewView = ({
 			if (activity === undefined) return // Skip if no activity found
 
 			// Find the room using the roomId from the found activity
-			const room = rooms.find(room => room._id === activity.roomId)
+			const room = rooms.find(room => room._id === activity.roomId._id)
 			if (room === undefined) return // Skip if no room found
 
 			const roomName = room.name

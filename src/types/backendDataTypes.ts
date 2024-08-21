@@ -26,7 +26,7 @@ export interface OptionType {
 
 export interface ActivityType {
 	_id: string
-	roomId: RoomType['_id']
+	roomId: RoomType
 	name: string
 }
 
@@ -49,13 +49,13 @@ export interface AdminType {
 	_id: string
 	name: string
 	email: string
-	password: string
+	password?: string
 }
 
 export interface KioskType {
 	_id: string
 	name: string
 	kioskTag: string
-	password: string
-	activities: Array<ActivityType['_id']>
+	password?: string
+	activities: ActivityType[]
 }
