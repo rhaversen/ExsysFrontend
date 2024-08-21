@@ -43,7 +43,7 @@ const Activity = ({
 	}, [])
 
 	const patchActivity = useCallback((activity: ActivityType, activityPatch: Omit<ActivityType, '_id'>): void => {
-		axios.patch(API_URL + `/v1/activitys/${activity._id}`, activityPatch, { withCredentials: true }).then((response) => {
+		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).then((response) => {
 			onActivityPatched(response.data as ActivityType)
 		}).catch((error) => {
 			addError(error)
@@ -52,7 +52,7 @@ const Activity = ({
 	}, [API_URL, onActivityPatched, addError])
 
 	const deleteActivity = useCallback((activity: ActivityType, confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/activitys/${activity._id}`, {
+		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
 			onActivityDeleted(activity._id)
