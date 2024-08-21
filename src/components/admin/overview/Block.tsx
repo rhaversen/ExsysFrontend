@@ -39,13 +39,13 @@ const Block = ({
 				if (counts[product.name] === undefined) {
 					counts[product.name] = 0
 				}
-				counts[product.name] += 1
+				counts[product.name] += product.quantity
 			})
 			order.options.forEach((option) => {
 				if (counts[option.name] === undefined) {
 					counts[option.name] = 0
 				}
-				counts[option.name] += 1
+				counts[option.name] += option.quantity
 			})
 		})
 		return counts
