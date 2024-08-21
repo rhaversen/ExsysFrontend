@@ -38,12 +38,12 @@ const RoomCol = ({
 		const optionsCount: Record<string, number> = {}
 
 		orders.forEach(order => {
-			order.products.forEach(product => {
-				productsCount[product.name] = Number((!Number.isNaN(productsCount[product.name])) || 0) + product.quantity
+			order.products.forEach(({ name, quantity }) => {
+				productsCount[name] = (productsCount[name] ?? 0) + quantity
 			})
 
-			order.options.forEach(option => {
-				optionsCount[option.name] = Number((!Number.isNaN(optionsCount[option.name])) || 0) + option.quantity
+			order.options.forEach(({ name, quantity }) => {
+				optionsCount[name] = (optionsCount[name] ?? 0) + quantity
 			})
 		})
 
@@ -76,7 +76,6 @@ const RoomCol = ({
 					</div>
 				</div>
 			</div>
-
 		</div>
 	)
 }
