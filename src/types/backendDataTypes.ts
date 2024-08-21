@@ -24,6 +24,12 @@ export interface OptionType {
 	imageURL?: string
 }
 
+export interface ActivityType {
+	_id: string
+	roomId: RoomType['_id']
+	name: string
+}
+
 export interface RoomType {
 	_id: string
 	name: string
@@ -34,7 +40,22 @@ export interface OrderType {
 	_id: string
 	products: Array<{ id: ProductType['_id'], quantity: number }>
 	options: Array<{ id: OptionType['_id'], quantity: number }>
-	roomId: RoomType['_id']
+	activityId: ActivityType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 	createdAt: string
+}
+
+export interface AdminType {
+	_id: string
+	name: string
+	email: string
+	password: string
+}
+
+export interface KioskType {
+	_id: string
+	name: string
+	kioskTag: string
+	password: string
+	activities: Array<ActivityType['_id']>
 }
