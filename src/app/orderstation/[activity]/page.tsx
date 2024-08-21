@@ -5,14 +5,14 @@ import OrderConfirmationWindow from '@/components/orderstation/confirmation/Orde
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 
-export default function Page ({ params }: Readonly<{ params: { room: RoomType['_id'] } }>): ReactElement {
+export default function Page ({ params }: Readonly<{ params: { activityId: ActivityType['_id'] } }>): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
 	const { addError } = useError()
@@ -27,7 +27,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading'>('loading')
 	const [price, setPrice] = useState(0)
-	const [roomName, setRoomName] = useState('')
+	const [activityName, setActivityName] = useState('')
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
@@ -41,15 +41,15 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		setOptions(options)
 	}, [API_URL, setProducts, setOptions])
 
-	const redirectToRoomSelection = useCallback(() => {
+	const redirectToActivitySelection = useCallback(() => {
 		router.push('/orderstation')
 	}, [router])
 
-	const validateRoomAndRedirect = useCallback(() => {
-		axios.get(API_URL + '/v1/rooms/' + params.room, { withCredentials: true }).catch(() => {
-			redirectToRoomSelection()
+	const validateActivityAndRedirect = useCallback(() => {
+		axios.get(API_URL + '/v1/activities/' + params.activityId, { withCredentials: true }).catch(() => {
+			redirectToActivitySelection()
 		})
-	}, [API_URL, params.room, redirectToRoomSelection])
+	}, [API_URL, params.activityId, redirectToActivitySelection])
 
 	// Fetch products and options on mount
 	useEffect(() => {
@@ -62,8 +62,8 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 	// Check if the room is valid
 	useEffect(() => {
 		if (API_URL === undefined) return
-		validateRoomAndRedirect()
-	}, [router, API_URL, validateRoomAndRedirect, params.room])
+		validateActivityAndRedirect()
+	}, [router, API_URL, validateActivityAndRedirect, params.activityId])
 
 	// Check if any product is selected
 	useEffect(() => {
@@ -80,18 +80,18 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		setPrice(price)
 	}, [cart, options, products])
 
-	// Get room name
+	// Get activity name
 	useEffect(() => {
-		axios.get(API_URL + '/v1/rooms/' + params.room, { withCredentials: true }).then((response) => {
-			const room = response.data as RoomType
-			setRoomName(room.name)
+		axios.get(API_URL + '/v1/activities/' + params.activityId, { withCredentials: true }).then((response) => {
+			const activity = response.data as ActivityType
+			setActivityName(activity.name)
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, params.room, addError, setRoomName])
+	}, [API_URL, params.activityId, addError, setActivityName])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
-	useInterval(validateRoomAndRedirect, 1000 * 60 * 60) // Validate room every hour
+	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
@@ -130,7 +130,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 		)
 
 		const data = {
-			roomId: params.room,
+			activityId: params.activityId,
 			products: productCart,
 			options: optionCart
 		}
@@ -143,7 +143,7 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			addError(error)
 			setOrderStatus('error')
 		})
-	}, [API_URL, cart, params.room, setOrderStatus, setShowOrderConfirmation, addError])
+	}, [API_URL, cart, params.activityId, setOrderStatus, setShowOrderConfirmation, addError])
 
 	const reset = useCallback((): void => {
 		setCart({
@@ -159,13 +159,13 @@ export default function Page ({ params }: Readonly<{ params: { room: RoomType['_
 			<div className="flex h-screen">
 				<div className="flex-1 overflow-y-auto">
 					<div className="flex flex-row justify-center p-1">
-						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + roomName}</h1>
+						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + activityName}</h1>
 						<button
-							onClick={redirectToRoomSelection}
+							onClick={redirectToActivitySelection}
 							className="ml-2 px-2 text-decoration-line: underline text-blue-500 rounded-md"
 							type="button"
 						>
-							Skift Rum
+							Skift Aktivitet
 						</button>
 					</div>
 					<SelectionWindow
