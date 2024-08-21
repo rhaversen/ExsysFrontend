@@ -62,7 +62,10 @@ export default function Page (): ReactElement {
 					/>
 				))}
 				{activities.length === 0 && (
-					<p className="text-center text-gray-800 text-2xl">Der er ingen rum tilknyttet denne kiosk</p>
+					<div>
+						<p className="text-center text-gray-800 text-2xl">Der er ikke fundet nogle aktiviteter</p>
+						<p className="text-center text-gray-800 text-2xl">Kontakt venligst personalet</p>
+					</div>
 				)}
 			</div>
 		</main>
