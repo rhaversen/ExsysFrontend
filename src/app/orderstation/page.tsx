@@ -17,14 +17,15 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 
 	const fetchActivities = useCallback(async () => {
-		const kioskResponse = await axios.get(API_URL + '/v1/kiosks/me', { withCredentials: true })
+		const [kioskResponse, activitiesResponse] = await Promise.all([
+			axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true }),
+			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+		])
+
 		const kiosk = kioskResponse.data as KioskType
+		const activities = activitiesResponse.data as ActivityType[]
 
-		const ActivitiesResponse = await axios.get(API_URL + '/v1/activities', { withCredentials: true })
-		const activities = ActivitiesResponse.data as ActivityType[]
-
-		// Set activities that are assigned to the kiosk
-		const kioskActivities = activities.filter((activity) => kiosk.activities.includes(activity._id))
+		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity._id))
 
 		setActivities(kioskActivities)
 	}, [API_URL, setActivities])
