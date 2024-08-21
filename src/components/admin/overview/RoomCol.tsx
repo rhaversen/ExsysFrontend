@@ -15,6 +15,8 @@ const RoomCol = ({
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderTypeWithNames[]>>({})
+	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
+	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
 
 	const groupOrdersByActivity = useCallback(() => {
 		const groupedOrders: Record<string, OrderTypeWithNames[]> = {}
@@ -31,6 +33,24 @@ const RoomCol = ({
 		groupOrdersByActivity()
 	}, [groupOrdersByActivity])
 
+	useEffect(() => {
+		const productsCount: Record<string, number> = {}
+		const optionsCount: Record<string, number> = {}
+
+		orders.forEach(order => {
+			order.products.forEach(product => {
+				productsCount[product.name] = Number((!Number.isNaN(productsCount[product.name])) || 0) + product.quantity
+			})
+
+			order.options.forEach(option => {
+				optionsCount[option.name] = Number((!Number.isNaN(optionsCount[option.name])) || 0) + option.quantity
+			})
+		})
+
+		setTotalProducts(productsCount)
+		setTotalOptions(optionsCount)
+	}, [orders])
+
 	return (
 		<div className="m-2 h-full border-2 border-gray-400 rounded-3xl">
 			<h2 className="text-gray-800 font-bold text-2xl text-center m-2">{room.name}</h2>
@@ -42,6 +62,21 @@ const RoomCol = ({
 					onUpdatedOrders={onUpdatedOrders}
 				/>
 			))}
+			<h3 className="text-gray-800 font-bold text-xl text-center m-2">Total</h3>
+			<div className="m-2 p-2 h-full border-2 border-gray-400 rounded-3xl">
+				<div className="flex flex-col items-center">
+					<div className="text-gray-800 text-lg">
+						{Object.entries(totalProducts).map(([name, quantity]) => (
+							<p key={name}>{quantity} x {name}</p>
+						))}
+						{Object.entries(totalOptions).map(([name, quantity]) => (
+							<p key={name}>{quantity} x {name}</p>
+						))}
+
+					</div>
+				</div>
+			</div>
+
 		</div>
 	)
 }
