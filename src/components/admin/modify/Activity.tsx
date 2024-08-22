@@ -2,25 +2,28 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType } from '@/types/backendDataTypes'
+import { type RoomType, type ActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import EditableDropdown from './ui/EditableDropdown'
 
-const Room = ({
-	room,
-	onRoomPatched,
-	onRoomDeleted
+const Activity = ({
+	activity,
+	rooms,
+	onActivityPatched,
+	onActivityDeleted
 }: {
-	room: RoomType
-	onRoomPatched: (room: RoomType) => void
-	onRoomDeleted: (id: RoomType['_id']) => void
+	activity: ActivityType
+	rooms: RoomType[]
+	onActivityPatched: (activity: ActivityType) => void
+	onActivityDeleted: (id: ActivityType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
 
 	const [isEditing, setIsEditing] = useState(false)
-	const [newRoom, setNewRoom] = useState<RoomType>(room)
+	const [newActivity, setNewActivity] = useState<ActivityType>(activity)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
@@ -40,53 +43,58 @@ const Room = ({
 		})
 	}, [])
 
-	const patchRoom = useCallback((room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
-		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).then((response) => {
-			onRoomPatched(response.data as RoomType)
+	const patchActivity = useCallback((activity: ActivityType, activityPatch: Omit<ActivityType, '_id'>): void => {
+		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).then((response) => {
+			onActivityPatched(response.data as ActivityType)
 		}).catch((error) => {
 			addError(error)
-			setNewRoom(room)
+			setNewActivity(activity)
 		})
-	}, [API_URL, onRoomPatched, addError])
+	}, [API_URL, onActivityPatched, addError])
 
-	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
+	const deleteActivity = useCallback((activity: ActivityType, confirm: boolean): void => {
+		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
-			onRoomDeleted(room._id)
+			onActivityDeleted(activity._id)
 		}).catch((error) => {
 			addError(error)
-			setNewRoom(room)
+			setNewActivity(activity)
 		})
-	}, [API_URL, onRoomDeleted, addError])
+	}, [API_URL, onActivityDeleted, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
+		setNewActivity({
+			...newActivity,
 			name: v
 		})
-	}, [newRoom])
+	}, [newActivity])
 
-	const handleDescriptionChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
-			description: v
+	const handleRoomIdChange = useCallback((v: string): void => {
+		// convert string to the object
+		const room = rooms.find((room) => room._id === v)
+		if (room === undefined) {
+			return
+		}
+		setNewActivity({
+			...newActivity,
+			roomId: room
 		})
-	}, [newRoom])
+	}, [newActivity, rooms])
 
 	const handleUndoEdit = useCallback((): void => {
-		setNewRoom(room)
+		setNewActivity(activity)
 		setIsEditing(false)
-	}, [room])
+	}, [activity])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchRoom(room, newRoom)
+		patchActivity(activity, newActivity)
 		setIsEditing(false)
-	}, [patchRoom, room, newRoom])
+	}, [patchActivity, activity, newActivity])
 
-	const handleDeleteRoom = useCallback((confirm: boolean): void => {
-		deleteRoom(room, confirm)
-	}, [deleteRoom, room])
+	const handleDeleteActivity = useCallback((confirm: boolean): void => {
+		deleteActivity(activity, confirm)
+	}, [deleteActivity, activity])
 
 	return (
 		<div className="p-2 m-2">
@@ -96,14 +104,14 @@ const Room = ({
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
-							initialText={room.name}
+							initialText={activity.name}
 							placeholder='Navn'
 							italic={false}
 							minSize={10}
 							required={true}
 							validations={[{
-								validate: (v: string) => v.length <= 20,
-								message: 'Navn kan kun have 20 tegn'
+								validate: (v: string) => v.length <= 50,
+								message: 'Navn kan kun have 50 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {
@@ -114,28 +122,13 @@ const Room = ({
 							}}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Beskrivelse'}</p>
-					<div className="text-gray-800">
-						<EditableField
-							fieldName='description'
-							initialText={room.description}
-							placeholder='Beskrivelse'
-							italic={true}
-							minSize={10}
-							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 20,
-								message: 'Beskrivelse kan kun have 20 tegn'
-							}]}
-							editable={isEditing}
-							onChange={(v: string) => {
-								handleDescriptionChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
-						/>
-					</div>
+					<p className="italic text-gray-500">{'Spisested'}</p>
+					<EditableDropdown
+						options={rooms.map((room) => ({ value: room._id, label: room.name }))}
+						selectedValue={newActivity.roomId._id}
+						onChange={handleRoomIdChange}
+						editable={isEditing}
+					/>
 				</div>
 				<EditingControls
 					isEditing={isEditing}
@@ -148,13 +141,13 @@ const Room = ({
 			</div>
 			{showDeleteConfirmation &&
 				<ConfirmDeletion
-					itemName={room.name}
+					itemName={activity.name}
 					onClose={() => {
 						setShowDeleteConfirmation(false)
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteRoom(confirm)
+						handleDeleteActivity(confirm)
 					}}
 				/>
 			}
@@ -162,4 +155,4 @@ const Room = ({
 	)
 }
 
-export default Room
+export default Activity

@@ -1,25 +1,23 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType } from '@/types/backendDataTypes'
+import { type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
-const Option = ({
-	onOptionPosted,
+const Admin = ({
+	onAdminPosted,
 	onClose
 }: {
-	onOptionPosted: (option: OptionType) => void
+	onAdminPosted: (admin: AdminType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
 
-	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
+	const [admin, setAdmin] = useState<Omit<AdminType, '_id'>>({
 		name: '',
-		price: 0,
-		imageURL: ''
+		password: ''
 	})
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
@@ -39,44 +37,36 @@ const Option = ({
 		})
 	}, [])
 
-	const postOption = useCallback((option: Omit<OptionType, '_id'>): void => {
-		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
-			onOptionPosted(response.data as OptionType)
+	const postAdmin = useCallback((admin: Omit<AdminType, '_id'>): void => {
+		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then((response) => {
+			onAdminPosted(response.data as AdminType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onOptionPosted, onClose, addError])
+	}, [API_URL, onAdminPosted, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
-		setOption({
-			...option,
+		setAdmin({
+			...admin,
 			name: v
 		})
-	}, [option])
+	}, [admin])
 
-	const handlePriceChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9.]/g, '')
-		setOption({
-			...option,
-			price: Number(v)
+	const handlePasswordChange = useCallback((v: string): void => {
+		setAdmin({
+			...admin,
+			password: v
 		})
-	}, [option])
-
-	const handleImageChange = useCallback((v: string): void => {
-		setOption({
-			...option,
-			imageURL: v
-		})
-	}, [option])
+	}, [admin])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
 	const handleCompletePost = useCallback((): void => {
-		postOption(option)
-	}, [option, postOption])
+		postAdmin(admin)
+	}, [postAdmin, admin])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -91,65 +81,52 @@ const Option = ({
 			</button>
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
-					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-					<div className="flex flex-row items-center gap-2 justify-center">
-						<div className="font-bold text-gray-800">
+					<div className="flex flex-col items-center justify-center">
+						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Admin'}</p>
+						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName="name"
-								placeholder="Navn"
+								fieldName='name'
+								placeholder='Navn'
 								italic={false}
+								minSize={10}
 								required={true}
-								minSize={5}
-								validations={[{
-									validate: (v) => v.length <= 50,
-									message: 'Navn skal være højst 50 tegn'
-								}]}
 								editable={true}
 								onChange={(v: string) => {
 									handleNameChange(v)
 								}}
+								validations={[{
+									validate: (v: string) => v.length <= 50,
+									message: 'Navn kan kun have 50 tegn'
+								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>
-						<div className="flex flex-row italic items-center text-gray-800">
+						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName="price"
-								placeholder="Pris"
-								italic={true}
+								fieldName='password'
+								placeholder='Kodeord'
+								italic={false}
+								minSize={10}
 								required={true}
-								minSize={2}
-								validations={[{
-									validate: (v) => !isNaN(Number(v)),
-									message: 'Prisen skal være et tal'
-								}, {
-									validate: (v) => Number(v) >= 0,
-									message: 'Prisen skal være positiv'
-								}]}
 								editable={true}
 								onChange={(v: string) => {
-									handlePriceChange(v)
+									handlePasswordChange(v)
 								}}
+								validations={[{
+									validate: (v: string) => v.length >= 4,
+									message: 'Password skal mindst have 4 tegn'
+								}, {
+									validate: (v: string) => v.length <= 100,
+									message: 'Password kan kun have 100 tegn'
+								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
 								}}
 							/>
-							<div className="pl-1">
-								{' kr'}
-							</div>
 						</div>
 					</div>
-					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
-					<EditableImage
-						URL={option.imageURL}
-						editable={true}
-						edited={false}
-						onChange={(v: string) => {
-							handleImageChange(v)
-						}}
-					/>
 				</div>
 				<div className="flex flex-row justify-center gap-4 pt-5">
 					<button
@@ -173,4 +150,4 @@ const Option = ({
 	)
 }
 
-export default Option
+export default Admin
