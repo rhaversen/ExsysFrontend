@@ -50,13 +50,15 @@ const CartWindow = ({
 					/>
 				</div>
 			}
-			<div className="bottom-0 flex justify-center">
-				<SubmitButton
-					text={(!cartIsEmpty && formIsValid) ? `Bestil for ${price} kr` : 'Vælg produkter'}
-					disabled={!formIsValid}
-					onClick={onSubmit}
-				/>
-			</div>
+			{!cartIsEmpty &&
+				<div className="bottom-0 flex justify-center">
+					<SubmitButton
+						text={`Bestil for ${price} kr`}
+						disabled={!formIsValid}
+						onClick={onSubmit}
+					/>
+				</div>
+			}
 		</div>
 	)
 }

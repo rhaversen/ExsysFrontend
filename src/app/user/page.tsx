@@ -106,8 +106,6 @@ export default function Page (): ReactElement {
 			roomId: selectedRoomId
 		}
 
-		console.log(data)
-
 		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).catch((error) => {
 			addError(error)
 		})

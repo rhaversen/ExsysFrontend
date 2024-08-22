@@ -3,38 +3,39 @@
 import axios from 'axios'
 import React, { useCallback, type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
+	const { addError } = useError()
 
 	const login = useCallback(async (credentials: any) => {
 		try {
-			const response = await axios.post(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
-			console.log(response.status)
+			await axios.post(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
 			router.push('/admin')
 		} catch (error: any) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL, router])
+	}, [API_URL, addError, router])
 
 	const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault() // Prevent default form submission
 		const formData = new FormData(event.currentTarget)
 		const credentials = {
-			email: formData.get('email'),
+			name: formData.get('username'),
 			password: formData.get('password'),
 			stayLoggedIn: formData.get('stayLoggedIn') === 'on' // Convert on to boolean
 		}
-		login(credentials).catch(console.error)
-	}, [login])
+		login(credentials).catch(addError)
+	}, [addError, login])
 
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
 			<form className="w-full max-w-sm flex flex-col justify-between space-y-5" onSubmit={handleSubmit}>
 				<div className="space-y-2">
-					<label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-					<input type="email" id="email" name="email" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+					<label htmlFor="username" className="block text-sm font-medium text-gray-700">Brugernavn</label>
+					<input type="username" id="username" name="username" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
 				</div>
 				<div className="space-y-2">
 					<label htmlFor="password" className="block text-sm font-medium text-gray-700">Kodeord</label>

@@ -3,20 +3,21 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, type ReactElement } from 'react'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
+	const { addError } = useError()
 
 	const login = useCallback(async (credentials: any) => {
 		try {
-			const response = await axios.post(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
-			console.log(response.status)
+			await axios.post(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			router.push('/orderstation')
 		} catch (error: any) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL, router])
+	}, [API_URL, addError, router])
 
 	const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault() // Prevent default form submission
@@ -25,16 +26,15 @@ export default function Page (): ReactElement {
 			kioskTag: String(formData.get('kioskTag')),
 			password: formData.get('password')
 		}
-		console.log(credentials)
-		login(credentials).catch(console.error)
-	}, [login])
+		login(credentials).catch(addError)
+	}, [addError, login])
 
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
 			<form className="w-full max-w-sm flex flex-col justify-between space-y-5" onSubmit={handleSubmit}>
 				<div className="space-y-2">
 					<label htmlFor="kioskTag" className="block text-sm font-medium text-gray-700">Kiosk Tag</label>
-					<input type="number" id="kioskTag" name="kioskTag" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+					<input type="number" id="kioskTag" name="kioskTag" pattern="[0-9]*" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
 				</div>
 				<div className="space-y-2">
 					<label htmlFor="password" className="block text-sm font-medium text-gray-700">Kodeord</label>

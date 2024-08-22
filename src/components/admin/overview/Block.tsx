@@ -1,16 +1,16 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OrderType } from '@/types/backendDataTypes'
+import { type ActivityType, type OrderType } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Block = ({
 	orders,
-	timeBlock,
+	activityId,
 	onUpdatedOrders
 }: {
 	orders: OrderTypeWithNames[]
-	timeBlock: string
+	activityId: string
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -20,6 +20,17 @@ const Block = ({
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
 	const [orderStatus, setOrderStatus] = useState<OrderType['status']>(orders[0].status)
 	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
+	const [activityName, setActivityName] = useState('')
+
+	const getActivityName = useCallback(() => {
+		const response = axios.get(`${API_URL}/v1/activities/${activityId}`, { withCredentials: true })
+		response.then((response) => {
+			const data = response.data as ActivityType
+			setActivityName(data.name)
+		}).catch((error: any) => {
+			addError(error)
+		})
+	}, [API_URL, activityId, addError])
 
 	const countOrders = useCallback((orders: OrderTypeWithNames[]) => {
 		const counts: Record<string, number> = {}
@@ -28,13 +39,13 @@ const Block = ({
 				if (counts[product.name] === undefined) {
 					counts[product.name] = 0
 				}
-				counts[product.name] += 1
+				counts[product.name] += product.quantity
 			})
 			order.options.forEach((option) => {
 				if (counts[option.name] === undefined) {
 					counts[option.name] = 0
 				}
-				counts[option.name] += 1
+				counts[option.name] += option.quantity
 			})
 		})
 		return counts
@@ -55,8 +66,9 @@ const Block = ({
 	const patchOrders = useCallback((status: OrderType['status']) => {
 		axios.patch(API_URL + '/v1/orders', {
 			orderIds: orders.map((order) => order._id),
-			status,
-			withCredentials: true
+			status
+		}, {
+			withCredentials: true // Move this to the Axios configuration object
 		}).then((response) => {
 			const data = response.data as OrderType[]
 			onUpdatedOrders(data)
@@ -80,11 +92,15 @@ const Block = ({
 		setOrderStatus(determineOrderStatus())
 	}, [setOrderStatus, determineOrderStatus])
 
+	useEffect(() => {
+		getActivityName()
+	}, [getActivityName])
+
 	return (
 		<div
 			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}
 		>
-			<h3 className="text-center text-xl ">{timeBlock}</h3>
+			<h3 className="text-center text-xl ">{activityName}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
 				const confirmedCount = confirmedOrders[name] ?? 0
 				const pendingCount = pendingOrders[name] ?? 0
@@ -94,7 +110,7 @@ const Block = ({
 
 				return (
 					<p key={name}>
-						{totalCount} {name}{diffText}
+						{totalCount} x {name}{diffText}
 					</p>
 				)
 			})}
