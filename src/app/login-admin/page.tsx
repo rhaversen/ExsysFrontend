@@ -3,19 +3,21 @@
 import axios from 'axios'
 import React, { useCallback, type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
+	const { addError } = useError()
 
 	const login = useCallback(async (credentials: any) => {
 		try {
 			await axios.post(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
 			router.push('/admin')
 		} catch (error: any) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL, router])
+	}, [API_URL, addError, router])
 
 	const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault() // Prevent default form submission
@@ -25,8 +27,8 @@ export default function Page (): ReactElement {
 			password: formData.get('password'),
 			stayLoggedIn: formData.get('stayLoggedIn') === 'on' // Convert on to boolean
 		}
-		login(credentials).catch(console.error)
-	}, [login])
+		login(credentials).catch(addError)
+	}, [addError, login])
 
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">

@@ -33,7 +33,6 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
 		fetchActivities().catch((error) => {
-			console.error(error)
 			addError(error)
 		})
 	}, [API_URL, addError, fetchActivities])

@@ -3,10 +3,12 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement } from 'react'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 
 	const checkAuth = async (): Promise<boolean> => {
 		try {
@@ -31,7 +33,7 @@ export default function Page (): ReactElement {
 							} else {
 								router.push('/login-kiosk')
 							}
-						}).catch(console.error)
+						}).catch(addError)
 					}}
 				>
 					Bestillings Station
@@ -46,7 +48,7 @@ export default function Page (): ReactElement {
 							} else {
 								router.push('/login-admin')
 							}
-						}).catch(console.error)
+						}).catch(addError)
 					}}
 				>
 					Personale

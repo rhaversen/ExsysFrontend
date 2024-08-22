@@ -3,10 +3,12 @@ import React, { useEffect, useCallback, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useInterval } from 'react-use'
+import { useError } from './ErrorContext/ErrorContext'
 
 export default function KioskAuthProvider ({ children }: { children: ReactNode }): ReactNode {
 	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 
 	const checkAuthentication = useCallback(async (): Promise<void> => {
 		try {
@@ -18,12 +20,12 @@ export default function KioskAuthProvider ({ children }: { children: ReactNode }
 
 	// Run the authentication check on component mount
 	useEffect(() => {
-		checkAuthentication().catch(console.error)
-	}, [checkAuthentication])
+		checkAuthentication().catch(addError)
+	}, [addError, checkAuthentication])
 
 	// Continue running the authentication check every 10 seconds
 	useInterval(() => {
-		checkAuthentication().catch(console.error)
+		checkAuthentication().catch(addError)
 	}, 1000 * 10)
 
 	return <>{children}</>
