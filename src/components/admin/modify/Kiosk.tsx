@@ -165,7 +165,7 @@ const Kiosk = ({
 								handleKioskTagChange(v)
 							}}
 							validations={[{
-								validate: (v: string) => v.length !== 5,
+								validate: (v: string) => v.length === 5,
 								message: 'Kiosk tag skal være præcis 5 tal'
 							}, {
 								validate: (v: string) => v.match('[0-9]*') !== null,
