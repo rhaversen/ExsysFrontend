@@ -214,7 +214,7 @@ const Product = ({
 							required={true}
 							validations={[{
 								validate: (v: string) => v.length <= 15,
-								message: 'Navn må maks være 15 tegn'
+								message: 'Navn kan kun have 15 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {

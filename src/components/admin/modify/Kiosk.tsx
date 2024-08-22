@@ -140,8 +140,8 @@ const Kiosk = ({
 							minSize={10}
 							required={true}
 							validations={[{
-								validate: (v: string) => v.length <= 30,
-								message: 'Navn må maks være 30 tegn'
+								validate: (v: string) => v.length <= 50,
+								message: 'Navn kan kun have 50 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {
@@ -165,8 +165,11 @@ const Kiosk = ({
 								handleKioskTagChange(v)
 							}}
 							validations={[{
-								validate: (v: string) => v.length <= 30,
-								message: 'Kiosk tag må maks være 30 tegn'
+								validate: (v: string) => v.length !== 5,
+								message: 'Kiosk tag skal være præcis 5 tal'
+							}, {
+								validate: (v: string) => v.match('[0-9]*') !== null,
+								message: 'Kiosk tag må kun være tal'
 							}]}
 							onValidationChange={(fieldName: string, v: boolean) => {
 								handleValidationChange(fieldName, v)

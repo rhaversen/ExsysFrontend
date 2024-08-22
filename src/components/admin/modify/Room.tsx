@@ -102,7 +102,7 @@ const Room = ({
 							required={true}
 							validations={[{
 								validate: (v: string) => v.length <= 20,
-								message: 'Navn må maks være 20 tegn'
+								message: 'Navn kan kun have 20 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {
@@ -123,7 +123,7 @@ const Room = ({
 							required={true}
 							validations={[{
 								validate: (v: string) => v.length <= 20,
-								message: 'Navn må maks være 20 tegn'
+								message: 'Beskrivelse kan kun have 20 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {

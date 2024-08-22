@@ -109,7 +109,7 @@ const Option = ({
 							required={true}
 							validations={[{
 								validate: (v) => v.length <= 20,
-								message: 'Navn kan højest have 20 tegn'
+								message: 'Navn kan kun have 20 tegn'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {

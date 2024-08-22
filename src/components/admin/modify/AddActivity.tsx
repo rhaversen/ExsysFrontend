@@ -107,8 +107,8 @@ const AddActivity = ({
 									handleNameChange(v)
 								}}
 								validations={[{
-									validate: (v: string) => v.length <= 20,
-									message: 'Navn må maks være 20 tegn'
+									validate: (v: string) => v.length <= 50,
+									message: 'Navn kan kun have 50 tegn'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)

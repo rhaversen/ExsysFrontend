@@ -123,8 +123,8 @@ const Kiosk = ({
 									handleNameChange(v)
 								}}
 								validations={[{
-									validate: (v: string) => v.length <= 20,
-									message: 'Navn må maks være 20 tegn'
+									validate: (v: string) => v.length <= 50,
+									message: 'Navn kan kun have 50 tegn'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
@@ -143,8 +143,11 @@ const Kiosk = ({
 									handleKioskTagChange(v)
 								}}
 								validations={[{
-									validate: (v: string) => v.length <= 20,
-									message: 'Kiosk tag må maks være 20 tegn'
+									validate: (v: string) => v.length !== 5,
+									message: 'Kiosk tag skal være præcis 5 tal'
+								}, {
+									validate: (v: string) => v.match('[0-9]*') !== null,
+									message: 'Kiosk tag må kun være tal'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
@@ -163,8 +166,12 @@ const Kiosk = ({
 									handlePasswordChange(v)
 								}}
 								validations={[{
-									validate: (v: string) => v.length <= 20,
-									message: 'Password må maks være 20 tegn'
+									validate: (v: string) => v.length >= 4,
+									message: 'Password skal mindst have 4 tegn'
+								},
+								{
+									validate: (v: string) => v.length <= 100,
+									message: 'Password kan kun have 100 tegn'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
