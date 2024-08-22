@@ -94,7 +94,7 @@ const AddActivity = ({
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
 					<div className="flex flex-col items-center justify-center">
-						<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
+						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								fieldName='name'
