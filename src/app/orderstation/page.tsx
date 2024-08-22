@@ -25,7 +25,7 @@ export default function Page (): ReactElement {
 		const kiosk = kioskResponse.data as KioskType
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity._id))
+		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity))
 
 		setActivities(kioskActivities)
 	}, [API_URL, setActivities])
