@@ -45,7 +45,7 @@ const Kiosk = ({
 	}, [])
 
 	const postKiosk = useCallback((kiosk: Omit<KioskType, '_id'>): void => {
-		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
+		axios.post(API_URL + '/v1/kiosks', { ...kiosk, kioskTag: undefined }, { withCredentials: true }).then((response) => {
 			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
@@ -57,13 +57,6 @@ const Kiosk = ({
 		setKiosk({
 			...kiosk,
 			name: v
-		})
-	}, [kiosk])
-
-	const handleKioskTagChange = useCallback((v: string): void => {
-		setKiosk({
-			...kiosk,
-			kioskTag: v
 		})
 	}, [kiosk])
 
@@ -125,29 +118,6 @@ const Kiosk = ({
 								validations={[{
 									validate: (v: string) => v.length <= 50,
 									message: 'Navn kan kun have 50 tegn'
-								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
-							/>
-						</div>
-						<div className="font-bold p-2 text-gray-800">
-							<EditableField
-								fieldName='kioskTag'
-								placeholder='Kiosk tag'
-								italic={false}
-								minSize={10}
-								required={true}
-								editable={true}
-								onChange={(v: string) => {
-									handleKioskTagChange(v)
-								}}
-								validations={[{
-									validate: (v: string) => v.length === 5 || v.length === 0,
-									message: 'Kiosk tag skal være præcis 5 tal'
-								}, {
-									validate: (v: string) => v.match('[0-9]*') !== null,
-									message: 'Kiosk tag må kun være tal'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
