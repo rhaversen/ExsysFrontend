@@ -19,7 +19,7 @@ const Dropdown = ({
 	editable?: boolean
 }): ReactElement => {
 	return (
-		<div className={'font-bold p-2 text-gray-800'}>
+		<div className={'font-bold pb-2 text-gray-800'}>
 			{editable
 				? (
 					<select

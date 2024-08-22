@@ -131,7 +131,8 @@ const Kiosk = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="font-bold p-2 text-gray-800">
+					<p className="italic text-gray-500">{'Navn'}</p>
+					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
 							initialText={kiosk.name}
@@ -152,7 +153,8 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
-					<div className="font-bold p-2 text-gray-800">
+					<p className="italic text-gray-500">{'Tag'}</p>
+					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='kioskTag'
 							initialText={kiosk.kioskTag}

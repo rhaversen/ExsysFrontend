@@ -100,7 +100,8 @@ const Activity = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="font-bold p-2 text-gray-800">
+					<p className="italic text-gray-500">{'Navn'}</p>
+					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
 							initialText={activity.name}
@@ -121,6 +122,7 @@ const Activity = ({
 							}}
 						/>
 					</div>
+					<p className="italic text-gray-500">{'Spisested'}</p>
 					<EditableDropdown
 						options={rooms.map((room) => ({ value: room._id, label: room.name }))}
 						selectedValue={newActivity.roomId._id}

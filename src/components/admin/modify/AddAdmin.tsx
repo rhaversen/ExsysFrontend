@@ -106,7 +106,7 @@ const Admin = ({
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								fieldName='password'
-								placeholder='Password'
+								placeholder='Kodeord'
 								italic={false}
 								minSize={10}
 								required={true}

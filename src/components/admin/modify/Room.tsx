@@ -92,7 +92,8 @@ const Room = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="font-bold p-2 text-gray-800">
+					<p className="italic text-gray-500">{'Navn'}</p>
+					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
 							initialText={room.name}
@@ -113,6 +114,7 @@ const Room = ({
 							}}
 						/>
 					</div>
+					<p className="italic text-gray-500">{'Beskrivelse'}</p>
 					<div className="text-gray-800">
 						<EditableField
 							fieldName='description'

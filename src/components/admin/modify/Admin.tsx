@@ -85,7 +85,8 @@ const Admin = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="font-bold p-2 text-gray-800">
+					<p className="italic text-gray-500">{'Brugernavn'}</p>
+					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
 							initialText={admin.name}
