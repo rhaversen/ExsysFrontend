@@ -48,7 +48,6 @@ export interface OrderType {
 export interface AdminType {
 	_id: string
 	name: string
-	email: string
 	password?: string
 }
 

@@ -67,13 +67,6 @@ const Admin = ({
 		})
 	}, [newAdmin])
 
-	const handleEmailChange = useCallback((v: string): void => {
-		setNewAdmin({
-			...newAdmin,
-			email: v
-		})
-	}, [newAdmin])
-
 	const handleUndoEdit = useCallback((): void => {
 		setNewAdmin(admin)
 		setIsEditing(false)
@@ -107,27 +100,6 @@ const Admin = ({
 							editable={isEditing}
 							onChange={(v: string) => {
 								handleNameChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
-						/>
-					</div>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName='email'
-							initialText={admin.email}
-							placeholder='Email'
-							italic={false}
-							minSize={10}
-							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 20,
-								message: 'Email må maks være 20 tegn'
-							}]}
-							editable={isEditing}
-							onChange={(v: string) => {
-								handleEmailChange(v)
 							}}
 							onValidationChange={(fieldName: string, v: boolean) => {
 								handleValidationChange(fieldName, v)

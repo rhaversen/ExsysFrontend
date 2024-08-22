@@ -17,7 +17,6 @@ const Admin = ({
 
 	const [admin, setAdmin] = useState<Omit<AdminType, '_id'>>({
 		name: '',
-		email: '',
 		password: ''
 	})
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
@@ -51,13 +50,6 @@ const Admin = ({
 		setAdmin({
 			...admin,
 			name: v
-		})
-	}, [admin])
-
-	const handleEmailChange = useCallback((v: string): void => {
-		setAdmin({
-			...admin,
-			email: v
 		})
 	}, [admin])
 
@@ -105,26 +97,6 @@ const Admin = ({
 								validations={[{
 									validate: (v: string) => v.length <= 20,
 									message: 'Navn må maks være 20 tegn'
-								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
-							/>
-						</div>
-						<div className="font-bold p-2 text-gray-800">
-							<EditableField
-								fieldName='email'
-								placeholder='Email'
-								italic={false}
-								minSize={10}
-								required={true}
-								editable={true}
-								onChange={(v: string) => {
-									handleEmailChange(v)
-								}}
-								validations={[{
-									validate: (v: string) => v.length <= 20,
-									message: 'Email må maks være 20 tegn'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)

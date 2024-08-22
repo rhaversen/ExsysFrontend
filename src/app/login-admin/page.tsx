@@ -21,7 +21,7 @@ export default function Page (): ReactElement {
 		event.preventDefault() // Prevent default form submission
 		const formData = new FormData(event.currentTarget)
 		const credentials = {
-			email: formData.get('email'),
+			name: formData.get('username'),
 			password: formData.get('password'),
 			stayLoggedIn: formData.get('stayLoggedIn') === 'on' // Convert on to boolean
 		}
@@ -32,8 +32,8 @@ export default function Page (): ReactElement {
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
 			<form className="w-full max-w-sm flex flex-col justify-between space-y-5" onSubmit={handleSubmit}>
 				<div className="space-y-2">
-					<label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-					<input type="email" id="email" name="email" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+					<label htmlFor="username" className="block text-sm font-medium text-gray-700">Brugernavn</label>
+					<input type="username" id="username" name="username" className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
 				</div>
 				<div className="space-y-2">
 					<label htmlFor="password" className="block text-sm font-medium text-gray-700">Kodeord</label>
