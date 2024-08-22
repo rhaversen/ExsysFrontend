@@ -3,6 +3,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type RoomType, type ActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import EditableDropdown from './ui/EditableDropdown'
 
 const AddActivity = ({
 	rooms,
@@ -114,22 +115,11 @@ const AddActivity = ({
 								}}
 							/>
 						</div>
-						<div className="font-bold p-2 text-gray-800">
-							<select
-								className="border border-gray-300 rounded-md p-2"
-								value={activity.roomId._id}
-								onChange={(e) => { handleRoomIdChange(e.target.value) }}
-								title="Vælg rum"
-							>
-								<option value="">Vælg rum</option>
-								{/* Map over the rooms and render an option for each room */}
-								{rooms.map((room) => (
-									<option key={room._id} value={room._id}>
-										{room.name}
-									</option>
-								))}
-							</select>
-						</div>
+						<EditableDropdown
+							options={rooms.map((room) => ({ value: room._id, label: room.name }))}
+							selectedValue={activity.roomId._id}
+							onChange={handleRoomIdChange}
+						/>
 					</div>
 				</div>
 				<div className="flex flex-row justify-center gap-4 pt-5">
