@@ -1,3 +1,4 @@
+import KioskAuthProvider from '@/contexts/KioskAuthProvider'
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -15,5 +16,5 @@ export default function SelectRoomLayout ({
 }: Readonly<{
 	children: React.ReactNode
 }>): React.JSX.Element {
-	return <section>{children}</section>
+	return <KioskAuthProvider>{children}</KioskAuthProvider>
 }

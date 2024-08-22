@@ -34,7 +34,7 @@ const ProductCatalog = ({
 
 	return (
 		<div className="flex flex-wrap justify-between mx-5">
-			{products.map((product) => (
+			{products.filter(product => productAvailabilities[product._id]).map((product) => (
 				<Product
 					key={product._id}
 					product={product}

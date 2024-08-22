@@ -1,3 +1,4 @@
+import AdminAuthProvider from '@/contexts/AdminAuthProvider'
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -12,5 +13,5 @@ export default function AdminLayout ({
 }: Readonly<{
 	children: React.ReactNode
 }>): React.JSX.Element {
-	return <section>{children}</section>
+	return <AdminAuthProvider>{children}</AdminAuthProvider>
 }

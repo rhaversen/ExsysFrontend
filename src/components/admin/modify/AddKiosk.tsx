@@ -1,24 +1,31 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Activities from './kioskActivities/Activities'
+import ActivitiesWindow from './ActivitiesWindow'
 
-const Room = ({
-	onRoomPosted,
+const Kiosk = ({
+	activities,
+	onKioskPosted,
 	onClose
 }: {
-	onRoomPosted: (room: RoomType) => void
+	activities: ActivityType[]
+	onKioskPosted: (kiosk: KioskType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
 
-	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
+	const [kiosk, setKiosk] = useState<Omit<KioskType, '_id'>>({
 		name: '',
-		description: ''
+		kioskTag: '',
+		password: '',
+		activities: []
 	})
+	const [showActivities, setShowActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -37,36 +44,50 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = useCallback((room: Omit<RoomType, '_id'>): void => {
-		axios.post(API_URL + '/v1/rooms', room, { withCredentials: true }).then((response) => {
-			onRoomPosted(response.data as RoomType)
+	const postKiosk = useCallback((kiosk: Omit<KioskType, '_id'>): void => {
+		axios.post(API_URL + '/v1/kiosks', { ...kiosk, kioskTag: undefined }, { withCredentials: true }).then((response) => {
+			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onRoomPosted, onClose, addError])
+	}, [API_URL, onKioskPosted, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
-		setRoom({
-			...room,
+		setKiosk({
+			...kiosk,
 			name: v
 		})
-	}, [room])
+	}, [kiosk])
 
-	const handleDescriptionChange = useCallback((v: string): void => {
-		setRoom({
-			...room,
-			description: v
+	const handlePasswordChange = useCallback((v: string): void => {
+		setKiosk({
+			...kiosk,
+			password: v
 		})
-	}, [room])
+	}, [kiosk])
+
+	const handleAddActivity = useCallback((v: ActivityType): void => {
+		setKiosk({
+			...kiosk,
+			activities: [...kiosk.activities, v]
+		})
+	}, [kiosk])
+
+	const handleDeleteActivity = useCallback((v: ActivityType): void => {
+		setKiosk({
+			...kiosk,
+			activities: kiosk.activities.filter((activity) => activity !== v)
+		})
+	}, [kiosk])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
 	const handleCompletePost = useCallback((): void => {
-		postRoom(room)
-	}, [postRoom, room])
+		postKiosk(kiosk)
+	}, [postKiosk, kiosk])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -82,7 +103,7 @@ const Room = ({
 			<div className="absolute bg-white rounded-3xl p-10">
 				<div className="flex flex-col items-center justify-center">
 					<div className="flex flex-col items-center justify-center">
-						<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
+						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kiosk'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								fieldName='name'
@@ -103,26 +124,62 @@ const Room = ({
 								}}
 							/>
 						</div>
-						<div className="text-gray-800">
+						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='description'
-								placeholder='Beskrivelse'
-								italic={true}
+								fieldName='password'
+								placeholder='Password'
+								italic={false}
 								minSize={10}
 								required={true}
 								editable={true}
 								onChange={(v: string) => {
-									handleDescriptionChange(v)
+									handlePasswordChange(v)
 								}}
 								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Beskrivelse kan kun have 50 tegn'
+									validate: (v: string) => v.length >= 4,
+									message: 'Password skal mindst have 4 tegn'
+								},
+								{
+									validate: (v: string) => v.length <= 100,
+									message: 'Password kan kun have 100 tegn'
 								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
 								}}
 							/>
 						</div>
+						{kiosk.activities.length > 0 &&
+							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
+						}
+						{kiosk.activities.length === 0 &&
+							<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
+						}
+						<Activities
+							selectedActivities={kiosk.activities}
+							editable={true}
+							onDeleteActivity={(v: ActivityType) => {
+								handleDeleteActivity(v)
+							}}
+							showActivities={() => {
+								setShowActivities(true)
+							}}
+						/>
+						{showActivities &&
+							<ActivitiesWindow
+								kioskName={kiosk.name}
+								activities={activities}
+								kioskActivities={kiosk.activities}
+								onAddActivity={(v: ActivityType) => {
+									handleAddActivity(v)
+								}}
+								onDeleteActivity={(v: ActivityType) => {
+									handleDeleteActivity(v)
+								}}
+								onClose={() => {
+									setShowActivities(false)
+								}}
+							/>
+						}
 					</div>
 				</div>
 				<div className="flex flex-row justify-center gap-4 pt-5">
@@ -147,4 +204,4 @@ const Room = ({
 	)
 }
 
-export default Room
+export default Kiosk
