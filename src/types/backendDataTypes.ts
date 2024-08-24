@@ -30,6 +30,12 @@ export interface ActivityType {
 	name: string
 }
 
+export interface ActivityTypeNonPopulated {
+	_id: string
+	roomId: RoomType['_id']
+	name: string
+}
+
 export interface RoomType {
 	_id: string
 	name: string
@@ -63,4 +69,12 @@ export interface KioskType {
 	password?: string
 	readerId: ReaderType['_id']
 	activities: ActivityType[]
+}
+
+export interface KioskTypeNonPopulated {
+	_id: string
+	name: string
+	kioskTag: string
+	readerId: ReaderType['_id']
+	activities: ActivityTypeNonPopulated[]
 }

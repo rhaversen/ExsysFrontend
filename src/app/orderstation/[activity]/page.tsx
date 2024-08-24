@@ -5,7 +5,7 @@ import OrderConfirmationWindow from '@/components/orderstation/confirmation/Orde
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type KioskType, type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type KioskTypeNonPopulated, type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
@@ -36,10 +36,13 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
 		])
 
-		const kiosk = kioskResponse.data as KioskType
+		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity))
+		const kioskActivities = activities.filter(activity =>
+			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
+		)
+
 		setNumberOfActivities(kioskActivities.length)
 	}, [API_URL, setNumberOfActivities])
 
