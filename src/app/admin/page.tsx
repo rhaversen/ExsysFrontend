@@ -244,6 +244,9 @@ export default function Page (): ReactElement {
 	useInterval(getProducts, 1000 * 60 * 60) // Fetch products every hour
 	useInterval(getOptions, 1000 * 60 * 60) // Fetch options every hour
 	useInterval(getRooms, 1000 * 60 * 60) // Fetch rooms every hour
+	useInterval(getActivities, 1000 * 60 * 60) // Fetch activities every hour
+	useInterval(getKiosks, 1000 * 60 * 60) // Fetch kiosks every hour
+	useInterval(getAdmins, 1000 * 60 * 60) // Fetch admins every hour
 
 	useEffect(() => {
 		fetchData()
