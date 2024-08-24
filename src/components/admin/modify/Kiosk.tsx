@@ -141,7 +141,7 @@ const Kiosk = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<p className="italic text-gray-500">{'Navn'}</p>
+					<p className="italic text-gray-500">{'Kioskens Navn'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='name'
@@ -163,7 +163,7 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Tag'}</p>
+					<p className="italic text-gray-500">{'Tag - Brugernavn til kiosk login'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName='kioskTag'
@@ -188,7 +188,7 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Kortlæser'}</p>
+					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<EditableDropdown
 						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
 						selectedValue={newKiosk.readerId}
@@ -196,14 +196,14 @@ const Kiosk = ({
 						editable={isEditing}
 					/>
 				</div>
-				{kiosk.activities.length > 0 &&
-					<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
+				{newKiosk.activities.length > 0 &&
+					<p className="italic text-gray-500 pt-2">{'Aktiviteter Tilknyttet Kiosken:'}</p>
 				}
-				{kiosk.activities.length === 0 && !isEditing &&
-					<p className="italic text-gray-500 pt-2">{'Ingen Aktiviteter'}</p>
+				{newKiosk.activities.length === 0 && !isEditing &&
+					<p className="italic text-gray-500 pt-2">{'Ingen Aktiviteter Tilknyttet Kiosken'}</p>
 				}
-				{kiosk.activities.length === 0 && isEditing &&
-					<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
+				{newKiosk.activities.length === 0 && isEditing &&
+					<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter Til Kiosken:'}</p>
 				}
 				<div className="flex flex-row flex-wrap max-w-52">
 					<Activities
