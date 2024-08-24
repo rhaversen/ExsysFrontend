@@ -13,8 +13,10 @@ import Room from '@/components/admin/modify/Room'
 import Activity from '@/components/admin/modify/Activity'
 import Kiosk from '@/components/admin/modify/Kiosk'
 import Admin from '@/components/admin/modify/Admin'
+import Reader from '@/components/admin/modify/Reader'
+import AddReader from '@/components/admin/modify/AddReader'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
-import { type ActivityType, type AdminType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ActivityType, type AdminType, type KioskType, type OptionType, type ProductType, type RoomType, type ReaderType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 
 const ModifyView = ({
@@ -24,6 +26,7 @@ const ModifyView = ({
 	activities,
 	kiosks,
 	admins,
+	readers,
 	onUpdatedProduct,
 	onDeletedProduct,
 	onAddedProduct,
@@ -41,7 +44,10 @@ const ModifyView = ({
 	onDeletedKiosk,
 	onAddedAdmin,
 	onUpdatedAdmin,
-	onDeletedAdmin
+	onDeletedAdmin,
+	onAddedReader,
+	onUpdatedReader,
+	onDeletedReader
 }: {
 	products: ProductType[]
 	options: OptionType[]
@@ -49,6 +55,7 @@ const ModifyView = ({
 	activities: ActivityType[]
 	kiosks: KioskType[]
 	admins: AdminType[]
+	readers: ReaderType[]
 	onUpdatedProduct: (product: ProductType) => void
 	onDeletedProduct: (id: string) => void
 	onAddedProduct: (product: ProductType) => void
@@ -67,8 +74,11 @@ const ModifyView = ({
 	onAddedAdmin: (admin: AdminType) => void
 	onUpdatedAdmin: (admin: AdminType) => void
 	onDeletedAdmin: (id: string) => void
+	onAddedReader: (reader: ReaderType) => void
+	onUpdatedReader: (reader: ReaderType) => void
+	onDeletedReader: (id: string) => void
 }): ReactElement => {
-	const views = ['Produkter', 'Tilvalg', 'Rum', 'Aktiviteter', 'Kiosker', 'Admins']
+	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [showAddRoom, setShowAddRoom] = useState(false)
@@ -77,6 +87,7 @@ const ModifyView = ({
 	const [showAddActivity, setShowAddActivity] = useState(false)
 	const [showAddKiosk, setShowAddKiosk] = useState(false)
 	const [showAddAdmin, setShowAddAdmin] = useState(false)
+	const [showAddReader, setShowAddReader] = useState(false)
 
 	return (
 		<div>
@@ -189,6 +200,7 @@ const ModifyView = ({
 							<Kiosk
 								kiosk={kiosk}
 								activities={activities}
+								readers={readers}
 								onKioskPatched={onUpdatedKiosk}
 								onKioskDeleted={onDeletedKiosk}
 							/>
@@ -212,6 +224,27 @@ const ModifyView = ({
 								admin={admin}
 								onAdminPatched={onUpdatedAdmin}
 								onAdminDeleted={onDeletedAdmin}
+							/>
+						</div>
+					))}
+				</ItemList>
+			}
+			{selectedView === 'Kortlæsere' &&
+				<ItemList
+					buttonText="Ny Kortlæser"
+					onAdd={() => {
+						setShowAddReader(true)
+					}}
+				>
+					{readers.map((reader) => (
+						<div
+							className="min-w-64"
+							key={reader._id}
+						>
+							<Reader
+								reader={reader}
+								onReaderPatched={onUpdatedReader}
+								onReaderDeleted={onDeletedReader}
 							/>
 						</div>
 					))}
@@ -254,6 +287,7 @@ const ModifyView = ({
 			{showAddKiosk &&
 				<AddKiosk
 					activities={activities}
+					readers={readers}
 					onKioskPosted={onAddedKiosk}
 					onClose={() => {
 						setShowAddKiosk(false)
@@ -265,6 +299,14 @@ const ModifyView = ({
 					onAdminPosted={onAddedAdmin}
 					onClose={() => {
 						setShowAddAdmin(false)
+					}}
+				/>
+			}
+			{showAddReader &&
+				<AddReader
+					onReaderPosted={onAddedReader}
+					onClose={() => {
+						setShowAddReader(false)
 					}}
 				/>
 			}

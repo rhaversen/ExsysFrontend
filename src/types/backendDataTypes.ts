@@ -30,6 +30,12 @@ export interface ActivityType {
 	name: string
 }
 
+export interface ActivityTypeNonPopulated {
+	_id: string
+	roomId: RoomType['_id']
+	name: string
+}
+
 export interface RoomType {
 	_id: string
 	name: string
@@ -45,6 +51,11 @@ export interface OrderType {
 	createdAt: string
 }
 
+export interface ReaderType {
+	_id: string
+	readerTag: string
+}
+
 export interface AdminType {
 	_id: string
 	name: string
@@ -56,5 +67,14 @@ export interface KioskType {
 	name: string
 	kioskTag: string
 	password?: string
+	readerId: ReaderType['_id']
 	activities: ActivityType[]
+}
+
+export interface KioskTypeNonPopulated {
+	_id: string
+	name: string
+	kioskTag: string
+	readerId: ReaderType['_id']
+	activities: ActivityTypeNonPopulated[]
 }

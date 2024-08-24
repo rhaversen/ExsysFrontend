@@ -24,6 +24,7 @@ const EditableField = ({
 	validations,
 	required = false,
 	minSize = 1,
+	upperCase = false,
 	onChange,
 	onValidationChange
 }: {
@@ -35,6 +36,7 @@ const EditableField = ({
 	validations: Validation[]
 	required?: boolean
 	minSize?: number
+	upperCase?: boolean
 	onChange: (value: string) => void
 	onValidationChange: (fieldName: string, isValid: boolean) => void
 }): ReactElement => {
@@ -43,13 +45,16 @@ const EditableField = ({
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
-		const newValue = event.target.value
+		let newValue = event.target.value
+		if (upperCase) {
+			newValue = newValue.toUpperCase()
+		}
 		setText(newValue)
 		onChange(newValue)
 		const newErrors = validateField(newValue, validations, required)
 		setErrors(newErrors)
 		onValidationChange(fieldName, newErrors.length === 0)
-	}, [onChange, validations, required, fieldName, onValidationChange])
+	}, [onChange, validations, required, fieldName, onValidationChange, upperCase])
 
 	// Reset text when no longer editable
 	useEffect(() => {

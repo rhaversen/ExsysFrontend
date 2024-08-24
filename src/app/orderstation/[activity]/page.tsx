@@ -1,11 +1,12 @@
 'use client'
 
 import CartWindow from '@/components/orderstation/cart/CartWindow'
+import SelectPaymentWindow from '@/components/orderstation/cart/SelectPaymentWindow'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type KioskType, type ActivityType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type KioskTypeNonPopulated, type ActivityType, type OptionType, type ProductType, type OrderType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
@@ -25,10 +26,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	})
 	const [formIsValid, setFormIsValid] = useState(false)
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
-	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading'>('loading')
+	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
 	const [price, setPrice] = useState(0)
 	const [activityName, setActivityName] = useState('')
 	const [numberOfActivities, setNumberOfActivities] = useState(0)
+	const [kioskId, setKioskId] = useState('')
+	const [showSelectPaymentWindow, setShowSelectPaymentWindow] = useState(false)
+	const [order, setOrder] = useState<OrderType | null>(null)
+	const [shouldFetchorderStatus, setShouldFetchOrderStatus] = useState(false)
 
 	const fetchNumberOfActivities = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -36,12 +41,21 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
 		])
 
-		const kiosk = kioskResponse.data as KioskType
+		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity))
+		const kioskActivities = activities.filter(activity =>
+			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
+		)
+
 		setNumberOfActivities(kioskActivities.length)
 	}, [API_URL, setNumberOfActivities])
+
+	const fetchKioskid = useCallback(async () => {
+		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
+		const kiosk = kioskResponse.data as KioskTypeNonPopulated
+		setKioskId(kiosk._id)
+	}, [API_URL, setKioskId])
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
@@ -112,6 +126,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		})
 	}, [API_URL, fetchNumberOfActivities, addError])
 
+	// Fetch kiosk id
+	useEffect(() => {
+		if (API_URL === undefined) return
+		fetchKioskid().catch((error) => {
+			addError(error)
+		})
+	}, [API_URL, fetchKioskid, addError])
+
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
@@ -133,7 +155,28 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		setCart(newCart)
 	}, [cart, setCart])
 
-	const submitOrder = useCallback((): void => {
+	useInterval(() => {
+		if (shouldFetchorderStatus) {
+			axios.get(API_URL + '/v1/orders/' + order?._id + '/paymentStatus', { withCredentials: true }).then((res) => {
+				const paymentStatus = res.data.paymentStatus as 'pending' | 'successful' | 'failed'
+				if (paymentStatus === 'successful') {
+					setOrderStatus('success')
+					setShouldFetchOrderStatus(false)
+				} else if (paymentStatus === 'failed') {
+					setOrderStatus('error')
+					setShouldFetchOrderStatus(false)
+				} else if (paymentStatus === 'pending') {
+					setOrderStatus('awaitingPayment')
+				}
+			}).catch((error) => {
+				addError(error)
+				setOrderStatus('error')
+				setShouldFetchOrderStatus(false)
+			})
+		}
+	}, shouldFetchorderStatus ? 1000 : null)
+
+	const submitOrder = useCallback((type: 'Cash' | 'Card'): void => {
 		setOrderStatus('loading')
 		setShowOrderConfirmation(true)
 
@@ -152,18 +195,29 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		)
 
 		const data = {
+			kioskId,
 			activityId: params.activity,
 			products: productCart,
-			options: optionCart
+			options: optionCart,
+			skipCheckout: false
 		}
 
-		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).then(() => {
-			setOrderStatus('success')
+		if (type === 'Cash') {
+			data.skipCheckout = true
+		} else if (type === 'Card') {
+			data.skipCheckout = false
+			setShouldFetchOrderStatus(true)
+		}
+
+		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).then((res) => {
+			setOrder(res.data as OrderType)
+			setShouldFetchOrderStatus(true)
 		}).catch((error) => {
 			addError(error)
 			setOrderStatus('error')
+			setShouldFetchOrderStatus(false)
 		})
-	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError])
+	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError, kioskId, setOrder, setShouldFetchOrderStatus])
 
 	const reset = useCallback((): void => {
 		if (numberOfActivities > 1) {
@@ -203,7 +257,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 						options={options}
 						cart={cart}
 						onCartChange={handleCartChange}
-						onSubmit={submitOrder}
+						onSubmit={() => { setShowSelectPaymentWindow(true) }}
 						formIsValid={formIsValid}
 					/>
 				</div>
@@ -214,7 +268,19 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 						price={price}
 						orderStatus={orderStatus}
 						onClose={reset}
-					/>}
+					/>
+				}
+			</div>
+			<div>
+				{showSelectPaymentWindow &&
+					<SelectPaymentWindow
+						onSubmit={(type) => {
+							submitOrder(type)
+							setShowOrderConfirmation(true)
+							setShowSelectPaymentWindow(false)
+						}}
+					/>
+				}
 			</div>
 		</main>
 	)
