@@ -34,7 +34,7 @@ export default function Page (): ReactElement {
 		toDate.setHours(24, 0, 0, 0)
 
 		try {
-			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed`, { withCredentials: true })
+			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed&paymentStatus=successful`, { withCredentials: true })
 			const data = response.data as OrderType[]
 			setOrders(data)
 		} catch (error: any) {
