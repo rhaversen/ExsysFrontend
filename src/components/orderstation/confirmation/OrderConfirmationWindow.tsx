@@ -8,12 +8,12 @@ const OrderConfirmationWindow = ({
 	onClose
 }: {
 	price: number
-	orderStatus: 'success' | 'error' | 'loading'
+	orderStatus: 'success' | 'error' | 'loading' | 'awaitingPayment'
 	onClose: () => void
 }): ReactElement => {
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			{orderStatus !== 'loading' &&
+			{orderStatus !== 'loading' && orderStatus !== 'awaitingPayment' &&
 				<button
 					type="button"
 					className="absolute inset-0 w-full h-full text-gray-800"
@@ -28,12 +28,13 @@ const OrderConfirmationWindow = ({
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-800"
 			>
 				<h2 className="text-2xl font-bold mb-4 text-center">
+					{orderStatus === 'awaitingPayment' && 'Afventer Betaling'}
 					{orderStatus === 'success' && 'Tak For Din Bestilling'}
 					{orderStatus === 'error' && 'Der Skete En Fejl'}
 					{orderStatus === 'loading' && 'Sender Bestilling...'}
 				</h2>
 				<p className="mb-4 flex justify-center">
-					{orderStatus === 'success' && `Husk at overføre ${price} kr til (BOX)`}
+					{orderStatus === 'success' && `Husk at lægge ${price} kr i skålen`}
 				</p>
 				<p className="mb-4 flex justify-center text-center">
 					{orderStatus === 'error' && (
@@ -70,6 +71,9 @@ const OrderConfirmationWindow = ({
 								height={200}
 							/>
 						}
+						{orderStatus === 'awaitingPayment' &&
+							<p>{'Betal på automaten'}</p>
+						}
 					</div>
 				</div>
 				<div className="flex justify-center">
@@ -77,7 +81,7 @@ const OrderConfirmationWindow = ({
 						<SubmitButton
 							text="Ny Bestilling"
 							onClick={onClose}
-							disabled={false}
+							disabled={orderStatus !== 'success' && orderStatus !== 'error'}
 						/>
 					}
 				</div>
