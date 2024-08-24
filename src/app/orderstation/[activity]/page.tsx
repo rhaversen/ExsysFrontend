@@ -29,6 +29,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [price, setPrice] = useState(0)
 	const [activityName, setActivityName] = useState('')
 	const [numberOfActivities, setNumberOfActivities] = useState(0)
+	const [kioskId, setKioskId] = useState('')
 
 	const fetchNumberOfActivities = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -45,6 +46,12 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 
 		setNumberOfActivities(kioskActivities.length)
 	}, [API_URL, setNumberOfActivities])
+
+	const fetchKioskid = useCallback(async () => {
+		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
+		const kiosk = kioskResponse.data as KioskTypeNonPopulated
+		setKioskId(kiosk._id)
+	}, [API_URL, setKioskId])
 
 	const fetchProductsAndOptions = useCallback(async () => {
 		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
@@ -115,6 +122,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		})
 	}, [API_URL, fetchNumberOfActivities, addError])
 
+	// Fetch kiosk id
+	useEffect(() => {
+		if (API_URL === undefined) return
+		fetchKioskid().catch((error) => {
+			addError(error)
+		})
+	}, [API_URL, fetchKioskid, addError])
+
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
 
@@ -155,6 +170,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		)
 
 		const data = {
+			kioskId,
 			activityId: params.activity,
 			products: productCart,
 			options: optionCart
@@ -166,7 +182,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			addError(error)
 			setOrderStatus('error')
 		})
-	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError])
+	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError, kioskId])
 
 	const reset = useCallback((): void => {
 		if (numberOfActivities > 1) {
