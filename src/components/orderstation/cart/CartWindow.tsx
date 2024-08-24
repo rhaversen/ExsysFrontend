@@ -53,7 +53,7 @@ const CartWindow = ({
 			{!cartIsEmpty &&
 				<div className="bottom-0 flex justify-center">
 					<SubmitButton
-						text={`Bestil for ${price} kr`}
+						text={`Betal ${price} kr`}
 						disabled={!formIsValid}
 						onClick={onSubmit}
 					/>

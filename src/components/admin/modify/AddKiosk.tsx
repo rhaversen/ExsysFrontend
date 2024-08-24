@@ -1,17 +1,20 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Activities from './kioskActivities/Activities'
 import ActivitiesWindow from './ActivitiesWindow'
+import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
 	activities,
+	readers,
 	onKioskPosted,
 	onClose
 }: {
 	activities: ActivityType[]
+	readers: ReaderType[]
 	onKioskPosted: (kiosk: KioskType) => void
 	onClose: () => void
 }): ReactElement => {
@@ -20,6 +23,7 @@ const Kiosk = ({
 	const { addError } = useError()
 
 	const [kiosk, setKiosk] = useState<Omit<KioskType, '_id'>>({
+		readerId: '',
 		name: '',
 		kioskTag: '',
 		password: '',
@@ -78,6 +82,13 @@ const Kiosk = ({
 		setKiosk({
 			...kiosk,
 			activities: kiosk.activities.filter((activity) => activity !== v)
+		})
+	}, [kiosk])
+
+	const handleReaderIdChange = useCallback((v: string): void => {
+		setKiosk({
+			...kiosk,
+			readerId: v
 		})
 	}, [kiosk])
 
@@ -148,6 +159,13 @@ const Kiosk = ({
 								}}
 							/>
 						</div>
+						<p className="italic text-gray-500">{'Kortlæser'}</p>
+						<EditableDropdown
+							options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
+							selectedValue={kiosk.readerId}
+							onChange={handleReaderIdChange}
+							editable={true}
+						/>
 						{kiosk.activities.length > 0 &&
 							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
 						}

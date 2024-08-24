@@ -2,7 +2,7 @@
 
 import Activity from '@/components/orderstation/Activity'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskTypeNonPopulated } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -22,10 +22,12 @@ export default function Page (): ReactElement {
 			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
 		])
 
-		const kiosk = kioskResponse.data as KioskType
+		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity => kiosk.activities.includes(activity))
+		const kioskActivities = activities.filter(activity =>
+			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
+		)
 
 		setActivities(kioskActivities)
 	}, [API_URL, setActivities])
