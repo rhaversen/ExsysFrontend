@@ -2,20 +2,23 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Activities from './kioskActivities/Activities'
 import ActivitiesWindow from './ActivitiesWindow'
+import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
 	kiosk,
 	activities,
+	readers,
 	onKioskPatched,
 	onKioskDeleted
 }: {
 	kiosk: KioskType
 	activities: ActivityType[]
+	readers: ReaderType[]
 	onKioskPatched: (kiosk: KioskType) => void
 	onKioskDeleted: (id: KioskType['_id']) => void
 }): ReactElement => {
@@ -99,6 +102,13 @@ const Kiosk = ({
 		})
 	}, [newKiosk])
 
+	const handleReaderIdChange = useCallback((v: string): void => {
+		setNewKiosk({
+			...newKiosk,
+			readerId: v
+		})
+	}, [newKiosk])
+
 	const handleAddActivity = useCallback((v: ActivityType): void => {
 		setNewKiosk({
 			...newKiosk,
@@ -178,6 +188,13 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
+					<p className="italic text-gray-500">{'Kortlæser'}</p>
+					<EditableDropdown
+						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
+						selectedValue={newKiosk.readerId}
+						onChange={handleReaderIdChange}
+						editable={isEditing}
+					/>
 				</div>
 				{kiosk.activities.length > 0 &&
 					<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
