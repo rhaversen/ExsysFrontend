@@ -5,7 +5,7 @@ import OverviewView from '@/components/admin/overview/OverviewView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type AdminType, type KioskType, type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type AdminType, type KioskType, type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
@@ -24,6 +24,7 @@ export default function Page (): ReactElement {
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [admins, setAdmins] = useState<AdminType[]>([])
+	const [readers, setReaders] = useState<ReaderType[]>([])
 
 	const [fetching, setFetching] = useState<boolean>(true)
 
@@ -99,6 +100,15 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL])
 
+	const getReaders = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/readers', { withCredentials: true })
+			const data = response.data as ReaderType[]
+			setReaders(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
 	const fetchData = useCallback(() => {
 		setFetching(true)
 		Promise.all([
@@ -108,12 +118,13 @@ export default function Page (): ReactElement {
 			getOrders(),
 			getActivities(),
 			getKiosks(),
-			getAdmins()
+			getAdmins(),
+			getReaders()
 		]).catch((error: any) => {
 			addError(error)
 		})
 		setFetching(false)
-	}, [getOrders, getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins])
+	}, [getOrders, getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins, getReaders])
 
 	const handleOrdersUpdate = useCallback((orders: OrderType[]) => {
 		// Only update the orders that were changed
@@ -240,6 +251,24 @@ export default function Page (): ReactElement {
 		setAdmins((prevAdmins) => [...prevAdmins, admin])
 	}, [])
 
+	const handleUpdateReader = useCallback((reader: ReaderType) => {
+		setReaders((prevReaders) => {
+			const index = prevReaders.findIndex((r) => r._id === reader._id)
+			if (index === -1) return prevReaders
+			const newReaders = [...prevReaders]
+			newReaders[index] = reader
+			return newReaders
+		})
+	}, [])
+
+	const handleDeleteReader = useCallback((id: string) => {
+		setReaders((prevReaders) => prevReaders.filter((r) => r._id !== id))
+	}, [])
+
+	const handleAddReader = useCallback((reader: ReaderType) => {
+		setReaders((prevReaders) => [...prevReaders, reader])
+	}, [])
+
 	useInterval(getOrders, 1000 * 10) // Fetch orders 10 seconds
 	useInterval(getProducts, 1000 * 60 * 60) // Fetch products every hour
 	useInterval(getOptions, 1000 * 60 * 60) // Fetch options every hour
@@ -247,6 +276,7 @@ export default function Page (): ReactElement {
 	useInterval(getActivities, 1000 * 60 * 60) // Fetch activities every hour
 	useInterval(getKiosks, 1000 * 60 * 60) // Fetch kiosks every hour
 	useInterval(getAdmins, 1000 * 60 * 60) // Fetch admins every hour
+	useInterval(getReaders, 1000 * 60 * 60) // Fetch readers every hour
 
 	useEffect(() => {
 		fetchData()
@@ -279,6 +309,7 @@ export default function Page (): ReactElement {
 					activities={activities}
 					kiosks={kiosks}
 					admins={admins}
+					readers={readers}
 					onUpdatedProduct={handleUpdateProduct}
 					onDeletedProduct={handleDeleteProduct}
 					onAddedProduct={handleAddProduct}
@@ -297,6 +328,9 @@ export default function Page (): ReactElement {
 					onAddedAdmin={handleAddAdmin}
 					onUpdatedAdmin={handleUpdateAdmin}
 					onDeletedAdmin={handleDeleteAdmin}
+					onAddedReader={handleAddReader}
+					onUpdatedReader={handleUpdateReader}
+					onDeletedReader={handleDeleteReader}
 				/>
 			}
 		</main>
