@@ -63,12 +63,12 @@ const AddActivity = ({
 	const handleRoomIdChange = useCallback((v: string): void => {
 		// convert string to the object
 		const room = rooms.find((room) => room._id === v)
-		if (room === undefined) {
+		if (room === undefined && v !== 'null-option') {
 			return
 		}
 		setActivity({
 			...activity,
-			roomId: room
+			roomId: ((room?._id) != null) ? room : null
 		})
 	}, [activity, rooms])
 
@@ -117,8 +117,10 @@ const AddActivity = ({
 						</div>
 						<EditableDropdown
 							options={rooms.map((room) => ({ value: room._id, label: room.name }))}
-							selectedValue={activity.roomId._id}
+							selectedValue={activity.roomId?._id ?? 'null-option'}
 							onChange={handleRoomIdChange}
+							placeholder='Vælg Spisested'
+							allowNullOption={true}
 						/>
 					</div>
 				</div>
