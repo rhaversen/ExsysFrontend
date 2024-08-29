@@ -67,7 +67,7 @@ export interface KioskType {
 	name: string
 	kioskTag: string
 	password?: string
-	readerId: ReaderType['_id']
+	readerId: ReaderType['_id'] | null
 	activities: ActivityType[]
 }
 
