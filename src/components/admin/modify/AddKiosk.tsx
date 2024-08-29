@@ -88,7 +88,7 @@ const Kiosk = ({
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setKiosk({
 			...kiosk,
-			readerId: v
+			readerId: v === 'null-option' ? null : v
 		})
 	}, [kiosk])
 
@@ -162,9 +162,12 @@ const Kiosk = ({
 						<p className="italic text-gray-500">{'Kortlæser'}</p>
 						<EditableDropdown
 							options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
-							selectedValue={kiosk.readerId}
+							selectedValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
 							editable={true}
+							fieldName='readerId'
+							placeholder='Vælg Kortlæser'
+							allowNullOption={true}
 						/>
 						{kiosk.activities.length > 0 &&
 							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
