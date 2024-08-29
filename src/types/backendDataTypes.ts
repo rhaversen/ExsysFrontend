@@ -26,7 +26,7 @@ export interface OptionType {
 
 export interface ActivityType {
 	_id: string
-	roomId: RoomType
+	roomId: RoomType | null
 	name: string
 }
 
