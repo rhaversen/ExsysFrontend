@@ -25,6 +25,14 @@ export interface PostProductType {
 	imageURL?: string
 }
 
+export interface PatchProductType {
+	name?: string
+	price?: number
+	orderWindow?: OrderWindow
+	options?: Array<OptionType['_id']>
+	imageURL?: string
+}
+
 export interface OptionType {
 	_id: string
 	name: string
@@ -38,6 +46,12 @@ export interface PostOptionType {
 	imageURL?: string
 }
 
+export interface PatchOptionType {
+	name?: string
+	price?: number
+	imageURL?: string
+}
+
 export interface ActivityType {
 	_id: string
 	roomId: RoomType | null
@@ -47,6 +61,11 @@ export interface ActivityType {
 export interface PostActivityType {
 	roomId?: RoomType['_id'] | null
 	name: string
+}
+
+export interface PatchActivityType {
+	roomId?: RoomType['_id'] | null
+	name?: string
 }
 
 export interface ActivityTypeNonPopulated {
@@ -66,6 +85,11 @@ export interface PostRoomType {
 	description: string
 }
 
+export interface PatchRoomType {
+	name?: string
+	description?: string
+}
+
 export interface OrderType {
 	_id: string
 	products: Array<{ id: ProductType['_id'], quantity: number }>
@@ -82,6 +106,11 @@ export interface PostOrderType {
 	kioskId: KioskType['_id']
 }
 
+export interface PatchOrderType {
+	orderIds: Array<OrderType['_id']>
+	status: 'pending' | 'confirmed' | 'delivered'
+}
+
 export interface ReaderType {
 	_id: string
 	readerTag: string
@@ -90,6 +119,11 @@ export interface ReaderType {
 export interface PostReaderType {
 	readerTag?: string
 	pairingCode: string
+}
+
+export interface PatchReaderType {
+	readerTag?: string | null
+	pairingCode?: string
 }
 
 export interface AdminType {
@@ -101,6 +135,11 @@ export interface AdminType {
 export interface PostAdminType {
 	name: string
 	password: string
+}
+
+export interface PatchAdminType {
+	name?: string
+	password?: string
 }
 
 export interface KioskType {
@@ -120,6 +159,13 @@ export interface PostKioskType {
 	activities: Array<ActivityType['_id']>
 }
 
+export interface PatchKioskType {
+	name?: string
+	kioskTag?: string | null
+	password?: string
+	readerId?: ReaderType['_id'] | null
+	activities?: Array<ActivityType['_id']>
+}
 
 export interface KioskTypeNonPopulated {
 	_id: string
