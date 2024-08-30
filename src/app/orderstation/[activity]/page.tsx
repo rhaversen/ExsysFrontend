@@ -263,6 +263,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			<div>
 				{isSelectPaymentWindowVisible &&
 					<SelectPaymentWindow
+						onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
 						onSubmit={type => {
 							submitOrder(type)
 							setIsOrderConfirmationVisible(true)

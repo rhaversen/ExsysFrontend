@@ -2,9 +2,11 @@ import React, { type ReactElement } from 'react'
 import AsyncImage from '@/components/ui/AsyncImage'
 
 const SelectPaymentWindow = ({
-	onSubmit
+	onSubmit,
+	onCancel
 }: {
 	onSubmit: (type: 'Card' | 'Cash') => void
+	onCancel: () => void
 }): ReactElement => {
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -48,6 +50,15 @@ const SelectPaymentWindow = ({
 							priority={true}
 							draggable={false}
 						/>
+					</button>
+				</div>
+				<div className="flex justify-center items-center h-full">
+					<button
+						onClick={() => { onCancel() }}
+						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
+						type='button'
+					>
+						{'Tilbage'}
 					</button>
 				</div>
 			</div>
