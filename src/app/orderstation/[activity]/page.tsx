@@ -33,7 +33,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [kioskId, setKioskId] = useState('')
 	const [showSelectPaymentWindow, setShowSelectPaymentWindow] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
-	const [shouldFetchorderStatus, setShouldFetchOrderStatus] = useState(false)
+	const [shouldFetchOrderStatus, setShouldFetchOrderStatus] = useState(false)
 
 	const fetchNumberOfActivities = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -156,7 +156,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [cart, setCart])
 
 	useInterval(() => {
-		if (shouldFetchorderStatus) {
+		if (shouldFetchOrderStatus) {
 			axios.get(API_URL + '/v1/orders/' + order?._id + '/paymentStatus', { withCredentials: true }).then((res) => {
 				const paymentStatus = res.data.paymentStatus as 'pending' | 'successful' | 'failed'
 				if (paymentStatus === 'successful') {
@@ -174,7 +174,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 				setShouldFetchOrderStatus(false)
 			})
 		}
-	}, shouldFetchorderStatus ? 1000 : null)
+	}, shouldFetchOrderStatus ? 1000 : null)
 
 	const submitOrder = useCallback((type: 'Cash' | 'Card'): void => {
 		setOrderStatus('loading')
