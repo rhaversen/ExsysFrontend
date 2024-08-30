@@ -70,7 +70,7 @@ export interface PatchActivityType {
 
 export interface ActivityTypeNonPopulated {
 	_id: string
-	roomId: RoomType['_id']
+	roomId: RoomType['_id'] | null
 	name: string
 }
 
@@ -129,7 +129,6 @@ export interface PatchReaderType {
 export interface AdminType {
 	_id: string
 	name: string
-	password?: string
 }
 
 export interface PostAdminType {
@@ -146,7 +145,6 @@ export interface KioskType {
 	_id: string
 	name: string
 	kioskTag: string
-	password?: string
 	readerId: ReaderType['_id'] | null
 	activities: ActivityType[]
 }
@@ -171,6 +169,6 @@ export interface KioskTypeNonPopulated {
 	_id: string
 	name: string
 	kioskTag: string
-	readerId: ReaderType['_id']
+	readerId: ReaderType['_id'] | null
 	activities: ActivityTypeNonPopulated[]
 }
