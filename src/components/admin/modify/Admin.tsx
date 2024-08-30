@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchActivityType, type AdminType } from '@/types/backendDataTypes'
+import { type PatchAdminType, type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -40,7 +40,7 @@ const Admin = ({
 		})
 	}, [])
 
-	const patchAdmin = useCallback((adminPatch: PatchActivityType): void => {
+	const patchAdmin = useCallback((adminPatch: PatchAdminType): void => {
 		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).then((response) => {
 			onAdminPatched(response.data as AdminType)
 		}).catch((error) => {
