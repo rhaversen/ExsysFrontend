@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ReaderType } from '@/types/backendDataTypes'
+import { type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -15,7 +15,10 @@ const Reader = ({
 
 	const { addError } = useError()
 
-	const [readerPairingCode, setReaderPairingCode] = useState<string>('')
+	const [reader, setReader] = useState<PostReaderType>({
+		pairingCode: '',
+		readerTag: undefined
+	})
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -35,13 +38,28 @@ const Reader = ({
 	}, [])
 
 	const postReader = useCallback((): void => {
-		axios.post(API_URL + '/v1/readers', { pairingCode: readerPairingCode }, { withCredentials: true }).then((response) => {
+		console.log(reader)
+		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
 			onReaderPosted(response.data as ReaderType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onReaderPosted, onClose, addError, readerPairingCode])
+	}, [API_URL, onReaderPosted, onClose, addError, reader])
+
+	const handlePairingCodeChange = useCallback((v: string): void => {
+		setReader({
+			...reader,
+			pairingCode: v
+		})
+	}, [reader])
+
+	const handleReaderTagChange = useCallback((v: string): void => {
+		setReader({
+			...reader,
+			readerTag: (v === '') ? undefined : v
+		})
+	}, [reader])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
@@ -76,7 +94,7 @@ const Reader = ({
 								required={true}
 								editable={true}
 								onChange={(v: string) => {
-									setReaderPairingCode(v)
+									handlePairingCodeChange(v)
 								}}
 								validations={[{
 									validate: (v: string) => v.length <= 10,
@@ -87,7 +105,23 @@ const Reader = ({
 								}}
 							/>
 						</div>
-
+						<div className="font-bold p-2 text-gray-800">
+							<EditableField
+								fieldName='tag'
+								placeholder='Tag (Automatisk)'
+								italic={false}
+								minSize={15}
+								required={false}
+								editable={true}
+								onChange={(v: string) => {
+									handleReaderTagChange(v)
+								}}
+								validations={[]}
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
+								}}
+							/>
+						</div>
 					</div>
 				</div>
 				<div className="flex flex-row justify-center gap-4 pt-5">

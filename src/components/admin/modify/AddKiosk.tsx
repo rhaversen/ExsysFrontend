@@ -25,7 +25,7 @@ const Kiosk = ({
 	const [kiosk, setKiosk] = useState<Omit<KioskType, '_id'>>({
 		readerId: '',
 		name: '',
-		kioskTag: '',
+		kioskTag: undefined,
 		password: '',
 		activities: []
 	})
@@ -49,7 +49,7 @@ const Kiosk = ({
 	}, [])
 
 	const postKiosk = useCallback((kiosk: Omit<KioskType, '_id'>): void => {
-		axios.post(API_URL + '/v1/kiosks', { ...kiosk, kioskTag: undefined }, { withCredentials: true }).then((response) => {
+		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
 			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
@@ -71,7 +71,14 @@ const Kiosk = ({
 		})
 	}, [kiosk])
 
-	const handleAddActivity = useCallback((v: ActivityType): void => {
+	const handleKioskTagChange = useCallback((v: KioskType['kioskTag']): void => {
+		console.log(v)
+		setKiosk({
+			...kiosk,
+			kioskTag: (v === '') ? undefined : v as any
+		})
+	}, [kiosk])
+
 		setKiosk({
 			...kiosk,
 			activities: [...kiosk.activities, v]
@@ -154,6 +161,23 @@ const Kiosk = ({
 									validate: (v: string) => v.length <= 100,
 									message: 'Password kan kun have 100 tegn'
 								}]}
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
+								}}
+							/>
+						</div>
+						<div className="font-bold p-2 text-gray-800">
+							<EditableField
+								fieldName='tag'
+								placeholder='Tag (Automatisk)'
+								italic={false}
+								minSize={15}
+								required={false}
+								editable={true}
+								onChange={(v: string) => {
+									handleKioskTagChange(v)
+								}}
+								validations={[]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
 								}}
