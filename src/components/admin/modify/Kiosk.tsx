@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import { type PatchKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Activities from './kioskActivities/Activities'
@@ -80,16 +80,16 @@ const Kiosk = ({
 		})
 	}, [])
 
-	const patchKiosk = useCallback((kiosk: KioskType, kioskPatch: Omit<KioskType, '_id'>): void => {
+	const patchKiosk = useCallback((kioskPatch: PatchKioskType): void => {
 		axios.patch(API_URL + `/v1/kiosks/${kiosk._id}`, kioskPatch, { withCredentials: true }).then((response) => {
 			onKioskPatched(response.data as KioskType)
 		}).catch((error) => {
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskPatched, addError])
+	}, [API_URL, onKioskPatched, addError, kiosk])
 
-	const deleteKiosk = useCallback((kiosk: KioskType, confirm: boolean): void => {
+	const deleteKiosk = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/kiosks/${kiosk._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -98,7 +98,7 @@ const Kiosk = ({
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskDeleted, addError])
+	}, [API_URL, onKioskDeleted, addError, kiosk])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewKiosk({
@@ -141,13 +141,13 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchKiosk(kiosk, newKiosk)
+		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id) })
 		setIsEditing(false)
-	}, [patchKiosk, kiosk, newKiosk])
+	}, [patchKiosk, newKiosk])
 
 	const handleDeleteKiosk = useCallback((confirm: boolean): void => {
-		deleteKiosk(kiosk, confirm)
-	}, [deleteKiosk, kiosk])
+		deleteKiosk(confirm)
+	}, [deleteKiosk])
 
 	return (
 		<div className="p-2 m-2">

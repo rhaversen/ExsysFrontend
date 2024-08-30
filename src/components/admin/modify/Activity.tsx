@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType, type ActivityType } from '@/types/backendDataTypes'
+import { type RoomType, type ActivityType, type PatchActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
@@ -54,16 +54,16 @@ const Activity = ({
 		})
 	}, [])
 
-	const patchActivity = useCallback((activity: ActivityType, activityPatch: Omit<ActivityType, '_id'>): void => {
+	const patchActivity = useCallback((activityPatch: PatchActivityType): void => {
 		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).then((response) => {
 			onActivityPatched(response.data as ActivityType)
 		}).catch((error) => {
 			addError(error)
 			setNewActivity(activity)
 		})
-	}, [API_URL, onActivityPatched, addError])
+	}, [API_URL, onActivityPatched, addError, activity])
 
-	const deleteActivity = useCallback((activity: ActivityType, confirm: boolean): void => {
+	const deleteActivity = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -72,7 +72,7 @@ const Activity = ({
 			addError(error)
 			setNewActivity(activity)
 		})
-	}, [API_URL, onActivityDeleted, addError])
+	}, [API_URL, onActivityDeleted, addError, activity])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewActivity({
@@ -89,7 +89,7 @@ const Activity = ({
 		}
 		setNewActivity({
 			...newActivity,
-			roomId: ((room?._id) != null) ? room : null
+			roomId: ((room?._id) !== undefined) ? room : null
 		})
 	}, [newActivity, rooms])
 
@@ -99,13 +99,13 @@ const Activity = ({
 	}, [activity])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchActivity(activity, newActivity)
+		patchActivity({ ...newActivity, roomId: newActivity.roomId?._id })
 		setIsEditing(false)
-	}, [patchActivity, activity, newActivity])
+	}, [patchActivity, newActivity])
 
 	const handleDeleteActivity = useCallback((confirm: boolean): void => {
-		deleteActivity(activity, confirm)
-	}, [deleteActivity, activity])
+		deleteActivity(confirm)
+	}, [deleteActivity])
 
 	return (
 		<div className="p-2 m-2">

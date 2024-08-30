@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type AdminType } from '@/types/backendDataTypes'
+import { type PatchActivityType, type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -40,16 +40,16 @@ const Admin = ({
 		})
 	}, [])
 
-	const patchAdmin = useCallback((admin: AdminType, adminPatch: Omit<AdminType, '_id'>): void => {
+	const patchAdmin = useCallback((adminPatch: PatchActivityType): void => {
 		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).then((response) => {
 			onAdminPatched(response.data as AdminType)
 		}).catch((error) => {
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminPatched, addError])
+	}, [API_URL, onAdminPatched, addError, admin])
 
-	const deleteAdmin = useCallback((admin: AdminType, confirm: boolean): void => {
+	const deleteAdmin = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/admins/${admin._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -58,7 +58,7 @@ const Admin = ({
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminDeleted, addError])
+	}, [API_URL, onAdminDeleted, addError, admin])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewAdmin({
@@ -73,13 +73,13 @@ const Admin = ({
 	}, [admin])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchAdmin(admin, newAdmin)
+		patchAdmin(newAdmin)
 		setIsEditing(false)
-	}, [patchAdmin, admin, newAdmin])
+	}, [patchAdmin, newAdmin])
 
 	const handleDeleteAdmin = useCallback((confirm: boolean): void => {
-		deleteAdmin(admin, confirm)
-	}, [deleteAdmin, admin])
+		deleteAdmin(confirm)
+	}, [deleteAdmin])
 
 	return (
 		<div className="p-2 m-2">

@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ReaderType } from '@/types/backendDataTypes'
+import { type PatchReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -40,16 +40,16 @@ const Reader = ({
 		})
 	}, [])
 
-	const patchReader = useCallback((reader: ReaderType, readerPatch: Omit<ReaderType, '_id'>): void => {
+	const patchReader = useCallback((readerPatch: PatchReaderType): void => {
 		axios.patch(API_URL + `/v1/readers/${reader._id}`, readerPatch, { withCredentials: true }).then((response) => {
 			onReaderPatched(response.data as ReaderType)
 		}).catch((error) => {
 			addError(error)
 			setNewReader(reader)
 		})
-	}, [API_URL, onReaderPatched, addError])
+	}, [API_URL, onReaderPatched, addError, reader])
 
-	const deleteReader = useCallback((reader: ReaderType, confirm: boolean): void => {
+	const deleteReader = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -58,7 +58,7 @@ const Reader = ({
 			addError(error)
 			setNewReader(reader)
 		})
-	}, [API_URL, onReaderDeleted, addError])
+	}, [API_URL, onReaderDeleted, addError, reader])
 
 	const handleReaderTagChange = useCallback((v: string): void => {
 		setNewReader({
@@ -73,13 +73,13 @@ const Reader = ({
 	}, [reader])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchReader(reader, newReader)
+		patchReader(newReader)
 		setIsEditing(false)
-	}, [patchReader, reader, newReader])
+	}, [patchReader, newReader])
 
 	const handleDeleteReader = useCallback((confirm: boolean): void => {
-		deleteReader(reader, confirm)
-	}, [deleteReader, reader])
+		deleteReader(confirm)
+	}, [deleteReader])
 
 	return (
 		<div className="p-2 m-2">
