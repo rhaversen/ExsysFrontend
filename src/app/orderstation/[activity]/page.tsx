@@ -220,15 +220,19 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		<main>
 			<div className="flex h-screen">
 				<div className="flex-1 overflow-y-auto">
-					<div className="flex flex-row justify-center p-1">
-						<h1 className="text-2xl font-bold text-center text-gray-800">{'Bestil til ' + activityName}</h1>
-						<button
-							onClick={redirectToActivitySelection}
-							className="ml-2 px-2 text-decoration-line: underline text-blue-500 rounded-md"
-							type="button"
-						>
-							Skift Aktivitet
-						</button>
+					<div className="flex flex-row justify-center p-1 items-center">
+						<h1 className="text-2xl font-bold text-center text-gray-800">
+							{'Bestil til ' + activityName}
+						</h1>
+						{activityCount > 1 &&
+							<button
+								onClick={redirectToActivitySelection}
+								className="bg-blue-500 text-white rounded-md mx-2 py-2 px-4"
+								type="button"
+							>
+								{'Skift Aktivitet'}
+							</button>
+						}
 					</div>
 					<SelectionWindow
 						products={products}
