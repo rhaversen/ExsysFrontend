@@ -38,7 +38,6 @@ const Reader = ({
 	}, [])
 
 	const postReader = useCallback((): void => {
-		console.log(reader)
 		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
 			onReaderPosted(response.data as ReaderType)
 			onClose()

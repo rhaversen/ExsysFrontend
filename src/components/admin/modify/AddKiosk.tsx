@@ -72,7 +72,6 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleKioskTagChange = useCallback((v: KioskType['kioskTag']): void => {
-		console.log(v)
 		setKiosk({
 			...kiosk,
 			kioskTag: (v === '') ? undefined : v as any
