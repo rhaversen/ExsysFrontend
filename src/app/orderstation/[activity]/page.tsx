@@ -20,23 +20,20 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
-	const [cart, setCart] = useState<CartType>({
-		products: {},
-		options: {}
-	})
-	const [formIsValid, setFormIsValid] = useState(false)
-	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
+	const [cart, setCart] = useState<CartType>({ products: {}, options: {} })
+	const [isFormValid, setIsFormValid] = useState(false)
+	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
-	const [price, setPrice] = useState(0)
+	const [totalPrice, setTotalPrice] = useState(0)
 	const [activityName, setActivityName] = useState('')
-	const [numberOfActivities, setNumberOfActivities] = useState(0)
+	const [activityCount, setActivityCount] = useState(0)
 	const [kioskId, setKioskId] = useState('')
-	const [showSelectPaymentWindow, setShowSelectPaymentWindow] = useState(false)
+	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
-	const [shouldFetchOrderStatus, setShouldFetchOrderStatus] = useState(false)
+	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
 	const [hasReader, setHasReader] = useState(false)
 
-	const fetchNumberOfActivities = useCallback(async () => {
+	const fetchActivityCount = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
 			axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true }),
 			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
@@ -45,99 +42,90 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		const activities = activitiesResponse.data as ActivityType[]
 
-		const kioskActivities = activities.filter(activity =>
+		const associatedActivities = activities.filter(activity =>
 			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
 		)
 
-		setNumberOfActivities(kioskActivities.length)
-	}, [API_URL, setNumberOfActivities])
+		setActivityCount(associatedActivities.length)
+	}, [API_URL])
 
-	const fetchKiosInfo = useCallback(async () => {
+	const fetchKioskInfo = useCallback(async () => {
 		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
 		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		setKioskId(kiosk._id)
 		setHasReader(kiosk.readerId !== null)
-	}, [API_URL, setKioskId])
+	}, [API_URL])
 
 	const fetchProductsAndOptions = useCallback(async () => {
-		const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
+		const productsResponse = await axios.get(`${API_URL}/v1/products`, { withCredentials: true })
 		const products = productsResponse.data as ProductType[]
-		products.forEach((product) => {
+		products.forEach(product => {
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 		})
 		setProducts(products)
-		const optionsResponse = await axios.get(API_URL + '/v1/options', { withCredentials: true })
+
+		const optionsResponse = await axios.get(`${API_URL}/v1/options`, { withCredentials: true })
 		const options = optionsResponse.data as OptionType[]
 		setOptions(options)
-	}, [API_URL, setProducts, setOptions])
+	}, [API_URL])
 
 	const redirectToActivitySelection = useCallback(() => {
 		router.push('/orderstation')
 	}, [router])
 
 	const validateActivityAndRedirect = useCallback(() => {
-		axios.get(API_URL + '/v1/activities/' + params.activity, { withCredentials: true }).catch(() => {
-			redirectToActivitySelection()
-		})
+		axios.get(`${API_URL}/v1/activities/${params.activity}`, { withCredentials: true })
+			.catch(() => { redirectToActivitySelection() })
 	}, [API_URL, params.activity, redirectToActivitySelection])
 
 	// Fetch products and options on mount
 	useEffect(() => {
-		if (API_URL === undefined) return
-		fetchProductsAndOptions().catch((error) => {
-			addError(error)
-		})
+		if (API_URL === null) return
+		fetchProductsAndOptions().catch(addError)
 	}, [API_URL, fetchProductsAndOptions, addError])
 
-	// Check if the room is valid
+	// Validate activity on mount
 	useEffect(() => {
-		if (API_URL === undefined) return
+		if (API_URL === null) return
 		validateActivityAndRedirect()
-	}, [router, API_URL, validateActivityAndRedirect, params.activity])
+	}, [API_URL, validateActivityAndRedirect])
 
 	// Check if any product is selected
 	useEffect(() => {
-		const productSelected = Object.values(cart.products).some((quantity) => quantity > 0)
-		setFormIsValid(productSelected)
+		const isProductSelected = Object.values(cart.products).some(quantity => quantity > 0)
+		setIsFormValid(isProductSelected)
 	}, [cart])
 
 	// Calculate total price
 	useEffect(() => {
-		const price = (
+		const calculatedPrice = (
 			Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
 			Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
 		)
-		setPrice(price)
-	}, [cart, options, products])
+		setTotalPrice(calculatedPrice)
+	}, [cart, products, options])
 
-	// Get activity name
+	// Fetch activity name
 	useEffect(() => {
-		axios.get(API_URL + '/v1/activities/' + params.activity, { withCredentials: true }).then((response) => {
-			const activity = response.data as ActivityType
-			setActivityName(activity.name)
-		}).catch((error) => {
-			addError(error)
-		})
-	}, [API_URL, params.activity, addError, setActivityName])
+		axios.get(`${API_URL}/v1/activities/${params.activity}`, { withCredentials: true })
+			.then(response => { setActivityName(response.data.name as string) })
+			.catch(addError)
+	}, [API_URL, params.activity, addError])
 
 	// Fetch number of activities for kiosk
 	useEffect(() => {
-		if (API_URL === undefined) return
-		fetchNumberOfActivities().catch((error) => {
-			addError(error)
-		})
-	}, [API_URL, fetchNumberOfActivities, addError])
+		if (API_URL === null) return
+		fetchActivityCount().catch(addError)
+	}, [API_URL, fetchActivityCount, addError])
 
 	// Fetch kiosk info
 	useEffect(() => {
-		if (API_URL === undefined) return
-		fetchKiosInfo().catch((error) => {
-			addError(error)
-		})
-	}, [API_URL, fetchKiosInfo, addError])
+		if (API_URL === null) return
+		fetchKioskInfo().catch(addError)
+	}, [API_URL, fetchKioskInfo, addError])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
-	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
+	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate activity every hour
 
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
@@ -158,80 +146,67 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [cart, setCart])
 
 	useInterval(() => {
-		if (shouldFetchOrderStatus) {
-			axios.get(API_URL + '/v1/orders/' + order?._id + '/paymentStatus', { withCredentials: true }).then((res) => {
-				const paymentStatus = res.data.paymentStatus as 'pending' | 'successful' | 'failed'
-				if (paymentStatus === 'successful') {
-					setOrderStatus('success')
-					setShouldFetchOrderStatus(false)
-				} else if (paymentStatus === 'failed') {
+		if (shouldFetchPaymentStatus) {
+			axios.get(`${API_URL}/v1/orders/${order?._id}/paymentStatus`, { withCredentials: true })
+				.then(res => {
+					const paymentStatus = res.data.paymentStatus as 'pending' | 'successful' | 'failed'
+					if (paymentStatus === 'successful') {
+						setOrderStatus('success')
+						setShouldFetchPaymentStatus(false)
+					} else if (paymentStatus === 'failed') {
+						setOrderStatus('error')
+						setShouldFetchPaymentStatus(false)
+					} else if (paymentStatus === 'pending') {
+						setOrderStatus('awaitingPayment')
+					}
+				})
+				.catch(error => {
+					addError(error)
 					setOrderStatus('error')
-					setShouldFetchOrderStatus(false)
-				} else if (paymentStatus === 'pending') {
-					setOrderStatus('awaitingPayment')
-				}
-			}).catch((error) => {
-				addError(error)
-				setOrderStatus('error')
-				setShouldFetchOrderStatus(false)
-			})
+					setShouldFetchPaymentStatus(false)
+				})
 		}
-	}, shouldFetchOrderStatus ? 1000 : null)
+	}, shouldFetchPaymentStatus ? 1000 : null)
 
 	const submitOrder = useCallback((type: 'Cash' | 'Card'): void => {
 		setOrderStatus('loading')
-		setShowOrderConfirmation(true)
+		setIsOrderConfirmationVisible(true)
 
-		const productCart = Object.entries(cart.products).map(
-			([item, quantity]) => ({
-				id: item,
-				quantity
-			})
-		)
-
-		const optionCart = Object.entries(cart.options).map(
-			([item, quantity]) => ({
-				id: item,
-				quantity
-			})
-		)
+		const productCart = Object.entries(cart.products).map(([item, quantity]) => ({ id: item, quantity }))
+		const optionCart = Object.entries(cart.options).map(([item, quantity]) => ({ id: item, quantity }))
 
 		const data = {
 			kioskId,
 			activityId: params.activity,
 			products: productCart,
 			options: optionCart,
-			skipCheckout: false
+			skipCheckout: type === 'Cash'
 		}
 
-		if (type === 'Cash') {
-			data.skipCheckout = true
-		} else if (type === 'Card') {
-			data.skipCheckout = false
-			setShouldFetchOrderStatus(true)
-		}
-
-		axios.post(API_URL + '/v1/orders', data, { withCredentials: true }).then((res) => {
-			setOrder(res.data as OrderType)
-			setShouldFetchOrderStatus(true)
-		}).catch((error) => {
-			addError(error)
-			setOrderStatus('error')
-			setShouldFetchOrderStatus(false)
-		})
-	}, [API_URL, cart, params.activity, setOrderStatus, setShowOrderConfirmation, addError, kioskId, setOrder, setShouldFetchOrderStatus])
+		axios.post(`${API_URL}/v1/orders`, data, { withCredentials: true })
+			.then(res => {
+				setOrder(res.data as OrderType)
+				if (type === 'Card') {
+					setShouldFetchPaymentStatus(true)
+				} else {
+					setOrderStatus('success')
+				}
+			})
+			.catch(error => {
+				addError(error)
+				setOrderStatus('error')
+				setShouldFetchPaymentStatus(false)
+			})
+	}, [API_URL, cart, params.activity, kioskId, addError])
 
 	const reset = useCallback((): void => {
-		if (numberOfActivities > 1) {
+		if (activityCount > 1) {
 			router.push('/orderstation')
 		}
-		setCart({
-			products: {},
-			options: {}
-		})
-		setShowOrderConfirmation(false)
+		setCart({ products: {}, options: {} })
+		setIsOrderConfirmationVisible(false)
 		setOrderStatus('loading')
-	}, [setCart, setShowOrderConfirmation, setOrderStatus, router, numberOfActivities])
+	}, [activityCount, router])
 
 	return (
 		<main>
@@ -254,32 +229,32 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 				</div>
 				<div className="w-[300px] h-screen overflow-y-auto">
 					<CartWindow
-						price={price}
+						price={totalPrice}
 						products={products}
 						options={options}
 						cart={cart}
 						onCartChange={handleCartChange}
 						onSubmit={() => { setShowSelectPaymentWindow(true) }}
-						formIsValid={formIsValid}
+						formIsValid={isFormValid}
 					/>
 				</div>
 			</div>
 			<div>
-				{showOrderConfirmation &&
+				{isOrderConfirmationVisible &&
 					<OrderConfirmationWindow
-						price={price}
+						price={totalPrice}
 						orderStatus={orderStatus}
 						onClose={reset}
 					/>
 				}
 			</div>
 			<div>
-				{showSelectPaymentWindow &&
+				{isSelectPaymentWindowVisible &&
 					<SelectPaymentWindow
-						onSubmit={(type) => {
+						onSubmit={type => {
 							submitOrder(type)
-							setShowOrderConfirmation(true)
-							setShowSelectPaymentWindow(false)
+							setIsOrderConfirmationVisible(true)
+							setIsSelectPaymentWindowVisible(false)
 						}}
 					/>
 				}
