@@ -28,6 +28,7 @@ const Kiosk = ({
 
 	const [isEditing, setIsEditing] = useState(false)
 	const [newKiosk, setNewKiosk] = useState<KioskType>(kiosk)
+	const [newPassword, setNewPassword] = useState<string>('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
@@ -120,6 +121,10 @@ const Kiosk = ({
 		})
 	}, [newKiosk])
 
+	const handlePasswordChange = useCallback((v: string): void => {
+		setNewPassword(v)
+	}, [])
+
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setNewKiosk({
 			...newKiosk,
@@ -147,9 +152,10 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id) })
+		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id), password: newPassword === '' ? undefined : newPassword })
+		setNewPassword('')
 		setIsEditing(false)
-	}, [patchKiosk, newKiosk])
+	}, [patchKiosk, newKiosk, newPassword])
 
 	const handleDeleteKiosk = useCallback((confirm: boolean): void => {
 		deleteKiosk(confirm)
@@ -206,6 +212,36 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
+					{isEditing &&
+						<div className='text-center'>
+							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
+							<div className="font-bold pb-2 text-gray-800">
+								<EditableField
+									fieldName='password'
+									initialText={newPassword}
+									placeholder='Nyt Kodeord'
+									italic={false}
+									minSize={10}
+									required={false}
+									validations={[{
+										validate: (v: string) => v.length >= 4 || v.length === 0,
+										message: 'Kodeord skal mindst have 4 tegn'
+									},
+									{
+										validate: (v: string) => v.length <= 100,
+										message: 'Kodeord kan kun have 100 tegn'
+									}]}
+									editable={isEditing}
+									onChange={(v: string) => {
+										handlePasswordChange(v)
+									}}
+									onValidationChange={(fieldName: string, v: boolean) => {
+										handleValidationChange(fieldName, v)
+									}}
+								/>
+							</div>
+						</div>
+					}
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<EditableDropdown
 						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}

@@ -24,6 +24,7 @@ const Admin = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
+	const [newPassword, setNewPassword] = useState<string>('')
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
@@ -67,15 +68,20 @@ const Admin = ({
 		})
 	}, [newAdmin])
 
+	const handlePasswordChange = useCallback((v: string): void => {
+		setNewPassword(v)
+	}, [])
+
 	const handleUndoEdit = useCallback((): void => {
 		setNewAdmin(admin)
 		setIsEditing(false)
 	}, [admin])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchAdmin(newAdmin)
+		patchAdmin({ ...newAdmin, password: newPassword === '' ? undefined : newPassword })
+		setNewPassword('')
 		setIsEditing(false)
-	}, [patchAdmin, newAdmin])
+	}, [patchAdmin, newAdmin, newPassword])
 
 	const handleDeleteAdmin = useCallback((confirm: boolean): void => {
 		deleteAdmin(confirm)
@@ -107,6 +113,36 @@ const Admin = ({
 							}}
 						/>
 					</div>
+					{isEditing &&
+						<div className='text-center'>
+							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
+							<div className="font-bold pb-2 text-gray-800">
+								<EditableField
+									fieldName='password'
+									initialText={newPassword}
+									placeholder='Nyt Kodeord'
+									italic={false}
+									minSize={10}
+									required={false}
+									validations={[{
+										validate: (v: string) => v.length >= 4 || v.length === 0,
+										message: 'Kodeord skal mindst have 4 tegn'
+									},
+									{
+										validate: (v: string) => v.length <= 100,
+										message: 'Kodeord kan kun have 100 tegn'
+									}]}
+									editable={isEditing}
+									onChange={(v: string) => {
+										handlePasswordChange(v)
+									}}
+									onValidationChange={(fieldName: string, v: boolean) => {
+										handleValidationChange(fieldName, v)
+									}}
+								/>
+							</div>
+						</div>
+					}
 				</div>
 				<EditingControls
 					isEditing={isEditing}
