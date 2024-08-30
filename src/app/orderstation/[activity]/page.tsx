@@ -34,6 +34,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [showSelectPaymentWindow, setShowSelectPaymentWindow] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [shouldFetchOrderStatus, setShouldFetchOrderStatus] = useState(false)
+	const [hasReader, setHasReader] = useState(false)
 
 	const fetchNumberOfActivities = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -51,10 +52,11 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		setNumberOfActivities(kioskActivities.length)
 	}, [API_URL, setNumberOfActivities])
 
-	const fetchKioskid = useCallback(async () => {
+	const fetchKiosInfo = useCallback(async () => {
 		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
 		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		setKioskId(kiosk._id)
+		setHasReader(kiosk.readerId !== null)
 	}, [API_URL, setKioskId])
 
 	const fetchProductsAndOptions = useCallback(async () => {
@@ -126,13 +128,13 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		})
 	}, [API_URL, fetchNumberOfActivities, addError])
 
-	// Fetch kiosk id
+	// Fetch kiosk info
 	useEffect(() => {
 		if (API_URL === undefined) return
-		fetchKioskid().catch((error) => {
+		fetchKiosInfo().catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, fetchKioskid, addError])
+	}, [API_URL, fetchKiosInfo, addError])
 
 	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
 	useInterval(validateActivityAndRedirect, 1000 * 60 * 60) // Validate room every hour
