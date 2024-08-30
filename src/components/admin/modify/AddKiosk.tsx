@@ -177,7 +177,13 @@ const Kiosk = ({
 								onChange={(v: string) => {
 									handleKioskTagChange(v)
 								}}
-								validations={[]}
+								validations={[{
+									validate: (v: string) => v.length === 5 || v.length === 0,
+									message: 'Kiosk tag skal være præcis 5 tal eller tomt'
+								}, {
+									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
+									message: 'Kiosk tag må kun være tal'
+								}]}
 								onValidationChange={(fieldName: string, v: boolean) => {
 									handleValidationChange(fieldName, v)
 								}}
