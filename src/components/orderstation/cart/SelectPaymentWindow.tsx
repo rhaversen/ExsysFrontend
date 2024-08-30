@@ -9,7 +9,7 @@ const SelectPaymentWindow = ({
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
 			<div className="bg-white rounded-xl shadow-lg p-8 m-4 text-gray-800">
-				<h2 className="text-lg font-semibold text-center mb-4">Vælg Betalingsmetode</h2>
+				<h2 className="text-4xl font-semibold text-center mb-4">Vælg Betaling</h2>
 				<div className="space-x-4 flex justify-center">
 					<button
 						onClick={() => { onSubmit('Card') }}
