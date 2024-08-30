@@ -96,10 +96,10 @@ const Reader = ({
 							required={true}
 							validations={[{
 								validate: (v: string) => v.length === 5,
-								message: 'Kiosk tag skal være præcis 5 tal'
+								message: 'Kortlæser tag skal være præcis 5 tal'
 							}, {
 								validate: (v: string) => v.match('^[0-9]+$') !== null,
-								message: 'Kiosk tag må kun være tal'
+								message: 'Kortlæser tag må kun være tal'
 							}]}
 							editable={isEditing}
 							onChange={(v: string) => {
