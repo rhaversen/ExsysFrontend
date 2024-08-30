@@ -1,5 +1,5 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type OrderType } from '@/types/backendDataTypes'
+import { type PatchOrderType, type ActivityType, type OrderType } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -63,12 +63,13 @@ const Block = ({
 		return 'delivered'
 	}, [orders])
 
-	const patchOrders = useCallback((status: OrderType['status']) => {
-		axios.patch(API_URL + '/v1/orders', {
+	const patchOrders = useCallback((status: PatchOrderType['status']) => {
+		const orderPatch: PatchOrderType = {
 			orderIds: orders.map((order) => order._id),
 			status
-		}, {
-			withCredentials: true // Move this to the Axios configuration object
+		}
+		axios.patch(API_URL + '/v1/orders', orderPatch, {
+			withCredentials: true
 		}).then((response) => {
 			const data = response.data as OrderType[]
 			onUpdatedOrders(data)
