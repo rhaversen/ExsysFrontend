@@ -44,17 +44,23 @@ const Kiosk = ({
 		})
 	}, [readers])
 
+	// Extract the findActivity function outside of the useEffect hook
+	const findActivity = (activities: ActivityType[], activityId: string): ActivityType | undefined => {
+		return activities.find((act) => act._id === activityId)
+	}
+
 	// Update newKiosk when activities change
 	useEffect(() => {
 		setNewKiosk(n => {
 			// Filter out activities that are not in the activity array
+			const activityIds = activities?.map((act) => act._id)
 			const filteredActivities = n.activities.filter((activity) =>
-				activities?.map((act) => act._id).includes(activity._id)
+				activityIds?.includes(activity._id)
 			)
 
 			// Update the remaining activities with new data from the activity array
 			const UpdatedActivities = filteredActivities.map((activity) => {
-				const newActivity = activities.find((act) => act._id === activity._id)
+				const newActivity = findActivity(activities, activity._id)
 				return newActivity ?? activity
 			})
 
