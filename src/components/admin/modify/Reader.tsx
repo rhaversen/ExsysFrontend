@@ -98,7 +98,7 @@ const Reader = ({
 								validate: (v: string) => v.length === 5,
 								message: 'Kortlæser tag skal være præcis 5 tal'
 							}, {
-								validate: (v: string) => v.match('^[0-9]+$') !== null,
+								validate: (v: string) => /^\d+$/.exec(v) !== null,
 								message: 'Kortlæser tag må kun være tal'
 							}]}
 							editable={isEditing}
