@@ -199,6 +199,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			})
 	}, [API_URL, cart, params.activity, kioskId, addError])
 
+	const handleSubmit = useCallback(() => {
+		if (hasReader) {
+			setIsSelectPaymentWindowVisible(true)
+		} else {
+			submitOrder('Cash')
+		}
+	}, [hasReader, submitOrder])
+
 	const reset = useCallback((): void => {
 		if (activityCount > 1) {
 			router.push('/orderstation')
@@ -234,7 +242,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 						options={options}
 						cart={cart}
 						onCartChange={handleCartChange}
-						onSubmit={() => { setShowSelectPaymentWindow(true) }}
+						onSubmit={handleSubmit}
 						formIsValid={isFormValid}
 					/>
 				</div>
