@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType, type ActivityType } from '@/types/backendDataTypes'
+import { type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
@@ -18,13 +18,9 @@ const AddActivity = ({
 
 	const { addError } = useError()
 
-	const [activity, setActivity] = useState<Omit<ActivityType, '_id'>>({
+	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
-		roomId: {
-			_id: '',
-			name: '',
-			description: ''
-		}
+		roomId: ''
 	})
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
@@ -44,7 +40,7 @@ const AddActivity = ({
 		})
 	}, [])
 
-	const postActivity = useCallback((activity: Omit<ActivityType, '_id'>): void => {
+	const postActivity = useCallback((activity: PostActivityType): void => {
 		axios.post(API_URL + '/v1/activities', activity, { withCredentials: true }).then((response) => {
 			onActivityPosted(response.data as ActivityType)
 			onClose()
@@ -68,7 +64,7 @@ const AddActivity = ({
 		}
 		setActivity({
 			...activity,
-			roomId: ((room?._id) != null) ? room : null
+			roomId: ((room?._id) != null) ? room._id : null
 		})
 	}, [activity, rooms])
 
@@ -117,7 +113,7 @@ const AddActivity = ({
 						</div>
 						<EditableDropdown
 							options={rooms.map((room) => ({ value: room._id, label: room.name }))}
-							selectedValue={activity.roomId?._id ?? 'null-option'}
+							selectedValue={activity.roomId ?? 'null-option'}
 							onChange={handleRoomIdChange}
 							placeholder='Vælg Spisested'
 							allowNullOption={true}

@@ -4,7 +4,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type PostProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -21,7 +21,7 @@ const AddProduct = ({
 
 	const { addError } = useError()
 
-	const [product, setProduct] = useState<Omit<ProductType, '_id'>>({
+	const [product, setProduct] = useState<PostProductType>({
 		name: '',
 		price: 0,
 		orderWindow: {
@@ -55,7 +55,7 @@ const AddProduct = ({
 		})
 	}, [])
 
-	const postProduct = useCallback((product: Omit<ProductType, '_id'>): void => {
+	const postProduct = useCallback((product: PostProductType): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productUTC = {
 			...product,
@@ -152,14 +152,14 @@ const AddProduct = ({
 	const handleAddOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
-			options: [...product.options, v]
+			options: [...product.options, v._id]
 		})
 	}, [product])
 
 	const handleDeleteOption = useCallback((v: OptionType): void => {
 		setProduct({
 			...product,
-			options: product.options.filter((option) => option._id !== v._id)
+			options: product.options.filter((option) => option !== v._id)
 		})
 	}, [product])
 
@@ -353,7 +353,7 @@ const AddProduct = ({
 						<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
 					}
 					<Options
-						selectedOptions={product.options}
+						selectedOptions={options.filter((option) => product.options.includes(option._id))}
 						editable={true}
 						onDeleteOption={(v: OptionType) => {
 							handleDeleteOption(v)
@@ -366,7 +366,7 @@ const AddProduct = ({
 						<OptionsWindow
 							productName={product.name}
 							options={options}
-							productOptions={product.options}
+							productOptions={options.filter((option) => product.options.includes(option._id))}
 							onAddOption={(v: OptionType) => {
 								handleAddOption(v)
 							}}
