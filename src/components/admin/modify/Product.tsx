@@ -32,6 +32,7 @@ const Product = ({
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
 
+	// Update newProduct when options change
 	useEffect(() => {
 		setNewProduct(n => {
 			// Filter out options that are not in the options array

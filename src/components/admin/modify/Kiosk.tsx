@@ -33,6 +33,18 @@ const Kiosk = ({
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
 
+	// update newKiosk when readers change
+	useEffect(() => {
+		setNewKiosk((prev) => {
+			const reader = readers.find((reader) => reader._id === prev.readerId)
+			return {
+				...prev,
+				readerId: reader?._id ?? null
+			}
+		})
+	}, [readers])
+
+	// Update newKiosk when activities change
 	useEffect(() => {
 		setNewKiosk(n => {
 			// Filter out activities that are not in the activity array

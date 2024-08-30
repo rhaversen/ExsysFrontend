@@ -28,6 +28,17 @@ const Activity = ({
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
 
+	// update newActivity when room changes
+	useEffect(() => {
+		setNewActivity((prev) => {
+			const room = rooms.find((room) => room._id === prev.roomId?._id)
+			return {
+				...prev,
+				roomId: room ?? null
+			}
+		})
+	}, [rooms])
+
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
 		const formIsValid = Object.values(fieldValidations).every((v) => v)
