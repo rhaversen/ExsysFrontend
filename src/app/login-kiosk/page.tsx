@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { useCallback, type ReactElement } from 'react'
+import React, { useCallback, useEffect, type ReactElement } from 'react'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
@@ -18,6 +18,14 @@ export default function Page (): ReactElement {
 			addError(error)
 		}
 	}, [API_URL, addError, router])
+
+	useEffect(() => {
+		axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true }).then(() => {
+			router.push('/orderstation')
+		}).catch(() => {
+			// Do nothing
+		})
+	}, [API_URL, router])
 
 	const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault() // Prevent default form submission
