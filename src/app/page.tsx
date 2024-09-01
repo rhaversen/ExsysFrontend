@@ -2,22 +2,44 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement } from 'react'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import React, { useEffect, useState, type ReactElement, useCallback } from 'react'
 
 export default function Page (): ReactElement {
 	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const { addError } = useError()
+	const [loginAs, setLoginAs] = useState<'Admin' | 'Kiosk' | null>(null)
 
-	const checkAuth = async (): Promise<boolean> => {
+	const checkAuth = useCallback(async (): Promise<void> => {
 		try {
 			await axios.get(`${API_URL}/v1/auth/is-authenticated`, { withCredentials: true })
-			return true
-		} catch (error: any) {
-			return false
+
+			try {
+				await axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true })
+				setLoginAs('Admin')
+				return
+			} catch (error) {
+				// Not an admin
+			}
+
+			try {
+				await axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true })
+				setLoginAs('Kiosk')
+				return
+			} catch (error) {
+				// Not a kiosk
+			}
+
+			setLoginAs(null) // No roles match
+		} catch (error) {
+			setLoginAs(null) // Authentication check failed
 		}
-	}
+	}, [API_URL])
+
+	useEffect(() => {
+		checkAuth().catch(() => {
+			setLoginAs(null)
+		})
+	}, [API_URL, checkAuth])
 
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -27,13 +49,11 @@ export default function Page (): ReactElement {
 					type="button"
 					className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
 					onClick={() => {
-						checkAuth().then((isAuthenticated) => {
-							if (isAuthenticated) {
-								router.push('/orderstation')
-							} else {
-								router.push('/login-kiosk')
-							}
-						}).catch(addError)
+						if (loginAs === 'Kiosk') {
+							router.push('/orderstation')
+						} else {
+							router.push('/login-kiosk')
+						}
 					}}
 				>
 					Bestillings Station
@@ -42,13 +62,11 @@ export default function Page (): ReactElement {
 					type="button"
 					className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
 					onClick={() => {
-						checkAuth().then((isAuthenticated) => {
-							if (isAuthenticated) {
-								router.push('/admin')
-							} else {
-								router.push('/login-admin')
-							}
-						}).catch(addError)
+						if (loginAs === 'Admin') {
+							router.push('/admin')
+						} else {
+							router.push('/login-admin')
+						}
 					}}
 				>
 					Personale

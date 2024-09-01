@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import { type PostKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Activities from './kioskActivities/Activities'
@@ -22,10 +22,10 @@ const Kiosk = ({
 
 	const { addError } = useError()
 
-	const [kiosk, setKiosk] = useState<Omit<KioskType, '_id'>>({
+	const [kiosk, setKiosk] = useState<PostKioskType>({
 		readerId: '',
 		name: '',
-		kioskTag: '',
+		kioskTag: undefined,
 		password: '',
 		activities: []
 	})
@@ -48,8 +48,8 @@ const Kiosk = ({
 		})
 	}, [])
 
-	const postKiosk = useCallback((kiosk: Omit<KioskType, '_id'>): void => {
-		axios.post(API_URL + '/v1/kiosks', { ...kiosk, kioskTag: undefined }, { withCredentials: true }).then((response) => {
+	const postKiosk = useCallback((kiosk: PostKioskType): void => {
+		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
 			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
@@ -71,14 +71,21 @@ const Kiosk = ({
 		})
 	}, [kiosk])
 
-	const handleAddActivity = useCallback((v: ActivityType): void => {
+	const handleKioskTagChange = useCallback((v: KioskType['kioskTag']): void => {
+		setKiosk({
+			...kiosk,
+			kioskTag: (v === '') ? undefined : v as any
+		})
+	}, [kiosk])
+
+	const handleAddActivity = useCallback((v: ActivityType['_id']): void => {
 		setKiosk({
 			...kiosk,
 			activities: [...kiosk.activities, v]
 		})
 	}, [kiosk])
 
-	const handleDeleteActivity = useCallback((v: ActivityType): void => {
+	const handleDeleteActivity = useCallback((v: ActivityType['_id']): void => {
 		setKiosk({
 			...kiosk,
 			activities: kiosk.activities.filter((activity) => activity !== v)
@@ -88,7 +95,7 @@ const Kiosk = ({
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setKiosk({
 			...kiosk,
-			readerId: v
+			readerId: v === 'null-option' ? undefined : v
 		})
 	}, [kiosk])
 
@@ -159,12 +166,38 @@ const Kiosk = ({
 								}}
 							/>
 						</div>
+						<div className="font-bold p-2 text-gray-800">
+							<EditableField
+								fieldName='tag'
+								placeholder='Tag (Automatisk)'
+								italic={false}
+								minSize={15}
+								required={false}
+								editable={true}
+								onChange={(v: string) => {
+									handleKioskTagChange(v)
+								}}
+								validations={[{
+									validate: (v: string) => v.length === 5 || v.length === 0,
+									message: 'Kiosk tag skal være præcis 5 tal eller tomt'
+								}, {
+									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
+									message: 'Kiosk tag må kun være tal'
+								}]}
+								onValidationChange={(fieldName: string, v: boolean) => {
+									handleValidationChange(fieldName, v)
+								}}
+							/>
+						</div>
 						<p className="italic text-gray-500">{'Kortlæser'}</p>
 						<EditableDropdown
 							options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
-							selectedValue={kiosk.readerId}
+							selectedValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
 							editable={true}
+							fieldName='readerId'
+							placeholder='Vælg Kortlæser'
+							allowNullOption={true}
 						/>
 						{kiosk.activities.length > 0 &&
 							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
@@ -173,10 +206,10 @@ const Kiosk = ({
 							<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
 						}
 						<Activities
-							selectedActivities={kiosk.activities}
+							selectedActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 							editable={true}
 							onDeleteActivity={(v: ActivityType) => {
-								handleDeleteActivity(v)
+								handleDeleteActivity(v._id)
 							}}
 							showActivities={() => {
 								setShowActivities(true)
@@ -186,12 +219,12 @@ const Kiosk = ({
 							<ActivitiesWindow
 								kioskName={kiosk.name}
 								activities={activities}
-								kioskActivities={kiosk.activities}
+								kioskActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 								onAddActivity={(v: ActivityType) => {
-									handleAddActivity(v)
+									handleAddActivity(v._id)
 								}}
 								onDeleteActivity={(v: ActivityType) => {
-									handleDeleteActivity(v)
+									handleDeleteActivity(v._id)
 								}}
 								onClose={() => {
 									setShowActivities(false)

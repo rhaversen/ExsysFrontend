@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type AdminType } from '@/types/backendDataTypes'
+import { type PostAdminType, type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -15,7 +15,7 @@ const Admin = ({
 
 	const { addError } = useError()
 
-	const [admin, setAdmin] = useState<Omit<AdminType, '_id'>>({
+	const [admin, setAdmin] = useState<PostAdminType>({
 		name: '',
 		password: ''
 	})
@@ -37,7 +37,7 @@ const Admin = ({
 		})
 	}, [])
 
-	const postAdmin = useCallback((admin: Omit<AdminType, '_id'>): void => {
+	const postAdmin = useCallback((admin: PostAdminType): void => {
 		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then((response) => {
 			onAdminPosted(response.data as AdminType)
 			onClose()
