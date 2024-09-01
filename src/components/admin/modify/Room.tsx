@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType } from '@/types/backendDataTypes'
+import { type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -40,16 +40,16 @@ const Room = ({
 		})
 	}, [])
 
-	const patchRoom = useCallback((room: RoomType, roomPatch: Omit<RoomType, '_id'>): void => {
+	const patchRoom = useCallback((roomPatch: PatchRoomType): void => {
 		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).then((response) => {
 			onRoomPatched(response.data as RoomType)
 		}).catch((error) => {
 			addError(error)
 			setNewRoom(room)
 		})
-	}, [API_URL, onRoomPatched, addError])
+	}, [API_URL, onRoomPatched, addError, room])
 
-	const deleteRoom = useCallback((room: RoomType, confirm: boolean): void => {
+	const deleteRoom = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -58,7 +58,7 @@ const Room = ({
 			addError(error)
 			setNewRoom(room)
 		})
-	}, [API_URL, onRoomDeleted, addError])
+	}, [API_URL, onRoomDeleted, addError, room])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewRoom({
@@ -80,13 +80,13 @@ const Room = ({
 	}, [room])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchRoom(room, newRoom)
+		patchRoom(newRoom)
 		setIsEditing(false)
-	}, [patchRoom, room, newRoom])
+	}, [patchRoom, newRoom])
 
 	const handleDeleteRoom = useCallback((confirm: boolean): void => {
-		deleteRoom(room, confirm)
-	}, [deleteRoom, room])
+		deleteRoom(confirm)
+	}, [deleteRoom])
 
 	return (
 		<div className="p-2 m-2">

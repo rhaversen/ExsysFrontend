@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type AdminType } from '@/types/backendDataTypes'
+import { type PatchAdminType, type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -24,6 +24,7 @@ const Admin = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
+	const [newPassword, setNewPassword] = useState<string>('')
 
 	// Update formIsValid when fieldValidations change
 	useEffect(() => {
@@ -40,16 +41,16 @@ const Admin = ({
 		})
 	}, [])
 
-	const patchAdmin = useCallback((admin: AdminType, adminPatch: Omit<AdminType, '_id'>): void => {
+	const patchAdmin = useCallback((adminPatch: PatchAdminType): void => {
 		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).then((response) => {
 			onAdminPatched(response.data as AdminType)
 		}).catch((error) => {
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminPatched, addError])
+	}, [API_URL, onAdminPatched, addError, admin])
 
-	const deleteAdmin = useCallback((admin: AdminType, confirm: boolean): void => {
+	const deleteAdmin = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/admins/${admin._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -58,7 +59,7 @@ const Admin = ({
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminDeleted, addError])
+	}, [API_URL, onAdminDeleted, addError, admin])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewAdmin({
@@ -67,19 +68,24 @@ const Admin = ({
 		})
 	}, [newAdmin])
 
+	const handlePasswordChange = useCallback((v: string): void => {
+		setNewPassword(v)
+	}, [])
+
 	const handleUndoEdit = useCallback((): void => {
 		setNewAdmin(admin)
 		setIsEditing(false)
 	}, [admin])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchAdmin(admin, newAdmin)
+		patchAdmin({ ...newAdmin, password: newPassword === '' ? undefined : newPassword })
+		setNewPassword('')
 		setIsEditing(false)
-	}, [patchAdmin, admin, newAdmin])
+	}, [patchAdmin, newAdmin, newPassword])
 
 	const handleDeleteAdmin = useCallback((confirm: boolean): void => {
-		deleteAdmin(admin, confirm)
-	}, [deleteAdmin, admin])
+		deleteAdmin(confirm)
+	}, [deleteAdmin])
 
 	return (
 		<div className="p-2 m-2">
@@ -107,6 +113,36 @@ const Admin = ({
 							}}
 						/>
 					</div>
+					{isEditing &&
+						<div className='text-center'>
+							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
+							<div className="font-bold pb-2 text-gray-800">
+								<EditableField
+									fieldName='password'
+									initialText={newPassword}
+									placeholder='Nyt Kodeord'
+									italic={false}
+									minSize={10}
+									required={false}
+									validations={[{
+										validate: (v: string) => v.length >= 4 || v.length === 0,
+										message: 'Kodeord skal mindst have 4 tegn'
+									},
+									{
+										validate: (v: string) => v.length <= 100,
+										message: 'Kodeord kan kun have 100 tegn'
+									}]}
+									editable={isEditing}
+									onChange={(v: string) => {
+										handlePasswordChange(v)
+									}}
+									onValidationChange={(fieldName: string, v: boolean) => {
+										handleValidationChange(fieldName, v)
+									}}
+								/>
+							</div>
+						</div>
+					}
 				</div>
 				<EditingControls
 					isEditing={isEditing}

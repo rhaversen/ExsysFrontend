@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import { type PatchKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Activities from './kioskActivities/Activities'
@@ -28,21 +28,40 @@ const Kiosk = ({
 
 	const [isEditing, setIsEditing] = useState(false)
 	const [newKiosk, setNewKiosk] = useState<KioskType>(kiosk)
+	const [newPassword, setNewPassword] = useState<string>('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
 
+	// update newKiosk when readers change
+	useEffect(() => {
+		setNewKiosk((prev) => {
+			const reader = readers.find((reader) => reader._id === prev.readerId)
+			return {
+				...prev,
+				readerId: reader?._id ?? null
+			}
+		})
+	}, [readers])
+
+	// Extract the findActivity function outside of the useEffect hook
+	const findActivity = (activities: ActivityType[], activityId: string): ActivityType | undefined => {
+		return activities.find((act) => act._id === activityId)
+	}
+
+	// Update newKiosk when activities change
 	useEffect(() => {
 		setNewKiosk(n => {
 			// Filter out activities that are not in the activity array
+			const activityIds = activities?.map((act) => act._id)
 			const filteredActivities = n.activities.filter((activity) =>
-				activities?.map((act) => act._id).includes(activity._id)
+				activityIds?.includes(activity._id)
 			)
 
 			// Update the remaining activities with new data from the activity array
 			const UpdatedActivities = filteredActivities.map((activity) => {
-				const newActivity = activities.find((act) => act._id === activity._id)
+				const newActivity = findActivity(activities, activity._id)
 				return newActivity ?? activity
 			})
 
@@ -68,16 +87,16 @@ const Kiosk = ({
 		})
 	}, [])
 
-	const patchKiosk = useCallback((kiosk: KioskType, kioskPatch: Omit<KioskType, '_id'>): void => {
+	const patchKiosk = useCallback((kioskPatch: PatchKioskType): void => {
 		axios.patch(API_URL + `/v1/kiosks/${kiosk._id}`, kioskPatch, { withCredentials: true }).then((response) => {
 			onKioskPatched(response.data as KioskType)
 		}).catch((error) => {
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskPatched, addError])
+	}, [API_URL, onKioskPatched, addError, kiosk])
 
-	const deleteKiosk = useCallback((kiosk: KioskType, confirm: boolean): void => {
+	const deleteKiosk = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/kiosks/${kiosk._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -86,7 +105,7 @@ const Kiosk = ({
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskDeleted, addError])
+	}, [API_URL, onKioskDeleted, addError, kiosk])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewKiosk({
@@ -102,10 +121,14 @@ const Kiosk = ({
 		})
 	}, [newKiosk])
 
+	const handlePasswordChange = useCallback((v: string): void => {
+		setNewPassword(v)
+	}, [])
+
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setNewKiosk({
 			...newKiosk,
-			readerId: v
+			readerId: v === 'null-option' ? null : v
 		})
 	}, [newKiosk])
 
@@ -129,13 +152,14 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchKiosk(kiosk, newKiosk)
+		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id), password: newPassword === '' ? undefined : newPassword })
+		setNewPassword('')
 		setIsEditing(false)
-	}, [patchKiosk, kiosk, newKiosk])
+	}, [patchKiosk, newKiosk, newPassword])
 
 	const handleDeleteKiosk = useCallback((confirm: boolean): void => {
-		deleteKiosk(kiosk, confirm)
-	}, [deleteKiosk, kiosk])
+		deleteKiosk(confirm)
+	}, [deleteKiosk])
 
 	return (
 		<div className="p-2 m-2">
@@ -180,7 +204,7 @@ const Kiosk = ({
 								validate: (v: string) => v.length === 5,
 								message: 'Kiosk tag skal være præcis 5 tal'
 							}, {
-								validate: (v: string) => v.match('^[0-9]+$') !== null,
+								validate: (v: string) => /^\d+$/.exec(v) !== null,
 								message: 'Kiosk tag må kun være tal'
 							}]}
 							onValidationChange={(fieldName: string, v: boolean) => {
@@ -188,12 +212,43 @@ const Kiosk = ({
 							}}
 						/>
 					</div>
+					{isEditing &&
+						<div className='text-center'>
+							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
+							<div className="font-bold pb-2 text-gray-800">
+								<EditableField
+									fieldName='password'
+									initialText={newPassword}
+									placeholder='Nyt Kodeord'
+									italic={false}
+									minSize={10}
+									required={false}
+									validations={[{
+										validate: (v: string) => v.length >= 4 || v.length === 0,
+										message: 'Kodeord skal mindst have 4 tegn'
+									},
+									{
+										validate: (v: string) => v.length <= 100,
+										message: 'Kodeord kan kun have 100 tegn'
+									}]}
+									editable={isEditing}
+									onChange={(v: string) => {
+										handlePasswordChange(v)
+									}}
+									onValidationChange={(fieldName: string, v: boolean) => {
+										handleValidationChange(fieldName, v)
+									}}
+								/>
+							</div>
+						</div>
+					}
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<EditableDropdown
 						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
-						selectedValue={newKiosk.readerId}
+						selectedValue={newKiosk.readerId ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
+						allowNullOption={true}
 					/>
 				</div>
 				{newKiosk.activities.length > 0 &&
