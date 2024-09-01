@@ -1,3 +1,4 @@
+// Helper types
 export interface Time {
 	hour: number
 	minute: number
@@ -8,6 +9,7 @@ export interface OrderWindow {
 	to: Time
 }
 
+// Product types
 export interface ProductType {
 	_id: string
 	name: string
@@ -35,6 +37,7 @@ export interface PatchProductType {
 	imageURL?: string
 }
 
+// Option types
 export interface OptionType {
 	_id: string
 	name: string
@@ -56,6 +59,7 @@ export interface PatchOptionType {
 	imageURL?: string
 }
 
+// Activity types
 export interface ActivityType {
 	_id: string
 	roomId: RoomType | null
@@ -80,6 +84,7 @@ export interface ActivityTypeNonPopulated {
 	name: string
 }
 
+// Room types
 export interface RoomType {
 	_id: string
 	name: string
@@ -98,6 +103,7 @@ export interface PatchRoomType {
 	description?: string
 }
 
+// Order types
 export interface OrderType {
 	_id: string
 	products: Array<{ id: ProductType['_id'], quantity: number }>
@@ -120,6 +126,7 @@ export interface PatchOrderType {
 	status: 'pending' | 'confirmed' | 'delivered'
 }
 
+// Reader types
 export interface ReaderType {
 	_id: string
 	readerTag: string
@@ -137,6 +144,7 @@ export interface PatchReaderType {
 	pairingCode?: string
 }
 
+// Admin types
 export interface AdminType {
 	_id: string
 	name: string
@@ -154,6 +162,7 @@ export interface PatchAdminType {
 	password?: string
 }
 
+// Kiosk types
 export interface KioskType {
 	_id: string
 	name: string
