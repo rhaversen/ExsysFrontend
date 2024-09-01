@@ -15,6 +15,8 @@ export interface ProductType {
 	orderWindow: OrderWindow
 	options: OptionType[]
 	imageURL?: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostProductType {
@@ -38,6 +40,8 @@ export interface OptionType {
 	name: string
 	price: number
 	imageURL?: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostOptionType {
@@ -56,6 +60,8 @@ export interface ActivityType {
 	_id: string
 	roomId: RoomType | null
 	name: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostActivityType {
@@ -78,6 +84,8 @@ export interface RoomType {
 	_id: string
 	name: string
 	description: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostRoomType {
@@ -97,6 +105,7 @@ export interface OrderType {
 	activityId: ActivityType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 	createdAt: string
+	updatedAt: string
 }
 
 export interface PostOrderType {
@@ -114,6 +123,8 @@ export interface PatchOrderType {
 export interface ReaderType {
 	_id: string
 	readerTag: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostReaderType {
@@ -129,6 +140,8 @@ export interface PatchReaderType {
 export interface AdminType {
 	_id: string
 	name: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostAdminType {
@@ -147,6 +160,8 @@ export interface KioskType {
 	kioskTag: string
 	readerId: ReaderType['_id'] | null
 	activities: ActivityType[]
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostKioskType {
