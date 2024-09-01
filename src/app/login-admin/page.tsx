@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios'
-import React, { useCallback, type ReactElement } from 'react'
+import React, { useCallback, useEffect, type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
@@ -18,6 +18,14 @@ export default function Page (): ReactElement {
 			addError(error)
 		}
 	}, [API_URL, addError, router])
+
+	useEffect(() => {
+		axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true }).then(() => {
+			router.push('/admin')
+		}).catch(() => {
+			// Do nothing
+		})
+	}, [API_URL, router])
 
 	const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault() // Prevent default form submission
@@ -51,6 +59,9 @@ export default function Page (): ReactElement {
 					<button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Log ind</button>
 				</div>
 			</form>
+			<div className="mt-5">
+				<button type='button' onClick={() => { router.push('/') }} className="text-sm text-indigo-600 hover:text-indigo-900">{'Tilbage'}</button>
+			</div>
 		</main>
 	)
 }

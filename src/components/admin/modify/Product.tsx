@@ -6,7 +6,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type PatchProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -32,6 +32,7 @@ const Product = ({
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
 
+	// Update newProduct when options change
 	useEffect(() => {
 		setNewProduct(n => {
 			// Filter out options that are not in the options array
@@ -67,11 +68,11 @@ const Product = ({
 		})
 	}, [])
 
-	const patchProduct = useCallback((product: ProductType, productPatch: Omit<ProductType, '_id'>): void => {
+	const patchProduct = useCallback((productPatch: PatchProductType): void => {
 		// Convert order window to UTC with convertOrderWindowToUTC
 		const productPatchUTC = {
 			...productPatch,
-			orderWindow: convertOrderWindowToUTC(productPatch.orderWindow)
+			orderWindow: (productPatch.orderWindow !== undefined) && convertOrderWindowToUTC(productPatch.orderWindow)
 		}
 		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC, { withCredentials: true }).then((response) => {
 			const product = response.data as ProductType
@@ -81,9 +82,9 @@ const Product = ({
 			addError(error)
 			setNewProduct(product)
 		})
-	}, [API_URL, onProductPatched, addError])
+	}, [API_URL, onProductPatched, addError, product])
 
-	const deleteProduct = useCallback((product: ProductType, confirm: boolean): void => {
+	const deleteProduct = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
 			data: { confirm }, withCredentials: true
 		}).then(() => {
@@ -92,7 +93,7 @@ const Product = ({
 			addError(error)
 			setNewProduct(product)
 		})
-	}, [API_URL, onProductDeleted, addError])
+	}, [API_URL, onProductDeleted, addError, product])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewProduct({
@@ -192,13 +193,13 @@ const Product = ({
 	}, [product])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchProduct(product, newProduct)
+		patchProduct({ ...newProduct, options: newProduct.options.map((option) => option._id) })
 		setIsEditing(false)
-	}, [product, newProduct, patchProduct])
+	}, [patchProduct, newProduct])
 
 	const handleDeleteProduct = useCallback((confirm: boolean): void => {
-		deleteProduct(product, confirm)
-	}, [product, deleteProduct])
+		deleteProduct(confirm)
+	}, [deleteProduct])
 
 	return (
 		<div className="p-2 m-2">

@@ -3,7 +3,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType } from '@/types/backendDataTypes'
+import { type PatchOptionType, type OptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -41,59 +41,59 @@ const Option = ({
 		})
 	}, [])
 
-	const patchOption = (option: OptionType, optionPatch: Omit<OptionType, '_id'>): void => {
+	const patchOption = useCallback((optionPatch: PatchOptionType): void => {
 		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch, { withCredentials: true }).then((response) => {
 			onOptionPatched(response.data as OptionType)
 		}).catch((error) => {
 			addError(error)
 			setNewOption(option)
 		})
-	}
+	}, [API_URL, onOptionPatched, addError, option])
 
-	const deleteOption = (option: OptionType, confirm: boolean): void => {
+	const deleteOption = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/options/${option._id}`, { data: { confirm }, withCredentials: true }).then(() => {
 			onOptionDeleted(option._id)
 		}).catch((error) => {
 			addError(error)
 			setNewOption(option)
 		})
-	}
+	}, [API_URL, onOptionDeleted, addError, option])
 
-	const handleNameChange = (v: string): void => {
+	const handleNameChange = useCallback((v: string): void => {
 		setNewOption({
 			...newOption,
 			name: v
 		})
-	}
+	}, [newOption])
 
-	const handlePriceChange = (v: string): void => {
+	const handlePriceChange = useCallback((v: string): void => {
 		v = v.replace(/[^0-9.]/g, '')
 		setNewOption({
 			...newOption,
 			price: Number(v)
 		})
-	}
+	}, [newOption])
 
-	const handleImageChange = (v: string): void => {
+	const handleImageChange = useCallback((v: string): void => {
 		setNewOption({
 			...newOption,
 			imageURL: v
 		})
-	}
+	}, [newOption])
 
-	const handleUndoEdit = (): void => {
+	const handleUndoEdit = useCallback((): void => {
 		setNewOption(option)
 		setIsEditing(false)
-	}
+	}, [option])
 
-	const handleCompleteEdit = (): void => {
-		patchOption(option, newOption)
+	const handleCompleteEdit = useCallback((): void => {
+		patchOption(newOption)
 		setIsEditing(false)
-	}
+	}, [patchOption, newOption])
 
-	const handleDeleteOption = (confirm: boolean): void => {
-		deleteOption(option, confirm)
-	}
+	const handleDeleteOption = useCallback((confirm: boolean): void => {
+		deleteOption(confirm)
+	}, [deleteOption])
 
 	return (
 		<div className="p-2 m-2">

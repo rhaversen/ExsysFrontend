@@ -9,6 +9,7 @@ import { type AdminType, type KioskType, type ActivityType, type OptionType, typ
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
+import LogoutButton from '@/components/admin/LogoutButton'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -284,6 +285,9 @@ export default function Page (): ReactElement {
 
 	return (
 		<main>
+			<LogoutButton
+				className='absolute top-0 right-0 m-3'
+			/>
 			<ViewSelectionBar
 				subBar={false}
 				views={views}

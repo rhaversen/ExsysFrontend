@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType } from '@/types/backendDataTypes'
+import { type PostRoomType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -15,7 +15,7 @@ const Room = ({
 
 	const { addError } = useError()
 
-	const [room, setRoom] = useState<Omit<RoomType, '_id'>>({
+	const [room, setRoom] = useState<PostRoomType>({
 		name: '',
 		description: ''
 	})
@@ -37,7 +37,7 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = useCallback((room: Omit<RoomType, '_id'>): void => {
+	const postRoom = useCallback((room: PostRoomType): void => {
 		axios.post(API_URL + '/v1/rooms', room, { withCredentials: true }).then((response) => {
 			onRoomPosted(response.data as RoomType)
 			onClose()

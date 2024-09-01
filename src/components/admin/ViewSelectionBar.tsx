@@ -10,7 +10,6 @@ const ViewSelectionBar = ({
 	views: string[]
 	selectedView: string | null
 	setSelectedView: (view: string) => void
-
 }): ReactElement => {
 	return (
 		<div className={`flex justify-center bg-gray-800 ${subBar ? 'py-1' : 'py-2'}`}>

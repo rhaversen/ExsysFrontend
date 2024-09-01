@@ -48,10 +48,9 @@ const OverviewView = ({
 			if (activity === undefined) return // Skip if no activity found
 
 			// Find the room using the roomId from the found activity
-			const room = rooms.find(room => room._id === activity.roomId._id)
-			if (room === undefined) return // Skip if no room found
+			const room = rooms.find(room => room._id === activity.roomId?._id)
 
-			const roomName = room.name
+			const roomName = room?.name ?? 'no-room'
 			if (roomOrders[roomName] === undefined) {
 				roomOrders[roomName] = []
 			}
@@ -102,6 +101,15 @@ const OverviewView = ({
 						onUpdatedOrders={onUpdatedOrders}
 					/>
 				))}
+				{roomOrders['no-room'] !== undefined && roomOrders['no-room'].length > 0 &&
+					<RoomCol
+						key={'no-room'}
+						room={{ _id: 'no-room', name: 'Ukendt Rum', description: 'Aktivitet har intet rum tildelt' }}
+						activities={activities}
+						orders={roomOrders['no-room'] ?? []}
+						onUpdatedOrders={onUpdatedOrders}
+					/>
+				}
 			</div>
 		</div>
 	)

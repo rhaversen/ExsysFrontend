@@ -1,7 +1,7 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType } from '@/types/backendDataTypes'
+import { type PostOptionType, type OptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -16,7 +16,7 @@ const Option = ({
 
 	const { addError } = useError()
 
-	const [option, setOption] = useState<Omit<OptionType, '_id'>>({
+	const [option, setOption] = useState<PostOptionType>({
 		name: '',
 		price: 0,
 		imageURL: ''
@@ -39,7 +39,7 @@ const Option = ({
 		})
 	}, [])
 
-	const postOption = useCallback((option: Omit<OptionType, '_id'>): void => {
+	const postOption = useCallback((option: PostOptionType): void => {
 		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
 			onOptionPosted(response.data as OptionType)
 			onClose()
