@@ -77,11 +77,11 @@ const OverviewView = ({
 		<div>
 			{isFetching &&
 				<div className="flex justify-center flex-row">
-					<p className="p-10 font-bold text-gray-800 text-2xl">Henter Order...</p>
+					<p className="p-10 font-bold text-gray-800 text-2xl">{'Henter Order...'}</p>
 				</div>
 			}
 			{orders.length === 0 && !isFetching &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Ingen Ordrer 😊</p>
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Ingen Ordrer 😊'}</p>
 			}
 			{orders.length === 0 &&
 				<div
@@ -108,7 +108,7 @@ const OverviewView = ({
 				))}
 				{roomOrders['no-room'] !== undefined && roomOrders['no-room'].length > 0 &&
 					<RoomCol
-						key={'no-room'}
+						key="no-room"
 						room={{
 							_id: 'no-room',
 							name: 'Ukendt Rum',

@@ -66,15 +66,15 @@ const RoomCol = ({
 					onUpdatedOrders={onUpdatedOrders}
 				/>
 			))}
-			<h3 className="text-gray-800 font-bold text-xl text-center m-2">Total</h3>
+			<h3 className="text-gray-800 font-bold text-xl text-center m-2">{'Total'}</h3>
 			<div className="m-2 p-2 h-full border-2 border-gray-400 rounded-3xl">
 				<div className="flex flex-col items-center">
 					<div className="text-gray-800 text-lg">
 						{Object.entries(totalProducts).map(([name, quantity]) => (
-							<p key={name}>{quantity} x {name}</p>
+							<p key={name}>{quantity}{' x '}{name}</p>
 						))}
 						{Object.entries(totalOptions).map(([name, quantity]) => (
-							<p key={name}>{quantity} x {name}</p>
+							<p key={name}>{quantity}{' x '}{name}</p>
 						))}
 
 					</div>

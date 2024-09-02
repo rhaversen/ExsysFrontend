@@ -71,7 +71,7 @@ export default function Page (): ReactElement {
 						}
 					}}
 				>
-					Personale
+					{'Personale'}
 				</button>
 			</div>
 		</main>
