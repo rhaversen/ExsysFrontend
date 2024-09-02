@@ -5,6 +5,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Room = ({
 	room,
@@ -137,6 +138,10 @@ const Room = ({
 						/>
 					</div>
 				</div>
+				<Timestamps
+					createdAt={room.createdAt}
+					updatedAt={room.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

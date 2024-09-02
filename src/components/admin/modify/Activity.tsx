@@ -6,6 +6,7 @@ import { type RoomType, type ActivityType, type PatchActivityType } from '@/type
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
+import Timestamps from './ui/Timestamps'
 
 const Activity = ({
 	activity,
@@ -142,6 +143,10 @@ const Activity = ({
 						allowNullOption={true}
 					/>
 				</div>
+				<Timestamps
+					createdAt={activity.createdAt}
+					updatedAt={activity.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

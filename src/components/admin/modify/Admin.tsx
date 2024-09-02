@@ -5,6 +5,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchAdminType, type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Admin = ({
 	admin,
@@ -144,6 +145,10 @@ const Admin = ({
 						</div>
 					}
 				</div>
+				<Timestamps
+					createdAt={admin.createdAt}
+					updatedAt={admin.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

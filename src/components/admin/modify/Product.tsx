@@ -9,6 +9,7 @@ import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUt
 import { type PatchProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Product = ({
 	product,
@@ -362,6 +363,10 @@ const Product = ({
 						}}
 					/>
 				</div>
+				<Timestamps
+					createdAt={product.createdAt}
+					updatedAt={product.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

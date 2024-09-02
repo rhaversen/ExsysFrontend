@@ -6,6 +6,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchOptionType, type OptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Option = ({
 	option,
@@ -154,6 +155,10 @@ const Option = ({
 					onChange={(v: string) => {
 						handleImageChange(v)
 					}}
+				/>
+				<Timestamps
+					createdAt={option.createdAt}
+					updatedAt={option.updatedAt}
 				/>
 				<EditingControls
 					isEditing={isEditing}

@@ -8,6 +8,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Activities from './kioskActivities/Activities'
 import ActivitiesWindow from './ActivitiesWindow'
 import EditableDropdown from './ui/EditableDropdown'
+import Timestamps from './ui/Timestamps'
 
 const Kiosk = ({
 	kiosk,
@@ -272,6 +273,10 @@ const Kiosk = ({
 						}}
 					/>
 				</div>
+				<Timestamps
+					createdAt={newKiosk.createdAt}
+					updatedAt={newKiosk.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
