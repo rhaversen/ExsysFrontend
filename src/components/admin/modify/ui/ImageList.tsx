@@ -1,5 +1,5 @@
 import AsyncImage from '@/components/ui/AsyncImage'
-import { ProductImages } from '@/lib/ProductImages'
+import ProductImages from '@/lib/ProductImages'
 import Image from 'next/image'
 import { type ReactElement } from 'react'
 
