@@ -1,15 +1,24 @@
 'use client'
 
+import LogoutButton from '@/components/admin/LogoutButton'
 import ModifyView from '@/components/admin/modify/ModifyView'
 import OverviewView from '@/components/admin/overview/OverviewView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type AdminType, type KioskType, type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType, type ReaderType } from '@/types/backendDataTypes'
+import {
+	type ActivityType,
+	type AdminType,
+	type KioskType,
+	type OptionType,
+	type OrderType,
+	type ProductType,
+	type ReaderType,
+	type RoomType
+} from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
-import LogoutButton from '@/components/admin/LogoutButton'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -286,7 +295,7 @@ export default function Page (): ReactElement {
 	return (
 		<main>
 			<LogoutButton
-				className='absolute top-0 right-0 m-3'
+				className="absolute top-0 right-0 m-3"
 			/>
 			<ViewSelectionBar
 				subBar={false}

@@ -1,7 +1,13 @@
 'use client'
 
 import RoomCol from '@/components/admin/overview/RoomCol'
-import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import {
+	type ActivityType,
+	type OptionType,
+	type OrderType,
+	type ProductType,
+	type RoomType
+} from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -96,7 +102,6 @@ const OverviewView = ({
 					<RoomCol
 						key={room._id}
 						room={room}
-						activities={activities}
 						orders={roomOrders[room.name] ?? []}
 						onUpdatedOrders={onUpdatedOrders}
 					/>
@@ -104,8 +109,13 @@ const OverviewView = ({
 				{roomOrders['no-room'] !== undefined && roomOrders['no-room'].length > 0 &&
 					<RoomCol
 						key={'no-room'}
-						room={{ _id: 'no-room', name: 'Ukendt Rum', description: 'Aktivitet har intet rum tildelt' }}
-						activities={activities}
+						room={{
+							_id: 'no-room',
+							name: 'Ukendt Rum',
+							description: 'Aktivitet har intet rum tildelt',
+							createdAt: '',
+							updatedAt: ''
+						}}
 						orders={roomOrders['no-room'] ?? []}
 						onUpdatedOrders={onUpdatedOrders}
 					/>

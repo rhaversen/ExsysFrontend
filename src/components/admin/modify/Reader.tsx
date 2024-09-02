@@ -5,6 +5,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Reader = ({
 	reader,
@@ -51,7 +52,8 @@ const Reader = ({
 
 	const deleteReader = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onReaderDeleted(reader._id)
 		}).catch((error) => {
@@ -88,9 +90,9 @@ const Reader = ({
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='readerTag'
+							fieldName="readerTag"
 							initialText={reader.readerTag}
-							placeholder='Kortlæser Tag'
+							placeholder="Kortlæser Tag"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -111,6 +113,10 @@ const Reader = ({
 						/>
 					</div>
 				</div>
+				<Timestamps
+					createdAt={reader.createdAt}
+					updatedAt={reader.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

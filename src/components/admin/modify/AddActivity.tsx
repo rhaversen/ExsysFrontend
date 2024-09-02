@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
+import { type ActivityType, type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
@@ -93,8 +93,8 @@ const AddActivity = ({
 						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='name'
-								placeholder='Navn'
+								fieldName="name"
+								placeholder="Navn"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -112,10 +112,13 @@ const AddActivity = ({
 							/>
 						</div>
 						<EditableDropdown
-							options={rooms.map((room) => ({ value: room._id, label: room.name }))}
+							options={rooms.map((room) => ({
+								value: room._id,
+								label: room.name
+							}))}
 							selectedValue={activity.roomId ?? 'null-option'}
 							onChange={handleRoomIdChange}
-							placeholder='Vælg Spisested'
+							placeholder="Vælg Spisested"
 							allowNullOption={true}
 						/>
 					</div>

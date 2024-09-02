@@ -6,7 +6,13 @@ import OrderConfirmationWindow from '@/components/orderstation/confirmation/Orde
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import { type KioskTypeNonPopulated, type ActivityType, type OptionType, type ProductType, type OrderType } from '@/types/backendDataTypes'
+import {
+	type ActivityType,
+	type KioskTypeNonPopulated,
+	type OptionType,
+	type OrderType,
+	type ProductType
+} from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
@@ -20,7 +26,10 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
-	const [cart, setCart] = useState<CartType>({ products: {}, options: {} })
+	const [cart, setCart] = useState<CartType>({
+		products: {},
+		options: {}
+	})
 	const [isFormValid, setIsFormValid] = useState(false)
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
@@ -172,8 +181,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
-		const productCart = Object.entries(cart.products).map(([item, quantity]) => ({ id: item, quantity }))
-		const optionCart = Object.entries(cart.options).map(([item, quantity]) => ({ id: item, quantity }))
+		const productCart = Object.entries(cart.products).map(([item, quantity]) => ({
+			id: item,
+			quantity
+		}))
+		const optionCart = Object.entries(cart.options).map(([item, quantity]) => ({
+			id: item,
+			quantity
+		}))
 
 		const data = {
 			kioskId,
@@ -211,7 +226,10 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		if (activityCount > 1) {
 			router.push('/orderstation')
 		}
-		setCart({ products: {}, options: {} })
+		setCart({
+			products: {},
+			options: {}
+		})
 		setIsOrderConfirmationVisible(false)
 		setOrderStatus('loading')
 	}, [activityCount, router])

@@ -1,7 +1,7 @@
 'use client'
-import React, { useEffect, useCallback, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
+import React, { type ReactNode, useCallback, useEffect } from 'react'
 import { useInterval } from 'react-use'
 import { useError } from './ErrorContext/ErrorContext'
 

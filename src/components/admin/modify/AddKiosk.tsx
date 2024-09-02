@@ -1,10 +1,10 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Activities from './kioskActivities/Activities'
 import ActivitiesWindow from './ActivitiesWindow'
+import Activities from './kioskActivities/Activities'
 import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
@@ -124,8 +124,8 @@ const Kiosk = ({
 						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kiosk'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='name'
-								placeholder='Navn'
+								fieldName="name"
+								placeholder="Navn"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -144,8 +144,8 @@ const Kiosk = ({
 						</div>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='password'
-								placeholder='Password'
+								fieldName="password"
+								placeholder="Password"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -168,8 +168,8 @@ const Kiosk = ({
 						</div>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='tag'
-								placeholder='Tag (Automatisk)'
+								fieldName="tag"
+								placeholder="Tag (Automatisk)"
 								italic={false}
 								minSize={15}
 								required={false}
@@ -191,12 +191,15 @@ const Kiosk = ({
 						</div>
 						<p className="italic text-gray-500">{'Kortlæser'}</p>
 						<EditableDropdown
-							options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
+							options={readers.map((reader) => ({
+								value: reader._id,
+								label: reader.readerTag
+							}))}
 							selectedValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
 							editable={true}
-							fieldName='readerId'
-							placeholder='Vælg Kortlæser'
+							fieldName="readerId"
+							placeholder="Vælg Kortlæser"
 							allowNullOption={true}
 						/>
 						{kiosk.activities.length > 0 &&

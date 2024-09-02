@@ -1,7 +1,7 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostOptionType, type OptionType } from '@/types/backendDataTypes'
+import { type OptionType, type PostOptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
