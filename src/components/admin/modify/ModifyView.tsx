@@ -18,6 +18,8 @@ import AddReader from '@/components/admin/modify/AddReader'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { type ActivityType, type AdminType, type KioskType, type OptionType, type ProductType, type RoomType, type ReaderType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
+import SortingControl from './SortingControl'
+import { type sortConfig } from '@/types/frontendDataTypes'
 
 const ModifyView = ({
 	products,
@@ -88,6 +90,31 @@ const ModifyView = ({
 	const [showAddKiosk, setShowAddKiosk] = useState(false)
 	const [showAddAdmin, setShowAddAdmin] = useState(false)
 	const [showAddReader, setShowAddReader] = useState(false)
+	const [sortField, setSortField] = useState('name')
+	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+	const sortByField = (items: any[]): any[] => {
+		console.log('Sorting by', sortField, sortDirection)
+
+		return items.slice().sort((a: any, b: any) => {
+			const valA = a[sortField]
+			const valB = b[sortField]
+
+			console.log('Comparing', valA, valB)
+
+			// If both values are strings, compare them case-insensitively
+			if (typeof valA === 'string' && typeof valB === 'string') {
+				const strA = valA.toLowerCase()
+				const strB = valB.toLowerCase()
+				if (strA < strB) return sortDirection === 'asc' ? -1 : 1
+				if (strA > strB) return sortDirection === 'asc' ? 1 : -1
+				return 0
+			}
+
+			// Otherwise, perform a basic comparison (works for numbers and dates)
+			return sortDirection === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1)
+		})
+	}
 
 	return (
 		<div>
@@ -97,6 +124,13 @@ const ModifyView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
+			{selectedView !== null &&
+				<SortingControl
+					onSortFieldChange={setSortField}
+					onSortDirectionChange={(sortDirection: string) => { setSortDirection(sortDirection as 'asc' | 'desc') }}
+					type={selectedView as keyof typeof sortConfig}
+				/>
+			}
 			{selectedView === null &&
 				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Vælg en kategori</p>}
 			{selectedView === 'Produkter' &&
@@ -106,7 +140,7 @@ const ModifyView = ({
 						setShowAddProduct(true)
 					}}
 				>
-					{products.map((product) => (
+					{sortByField(products).map((product) => (
 						<div
 							className="min-w-64"
 							key={product._id}
@@ -128,7 +162,7 @@ const ModifyView = ({
 						setShowAddOption(true)
 					}}
 				>
-					{options.map((option) => (
+					{sortByField(options).map((option) => (
 						<div
 							className="min-w-64 h-full"
 							key={option._id}
@@ -149,7 +183,7 @@ const ModifyView = ({
 						setShowAddRoom(true)
 					}}
 				>
-					{rooms.map((room) => (
+					{sortByField(rooms).map((room) => (
 						<div
 							className="min-w-64"
 							key={room._id}
@@ -170,7 +204,7 @@ const ModifyView = ({
 						setShowAddActivity(true)
 					}}
 				>
-					{activities.map((activity) => (
+					{sortByField(activities).map((activity) => (
 						<div
 							className="min-w-64"
 							key={activity._id}
@@ -192,7 +226,7 @@ const ModifyView = ({
 						setShowAddKiosk(true)
 					}}
 				>
-					{kiosks.map((kiosk) => (
+					{sortByField(kiosks).map((kiosk) => (
 						<div
 							className="min-w-64"
 							key={kiosk._id}
@@ -215,7 +249,7 @@ const ModifyView = ({
 						setShowAddAdmin(true)
 					}}
 				>
-					{admins.map((admin) => (
+					{sortByField(admins).map((admin) => (
 						<div
 							className="min-w-64"
 							key={admin._id}
@@ -236,7 +270,7 @@ const ModifyView = ({
 						setShowAddReader(true)
 					}}
 				>
-					{readers.map((reader) => (
+					{sortByField(readers).map((reader) => (
 						<div
 							className="min-w-64"
 							key={reader._id}
