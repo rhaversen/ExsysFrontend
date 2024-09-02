@@ -81,7 +81,7 @@ const OverviewView = ({
 				</div>
 			}
 			{orders.length === 0 && !isFetching &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Ingen Ordrer 😊'}</p>
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Ingen Ordrer '}&#128522;</p>
 			}
 			{orders.length === 0 &&
 				<div
