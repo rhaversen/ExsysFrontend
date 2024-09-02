@@ -25,7 +25,7 @@ import {
 	type ReaderType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import { type sortConfig } from '@/types/frontendDataTypes'
+import type sortConfig from '@/lib/SortConfig'
 import React, { type ReactElement, useState } from 'react'
 import SortingControl from './SortingControl'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { sortConfig } from '@/types/frontendDataTypes'
+import sortConfig from '@/lib/SortConfig'
 import { type ReactElement } from 'react'
 
 const SortingControl = ({
