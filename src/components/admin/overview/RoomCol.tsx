@@ -71,10 +71,10 @@ const RoomCol = ({
 				<div className="flex flex-col items-center">
 					<div className="text-gray-800 text-lg">
 						{Object.entries(totalProducts).map(([name, quantity]) => (
-							<p key={name}>{quantity}{' x '}{name}</p>
+							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
 						))}
 						{Object.entries(totalOptions).map(([name, quantity]) => (
-							<p key={name}>{quantity}{' x '}{name}</p>
+							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
 						))}
 
 					</div>

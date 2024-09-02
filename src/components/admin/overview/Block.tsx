@@ -111,7 +111,7 @@ const Block = ({
 
 				return (
 					<p key={name}>
-						{totalCount}{' x '}{name}{diffText}
+						{totalCount}{' '}&times;{' '}{name}{diffText}
 					</p>
 				)
 			})}

@@ -71,7 +71,7 @@ const ErrorWindow = ({
 					className="text-3xl p-3"
 					onClick={handleClose}
 				>
-					{'X\r'}
+					&times;
 				</button>
 			</div>
 			<div
