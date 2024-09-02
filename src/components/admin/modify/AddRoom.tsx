@@ -85,8 +85,8 @@ const Room = ({
 						<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='name'
-								placeholder='Navn'
+								fieldName="name"
+								placeholder="Navn"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -105,8 +105,8 @@ const Room = ({
 						</div>
 						<div className="text-gray-800">
 							<EditableField
-								fieldName='description'
-								placeholder='Beskrivelse'
+								fieldName="description"
+								placeholder="Beskrivelse"
 								italic={true}
 								minSize={10}
 								required={true}

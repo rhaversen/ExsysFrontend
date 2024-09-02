@@ -1,5 +1,5 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchOrderType, type ActivityType, type OrderType } from '@/types/backendDataTypes'
+import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
