@@ -86,8 +86,8 @@ const Reader = ({
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
 								upperCase={true}
-								fieldName='pairingCode'
-								placeholder='Parring Kode'
+								fieldName="pairingCode"
+								placeholder="Parring Kode"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -106,8 +106,8 @@ const Reader = ({
 						</div>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='tag'
-								placeholder='Tag (Automatisk)'
+								fieldName="tag"
+								placeholder="Tag (Automatisk)"
 								italic={false}
 								minSize={15}
 								required={false}

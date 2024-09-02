@@ -5,6 +5,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Room = ({
 	room,
@@ -51,7 +52,8 @@ const Room = ({
 
 	const deleteRoom = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onRoomDeleted(room._id)
 		}).catch((error) => {
@@ -95,9 +97,9 @@ const Room = ({
 					<p className="italic text-gray-500">{'Navn'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='name'
+							fieldName="name"
 							initialText={room.name}
-							placeholder='Navn'
+							placeholder="Navn"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -117,9 +119,9 @@ const Room = ({
 					<p className="italic text-gray-500">{'Beskrivelse'}</p>
 					<div className="text-gray-800">
 						<EditableField
-							fieldName='description'
+							fieldName="description"
 							initialText={room.description}
-							placeholder='Beskrivelse'
+							placeholder="Beskrivelse"
 							italic={true}
 							minSize={10}
 							required={true}
@@ -137,6 +139,10 @@ const Room = ({
 						/>
 					</div>
 				</div>
+				<Timestamps
+					createdAt={room.createdAt}
+					updatedAt={room.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

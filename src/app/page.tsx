@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState, type ReactElement, useCallback } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 export default function Page (): ReactElement {
 	const router = useRouter()
@@ -43,7 +43,9 @@ export default function Page (): ReactElement {
 
 	return (
 		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-			<h1 className="mb-4 text-2xl font-bold text-gray-800">Vælg Opgave</h1>
+			<h1 className="mb-4 text-2xl font-bold text-gray-800">
+				{'Vælg Opgave'}
+			</h1>
 			<div className="flex space-x-4">
 				<button
 					type="button"
@@ -56,7 +58,7 @@ export default function Page (): ReactElement {
 						}
 					}}
 				>
-					Bestillings Station
+					{'Bestillings Station'}
 				</button>
 				<button
 					type="button"

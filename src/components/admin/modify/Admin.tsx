@@ -2,9 +2,10 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchAdminType, type AdminType } from '@/types/backendDataTypes'
+import { type AdminType, type PatchAdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import Timestamps from './ui/Timestamps'
 
 const Admin = ({
 	admin,
@@ -52,7 +53,8 @@ const Admin = ({
 
 	const deleteAdmin = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/admins/${admin._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onAdminDeleted(admin._id)
 		}).catch((error) => {
@@ -78,7 +80,10 @@ const Admin = ({
 	}, [admin])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchAdmin({ ...newAdmin, password: newPassword === '' ? undefined : newPassword })
+		patchAdmin({
+			...newAdmin,
+			password: newPassword === '' ? undefined : newPassword
+		})
 		setNewPassword('')
 		setIsEditing(false)
 	}, [patchAdmin, newAdmin, newPassword])
@@ -94,9 +99,9 @@ const Admin = ({
 					<p className="italic text-gray-500">{'Brugernavn'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='name'
+							fieldName="name"
 							initialText={admin.name}
-							placeholder='Navn'
+							placeholder="Navn"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -114,13 +119,13 @@ const Admin = ({
 						/>
 					</div>
 					{isEditing &&
-						<div className='text-center'>
+						<div className="text-center">
 							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
 							<div className="font-bold pb-2 text-gray-800">
 								<EditableField
-									fieldName='password'
+									fieldName="password"
 									initialText={newPassword}
-									placeholder='Nyt Kodeord'
+									placeholder="Nyt Kodeord"
 									italic={false}
 									minSize={10}
 									required={false}
@@ -144,6 +149,10 @@ const Admin = ({
 						</div>
 					}
 				</div>
+				<Timestamps
+					createdAt={admin.createdAt}
+					updatedAt={admin.updatedAt}
+				/>
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}

@@ -1,3 +1,4 @@
+// Helper types
 export interface Time {
 	hour: number
 	minute: number
@@ -8,6 +9,7 @@ export interface OrderWindow {
 	to: Time
 }
 
+// Product types
 export interface ProductType {
 	_id: string
 	name: string
@@ -15,6 +17,8 @@ export interface ProductType {
 	orderWindow: OrderWindow
 	options: OptionType[]
 	imageURL?: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostProductType {
@@ -33,11 +37,14 @@ export interface PatchProductType {
 	imageURL?: string
 }
 
+// Option types
 export interface OptionType {
 	_id: string
 	name: string
 	price: number
 	imageURL?: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostOptionType {
@@ -52,10 +59,13 @@ export interface PatchOptionType {
 	imageURL?: string
 }
 
+// Activity types
 export interface ActivityType {
 	_id: string
 	roomId: RoomType | null
 	name: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostActivityType {
@@ -74,10 +84,13 @@ export interface ActivityTypeNonPopulated {
 	name: string
 }
 
+// Room types
 export interface RoomType {
 	_id: string
 	name: string
 	description: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostRoomType {
@@ -90,6 +103,7 @@ export interface PatchRoomType {
 	description?: string
 }
 
+// Order types
 export interface OrderType {
 	_id: string
 	products: Array<{ id: ProductType['_id'], quantity: number }>
@@ -97,6 +111,7 @@ export interface OrderType {
 	activityId: ActivityType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 	createdAt: string
+	updatedAt: string
 }
 
 export interface PostOrderType {
@@ -111,9 +126,12 @@ export interface PatchOrderType {
 	status: 'pending' | 'confirmed' | 'delivered'
 }
 
+// Reader types
 export interface ReaderType {
 	_id: string
 	readerTag: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostReaderType {
@@ -126,9 +144,12 @@ export interface PatchReaderType {
 	pairingCode?: string
 }
 
+// Admin types
 export interface AdminType {
 	_id: string
 	name: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostAdminType {
@@ -141,12 +162,15 @@ export interface PatchAdminType {
 	password?: string
 }
 
+// Kiosk types
 export interface KioskType {
 	_id: string
 	name: string
 	kioskTag: string
-	readerId: ReaderType['_id'] | null
+	readerId: ReaderType | null
 	activities: ActivityType[]
+	createdAt: string
+	updatedAt: string
 }
 
 export interface PostKioskType {
