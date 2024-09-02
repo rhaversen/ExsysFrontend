@@ -100,7 +100,7 @@ const Activity = ({
 	}, [activity])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchActivity({ ...newActivity, roomId: newActivity.roomId?._id })
+		patchActivity({ ...newActivity, roomId: newActivity.roomId === null ? null : newActivity.roomId._id })
 		setIsEditing(false)
 	}, [patchActivity, newActivity])
 

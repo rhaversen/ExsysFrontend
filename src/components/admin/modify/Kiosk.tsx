@@ -153,7 +153,7 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id), password: newPassword === '' ? undefined : newPassword })
+		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id), readerId: newKiosk.readerId === null ? null : newKiosk.readerId._id, password: newPassword === '' ? undefined : newPassword })
 		setNewPassword('')
 		setIsEditing(false)
 	}, [patchKiosk, newKiosk, newPassword])
