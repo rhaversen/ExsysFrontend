@@ -38,10 +38,10 @@ const Kiosk = ({
 	// update newKiosk when readers change
 	useEffect(() => {
 		setNewKiosk((prev) => {
-			const reader = readers.find((reader) => reader._id === prev.readerId)
+			const reader = readers.find((reader) => reader._id === prev.readerId?._id)
 			return {
 				...prev,
-				readerId: reader?._id ?? null
+				readerId: reader ?? null
 			}
 		})
 	}, [readers])
@@ -129,9 +129,9 @@ const Kiosk = ({
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setNewKiosk({
 			...newKiosk,
-			readerId: v === 'null-option' ? null : v
+			readerId: v === 'null-option' ? null : readers.find((reader) => reader._id === v) ?? null
 		})
-	}, [newKiosk])
+	}, [newKiosk, readers])
 
 	const handleAddActivity = useCallback((v: ActivityType): void => {
 		setNewKiosk({
@@ -246,7 +246,7 @@ const Kiosk = ({
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<EditableDropdown
 						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
-						selectedValue={newKiosk.readerId ?? 'null-option'}
+						selectedValue={newKiosk.readerId?._id ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
 						allowNullOption={true}
