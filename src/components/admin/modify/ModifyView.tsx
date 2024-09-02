@@ -94,13 +94,14 @@ const ModifyView = ({
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
 	const sortByField = (items: any[]): any[] => {
-		console.log('Sorting by', sortField, sortDirection)
+		// Helper function to resolve nested properties
+		const resolveProperty = (obj: any, path: string): any => {
+			return path.split('.').reduce((acc, part) => (acc !== null && acc !== undefined) ? acc[part] : undefined, obj)
+		}
 
 		return items.slice().sort((a: any, b: any) => {
-			const valA = a[sortField]
-			const valB = b[sortField]
-
-			console.log('Comparing', valA, valB)
+			const valA = resolveProperty(a, sortField)
+			const valB = resolveProperty(b, sortField)
 
 			// If both values are strings, compare them case-insensitively
 			if (typeof valA === 'string' && typeof valB === 'string') {
