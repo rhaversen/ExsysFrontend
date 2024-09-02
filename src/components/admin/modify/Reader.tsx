@@ -52,7 +52,8 @@ const Reader = ({
 
 	const deleteReader = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onReaderDeleted(reader._id)
 		}).catch((error) => {
@@ -89,9 +90,9 @@ const Reader = ({
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='readerTag'
+							fieldName="readerTag"
 							initialText={reader.readerTag}
-							placeholder='Kortlæser Tag'
+							placeholder="Kortlæser Tag"
 							italic={false}
 							minSize={10}
 							required={true}

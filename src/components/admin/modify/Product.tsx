@@ -6,7 +6,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type PatchProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type OptionType, type PatchProductType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Timestamps from './ui/Timestamps'
@@ -87,7 +87,8 @@ const Product = ({
 
 	const deleteProduct = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onProductDeleted(product._id)
 		}).catch((error) => {
@@ -194,7 +195,10 @@ const Product = ({
 	}, [product])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchProduct({ ...newProduct, options: newProduct.options.map((option) => option._id) })
+		patchProduct({
+			...newProduct,
+			options: newProduct.options.map((option) => option._id)
+		})
 		setIsEditing(false)
 	}, [patchProduct, newProduct])
 
@@ -208,7 +212,7 @@ const Product = ({
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
-							fieldName='name'
+							fieldName="name"
 							initialText={product.name}
 							placeholder="Navn"
 							italic={false}
@@ -229,7 +233,7 @@ const Product = ({
 					</div>
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
-							fieldName='price'
+							fieldName="price"
 							initialText={product.price.toString()}
 							placeholder="Pris"
 							italic={true}
@@ -257,7 +261,7 @@ const Product = ({
 				</div>
 				<div className="flex flex-row text-gray-800">
 					<EditableField
-						fieldName='fromHour'
+						fieldName="fromHour"
 						initialText={product.orderWindow.from.hour.toString().padStart(2, '0')}
 						placeholder="Time"
 						italic={false}
@@ -276,7 +280,7 @@ const Product = ({
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
-						fieldName='fromMinute'
+						fieldName="fromMinute"
 						initialText={product.orderWindow.from.minute.toString().padStart(2, '0')}
 						placeholder="Minut"
 						italic={false}
@@ -297,7 +301,7 @@ const Product = ({
 						{'—'}
 					</div>
 					<EditableField
-						fieldName='toHour'
+						fieldName="toHour"
 						initialText={product.orderWindow.to.hour.toString().padStart(2, '0')}
 						placeholder="Time"
 						italic={false}
@@ -316,7 +320,7 @@ const Product = ({
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
 					<EditableField
-						fieldName='toMinute'
+						fieldName="toMinute"
 						initialText={product.orderWindow.to.minute.toString().padStart(2, '0')}
 						placeholder="Minut"
 						italic={false}

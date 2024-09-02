@@ -1,6 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostAdminType, type AdminType } from '@/types/backendDataTypes'
+import { type AdminType, type PostAdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
@@ -85,8 +85,8 @@ const Admin = ({
 						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Admin'}</p>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='name'
-								placeholder='Navn'
+								fieldName="name"
+								placeholder="Navn"
 								italic={false}
 								minSize={10}
 								required={true}
@@ -105,8 +105,8 @@ const Admin = ({
 						</div>
 						<div className="font-bold p-2 text-gray-800">
 							<EditableField
-								fieldName='password'
-								placeholder='Kodeord'
+								fieldName="password"
+								placeholder="Kodeord"
 								italic={false}
 								minSize={10}
 								required={true}

@@ -2,11 +2,11 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type PatchKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Activities from './kioskActivities/Activities'
 import ActivitiesWindow from './ActivitiesWindow'
+import Activities from './kioskActivities/Activities'
 import EditableDropdown from './ui/EditableDropdown'
 import Timestamps from './ui/Timestamps'
 
@@ -99,7 +99,8 @@ const Kiosk = ({
 
 	const deleteKiosk = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/kiosks/${kiosk._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onKioskDeleted(kiosk._id)
 		}).catch((error) => {
@@ -153,7 +154,12 @@ const Kiosk = ({
 	}, [kiosk])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchKiosk({ ...newKiosk, activities: newKiosk.activities.map((activity) => activity._id), readerId: newKiosk.readerId === null ? null : newKiosk.readerId._id, password: newPassword === '' ? undefined : newPassword })
+		patchKiosk({
+			...newKiosk,
+			activities: newKiosk.activities.map((activity) => activity._id),
+			readerId: newKiosk.readerId === null ? null : newKiosk.readerId._id,
+			password: newPassword === '' ? undefined : newPassword
+		})
 		setNewPassword('')
 		setIsEditing(false)
 	}, [patchKiosk, newKiosk, newPassword])
@@ -169,9 +175,9 @@ const Kiosk = ({
 					<p className="italic text-gray-500">{'Kioskens Navn'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='name'
+							fieldName="name"
 							initialText={kiosk.name}
-							placeholder='Navn'
+							placeholder="Navn"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -191,9 +197,9 @@ const Kiosk = ({
 					<p className="italic text-gray-500">{'Tag - Brugernavn til kiosk login'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='kioskTag'
+							fieldName="kioskTag"
 							initialText={kiosk.kioskTag}
-							placeholder='Kiosk tag'
+							placeholder="Kiosk tag"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -214,13 +220,13 @@ const Kiosk = ({
 						/>
 					</div>
 					{isEditing &&
-						<div className='text-center'>
+						<div className="text-center">
 							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
 							<div className="font-bold pb-2 text-gray-800">
 								<EditableField
-									fieldName='password'
+									fieldName="password"
 									initialText={newPassword}
-									placeholder='Nyt Kodeord'
+									placeholder="Nyt Kodeord"
 									italic={false}
 									minSize={10}
 									required={false}
@@ -245,7 +251,10 @@ const Kiosk = ({
 					}
 					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<EditableDropdown
-						options={readers.map((reader) => ({ value: reader._id, label: reader.readerTag }))}
+						options={readers.map((reader) => ({
+							value: reader._id,
+							label: reader.readerTag
+						}))}
 						selectedValue={newKiosk.readerId?._id ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
@@ -314,7 +323,7 @@ const Kiosk = ({
 					/>
 				}
 			</div>
-		</div >
+		</div>
 	)
 }
 

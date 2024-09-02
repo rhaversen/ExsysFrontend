@@ -17,14 +17,21 @@ const Timestamps = ({
 	const isUpdatedToday = updatedDate.toDateString() === currentDate.toDateString()
 
 	const formatDate = (date: Date): string => {
-		let dateStr = date.toLocaleDateString('da-DK', { day: 'numeric', month: 'long' })
+		let dateStr = date.toLocaleDateString('da-DK', {
+			day: 'numeric',
+			month: 'long'
+		})
 		if (date.getFullYear() !== currentYear) {
 			dateStr += ` ${date.getFullYear()}`
 		}
 		return dateStr
 	}
 
-	const formatTime = (date: Date): string => 'i dag ' + date.toLocaleTimeString('da-DK', { hour: 'numeric', minute: '2-digit', hour12: false })
+	const formatTime = (date: Date): string => 'i dag ' + date.toLocaleTimeString('da-DK', {
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: false
+	})
 
 	const created = isCreatedToday ? formatTime(createdDate) : formatDate(createdDate)
 	const updated = isUpdatedToday ? formatTime(updatedDate) : formatDate(updatedDate)

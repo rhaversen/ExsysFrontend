@@ -2,7 +2,7 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType, type ActivityType, type PatchActivityType } from '@/types/backendDataTypes'
+import { type ActivityType, type PatchActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
@@ -66,7 +66,8 @@ const Activity = ({
 
 	const deleteActivity = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
-			data: { confirm }, withCredentials: true
+			data: { confirm },
+			withCredentials: true
 		}).then(() => {
 			onActivityDeleted(activity._id)
 		}).catch((error) => {
@@ -100,7 +101,10 @@ const Activity = ({
 	}, [activity])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchActivity({ ...newActivity, roomId: newActivity.roomId === null ? null : newActivity.roomId._id })
+		patchActivity({
+			...newActivity,
+			roomId: newActivity.roomId === null ? null : newActivity.roomId._id
+		})
 		setIsEditing(false)
 	}, [patchActivity, newActivity])
 
@@ -115,9 +119,9 @@ const Activity = ({
 					<p className="italic text-gray-500">{'Navn'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName='name'
+							fieldName="name"
 							initialText={activity.name}
-							placeholder='Navn'
+							placeholder="Navn"
 							italic={false}
 							minSize={10}
 							required={true}
@@ -136,7 +140,10 @@ const Activity = ({
 					</div>
 					<p className="italic text-gray-500">{'Spisested'}</p>
 					<EditableDropdown
-						options={rooms.map((room) => ({ value: room._id, label: room.name }))}
+						options={rooms.map((room) => ({
+							value: room._id,
+							label: room.name
+						}))}
 						selectedValue={newActivity.roomId?._id ?? 'null-option'}
 						onChange={handleRoomIdChange}
 						editable={isEditing}

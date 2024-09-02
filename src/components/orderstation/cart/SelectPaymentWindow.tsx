@@ -1,5 +1,5 @@
-import React, { type ReactElement } from 'react'
 import AsyncImage from '@/components/ui/AsyncImage'
+import React, { type ReactElement } from 'react'
 
 const SelectPaymentWindow = ({
 	onSubmit,
@@ -11,14 +11,16 @@ const SelectPaymentWindow = ({
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
 			<div className="bg-white rounded-xl shadow-lg p-8 m-4 text-gray-800">
-				<h2 className="text-4xl font-semibold text-center mb-4">Vælg Betaling</h2>
+				<h2 className="text-4xl font-semibold text-center mb-4">
+					{'Vælg Betaling'}
+				</h2>
 				<div className="space-x-4 flex justify-center">
 					<button
 						onClick={() => { onSubmit('Card') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
-						type='button'
+						type="button"
 					>
-						<div className='text-2xl font-bold text-center text-gray-800'>
+						<div className="text-2xl font-bold text-center text-gray-800">
 							{'Kort'}
 						</div>
 						<AsyncImage
@@ -35,9 +37,9 @@ const SelectPaymentWindow = ({
 					<button
 						onClick={() => { onSubmit('Cash') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
-						type='button'
+						type="button"
 					>
-						<div className='text-2xl font-bold text-center text-gray-800'>
+						<div className="text-2xl font-bold text-center text-gray-800">
 							{'Kontant'}
 						</div>
 						<AsyncImage
@@ -56,7 +58,7 @@ const SelectPaymentWindow = ({
 					<button
 						onClick={() => { onCancel() }}
 						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
-						type='button'
+						type="button"
 					>
 						{'Tilbage'}
 					</button>

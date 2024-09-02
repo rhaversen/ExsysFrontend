@@ -1,25 +1,33 @@
 'use client'
 
+import Activity from '@/components/admin/modify/Activity'
+import AddActivity from '@/components/admin/modify/AddActivity'
+import AddAdmin from '@/components/admin/modify/AddAdmin'
+import AddKiosk from '@/components/admin/modify/AddKiosk'
 import AddOption from '@/components/admin/modify/AddOption'
 import AddProduct from '@/components/admin/modify/AddProduct'
+import AddReader from '@/components/admin/modify/AddReader'
 import AddRoom from '@/components/admin/modify/AddRoom'
-import AddActivity from '@/components/admin/modify/AddActivity'
-import AddKiosk from '@/components/admin/modify/AddKiosk'
-import AddAdmin from '@/components/admin/modify/AddAdmin'
+import Admin from '@/components/admin/modify/Admin'
 import ItemList from '@/components/admin/modify/ItemList'
+import Kiosk from '@/components/admin/modify/Kiosk'
 import Option from '@/components/admin/modify/Option'
 import Product from '@/components/admin/modify/Product'
-import Room from '@/components/admin/modify/Room'
-import Activity from '@/components/admin/modify/Activity'
-import Kiosk from '@/components/admin/modify/Kiosk'
-import Admin from '@/components/admin/modify/Admin'
 import Reader from '@/components/admin/modify/Reader'
-import AddReader from '@/components/admin/modify/AddReader'
+import Room from '@/components/admin/modify/Room'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
-import { type ActivityType, type AdminType, type KioskType, type OptionType, type ProductType, type RoomType, type ReaderType } from '@/types/backendDataTypes'
+import {
+	type ActivityType,
+	type AdminType,
+	type KioskType,
+	type OptionType,
+	type ProductType,
+	type ReaderType,
+	type RoomType
+} from '@/types/backendDataTypes'
+import { type sortConfig } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import SortingControl from './SortingControl'
-import { type sortConfig } from '@/types/frontendDataTypes'
 
 const ModifyView = ({
 	products,

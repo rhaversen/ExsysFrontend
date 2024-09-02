@@ -1,17 +1,15 @@
 import Block from '@/components/admin/overview/Block'
-import { type ActivityType, type OrderType, type RoomType } from '@/types/backendDataTypes'
+import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const RoomCol = ({
 	room,
 	orders,
-	activities,
 	onUpdatedOrders
 }: {
-	room: RoomType
+	room: Omit<RoomType, 'createdAt' | 'updatedAt'>
 	orders: OrderTypeWithNames[]
-	activities: ActivityType[]
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderTypeWithNames[]>>({})
@@ -38,11 +36,17 @@ const RoomCol = ({
 		const optionsCount: Record<string, number> = {}
 
 		orders.forEach(order => {
-			order.products.forEach(({ name, quantity }) => {
+			order.products.forEach(({
+				name,
+				quantity
+			}) => {
 				productsCount[name] = (productsCount[name] ?? 0) + quantity
 			})
 
-			order.options.forEach(({ name, quantity }) => {
+			order.options.forEach(({
+				name,
+				quantity
+			}) => {
 				optionsCount[name] = (optionsCount[name] ?? 0) + quantity
 			})
 		})
