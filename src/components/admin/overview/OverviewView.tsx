@@ -112,7 +112,9 @@ const OverviewView = ({
 						room={{
 							_id: 'no-room',
 							name: 'Ukendt Rum',
-							description: 'Aktivitet har intet rum tildelt'
+							description: 'Aktivitet har intet rum tildelt',
+							createdAt: '',
+							updatedAt: ''
 						}}
 						orders={roomOrders['no-room'] ?? []}
 						onUpdatedOrders={onUpdatedOrders}

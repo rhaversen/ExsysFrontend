@@ -41,7 +41,9 @@ const OptionsWindow = ({
 							_id: 'none',
 							name: 'Intet',
 							imageURL: '/none.svg',
-							price: 0
+							price: 0,
+							createdAt: '',
+							updatedAt: ''
 						}}
 						onOptionSelect={onClose}
 					/>

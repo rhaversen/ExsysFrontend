@@ -8,7 +8,7 @@ const RoomCol = ({
 	orders,
 	onUpdatedOrders
 }: {
-	room: Omit<RoomType, 'createdAt' | 'updatedAt'>
+	room: RoomType
 	orders: OrderTypeWithNames[]
 	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
