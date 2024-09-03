@@ -34,11 +34,11 @@ const Dropdown = ({
 	}
 
 	return (
-		<div className={'font-bold pb-2 text-gray-800'}>
+		<div className="font-bold pb-2 text-gray-800">
 			{editable
 				? (
 					<select
-						className={'border-2 border-blue-500 bg-transparent rounded-md p-2 focus:outline-none'}
+						className="border-2 border-blue-500 bg-transparent rounded-md p-2 focus:outline-none"
 						value={selectedValue.length > 0 ? selectedValue : ''}
 						onChange={(e) => { handleChange(e.target.value) }}
 						title={title}

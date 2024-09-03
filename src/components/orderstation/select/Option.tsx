@@ -20,8 +20,8 @@ const Option = ({
 				draggable="false"
 			>
 				<div className="flex flex-row items-center justify-center">
-					<h3 className={'font-bold pr-2 text-gray-800'}>{option.name}</h3>
-					<p className={'italic text-gray-800'}>
+					<h3 className="font-bold pr-2 text-gray-800">{option.name}</h3>
+					<p className="italic text-gray-800">
 						{option.price === 0 ? 'Gratis' : `${option.price} kr`}
 					</p>
 				</div>

@@ -260,7 +260,7 @@ const AddProduct = ({
 								handleValidationChange(fieldName, v)
 							}}
 						/>
-						<div className={'font-bold text-xl px-1'}>{':'}</div>
+						<div className="font-bold text-xl px-1">{':'}</div>
 						<EditableField
 							fieldName="fromMinute"
 							initialText={product.orderWindow.from.minute.toString()}
@@ -285,7 +285,7 @@ const AddProduct = ({
 								handleValidationChange(fieldName, v)
 							}}
 						/>
-						<div className={'text-xl px-1'}>{'—'}</div>
+						<div className="text-xl px-1">{'—'}</div>
 						<EditableField
 							fieldName="toHour"
 							initialText={product.orderWindow.to.hour.toString()}
@@ -311,7 +311,7 @@ const AddProduct = ({
 								handleValidationChange(fieldName, v)
 							}}
 						/>
-						<div className={'font-bold text-xl px-1'}>{':'}</div>
+						<div className="font-bold text-xl px-1">{':'}</div>
 						<EditableField
 							fieldName="toMinute"
 							initialText={product.orderWindow.to.minute.toString()}

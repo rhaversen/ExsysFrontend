@@ -37,12 +37,12 @@ const Timestamps = ({
 	const updated = isUpdatedToday ? formatTime(updatedDate) : formatDate(updatedDate)
 
 	return (
-		<div className={'flex flex-col items-center'}>
-			<div className={'text-sm text-gray-600'}>
+		<div className="flex flex-col items-center">
+			<div className="text-sm text-gray-600">
 				{`Oprettet ${created}`}
 			</div>
 			{createdAt !== updatedAt && (
-				<div className={'text-sm text-gray-600'}>
+				<div className="text-sm text-gray-600">
 					{`Opdateret ${updated}`}
 				</div>
 			)}

@@ -1,5 +1,5 @@
 import AsyncImage from '@/components/ui/AsyncImage'
-import { ProductImages } from '@/lib/ProductImages'
+import ProductImages from '@/lib/ProductImages'
 import Image from 'next/image'
 import { type ReactElement } from 'react'
 
@@ -24,7 +24,7 @@ const ImageList = ({
 			<div
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
 			>
-				<h3 className="text-gray-800 text-center text-2xl font-bold">Vælg Billede</h3>
+				<h3 className="text-gray-800 text-center text-2xl font-bold">{'Vælg Billede'}</h3>
 				<div className="flex flex-wrap justify-center gap-4">
 					{ProductImages.map((imageURL) => (
 						<button
@@ -51,7 +51,7 @@ const ImageList = ({
 						</button>
 					))}
 					<button
-						key={'none'}
+						key="none"
 						type="button"
 						className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 						onClick={() => {
@@ -65,8 +65,8 @@ const ImageList = ({
 							width={70}
 							height={70}
 							quality={30}
-							src={'/none.svg'}
-							alt={'none'}
+							src="/none.svg"
+							alt="none"
 							className="w-full h-full object-cover"
 						/>
 					</button>

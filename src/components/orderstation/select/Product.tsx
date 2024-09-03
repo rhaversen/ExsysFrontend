@@ -35,7 +35,7 @@ const Product = ({
 						</p>
 					</div>
 					<div className={`${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
-						{product.orderWindow.from.hour.toString().padStart(2, '0')}:{product.orderWindow.from.minute.toString().padStart(2, '0')} {' — '} {product.orderWindow.to.hour.toString().padStart(2, '0')}:{product.orderWindow.to.minute.toString().padStart(2, '0')}
+						{product.orderWindow.from.hour.toString().padStart(2, '0')}{':'}{product.orderWindow.from.minute.toString().padStart(2, '0')} {' — '} {product.orderWindow.to.hour.toString().padStart(2, '0')}{':'}{product.orderWindow.to.minute.toString().padStart(2, '0')}
 					</div>
 					<AsyncImage
 						className="w-64 h-64"

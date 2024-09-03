@@ -65,7 +65,7 @@ const OrderConfirmationWindow = ({
 						}
 						{orderStatus === 'error' &&
 							<Image
-								src="/orderStation/questionmark.svg"
+								src="/orderStation/question-mark.svg"
 								alt="Error"
 								width={200}
 								height={200}

@@ -283,8 +283,8 @@ const Kiosk = ({
 					/>
 				</div>
 				<Timestamps
-					createdAt={newKiosk.createdAt}
-					updatedAt={newKiosk.updatedAt}
+					createdAt={kiosk.createdAt}
+					updatedAt={kiosk.updatedAt}
 				/>
 				<EditingControls
 					isEditing={isEditing}

@@ -1,4 +1,4 @@
-export const ProductImages = [
+const ProductImages = [
 	'/productImages/cake.webp',
 	'/productImages/cheese.webp',
 	'/productImages/coffee.webp',
@@ -6,3 +6,5 @@ export const ProductImages = [
 	'/productImages/strawberry_jam.webp',
 	'/productImages/tea.webp'
 ] as string[]
+
+export default ProductImages
