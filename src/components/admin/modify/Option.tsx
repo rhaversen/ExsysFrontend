@@ -105,9 +105,9 @@ const Option = ({
 				<div className="flex flex-row items-center justify-center">
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
-							fieldName={'name'}
+							fieldName="name"
 							initialText={option.name}
-							placeholder={'Navn'}
+							placeholder="Navn"
 							italic={false}
 							minSize={5}
 							required={true}
@@ -126,9 +126,9 @@ const Option = ({
 					</div>
 					<div className="flex flex-row italic items-center text-gray-800">
 						<EditableField
-							fieldName={'price'}
+							fieldName="price"
 							initialText={option.price.toString()}
-							placeholder={'Pris'}
+							placeholder="Pris"
 							italic={true}
 							minSize={2}
 							validations={[{
