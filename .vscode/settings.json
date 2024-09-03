@@ -1,3 +1,7 @@
 {
-    "cSpell.language": "en-US,en,lorem,en-GB,da-DK,da"
+    "cSpell.language": "en-US,en,lorem,en-GB,da-DK,da",
+    "cSpell.words": [
+        "esnext",
+        "tailwindcss"
+    ]
 }

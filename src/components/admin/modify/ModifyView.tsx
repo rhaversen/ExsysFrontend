@@ -25,7 +25,7 @@ import {
 	type ReaderType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import { type sortConfig } from '@/types/frontendDataTypes'
+import type sortConfig from '@/lib/SortConfig'
 import React, { type ReactElement, useState } from 'react'
 import SortingControl from './SortingControl'
 
@@ -101,27 +101,37 @@ const ModifyView = ({
 	const [sortField, setSortField] = useState('name')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-	const sortByField = (items: any[]): any[] => {
-		// Helper function to resolve nested properties
-		const resolveProperty = (obj: any, path: string): any => {
-			return path.split('.').reduce((acc, part) => (acc !== null && acc !== undefined) ? acc[part] : undefined, obj)
+	const resolveProperty = (obj: any, path: string): any => {
+		return path.split('.').reduce((acc, part) => acc != null ? acc[part] : undefined, obj)
+	}
+
+	const compareStrings = (strA: string, strB: string): number => {
+		const lowerStrA = strA.toLowerCase()
+		const lowerStrB = strB.toLowerCase()
+		if (lowerStrA < lowerStrB) return sortDirection === 'asc' ? -1 : 1
+		if (lowerStrA > lowerStrB) return sortDirection === 'asc' ? 1 : -1
+		return 0
+	}
+
+	const compareValues = (valA: any, valB: any, sortDirection: string): number => {
+		if (typeof valA === 'string' && typeof valB === 'string') {
+			return compareStrings(valA, valB)
 		}
 
+		let result
+		if (sortDirection === 'asc') {
+			result = valA > valB ? 1 : -1
+		} else {
+			result = valA < valB ? 1 : -1
+		}
+		return result
+	}
+
+	const sortByField = (items: any[]): any[] => {
 		return items.slice().sort((a: any, b: any) => {
 			const valA = resolveProperty(a, sortField)
 			const valB = resolveProperty(b, sortField)
-
-			// If both values are strings, compare them case-insensitively
-			if (typeof valA === 'string' && typeof valB === 'string') {
-				const strA = valA.toLowerCase()
-				const strB = valB.toLowerCase()
-				if (strA < strB) return sortDirection === 'asc' ? -1 : 1
-				if (strA > strB) return sortDirection === 'asc' ? 1 : -1
-				return 0
-			}
-
-			// Otherwise, perform a basic comparison (works for numbers and dates)
-			return sortDirection === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1)
+			return compareValues(valA, valB, sortDirection)
 		})
 	}
 
@@ -141,7 +151,7 @@ const ModifyView = ({
 				/>
 			}
 			{selectedView === null &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Vælg en kategori</p>}
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>}
 			{selectedView === 'Produkter' &&
 				<ItemList
 					buttonText="Nyt Produkt"

@@ -26,7 +26,7 @@ const EditingControls = ({
 					type="button"
 					className="w-5 h-5 mx-2.5 place-self-center hover:bounceOrig"
 				>
-					<span className="sr-only">Delete</span>
+					<span className="sr-only">{'Delete'}</span>
 					<Image
 						width={20}
 						height={20}
@@ -40,7 +40,7 @@ const EditingControls = ({
 					type="button"
 					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:-rotate-180"
 				>
-					<span className="sr-only">Undo changes</span>
+					<span className="sr-only">{'Undo changes'}</span>
 					<Image
 						width={40}
 						height={40}
@@ -65,7 +65,7 @@ const EditingControls = ({
 						disabled={!formIsValid}
 						className={`w-full h-full place-self-center transition-transform duration-300 transform ${formIsValid ? 'hover:rotate-12 hover:scale-125' : 'scale-90'}`}
 					>
-						<span className="sr-only">Complete changes</span>
+						<span className="sr-only">{'Complete changes'}</span>
 						<Image
 							width={40}
 							height={40}
@@ -93,7 +93,7 @@ const EditingControls = ({
 					src="/admin/modify/pen.svg"
 					alt="Edit"
 				/>
-				<span className="sr-only">Edit</span>
+				<span className="sr-only">{'Edit'}</span>
 			</button>
 		)
 	}

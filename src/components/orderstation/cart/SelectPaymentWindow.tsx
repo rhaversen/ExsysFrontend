@@ -24,7 +24,7 @@ const SelectPaymentWindow = ({
 							{'Kort'}
 						</div>
 						<AsyncImage
-							src="/orderStation/creditcard.svg"
+							src="/orderStation/credit-card.svg"
 							alt="Kort"
 							className="w-48 h-48"
 							width={200}

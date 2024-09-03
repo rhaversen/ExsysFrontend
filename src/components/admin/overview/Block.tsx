@@ -111,7 +111,7 @@ const Block = ({
 
 				return (
 					<p key={name}>
-						{totalCount} x {name}{diffText}
+						{totalCount}{' '}&times;{' '}{name}{diffText}
 					</p>
 				)
 			})}
@@ -124,7 +124,7 @@ const Block = ({
 							patchOrders('confirmed')
 						}}
 					>
-						Marker som læst
+						{'Marker som læst'}
 					</button>
 				}
 				{orderStatus === 'confirmed' &&
@@ -135,7 +135,7 @@ const Block = ({
 							setShowConfirmDelivered(true)
 						}}
 					>
-						Marker som leveret
+						{'Marker som leveret'}
 					</button>
 				}
 			</div>
