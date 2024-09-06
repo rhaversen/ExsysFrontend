@@ -17,14 +17,11 @@ jobs:
             -   name: Build
                 run: npm run build
 
-            -   name: List contents of the directory
-                run: ls -alh .next
-
             -   name: Archive production artifacts
                 uses: actions/upload-artifact@v4
                 with:
                     name: .next
-                    path: .next
+                    path: ./.next
 
     test-lint:
         runs-on: ubuntu-latest
