@@ -150,6 +150,7 @@ const Kiosk = ({
 
 	const handleUndoEdit = useCallback((): void => {
 		setNewKiosk(kiosk)
+		setNewPassword('')
 		setIsEditing(false)
 	}, [kiosk])
 

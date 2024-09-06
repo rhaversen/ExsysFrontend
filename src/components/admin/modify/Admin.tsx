@@ -76,6 +76,7 @@ const Admin = ({
 
 	const handleUndoEdit = useCallback((): void => {
 		setNewAdmin(admin)
+		setNewPassword('')
 		setIsEditing(false)
 	}, [admin])
 
