@@ -1,15 +1,14 @@
-import ValidationErrorWindow from '@/components/ui/ValidationErrorWindow'
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 // Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[], required: boolean): { errors: string[], isValid: boolean } => {
+const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): { errors: string[], isValid: boolean } => {
 	const [errors, setErrors] = useState<string[]>([])
 
 	const validate = useCallback((): string[] => {
 		const newErrors: string[] = []
 		if (required && value.length === 0) {
-			newErrors.push('Dette felt er påkrævet')
+			newErrors.push(placeholder + ' er påkrævet')
 		}
 		validations.forEach(validation => {
 			if (!validation.validate(value)) {
@@ -17,7 +16,7 @@ const useValidation = (value: string, validations: Validation[], required: boole
 			}
 		})
 		return newErrors
-	}, [value, validations, required])
+	}, [value, validations, required, placeholder])
 
 	useEffect(() => {
 		const validationErrors = validate()
@@ -56,7 +55,7 @@ const EditableField = ({
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	// Use custom validation hook
-	const { errors, isValid } = useValidation(text, validations, required)
+	const { errors, isValid } = useValidation(text, validations, required, placeholder)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
