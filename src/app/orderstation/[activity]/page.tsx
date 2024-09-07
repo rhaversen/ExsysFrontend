@@ -177,7 +177,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		}
 	}, shouldFetchPaymentStatus ? 1000 : null)
 
-	const submitOrder = useCallback((type: 'Cash' | 'Card'): void => {
+	const submitOrder = useCallback((checkoutType: 'sumup' | 'cash'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
@@ -195,7 +195,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			activityId: params.activity,
 			products: productCart,
 			options: optionCart,
-			skipCheckout: type === 'Cash'
+			checkoutType
 		}
 
 		axios.post(`${API_URL}/v1/orders`, data, { withCredentials: true })
@@ -218,7 +218,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		if (hasReader) {
 			setIsSelectPaymentWindowVisible(true)
 		} else {
-			submitOrder('Cash')
+			submitOrder('sumup')
 		}
 	}, [hasReader, submitOrder])
 
