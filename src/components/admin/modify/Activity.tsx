@@ -140,10 +140,12 @@ const Activity = ({
 							value: room._id,
 							label: room.name
 						}))}
-						selectedValue={newActivity.roomId?._id ?? 'null-option'}
+						initialValue={newActivity.roomId?._id ?? 'null-option'}
 						onChange={handleRoomIdChange}
 						editable={isEditing}
+						fieldName='roomId'
 						allowNullOption={true}
+						onValidationChange={handleValidationChange}
 					/>
 				</div>
 				<Timestamps

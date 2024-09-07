@@ -183,12 +183,13 @@ const Kiosk = ({
 								value: reader._id,
 								label: reader.readerTag
 							}))}
-							selectedValue={kiosk.readerId ?? 'null-option'}
+							initialValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
 							editable={true}
 							fieldName="readerId"
 							placeholder="Vælg Kortlæser"
 							allowNullOption={true}
+							onValidationChange={handleValidationChange}
 						/>
 						{kiosk.activities.length > 0 &&
 							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>

@@ -244,10 +244,12 @@ const Kiosk = ({
 							value: reader._id,
 							label: reader.readerTag
 						}))}
-						selectedValue={newKiosk.readerId?._id ?? 'null-option'}
+						initialValue={newKiosk.readerId?._id ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
+						fieldName='readerId'
 						allowNullOption={true}
+						onValidationChange={handleValidationChange}
 					/>
 				</div>
 				{newKiosk.activities.length > 0 &&

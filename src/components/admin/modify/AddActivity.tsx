@@ -112,10 +112,12 @@ const AddActivity = ({
 								value: room._id,
 								label: room.name
 							}))}
-							selectedValue={activity.roomId ?? 'null-option'}
+							initialValue={activity.roomId ?? 'null-option'}
 							onChange={handleRoomIdChange}
 							placeholder="Vælg Spisested"
 							allowNullOption={true}
+							fieldName='roomId'
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>

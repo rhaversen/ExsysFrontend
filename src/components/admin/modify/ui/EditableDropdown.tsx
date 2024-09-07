@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import React, { useEffect, useState, type ReactElement } from 'react'
 
 interface Option {
 	value: string
@@ -7,7 +7,7 @@ interface Option {
 
 const Dropdown = ({
 	options,
-	selectedValue,
+	initialValue,
 	onChange,
 	title,
 	editable = true,
@@ -17,7 +17,7 @@ const Dropdown = ({
 	allowNullOption = false
 }: {
 	options: Option[]
-	selectedValue: string
+	initialValue?: string
 	onChange: (value: string) => void
 	title?: string
 	editable?: boolean
@@ -26,12 +26,34 @@ const Dropdown = ({
 	onValidationChange?: (fieldName: string, isValid: boolean) => void
 	allowNullOption?: boolean
 }): ReactElement => {
+	const [selectedValue, setSelectedValue] = useState<string>(initialValue ?? '')
+
 	const handleChange = (value: string): void => {
 		onChange(value)
+		setSelectedValue(value)
 		if (onValidationChange !== undefined && fieldName !== undefined) {
-			onValidationChange(fieldName, true)
+			if (value !== '') {
+				onValidationChange(fieldName, true)
+			} else {
+				onValidationChange(fieldName, false)
+			}
 		}
 	}
+
+	// Notify parent component when validation changes
+	useEffect(() => {
+		if (onValidationChange !== undefined && fieldName !== undefined) {
+			onValidationChange(fieldName, false)
+		}
+	}, [fieldName, onValidationChange])
+
+	// Reset text when no longer editable
+	useEffect(() => {
+		if (!editable) {
+			setSelectedValue(initialValue ?? '')
+		}
+	}, [editable, initialValue])
+
 
 	return (
 		<div className="font-bold pb-2 text-gray-800">
