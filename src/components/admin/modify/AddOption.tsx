@@ -106,12 +106,8 @@ const Option = ({
 									message: 'Navn skal være højst 50 tegn'
 								}]}
 								editable={true}
-								onChange={(v: string) => {
-									handleNameChange(v)
-								}}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onChange={handleNameChange}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="flex flex-row italic items-center text-gray-800">
@@ -129,12 +125,8 @@ const Option = ({
 									message: 'Prisen skal være positiv'
 								}]}
 								editable={true}
-								onChange={(v: string) => {
-									handlePriceChange(v)
-								}}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onChange={handlePriceChange}
+								onValidationChange={handleValidationChange}
 							/>
 							<div className="pl-1">
 								{' kr'}
@@ -146,9 +138,7 @@ const Option = ({
 						URL={option.imageURL}
 						editable={true}
 						edited={false}
-						onChange={(v: string) => {
-							handleImageChange(v)
-						}}
+						onChange={handleImageChange}
 					/>
 				</div>
 				<div className="flex flex-row justify-center gap-4 pt-5">

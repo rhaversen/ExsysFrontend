@@ -130,12 +130,8 @@ const Activity = ({
 								message: 'Navn kan kun have 50 tegn'
 							}]}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleNameChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleNameChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 					<p className="italic text-gray-500">{'Spisested'}</p>
@@ -144,10 +140,12 @@ const Activity = ({
 							value: room._id,
 							label: room.name
 						}))}
-						selectedValue={newActivity.roomId?._id ?? 'null-option'}
+						initialValue={newActivity.roomId?._id ?? 'null-option'}
 						onChange={handleRoomIdChange}
 						editable={isEditing}
+						fieldName="roomId"
 						allowNullOption={true}
+						onValidationChange={handleValidationChange}
 					/>
 				</div>
 				<Timestamps

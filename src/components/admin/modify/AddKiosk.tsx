@@ -78,17 +78,17 @@ const Kiosk = ({
 		})
 	}, [kiosk])
 
-	const handleAddActivity = useCallback((v: ActivityType['_id']): void => {
+	const handleAddActivity = useCallback((v: ActivityType): void => {
 		setKiosk({
 			...kiosk,
-			activities: [...kiosk.activities, v]
+			activities: [...kiosk.activities, v._id]
 		})
 	}, [kiosk])
 
-	const handleDeleteActivity = useCallback((v: ActivityType['_id']): void => {
+	const handleDeleteActivity = useCallback((v: ActivityType): void => {
 		setKiosk({
 			...kiosk,
-			activities: kiosk.activities.filter((activity) => activity !== v)
+			activities: kiosk.activities.filter((activity) => activity !== v._id)
 		})
 	}, [kiosk])
 
@@ -130,16 +130,12 @@ const Kiosk = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handleNameChange(v)
-								}}
+								onChange={handleNameChange}
 								validations={[{
 									validate: (v: string) => v.length <= 50,
 									message: 'Navn kan kun have 50 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="font-bold p-2 text-gray-800">
@@ -150,9 +146,7 @@ const Kiosk = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handlePasswordChange(v)
-								}}
+								onChange={handlePasswordChange}
 								validations={[{
 									validate: (v: string) => v.length >= 4,
 									message: 'Password skal mindst have 4 tegn'
@@ -161,9 +155,7 @@ const Kiosk = ({
 									validate: (v: string) => v.length <= 100,
 									message: 'Password kan kun have 100 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="font-bold p-2 text-gray-800">
@@ -174,9 +166,7 @@ const Kiosk = ({
 								minSize={15}
 								required={false}
 								editable={true}
-								onChange={(v: string) => {
-									handleKioskTagChange(v)
-								}}
+								onChange={handleKioskTagChange}
 								validations={[{
 									validate: (v: string) => v.length === 5 || v.length === 0,
 									message: 'Kiosk tag skal være præcis 5 tal eller tomt'
@@ -184,9 +174,7 @@ const Kiosk = ({
 									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
 									message: 'Kiosk tag må kun være tal'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<p className="italic text-gray-500">{'Kortlæser'}</p>
@@ -195,12 +183,13 @@ const Kiosk = ({
 								value: reader._id,
 								label: reader.readerTag
 							}))}
-							selectedValue={kiosk.readerId ?? 'null-option'}
+							initialValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
 							editable={true}
 							fieldName="readerId"
 							placeholder="Vælg Kortlæser"
 							allowNullOption={true}
+							onValidationChange={handleValidationChange}
 						/>
 						{kiosk.activities.length > 0 &&
 							<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
@@ -211,9 +200,7 @@ const Kiosk = ({
 						<Activities
 							selectedActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 							editable={true}
-							onDeleteActivity={(v: ActivityType) => {
-								handleDeleteActivity(v._id)
-							}}
+							onDeleteActivity={handleDeleteActivity}
 							showActivities={() => {
 								setShowActivities(true)
 							}}
@@ -223,12 +210,8 @@ const Kiosk = ({
 								kioskName={kiosk.name}
 								activities={activities}
 								kioskActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-								onAddActivity={(v: ActivityType) => {
-									handleAddActivity(v._id)
-								}}
-								onDeleteActivity={(v: ActivityType) => {
-									handleDeleteActivity(v._id)
-								}}
+								onAddActivity={handleAddActivity}
+								onDeleteActivity={handleDeleteActivity}
 								onClose={() => {
 									setShowActivities(false)
 								}}
