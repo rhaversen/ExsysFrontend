@@ -5,7 +5,7 @@ const SelectPaymentWindow = ({
 	onSubmit,
 	onCancel
 }: {
-	onSubmit: (type: 'sumup' | 'cash') => void
+	onSubmit: (type: 'sumUp' | 'cash') => void
 	onCancel: () => void
 }): ReactElement => {
 	return (
@@ -16,7 +16,7 @@ const SelectPaymentWindow = ({
 				</h2>
 				<div className="space-x-4 flex justify-center">
 					<button
-						onClick={() => { onSubmit('sumup') }}
+						onClick={() => { onSubmit('sumUp') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
 						type="button"
 					>
