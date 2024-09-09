@@ -7,6 +7,7 @@ import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
+	type PostOrderType,
 	type ActivityType,
 	type KioskTypeNonPopulated,
 	type OptionType,
@@ -177,7 +178,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		}
 	}, shouldFetchPaymentStatus ? 1000 : null)
 
-	const submitOrder = useCallback((type: 'Cash' | 'Card'): void => {
+	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
@@ -190,18 +191,18 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			quantity
 		}))
 
-		const data = {
+		const data: PostOrderType = {
 			kioskId,
 			activityId: params.activity,
 			products: productCart,
 			options: optionCart,
-			skipCheckout: type === 'Cash'
+			checkoutMethod
 		}
 
 		axios.post(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(res => {
 				setOrder(res.data as OrderType)
-				if (type === 'Card') {
+				if (checkoutMethod === 'sumUp') {
 					setShouldFetchPaymentStatus(true)
 				} else {
 					setOrderStatus('success')
@@ -218,7 +219,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		if (hasReader) {
 			setIsSelectPaymentWindowVisible(true)
 		} else {
-			submitOrder('Cash')
+			submitOrder('sumUp')
 		}
 	}, [hasReader, submitOrder])
 
@@ -282,8 +283,8 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 				{isSelectPaymentWindowVisible &&
 					<SelectPaymentWindow
 						onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
-						onSubmit={type => {
-							submitOrder(type)
+						onSubmit={checkoutMethod => {
+							submitOrder(checkoutMethod)
 							setIsOrderConfirmationVisible(true)
 							setIsSelectPaymentWindowVisible(false)
 						}}

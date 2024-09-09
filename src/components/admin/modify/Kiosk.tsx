@@ -150,6 +150,7 @@ const Kiosk = ({
 
 	const handleUndoEdit = useCallback((): void => {
 		setNewKiosk(kiosk)
+		setNewPassword('')
 		setIsEditing(false)
 	}, [kiosk])
 
@@ -186,12 +187,8 @@ const Kiosk = ({
 								message: 'Navn kan kun have 50 tegn'
 							}]}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleNameChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleNameChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 					<p className="italic text-gray-500">{'Tag - Brugernavn til kiosk login'}</p>
@@ -204,9 +201,7 @@ const Kiosk = ({
 							minSize={10}
 							required={true}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleKioskTagChange(v)
-							}}
+							onChange={handleKioskTagChange}
 							validations={[{
 								validate: (v: string) => v.length === 5,
 								message: 'Kiosk tag skal være præcis 5 tal'
@@ -214,9 +209,7 @@ const Kiosk = ({
 								validate: (v: string) => /^\d+$/.exec(v) !== null,
 								message: 'Kiosk tag må kun være tal'
 							}]}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 					{isEditing &&
@@ -239,12 +232,8 @@ const Kiosk = ({
 										message: 'Kodeord kan kun have 100 tegn'
 									}]}
 									editable={isEditing}
-									onChange={(v: string) => {
-										handlePasswordChange(v)
-									}}
-									onValidationChange={(fieldName: string, v: boolean) => {
-										handleValidationChange(fieldName, v)
-									}}
+									onChange={handlePasswordChange}
+									onValidationChange={handleValidationChange}
 								/>
 							</div>
 						</div>
@@ -255,10 +244,12 @@ const Kiosk = ({
 							value: reader._id,
 							label: reader.readerTag
 						}))}
-						selectedValue={newKiosk.readerId?._id ?? 'null-option'}
+						initialValue={newKiosk.readerId?._id ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
+						fieldName="readerId"
 						allowNullOption={true}
+						onValidationChange={handleValidationChange}
 					/>
 				</div>
 				{newKiosk.activities.length > 0 &&
@@ -274,9 +265,7 @@ const Kiosk = ({
 					<Activities
 						selectedActivities={newKiosk.activities}
 						editable={isEditing}
-						onDeleteActivity={(v: ActivityType) => {
-							handleDeleteActivity(v)
-						}}
+						onDeleteActivity={handleDeleteActivity}
 						showActivities={() => {
 							setShowActivities(true)
 						}}
@@ -311,12 +300,8 @@ const Kiosk = ({
 						kioskName={newKiosk.name}
 						activities={activities}
 						kioskActivities={newKiosk.activities}
-						onAddActivity={(v: ActivityType) => {
-							handleAddActivity(v)
-						}}
-						onDeleteActivity={(v: ActivityType) => {
-							handleDeleteActivity(v)
-						}}
+						onAddActivity={handleAddActivity}
+						onDeleteActivity={handleDeleteActivity}
 						onClose={() => {
 							setShowActivities(false)
 						}}

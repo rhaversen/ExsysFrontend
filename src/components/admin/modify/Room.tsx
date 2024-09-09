@@ -108,12 +108,8 @@ const Room = ({
 								message: 'Navn kan kun have 20 tegn'
 							}]}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleNameChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleNameChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 					<p className="italic text-gray-500">{'Beskrivelse'}</p>
@@ -130,12 +126,8 @@ const Room = ({
 								message: 'Beskrivelse kan kun have 20 tegn'
 							}]}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleDescriptionChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleDescriptionChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>

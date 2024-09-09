@@ -99,16 +99,12 @@ const AddActivity = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handleNameChange(v)
-								}}
+								onChange={handleNameChange}
 								validations={[{
 									validate: (v: string) => v.length <= 50,
 									message: 'Navn kan kun have 50 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<EditableDropdown
@@ -116,10 +112,12 @@ const AddActivity = ({
 								value: room._id,
 								label: room.name
 							}))}
-							selectedValue={activity.roomId ?? 'null-option'}
+							initialValue={activity.roomId ?? 'null-option'}
 							onChange={handleRoomIdChange}
 							placeholder="Vælg Spisested"
 							allowNullOption={true}
+							fieldName="roomId"
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>

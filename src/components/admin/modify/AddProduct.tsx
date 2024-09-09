@@ -199,12 +199,8 @@ const AddProduct = ({
 									message: 'Navn kan kun have 15 tegn'
 								}]}
 								editable={true}
-								onChange={(v: string) => {
-									handleNameChange(v)
-								}}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onChange={handleNameChange}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="flex flex-row italic items-center text-gray-800">
@@ -222,12 +218,8 @@ const AddProduct = ({
 									message: 'Pris skal være positiv'
 								}]}
 								editable={true}
-								onChange={(v: string) => {
-									handlePriceChange(v)
-								}}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onChange={handlePriceChange}
+								onValidationChange={handleValidationChange}
 							/>
 							<div className="pl-1">
 								{' kr'}
@@ -253,12 +245,8 @@ const AddProduct = ({
 								message: 'Time skal være mellem 0 og 24'
 							}]}
 							editable={true}
-							onChange={(v: string) => {
-								handleOrderWindowFromHourChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleOrderWindowFromHourChange}
+							onValidationChange={handleValidationChange}
 						/>
 						<div className="font-bold text-xl px-1">{':'}</div>
 						<EditableField
@@ -278,12 +266,8 @@ const AddProduct = ({
 								message: 'Minutter skal være mellem 0 og 60'
 							}]}
 							editable={true}
-							onChange={(v: string) => {
-								handleOrderWindowFromMinuteChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleOrderWindowFromMinuteChange}
+							onValidationChange={handleValidationChange}
 						/>
 						<div className="text-xl px-1">{'—'}</div>
 						<EditableField
@@ -304,12 +288,8 @@ const AddProduct = ({
 
 							}]}
 							editable={true}
-							onChange={(v: string) => {
-								handleOrderWindowToHourChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleOrderWindowToHourChange}
+							onValidationChange={handleValidationChange}
 						/>
 						<div className="font-bold text-xl px-1">{':'}</div>
 						<EditableField
@@ -329,12 +309,8 @@ const AddProduct = ({
 								message: 'Minutter skal være mellem 0 og 60'
 							}]}
 							editable={true}
-							onChange={(v: string) => {
-								handleOrderWindowToMinuteChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleOrderWindowToMinuteChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
@@ -342,9 +318,7 @@ const AddProduct = ({
 						URL={product.imageURL}
 						editable={true}
 						edited={false}
-						onChange={(v: string) => {
-							handleImageChange(v)
-						}}
+						onChange={handleImageChange}
 					/>
 					{product.options.length > 0 &&
 						<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
@@ -355,9 +329,7 @@ const AddProduct = ({
 					<Options
 						selectedOptions={options.filter((option) => product.options.includes(option._id))}
 						editable={true}
-						onDeleteOption={(v: OptionType) => {
-							handleDeleteOption(v)
-						}}
+						onDeleteOption={handleDeleteOption}
 						showOptions={() => {
 							setShowOptions(true)
 						}}
@@ -367,12 +339,8 @@ const AddProduct = ({
 							productName={product.name}
 							options={options}
 							productOptions={options.filter((option) => product.options.includes(option._id))}
-							onAddOption={(v: OptionType) => {
-								handleAddOption(v)
-							}}
-							onDeleteOption={(v: OptionType) => {
-								handleDeleteOption(v)
-							}}
+							onAddOption={handleAddOption}
+							onDeleteOption={handleDeleteOption}
 							onClose={() => {
 								setShowOptions(false)
 							}}
