@@ -143,7 +143,7 @@ const Activity = ({
 						initialValue={newActivity.roomId?._id ?? 'null-option'}
 						onChange={handleRoomIdChange}
 						editable={isEditing}
-						fieldName='roomId'
+						fieldName="roomId"
 						allowNullOption={true}
 						onValidationChange={handleValidationChange}
 					/>

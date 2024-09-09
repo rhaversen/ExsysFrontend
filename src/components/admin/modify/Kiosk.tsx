@@ -247,7 +247,7 @@ const Kiosk = ({
 						initialValue={newKiosk.readerId?._id ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						editable={isEditing}
-						fieldName='readerId'
+						fieldName="readerId"
 						allowNullOption={true}
 						onValidationChange={handleValidationChange}
 					/>

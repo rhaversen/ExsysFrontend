@@ -2,7 +2,10 @@ import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 // Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): { errors: string[], isValid: boolean } => {
+const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): {
+	errors: string[]
+	isValid: boolean
+} => {
 	const [errors, setErrors] = useState<string[]>([])
 
 	const validate = useCallback((): string[] => {
@@ -23,7 +26,10 @@ const useValidation = (value: string, validations: Validation[], required: boole
 		setErrors(validationErrors)
 	}, [validate])
 
-	return { errors, isValid: errors.length === 0 }
+	return {
+		errors,
+		isValid: errors.length === 0
+	}
 }
 
 const EditableField = ({
@@ -55,7 +61,10 @@ const EditableField = ({
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	// Use custom validation hook
-	const { errors, isValid } = useValidation(text, validations, required, placeholder)
+	const {
+		errors,
+		isValid
+	} = useValidation(text, validations, required, placeholder)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
@@ -100,11 +109,13 @@ const EditableField = ({
 				</p>
 			}
 			{errors.length > 0 &&
-				<div className="my-2 not-italic rounded-lg border-2 border-red-800 text-red-800 font-bold flex flex-row items-center">
-					<div className='w-6 h-6 m-1 border-2 text-sm border-red-800 rounded-full flex justify-center items-center'>
+				<div
+					className="my-2 not-italic rounded-lg border-2 border-red-800 text-red-800 font-bold flex flex-row items-center">
+					<div
+						className="w-6 h-6 m-1 border-2 text-sm border-red-800 rounded-full flex justify-center items-center">
 						{'!'}
 					</div>
-					<div className='flex flex-col mx-2'>
+					<div className="flex flex-col mx-2">
 						{errors.map((error, i) => (
 							<p key={i + error} className="text-sm">
 								{error}

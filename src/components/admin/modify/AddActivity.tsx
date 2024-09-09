@@ -116,7 +116,7 @@ const AddActivity = ({
 							onChange={handleRoomIdChange}
 							placeholder="Vælg Spisested"
 							allowNullOption={true}
-							fieldName='roomId'
+							fieldName="roomId"
 							onValidationChange={handleValidationChange}
 						/>
 					</div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type ReactElement, useCallback } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 interface Option {
 	value: string
