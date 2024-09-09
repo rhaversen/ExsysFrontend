@@ -16,6 +16,7 @@ import Product from '@/components/admin/modify/Product'
 import Reader from '@/components/admin/modify/Reader'
 import Room from '@/components/admin/modify/Room'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
+import type sortConfig from '@/lib/SortConfig'
 import {
 	type ActivityType,
 	type AdminType,
@@ -25,7 +26,6 @@ import {
 	type ReaderType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import type sortConfig from '@/lib/SortConfig'
 import React, { type ReactElement, useState } from 'react'
 import SortingControl from './SortingControl'
 

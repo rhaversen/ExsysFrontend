@@ -104,12 +104,8 @@ const Reader = ({
 								message: 'Kortlæser tag må kun være tal'
 							}]}
 							editable={isEditing}
-							onChange={(v: string) => {
-								handleReaderTagChange(v)
-							}}
-							onValidationChange={(fieldName: string, v: boolean) => {
-								handleValidationChange(fieldName, v)
-							}}
+							onChange={handleReaderTagChange}
+							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>

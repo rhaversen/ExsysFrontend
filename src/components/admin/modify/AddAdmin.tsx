@@ -91,16 +91,12 @@ const Admin = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handleNameChange(v)
-								}}
+								onChange={handleNameChange}
 								validations={[{
 									validate: (v: string) => v.length <= 50,
 									message: 'Navn kan kun have 50 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="font-bold p-2 text-gray-800">
@@ -111,9 +107,7 @@ const Admin = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handlePasswordChange(v)
-								}}
+								onChange={handlePasswordChange}
 								validations={[{
 									validate: (v: string) => v.length >= 4,
 									message: 'Password skal mindst have 4 tegn'
@@ -121,9 +115,7 @@ const Admin = ({
 									validate: (v: string) => v.length <= 100,
 									message: 'Password kan kun have 100 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 					</div>
