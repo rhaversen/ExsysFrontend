@@ -1,18 +1,35 @@
-import ValidationErrorWindow from '@/components/ui/ValidationErrorWindow'
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
-const validateField = (value: string, validations: Validation[], required: boolean = false): string[] => {
-	const errors: string[] = []
-	if (required && value.length === 0) {
-		errors.push('Dette felt er påkrævet')
-	}
-	validations.forEach(validation => {
-		if (!validation.validate(value)) {
-			errors.push(validation.message)
+// Separate validation logic into a hook
+const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): {
+	errors: string[]
+	isValid: boolean
+} => {
+	const [errors, setErrors] = useState<string[]>([])
+
+	const validate = useCallback((): string[] => {
+		const newErrors: string[] = []
+		if (required && value.length === 0) {
+			newErrors.push(placeholder + ' er påkrævet')
 		}
-	})
-	return errors
+		validations.forEach(validation => {
+			if (!validation.validate(value)) {
+				newErrors.push(validation.message)
+			}
+		})
+		return newErrors
+	}, [value, validations, required, placeholder])
+
+	useEffect(() => {
+		const validationErrors = validate()
+		setErrors(validationErrors)
+	}, [validate])
+
+	return {
+		errors,
+		isValid: errors.length === 0
+	}
 }
 
 const EditableField = ({
@@ -41,8 +58,13 @@ const EditableField = ({
 	onValidationChange: (fieldName: string, isValid: boolean) => void
 }): ReactElement => {
 	const [text, setText] = useState<string>(initialText)
-	const [errors, setErrors] = useState<string[]>([])
 	const inputRef = useRef<HTMLInputElement>(null)
+
+	// Use custom validation hook
+	const {
+		errors,
+		isValid
+	} = useValidation(text, validations, required, placeholder)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
@@ -51,10 +73,12 @@ const EditableField = ({
 		}
 		setText(newValue)
 		onChange(newValue)
-		const newErrors = validateField(newValue, validations, required)
-		setErrors(newErrors)
-		onValidationChange(fieldName, newErrors.length === 0)
-	}, [onChange, validations, required, fieldName, onValidationChange, upperCase])
+	}, [onChange, upperCase])
+
+	// Notify parent component when validation changes
+	useEffect(() => {
+		onValidationChange(fieldName, isValid)
+	}, [isValid, fieldName, onValidationChange])
 
 	// Reset text when no longer editable
 	useEffect(() => {
@@ -63,12 +87,8 @@ const EditableField = ({
 		}
 	}, [editable, initialText])
 
-	useEffect(() => {
-		setErrors(validateField(text, validations, required))
-	}, [text, validations, required])
-
 	return (
-		<div className="flex flex-row items-center">
+		<div className="flex flex-col items-center">
 			{editable &&
 				<input
 					ref={inputRef}
@@ -88,10 +108,21 @@ const EditableField = ({
 					{text}
 				</p>
 			}
-			{errors !== null &&
-				<ValidationErrorWindow
-					messages={errors}
-				/>
+			{errors.length > 0 &&
+				<div
+					className="my-2 not-italic rounded-lg border-2 border-red-800 text-red-800 font-bold flex flex-row items-center">
+					<div
+						className="w-6 h-6 m-1 border-2 text-sm border-red-800 rounded-full flex justify-center items-center">
+						{'!'}
+					</div>
+					<div className="flex flex-col mx-2">
+						{errors.map((error, i) => (
+							<p key={i + error} className="text-sm">
+								{error}
+							</p>
+						))}
+					</div>
+				</div>
 			}
 		</div>
 	)

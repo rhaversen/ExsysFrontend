@@ -92,16 +92,12 @@ const Reader = ({
 								minSize={10}
 								required={true}
 								editable={true}
-								onChange={(v: string) => {
-									handlePairingCodeChange(v)
-								}}
+								onChange={handlePairingCodeChange}
 								validations={[{
 									validate: (v: string) => v.length <= 10,
 									message: 'Kode kan kun have 10 tegn'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 						<div className="font-bold p-2 text-gray-800">
@@ -112,9 +108,7 @@ const Reader = ({
 								minSize={15}
 								required={false}
 								editable={true}
-								onChange={(v: string) => {
-									handleReaderTagChange(v)
-								}}
+								onChange={handleReaderTagChange}
 								validations={[{
 									validate: (v: string) => v.length === 5 || v.length === 0,
 									message: 'Kortlæser tag skal være præcis 5 tal eller tomt'
@@ -122,9 +116,7 @@ const Reader = ({
 									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
 									message: 'Kortlæser tag må kun være tal'
 								}]}
-								onValidationChange={(fieldName: string, v: boolean) => {
-									handleValidationChange(fieldName, v)
-								}}
+								onValidationChange={handleValidationChange}
 							/>
 						</div>
 					</div>
