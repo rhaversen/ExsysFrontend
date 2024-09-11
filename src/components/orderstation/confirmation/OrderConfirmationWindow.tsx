@@ -28,7 +28,7 @@ const OrderConfirmationWindow = ({
 				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-800"
 			>
 				<h2 className="text-2xl font-bold mb-4 text-center">
-					{orderStatus === 'awaitingPayment' && 'Afventer Betaling'}
+					{orderStatus === 'awaitingPayment' && 'Betal på skærmen'}
 					{orderStatus === 'success' && 'Tak For Din Bestilling'}
 					{orderStatus === 'error' && 'Der Skete En Fejl'}
 					{orderStatus === 'loading' && 'Sender Bestilling...'}
@@ -72,7 +72,12 @@ const OrderConfirmationWindow = ({
 							/>
 						}
 						{orderStatus === 'awaitingPayment' &&
-							<p>{'Betal på automaten'}</p>
+							<Image
+								src="/orderStation/arrow.svg"
+								alt="Awaiting Payment"
+								width={200}
+								height={200}
+							/>
 						}
 					</div>
 				</div>
