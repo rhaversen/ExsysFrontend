@@ -33,6 +33,7 @@ const useValidation = (value: string, validations: Validation[], required: boole
 }
 
 const EditableField = ({
+	pattern = '',
 	fieldName,
 	initialText = '',
 	placeholder,
@@ -45,6 +46,7 @@ const EditableField = ({
 	onChange,
 	onValidationChange
 }: {
+	pattern?: string
 	fieldName: string
 	initialText?: string
 	placeholder: string
@@ -91,6 +93,7 @@ const EditableField = ({
 		<div className="flex flex-col items-center">
 			{editable &&
 				<input
+					pattern={pattern}
 					ref={inputRef}
 					type="text"
 					value={text}
