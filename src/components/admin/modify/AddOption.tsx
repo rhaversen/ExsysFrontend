@@ -124,7 +124,6 @@ const Option = ({
 					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
 						URL={option.imageURL}
-						editable={true}
 						onChange={handleImageChange}
 					/>
 				</div>

@@ -4,12 +4,12 @@ import { type ReactElement } from 'react'
 
 const Activities = ({
 	selectedActivities,
-	editable,
+	editable = true,
 	onDeleteActivity,
 	showActivities
 }: {
 	selectedActivities: ActivityType[]
-	editable: boolean
+	editable?: boolean
 	onDeleteActivity: (v: ActivityType) => void
 	showActivities: () => void
 }): ReactElement => {

@@ -4,11 +4,11 @@ import React, { type ReactElement, useState } from 'react'
 
 const EditableImage = ({
 	URL,
-	editable,
+	editable = true,
 	onChange
 }: {
 	URL: string | undefined
-	editable: boolean
+	editable?: boolean
 	onChange: (v: string) => void
 }): ReactElement => {
 	const [showImageList, setShowImageList] = useState(false)

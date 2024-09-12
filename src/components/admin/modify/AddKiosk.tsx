@@ -184,7 +184,6 @@ const Kiosk = ({
 						}
 						<Activities
 							selectedActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-							editable={true}
 							onDeleteActivity={handleDeleteActivity}
 							showActivities={() => {
 								setShowActivities(true)

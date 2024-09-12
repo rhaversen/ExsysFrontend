@@ -267,7 +267,6 @@ const AddProduct = ({
 					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 					<EditableImage
 						URL={product.imageURL}
-						editable={true}
 						onChange={handleImageChange}
 					/>
 					{product.options.length > 0 &&
@@ -278,7 +277,6 @@ const AddProduct = ({
 					}
 					<Options
 						selectedOptions={options.filter((option) => product.options.includes(option._id))}
-						editable={true}
 						onDeleteOption={handleDeleteOption}
 						showOptions={() => {
 							setShowOptions(true)
