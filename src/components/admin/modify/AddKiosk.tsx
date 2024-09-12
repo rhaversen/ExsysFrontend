@@ -8,11 +8,13 @@ import Activities from './kioskActivities/Activities'
 import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
+	kiosks,
 	activities,
 	readers,
 	onKioskPosted,
 	onClose
 }: {
+	kiosks: KioskType[]
 	activities: ActivityType[]
 	readers: ReaderType[]
 	onKioskPosted: (kiosk: KioskType) => void
@@ -160,6 +162,10 @@ const Kiosk = ({
 								onChange={handleKioskTagChange}
 								minLength={5}
 								maxLength={5}
+								validations={[{
+									validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
+									message: 'Kortlæser tag er allerede i brug'
+								}]}
 								type="number"
 								onValidationChange={handleValidationChange}
 							/>

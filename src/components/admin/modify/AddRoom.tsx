@@ -5,9 +5,11 @@ import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Room = ({
+	rooms,
 	onRoomPosted,
 	onClose
 }: {
+	rooms: RoomType[]
 	onRoomPosted: (room: RoomType) => void
 	onClose: () => void
 }): ReactElement => {
@@ -93,6 +95,10 @@ const Room = ({
 								editable={true}
 								onChange={handleNameChange}
 								maxLength={50}
+								validations={[{
+									validate: (v: string) => !rooms.some((room) => room.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>

@@ -5,9 +5,11 @@ import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Reader = ({
+	readers,
 	onReaderPosted,
 	onClose
 }: {
+	readers: ReaderType[]
 	onReaderPosted: (reader: ReaderType) => void
 	onClose: () => void
 }): ReactElement => {
@@ -108,6 +110,10 @@ const Reader = ({
 								onChange={handleReaderTagChange}
 								minLength={5}
 								maxLength={5}
+								validations={[{
+									validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
+									message: 'Kortlæser tag er allerede i brug'
+								}]}
 								type="number"
 								onValidationChange={handleValidationChange}
 							/>

@@ -208,6 +208,7 @@ const ModifyView = ({
 							key={room._id}
 						>
 							<Room
+								rooms={rooms}
 								room={room}
 								onRoomPatched={onUpdatedRoom}
 								onRoomDeleted={onDeletedRoom}
@@ -251,6 +252,7 @@ const ModifyView = ({
 							key={kiosk._id}
 						>
 							<Kiosk
+								kiosks={kiosks}
 								kiosk={kiosk}
 								activities={activities}
 								readers={readers}
@@ -274,6 +276,7 @@ const ModifyView = ({
 							key={admin._id}
 						>
 							<Admin
+								admins={admins}
 								admin={admin}
 								onAdminPatched={onUpdatedAdmin}
 								onAdminDeleted={onDeletedAdmin}
@@ -295,6 +298,7 @@ const ModifyView = ({
 							key={reader._id}
 						>
 							<Reader
+								readers={readers}
 								reader={reader}
 								onReaderPatched={onUpdatedReader}
 								onReaderDeleted={onDeletedReader}
@@ -322,6 +326,7 @@ const ModifyView = ({
 			}
 			{showAddRoom &&
 				<AddRoom
+					rooms={rooms}
 					onRoomPosted={onAddedRoom}
 					onClose={() => {
 						setShowAddRoom(false)
@@ -339,6 +344,7 @@ const ModifyView = ({
 			}
 			{showAddKiosk &&
 				<AddKiosk
+					kiosks={kiosks}
 					activities={activities}
 					readers={readers}
 					onKioskPosted={onAddedKiosk}
@@ -349,6 +355,7 @@ const ModifyView = ({
 			}
 			{showAddAdmin &&
 				<AddAdmin
+					admins={admins}
 					onAdminPosted={onAddedAdmin}
 					onClose={() => {
 						setShowAddAdmin(false)
@@ -357,6 +364,7 @@ const ModifyView = ({
 			}
 			{showAddReader &&
 				<AddReader
+					readers={readers}
 					onReaderPosted={onAddedReader}
 					onClose={() => {
 						setShowAddReader(false)

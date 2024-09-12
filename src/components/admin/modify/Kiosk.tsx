@@ -11,12 +11,14 @@ import EditableDropdown from './ui/EditableDropdown'
 import Timestamps from './ui/Timestamps'
 
 const Kiosk = ({
+	kiosks,
 	kiosk,
 	activities,
 	readers,
 	onKioskPatched,
 	onKioskDeleted
 }: {
+	kiosks: KioskType[]
 	kiosk: KioskType
 	activities: ActivityType[]
 	readers: ReaderType[]
@@ -202,6 +204,10 @@ const Kiosk = ({
 							minLength={5}
 							maxLength={5}
 							type="number"
+							validations={[{
+								validate: (v: string) => !kiosks.some((k) => k.kioskTag === v && k._id !== newKiosk._id),
+								message: 'Kiosk tag er allerede i brug'
+							}]}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>

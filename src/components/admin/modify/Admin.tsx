@@ -8,10 +8,12 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Timestamps from './ui/Timestamps'
 
 const Admin = ({
+	admins,
 	admin,
 	onAdminPatched,
 	onAdminDeleted
 }: {
+	admins: AdminType[]
 	admin: AdminType
 	onAdminPatched: (admin: AdminType) => void
 	onAdminDeleted: (id: AdminType['_id']) => void
@@ -107,6 +109,10 @@ const Admin = ({
 							minSize={10}
 							required={true}
 							maxLength={50}
+							validations={[{
+								validate: (v: string) => !admins.some((a) => a.name === v && a._id !== newAdmin._id),
+								message: 'Navn er allerede i brug'
+							}]}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}

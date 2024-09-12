@@ -8,10 +8,12 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Timestamps from './ui/Timestamps'
 
 const Room = ({
+	rooms,
 	room,
 	onRoomPatched,
 	onRoomDeleted
 }: {
+	rooms: RoomType[]
 	room: RoomType
 	onRoomPatched: (room: RoomType) => void
 	onRoomDeleted: (id: RoomType['_id']) => void
@@ -104,6 +106,10 @@ const Room = ({
 							minSize={10}
 							required={true}
 							maxLength={20}
+							validations={[{
+								validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
+								message: 'Navn er allerede i brug'
+							}]}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}

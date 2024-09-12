@@ -5,9 +5,11 @@ import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Admin = ({
+	admins,
 	onAdminPosted,
 	onClose
 }: {
+	admins: AdminType[]
 	onAdminPosted: (admin: AdminType) => void
 	onClose: () => void
 }): ReactElement => {
@@ -93,6 +95,10 @@ const Admin = ({
 								editable={true}
 								onChange={handleNameChange}
 								maxLength={50}
+								validations={[{
+									validate: (v: string) => !admins.some((a) => a.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
