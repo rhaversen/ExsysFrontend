@@ -157,7 +157,6 @@ const Kiosk = ({
 								placeholder="Tag (Automatisk)"
 								italic={false}
 								minSize={15}
-								required={false}
 								editable={true}
 								onChange={handleKioskTagChange}
 								minLength={5}

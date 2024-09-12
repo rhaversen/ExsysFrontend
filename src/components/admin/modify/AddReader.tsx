@@ -105,7 +105,6 @@ const Reader = ({
 								placeholder="Tag (Automatisk)"
 								italic={false}
 								minSize={15}
-								required={false}
 								editable={true}
 								onChange={handleReaderTagChange}
 								minLength={5}

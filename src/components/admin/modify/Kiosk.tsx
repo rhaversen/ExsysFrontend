@@ -221,7 +221,6 @@ const Kiosk = ({
 									placeholder="Nyt Kodeord"
 									italic={false}
 									minSize={10}
-									required={false}
 									minLength={4}
 									maxLength={100}
 									editable={isEditing}
