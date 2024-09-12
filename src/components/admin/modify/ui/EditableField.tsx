@@ -33,7 +33,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 }
 
 const EditableField = ({
-	pattern = '',
+	type = 'text',
 	fieldName,
 	initialText = '',
 	placeholder,
@@ -46,7 +46,7 @@ const EditableField = ({
 	onChange,
 	onValidationChange
 }: {
-	pattern?: string
+	type?: 'number' | 'text'
 	fieldName: string
 	initialText?: string
 	placeholder: string
@@ -70,12 +70,20 @@ const EditableField = ({
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
+		let isNumberType = type === 'number'
+		let isInvalidNumber = isNumberType && (newValue !== '' && isNaN(Number(newValue)))
+
+		let allowChange = !isInvalidNumber
+
 		if (upperCase) {
 			newValue = newValue.toUpperCase()
 		}
-		setText(newValue)
-		onChange(newValue)
-	}, [onChange, upperCase])
+
+		if (allowChange) {
+			setText(newValue)
+			onChange(newValue)
+		}
+	}, [type, onChange, upperCase])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
@@ -93,7 +101,7 @@ const EditableField = ({
 		<div className="flex flex-col items-center">
 			{editable &&
 				<input
-					pattern={pattern}
+					pattern={type === 'number' ? '[0-9]*' : undefined}
 					ref={inputRef}
 					type="text"
 					value={text}
