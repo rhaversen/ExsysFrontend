@@ -103,10 +103,7 @@ const Room = ({
 							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 20,
-								message: 'Navn kan kun have 20 tegn'
-							}]}
+							maxLength={20}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -121,10 +118,7 @@ const Room = ({
 							italic={true}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 20,
-								message: 'Beskrivelse kan kun have 20 tegn'
-							}]}
+							maxLength={20}
 							editable={isEditing}
 							onChange={handleDescriptionChange}
 							onValidationChange={handleValidationChange}

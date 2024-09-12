@@ -92,10 +92,7 @@ const Room = ({
 								required={true}
 								editable={true}
 								onChange={handleNameChange}
-								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Navn kan kun have 50 tegn'
-								}]}
+								maxLength={50}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
@@ -108,10 +105,7 @@ const Room = ({
 								required={true}
 								editable={true}
 								onChange={handleDescriptionChange}
-								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Beskrivelse kan kun have 50 tegn'
-								}]}
+								maxLength={50}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>

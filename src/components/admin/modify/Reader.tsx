@@ -96,13 +96,9 @@ const Reader = ({
 							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length === 5,
-								message: 'Kortlæser tag skal være præcis 5 tal'
-							}, {
-								validate: (v: string) => /^\d+$/.exec(v) !== null,
-								message: 'Kortlæser tag må kun være tal'
-							}]}
+							minLength={5}
+							maxLength={5}
+							type="number"
 							editable={isEditing}
 							onChange={handleReaderTagChange}
 							onValidationChange={handleValidationChange}

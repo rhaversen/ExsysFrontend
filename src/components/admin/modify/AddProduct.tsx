@@ -194,10 +194,7 @@ const AddProduct = ({
 								italic={false}
 								minSize={5}
 								required={true}
-								validations={[{
-									validate: (v: string) => v.length <= 15,
-									message: 'Navn kan kun have 15 tegn'
-								}]}
+								maxLength={15}
 								editable={true}
 								onChange={handleNameChange}
 								onValidationChange={handleValidationChange}
@@ -210,13 +207,7 @@ const AddProduct = ({
 								italic={true}
 								required={true}
 								minSize={2}
-								validations={[{
-									validate: (v: string) => !isNaN(Number(v)),
-									message: 'Pris skal være et tal'
-								}, {
-									validate: (v: string) => Number(v) >= 0,
-									message: 'Pris skal være positiv'
-								}]}
+								type="number"
 								editable={true}
 								onChange={handlePriceChange}
 								onValidationChange={handleValidationChange}
@@ -234,16 +225,9 @@ const AddProduct = ({
 							placeholder="Time"
 							italic={false}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Time skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 24)
-								},
-								message: 'Time skal være mellem 0 og 24'
-							}]}
+							type="number"
+							maxValue={23}
+							maxLength={2}
 							editable={true}
 							onChange={handleOrderWindowFromHourChange}
 							onValidationChange={handleValidationChange}
@@ -255,16 +239,9 @@ const AddProduct = ({
 							placeholder="Minut"
 							italic={false}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Minutter skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 60)
-								},
-								message: 'Minutter skal være mellem 0 og 60'
-							}]}
+							type="number"
+							maxValue={59}
+							maxLength={2}
 							editable={true}
 							onChange={handleOrderWindowFromMinuteChange}
 							onValidationChange={handleValidationChange}
@@ -276,17 +253,9 @@ const AddProduct = ({
 							placeholder="Time"
 							italic={false}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Time skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 24)
-								},
-								message: 'Time skal være mellem 0 og 24'
-
-							}]}
+							type="number"
+							maxValue={23}
+							maxLength={2}
 							editable={true}
 							onChange={handleOrderWindowToHourChange}
 							onValidationChange={handleValidationChange}
@@ -298,16 +267,9 @@ const AddProduct = ({
 							placeholder="Minut"
 							italic={false}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Minutter skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 60)
-								},
-								message: 'Minutter skal være mellem 0 og 60'
-							}]}
+							type="number"
+							maxValue={59}
+							maxLength={2}
 							editable={true}
 							onChange={handleOrderWindowToMinuteChange}
 							onValidationChange={handleValidationChange}

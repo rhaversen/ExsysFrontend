@@ -182,10 +182,7 @@ const Kiosk = ({
 							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 50,
-								message: 'Navn kan kun have 50 tegn'
-							}]}
+							maxLength={50}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -202,13 +199,9 @@ const Kiosk = ({
 							required={true}
 							editable={isEditing}
 							onChange={handleKioskTagChange}
-							validations={[{
-								validate: (v: string) => v.length === 5,
-								message: 'Kiosk tag skal være præcis 5 tal'
-							}, {
-								validate: (v: string) => /^\d+$/.exec(v) !== null,
-								message: 'Kiosk tag må kun være tal'
-							}]}
+							minLength={5}
+							maxLength={5}
+							type="number"
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -223,14 +216,8 @@ const Kiosk = ({
 									italic={false}
 									minSize={10}
 									required={false}
-									validations={[{
-										validate: (v: string) => v.length >= 4 || v.length === 0,
-										message: 'Kodeord skal mindst have 4 tegn'
-									},
-									{
-										validate: (v: string) => v.length <= 100,
-										message: 'Kodeord kan kun have 100 tegn'
-									}]}
+									minLength={4}
+									maxLength={100}
 									editable={isEditing}
 									onChange={handlePasswordChange}
 									onValidationChange={handleValidationChange}

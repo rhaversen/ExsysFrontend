@@ -93,10 +93,7 @@ const Reader = ({
 								required={true}
 								editable={true}
 								onChange={handlePairingCodeChange}
-								validations={[{
-									validate: (v: string) => v.length <= 10,
-									message: 'Kode kan kun have 10 tegn'
-								}]}
+								maxLength={10}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
@@ -109,13 +106,9 @@ const Reader = ({
 								required={false}
 								editable={true}
 								onChange={handleReaderTagChange}
-								validations={[{
-									validate: (v: string) => v.length === 5 || v.length === 0,
-									message: 'Kortlæser tag skal være præcis 5 tal eller tomt'
-								}, {
-									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
-									message: 'Kortlæser tag må kun være tal'
-								}]}
+								minLength={5}
+								maxLength={5}
+								type="number"
 								onValidationChange={handleValidationChange}
 							/>
 						</div>

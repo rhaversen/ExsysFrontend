@@ -92,10 +92,7 @@ const Admin = ({
 								required={true}
 								editable={true}
 								onChange={handleNameChange}
-								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Navn kan kun have 50 tegn'
-								}]}
+								maxLength={50}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
@@ -108,13 +105,8 @@ const Admin = ({
 								required={true}
 								editable={true}
 								onChange={handlePasswordChange}
-								validations={[{
-									validate: (v: string) => v.length >= 4,
-									message: 'Password skal mindst have 4 tegn'
-								}, {
-									validate: (v: string) => v.length <= 100,
-									message: 'Password kan kun have 100 tegn'
-								}]}
+								maxLength={100}
+								minLength={4}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>

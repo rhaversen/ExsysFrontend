@@ -218,10 +218,7 @@ const Product = ({
 							italic={false}
 							minSize={5}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 15,
-								message: 'Navn kan kun have 15 tegn'
-							}]}
+							maxLength={15}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -235,13 +232,7 @@ const Product = ({
 							italic={true}
 							minSize={2}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Pris skal være et tal'
-							}, {
-								validate: (v: string) => Number(v) >= 0,
-								message: 'Pris skal være positiv'
-							}]}
+							type="number"
 							editable={isEditing}
 							onChange={handlePriceChange}
 							onValidationChange={handleValidationChange}
@@ -258,10 +249,9 @@ const Product = ({
 						placeholder="Time"
 						italic={false}
 						required={true}
-						validations={[{
-							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
-							message: 'Time skal være mellem 0 og 24'
-						}]}
+						type="number"
+						maxValue={23}
+						maxLength={2}
 						editable={isEditing}
 						onChange={handleOrderWindowFromHourChange}
 						onValidationChange={handleValidationChange}
@@ -273,10 +263,9 @@ const Product = ({
 						placeholder="Minut"
 						italic={false}
 						required={true}
-						validations={[{
-							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
-							message: 'Minutter skal være mellem 0 og 60'
-						}]}
+						type="number"
+						maxValue={59}
+						maxLength={2}
 						editable={isEditing}
 						onChange={handleOrderWindowFromMinuteChange}
 						onValidationChange={handleValidationChange}
@@ -290,10 +279,9 @@ const Product = ({
 						placeholder="Time"
 						italic={false}
 						required={true}
-						validations={[{
-							validate: (v: string) => Number(v) >= 0 && Number(v) < 24,
-							message: 'Time skal være mellem 0 og 24'
-						}]}
+						type="number"
+						maxValue={23}
+						maxLength={2}
 						editable={isEditing}
 						onChange={handleOrderWindowToHourChange}
 						onValidationChange={handleValidationChange}
@@ -305,10 +293,9 @@ const Product = ({
 						placeholder="Minut"
 						italic={false}
 						required={true}
-						validations={[{
-							validate: (v: string) => Number(v) >= 0 && Number(v) < 60,
-							message: 'Minutter skal være mellem 0 og 60'
-						}]}
+						type="number"
+						maxValue={59}
+						maxLength={2}
 						editable={isEditing}
 						onChange={handleOrderWindowToMinuteChange}
 						onValidationChange={handleValidationChange}

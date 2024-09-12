@@ -101,10 +101,7 @@ const Option = ({
 								italic={false}
 								required={true}
 								minSize={5}
-								validations={[{
-									validate: (v) => v.length <= 50,
-									message: 'Navn skal være højst 50 tegn'
-								}]}
+								maxLength={50}
 								editable={true}
 								onChange={handleNameChange}
 								onValidationChange={handleValidationChange}
@@ -117,13 +114,7 @@ const Option = ({
 								italic={true}
 								required={true}
 								minSize={2}
-								validations={[{
-									validate: (v) => !isNaN(Number(v)),
-									message: 'Prisen skal være et tal'
-								}, {
-									validate: (v) => Number(v) >= 0,
-									message: 'Prisen skal være positiv'
-								}]}
+								type="number"
 								editable={true}
 								onChange={handlePriceChange}
 								onValidationChange={handleValidationChange}

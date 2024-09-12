@@ -106,10 +106,7 @@ const Admin = ({
 							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 50,
-								message: 'Navn kan kun have 50 tegn'
-							}]}
+							maxLength={50}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -126,14 +123,8 @@ const Admin = ({
 									italic={false}
 									minSize={10}
 									required={false}
-									validations={[{
-										validate: (v: string) => v.length >= 4 || v.length === 0,
-										message: 'Kodeord skal mindst have 4 tegn'
-									},
-									{
-										validate: (v: string) => v.length <= 100,
-										message: 'Kodeord kan kun have 100 tegn'
-									}]}
+									minLength={4}
+									maxLength={100}
 									editable={isEditing}
 									onChange={handlePasswordChange}
 									onValidationChange={handleValidationChange}

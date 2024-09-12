@@ -125,10 +125,7 @@ const Activity = ({
 							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 50,
-								message: 'Navn kan kun have 50 tegn'
-							}]}
+							maxLength={50}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}

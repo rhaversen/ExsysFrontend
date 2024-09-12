@@ -131,10 +131,7 @@ const Kiosk = ({
 								required={true}
 								editable={true}
 								onChange={handleNameChange}
-								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Navn kan kun have 50 tegn'
-								}]}
+								maxLength={50}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
@@ -147,14 +144,8 @@ const Kiosk = ({
 								required={true}
 								editable={true}
 								onChange={handlePasswordChange}
-								validations={[{
-									validate: (v: string) => v.length >= 4,
-									message: 'Password skal mindst have 4 tegn'
-								},
-								{
-									validate: (v: string) => v.length <= 100,
-									message: 'Password kan kun have 100 tegn'
-								}]}
+								minLength={4}
+								maxLength={100}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
@@ -167,13 +158,9 @@ const Kiosk = ({
 								required={false}
 								editable={true}
 								onChange={handleKioskTagChange}
-								validations={[{
-									validate: (v: string) => v.length === 5 || v.length === 0,
-									message: 'Kiosk tag skal være præcis 5 tal eller tomt'
-								}, {
-									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
-									message: 'Kiosk tag må kun være tal'
-								}]}
+								minLength={5}
+								maxLength={5}
+								type="number"
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
