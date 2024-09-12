@@ -124,6 +124,7 @@ const Option = ({
 							placeholder="Pris"
 							italic={true}
 							minSize={2}
+							required={true}
 							type="number"
 							editable={isEditing}
 							onChange={handlePriceChange}
