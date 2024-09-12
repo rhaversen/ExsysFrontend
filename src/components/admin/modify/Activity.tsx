@@ -122,7 +122,6 @@ const Activity = ({
 							fieldName="name"
 							initialText={activity.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={10}
 							required={true}
 							maxLength={50}

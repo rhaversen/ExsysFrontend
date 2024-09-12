@@ -102,7 +102,6 @@ const Room = ({
 							fieldName="name"
 							initialText={room.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={10}
 							required={true}
 							maxLength={20}

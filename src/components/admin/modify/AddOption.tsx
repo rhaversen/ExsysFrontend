@@ -98,11 +98,9 @@ const Option = ({
 							<EditableField
 								fieldName="name"
 								placeholder="Navn"
-								italic={false}
 								required={true}
 								minSize={5}
 								maxLength={50}
-								editable={true}
 								onChange={handleNameChange}
 								onValidationChange={handleValidationChange}
 							/>
@@ -115,7 +113,6 @@ const Option = ({
 								required={true}
 								minSize={2}
 								type="number"
-								editable={true}
 								onChange={handlePriceChange}
 								onValidationChange={handleValidationChange}
 							/>

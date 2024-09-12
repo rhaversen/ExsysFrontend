@@ -108,7 +108,6 @@ const Option = ({
 							fieldName="name"
 							initialText={option.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={5}
 							required={true}
 							maxLength={20}

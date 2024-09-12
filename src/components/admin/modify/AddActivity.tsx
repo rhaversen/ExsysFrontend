@@ -95,10 +95,8 @@ const AddActivity = ({
 							<EditableField
 								fieldName="name"
 								placeholder="Navn"
-								italic={false}
 								minSize={10}
 								required={true}
-								editable={true}
 								onChange={handleNameChange}
 								maxLength={50}
 								onValidationChange={handleValidationChange}

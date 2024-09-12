@@ -89,10 +89,8 @@ const Admin = ({
 							<EditableField
 								fieldName="name"
 								placeholder="Navn"
-								italic={false}
 								minSize={10}
 								required={true}
-								editable={true}
 								onChange={handleNameChange}
 								maxLength={50}
 								validations={[{
@@ -106,10 +104,8 @@ const Admin = ({
 							<EditableField
 								fieldName="password"
 								placeholder="Kodeord"
-								italic={false}
 								minSize={10}
 								required={true}
-								editable={true}
 								onChange={handlePasswordChange}
 								maxLength={100}
 								minLength={4}

@@ -45,8 +45,8 @@ const EditableField = ({
 	fieldName,
 	initialText = '',
 	placeholder,
-	italic,
-	editable,
+	italic = false,
+	editable = true,
 	validations,
 	required = false,
 	minSize = 1,
@@ -61,8 +61,8 @@ const EditableField = ({
 	fieldName: string
 	initialText?: string
 	placeholder: string
-	italic: boolean
-	editable: boolean
+	italic?: boolean
+	editable?: boolean
 	validations?: Validation[]
 	required?: boolean
 	minSize?: number

@@ -128,10 +128,8 @@ const Kiosk = ({
 							<EditableField
 								fieldName="name"
 								placeholder="Navn"
-								italic={false}
 								minSize={10}
 								required={true}
-								editable={true}
 								onChange={handleNameChange}
 								maxLength={50}
 								onValidationChange={handleValidationChange}
@@ -141,10 +139,8 @@ const Kiosk = ({
 							<EditableField
 								fieldName="password"
 								placeholder="Password"
-								italic={false}
 								minSize={10}
 								required={true}
-								editable={true}
 								onChange={handlePasswordChange}
 								minLength={4}
 								maxLength={100}
@@ -155,9 +151,7 @@ const Kiosk = ({
 							<EditableField
 								fieldName="tag"
 								placeholder="Tag (Automatisk)"
-								italic={false}
 								minSize={15}
-								editable={true}
 								onChange={handleKioskTagChange}
 								minLength={5}
 								maxLength={5}
@@ -177,7 +171,6 @@ const Kiosk = ({
 							}))}
 							initialValue={kiosk.readerId ?? 'null-option'}
 							onChange={handleReaderIdChange}
-							editable={true}
 							fieldName="readerId"
 							placeholder="Vælg Kortlæser"
 							allowNullOption={true}

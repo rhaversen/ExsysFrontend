@@ -191,11 +191,9 @@ const AddProduct = ({
 							<EditableField
 								fieldName="name"
 								placeholder="Navn"
-								italic={false}
 								minSize={5}
 								required={true}
 								maxLength={15}
-								editable={true}
 								onChange={handleNameChange}
 								onValidationChange={handleValidationChange}
 							/>
@@ -208,7 +206,6 @@ const AddProduct = ({
 								required={true}
 								minSize={2}
 								type="number"
-								editable={true}
 								onChange={handlePriceChange}
 								onValidationChange={handleValidationChange}
 							/>
@@ -223,12 +220,10 @@ const AddProduct = ({
 							fieldName="fromHour"
 							initialText={product.orderWindow.from.hour.toString()}
 							placeholder="Time"
-							italic={false}
 							required={true}
 							type="number"
 							maxValue={23}
 							maxLength={2}
-							editable={true}
 							onChange={handleOrderWindowFromHourChange}
 							onValidationChange={handleValidationChange}
 						/>
@@ -237,12 +232,10 @@ const AddProduct = ({
 							fieldName="fromMinute"
 							initialText={product.orderWindow.from.minute.toString()}
 							placeholder="Minut"
-							italic={false}
 							required={true}
 							type="number"
 							maxValue={59}
 							maxLength={2}
-							editable={true}
 							onChange={handleOrderWindowFromMinuteChange}
 							onValidationChange={handleValidationChange}
 						/>
@@ -251,12 +244,10 @@ const AddProduct = ({
 							fieldName="toHour"
 							initialText={product.orderWindow.to.hour.toString()}
 							placeholder="Time"
-							italic={false}
 							required={true}
 							type="number"
 							maxValue={23}
 							maxLength={2}
-							editable={true}
 							onChange={handleOrderWindowToHourChange}
 							onValidationChange={handleValidationChange}
 						/>
@@ -265,12 +256,10 @@ const AddProduct = ({
 							fieldName="toMinute"
 							initialText={product.orderWindow.to.minute.toString()}
 							placeholder="Minut"
-							italic={false}
 							required={true}
 							type="number"
 							maxValue={59}
 							maxLength={2}
-							editable={true}
 							onChange={handleOrderWindowToMinuteChange}
 							onValidationChange={handleValidationChange}
 						/>

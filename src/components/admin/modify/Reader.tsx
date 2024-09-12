@@ -95,7 +95,6 @@ const Reader = ({
 							fieldName="readerTag"
 							initialText={reader.readerTag}
 							placeholder="Kortlæser Tag"
-							italic={false}
 							minSize={10}
 							required={true}
 							minLength={5}
