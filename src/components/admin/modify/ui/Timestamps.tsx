@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React, { type ReactElement } from 'react'
 
 const Timestamps = ({
@@ -38,12 +39,26 @@ const Timestamps = ({
 
 	return (
 		<div className="flex flex-col items-center">
-			<div className="text-sm text-gray-600">
-				{`Oprettet ${created}`}
+			<div className="text-sm text-gray-600 flex flex-row items-center">
+				<Image
+					className="h-7 w-7 p-1 mx-1"
+					src="admin/created.svg"
+					alt="Oprettet"
+					width={10}
+					height={10}
+				/>
+				{created}
 			</div>
 			{createdAt !== updatedAt && (
-				<div className="text-sm text-gray-600">
-					{`Opdateret ${updated}`}
+				<div className="text-sm text-gray-600 flex flex-row items-center">
+					<Image
+						className="h-7 w-7 p-1 mx-1"
+						src="admin/updated.svg"
+						alt="Opdateret"
+						width={10}
+						height={10}
+					/>
+					{updated}
 				</div>
 			)}
 		</div>
