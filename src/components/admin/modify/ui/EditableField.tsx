@@ -2,7 +2,7 @@ import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 // Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): {
+const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -13,7 +13,7 @@ const useValidation = (value: string, validations: Validation[], required: boole
 		if (required && value.length === 0) {
 			newErrors.push(placeholder + ' er påkrævet')
 		}
-		validations.forEach(validation => {
+		validations?.forEach(validation => {
 			if (!validation.validate(value)) {
 				newErrors.push(validation.message)
 			}
@@ -52,7 +52,7 @@ const EditableField = ({
 	placeholder: string
 	italic: boolean
 	editable: boolean
-	validations: Validation[]
+	validations?: Validation[]
 	required?: boolean
 	minSize?: number
 	upperCase?: boolean
