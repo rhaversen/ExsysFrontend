@@ -7,11 +7,11 @@ import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
-	type PostOrderType,
 	type ActivityType,
 	type KioskTypeNonPopulated,
 	type OptionType,
 	type OrderType,
+	type PostOrderType,
 	type ProductType
 } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
