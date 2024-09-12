@@ -81,11 +81,11 @@ const EditableField = ({
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
-		let isNumberType = type === 'number'
-		let isInvalidNumber = isNumberType && (newValue !== '' && isNaN(Number(newValue)))
-		let exceedsMaxLength = isNumberType && newValue.length > maxLength
+		const isNumberType = type === 'number'
+		const isInvalidNumber = isNumberType && (newValue !== '' && isNaN(Number(newValue)))
+		const exceedsMaxLength = isNumberType && newValue.length > maxLength
 
-		let allowChange = !exceedsMaxLength && !isInvalidNumber
+		const allowChange = !exceedsMaxLength && !isInvalidNumber
 
 		if (upperCase) {
 			newValue = newValue.toUpperCase()
