@@ -123,7 +123,7 @@ const EditableField = ({
 					className={`${italic ? 'italic' : ''} border-blue-500 text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none`}
 					readOnly={!editable}
 					size={Math.max(text.length, minSize, 1)}
-					aria-label={text}
+					aria-label={fieldName}
 				/>
 			}
 			{!editable &&
