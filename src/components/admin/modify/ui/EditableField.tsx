@@ -2,7 +2,7 @@ import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 // Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string): {
+const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -12,6 +12,11 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 		const newErrors: string[] = []
 		if (required && value.length === 0) {
 			newErrors.push(placeholder + ' er påkrævet')
+		} else if (value.length > 0 && value.length < minLength) {
+			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
+		}
+		if (type === 'number' && parseInt(value) > maxValue) {
+			newErrors.push(placeholder + ' kan ikke være større end ' + maxValue)
 		}
 		validations?.forEach(validation => {
 			if (!validation.validate(value)) {
@@ -19,7 +24,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 			}
 		})
 		return newErrors
-	}, [value, validations, required, placeholder])
+	}, [value, validations, required, placeholder, minLength, maxValue, type])
 
 	useEffect(() => {
 		const validationErrors = validate()
@@ -34,6 +39,9 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 
 const EditableField = ({
 	type = 'text',
+	minLength = 0,
+	maxLength = 50,
+	maxValue = Number.MAX_SAFE_INTEGER,
 	fieldName,
 	initialText = '',
 	placeholder,
@@ -47,6 +55,9 @@ const EditableField = ({
 	onValidationChange
 }: {
 	type?: 'number' | 'text'
+	minLength?: number
+	maxLength?: number
+	maxValue?: number
 	fieldName: string
 	initialText?: string
 	placeholder: string
@@ -66,14 +77,15 @@ const EditableField = ({
 	const {
 		errors,
 		isValid
-	} = useValidation(text, validations, required, placeholder)
+	} = useValidation(text, validations, required, placeholder, minLength, maxValue, type)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
 		let isNumberType = type === 'number'
 		let isInvalidNumber = isNumberType && (newValue !== '' && isNaN(Number(newValue)))
+		let exceedsMaxLength = isNumberType && newValue.length > maxLength
 
-		let allowChange = !isInvalidNumber
+		let allowChange = !exceedsMaxLength && !isInvalidNumber
 
 		if (upperCase) {
 			newValue = newValue.toUpperCase()
@@ -83,7 +95,7 @@ const EditableField = ({
 			setText(newValue)
 			onChange(newValue)
 		}
-	}, [type, onChange, upperCase])
+	}, [type, onChange, upperCase, maxLength])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
@@ -103,6 +115,7 @@ const EditableField = ({
 				<input
 					pattern={type === 'number' ? '[0-9]*' : undefined}
 					ref={inputRef}
+					maxLength={maxLength}
 					type="text"
 					value={text}
 					placeholder={placeholder}
