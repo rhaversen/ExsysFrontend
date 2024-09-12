@@ -18,7 +18,7 @@ const EditableImage = ({
 			<button
 				type="button"
 				className={`
-					${editable && 'border-blue-500 cursor-pointer border-2 rounded-md px-1 py-0.5 pr-1.5 transition-colors duration-200 ease-in-out focus:outline-none'}`
+					${editable && 'border-blue-500 cursor-pointer border-2 rounded-md px-1 py-0.5 pr-1.5 focus:outline-none'}`
 				}
 				onClick={() => {
 					setShowImageList(true)
