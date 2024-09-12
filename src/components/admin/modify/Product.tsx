@@ -299,7 +299,6 @@ const Product = ({
 				<EditableImage
 					URL={newProduct.imageURL}
 					editable={isEditing}
-					edited={newProduct.imageURL !== product.imageURL}
 					onChange={handleImageChange}
 				/>
 				{product.options.length > 0 &&

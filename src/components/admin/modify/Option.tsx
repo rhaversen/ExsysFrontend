@@ -137,7 +137,6 @@ const Option = ({
 				<EditableImage
 					URL={newOption.imageURL}
 					editable={isEditing}
-					edited={newOption.imageURL !== option.imageURL}
 					onChange={handleImageChange}
 				/>
 				<Timestamps

@@ -125,7 +125,6 @@ const Option = ({
 					<EditableImage
 						URL={option.imageURL}
 						editable={true}
-						edited={false}
 						onChange={handleImageChange}
 					/>
 				</div>

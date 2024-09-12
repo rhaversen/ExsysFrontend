@@ -268,7 +268,6 @@ const AddProduct = ({
 					<EditableImage
 						URL={product.imageURL}
 						editable={true}
-						edited={false}
 						onChange={handleImageChange}
 					/>
 					{product.options.length > 0 &&
