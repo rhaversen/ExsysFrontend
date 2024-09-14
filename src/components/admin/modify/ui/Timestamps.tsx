@@ -39,7 +39,9 @@ const Timestamps = ({
 
 	return (
 		<div className="flex flex-col items-center">
-			<div className="text-sm text-gray-600 flex flex-row items-center">
+			<div className="text-sm text-gray-600 flex flex-row items-center"
+				title='Oprettet'
+			>
 				<Image
 					className="h-7 w-7 p-1.5 mx-1"
 					src="admin/created.svg"
@@ -50,7 +52,9 @@ const Timestamps = ({
 				{created}
 			</div>
 			{createdAt !== updatedAt && (
-				<div className="text-sm text-gray-600 flex flex-row items-center">
+				<div className="text-sm text-gray-600 flex flex-row items-center"
+					title='Opdateret'
+				>
 					<Image
 						className="h-7 w-7 p-1 mx-1"
 						src="admin/updated.svg"
