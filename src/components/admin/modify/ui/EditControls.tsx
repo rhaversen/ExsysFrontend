@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { useEffect, type ReactElement } from 'react'
+import React, { type ReactElement, useEffect } from 'react'
 
 const EditingControls = ({
 	canClose = true,

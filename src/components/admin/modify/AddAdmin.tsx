@@ -122,7 +122,7 @@ const Admin = ({
 					{'Færdig'}
 				</button>
 			</div>
-		</CloseableModal >
+		</CloseableModal>
 	)
 }
 

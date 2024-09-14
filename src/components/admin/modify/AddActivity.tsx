@@ -1,10 +1,10 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from './ui/EditableDropdown'
-import CloseableModal from '@/components/ui/CloseableModal'
 
 const AddActivity = ({
 	rooms,
