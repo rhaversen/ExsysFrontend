@@ -41,7 +41,7 @@ const Timestamps = ({
 		<div className="flex flex-col items-center">
 			<div className="text-sm text-gray-600 flex flex-row items-center">
 				<Image
-					className="h-7 w-7 p-1 mx-1"
+					className="h-7 w-7 p-1.5 mx-1"
 					src="admin/created.svg"
 					alt="Oprettet"
 					width={10}
