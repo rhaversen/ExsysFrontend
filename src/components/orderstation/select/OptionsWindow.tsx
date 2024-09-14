@@ -1,4 +1,5 @@
 import Option from '@/components/orderstation/select/Option'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
@@ -12,44 +13,31 @@ const OptionsWindow = ({
 	onClose: () => void
 }): ReactElement => {
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
-			<div
-				className="bg-white rounded-3xl p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-			>
-				<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-					{'Tilvalg'}
-				</h2>
-				<div className="flex flex-wrap justify-center gap-4">
-					{productOptions.map((option) => (
-						<Option
-							key={option._id}
-							option={option}
-							onOptionSelect={onOptionSelect}
-						/>
-					))}
+		<CloseableModal onClose={onClose}>
+			<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+				{'Tilvalg'}
+			</h2>
+			<div className="flex flex-wrap justify-center gap-4">
+				{productOptions.map((option) => (
 					<Option
-						option={{
-							_id: 'none',
-							name: 'Intet',
-							imageURL: '/none.svg',
-							price: 0,
-							createdAt: '',
-							updatedAt: ''
-						}}
-						onOptionSelect={onClose}
+						key={option._id}
+						option={option}
+						onOptionSelect={onOptionSelect}
 					/>
-				</div>
+				))}
+				<Option
+					option={{
+						_id: 'none',
+						name: 'Intet',
+						imageURL: '/none.svg',
+						price: 0,
+						createdAt: '',
+						updatedAt: ''
+					}}
+					onOptionSelect={onClose}
+				/>
 			</div>
-		</div>
+		</CloseableModal>
 	)
 }
 

@@ -331,6 +331,7 @@ const Product = ({
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
+					canClose={!showOptions}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion

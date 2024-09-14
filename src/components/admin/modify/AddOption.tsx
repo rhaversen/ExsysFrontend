@@ -1,5 +1,6 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type OptionType, type PostOptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
@@ -79,73 +80,62 @@ const Option = ({
 	}, [option, postOption])
 
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
-					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-					<div className="flex flex-row items-center gap-2 justify-center">
-						<div className="font-bold text-gray-800">
-							<EditableField
-								fieldName="name"
-								placeholder="Navn"
-								required={true}
-								minSize={5}
-								maxLength={50}
-								onChange={handleNameChange}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
-						<div className="flex flex-row italic items-center text-gray-800">
-							<EditableField
-								fieldName="price"
-								placeholder="Pris"
-								italic={true}
-								required={true}
-								minSize={2}
-								type="number"
-								onChange={handlePriceChange}
-								onValidationChange={handleValidationChange}
-							/>
-							<div className="pl-1">
-								{' kr'}
-							</div>
+		<CloseableModal onClose={onClose}>
+			<div className="flex flex-col items-center justify-center">
+				<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
+				<p className="italic text-gray-500">{'Navn og Pris:'}</p>
+				<div className="flex flex-row items-center gap-2 justify-center">
+					<div className="font-bold text-gray-800">
+						<EditableField
+							fieldName="name"
+							placeholder="Navn"
+							required={true}
+							minSize={5}
+							maxLength={50}
+							onChange={handleNameChange}
+							onValidationChange={handleValidationChange}
+						/>
+					</div>
+					<div className="flex flex-row italic items-center text-gray-800">
+						<EditableField
+							fieldName="price"
+							placeholder="Pris"
+							italic={true}
+							required={true}
+							minSize={2}
+							type="number"
+							onChange={handlePriceChange}
+							onValidationChange={handleValidationChange}
+						/>
+						<div className="pl-1">
+							{' kr'}
 						</div>
 					</div>
-					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
-					<EditableImage
-						URL={option.imageURL}
-						onChange={handleImageChange}
-					/>
 				</div>
-				<div className="flex flex-row justify-center gap-4 pt-5">
-					<button
-						type="button"
-						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-						onClick={handleCancelPost}
-					>
-						{'Annuller'}
-					</button>
-					<button
-						type="button"
-						disabled={!formIsValid}
-						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-						onClick={handleCompletePost}
-					>
-						{'Færdig'}
-					</button>
-				</div>
+				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
+				<EditableImage
+					URL={option.imageURL}
+					onChange={handleImageChange}
+				/>
 			</div>
-		</div>
+			<div className="flex flex-row justify-center gap-4 pt-5">
+				<button
+					type="button"
+					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
+					onClick={handleCancelPost}
+				>
+					{'Annuller'}
+				</button>
+				<button
+					type="button"
+					disabled={!formIsValid}
+					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
+					onClick={handleCompletePost}
+				>
+					{'Færdig'}
+				</button>
+			</div>
+		</CloseableModal>
 	)
 }
 

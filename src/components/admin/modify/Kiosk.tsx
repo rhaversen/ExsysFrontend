@@ -271,6 +271,7 @@ const Kiosk = ({
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
+					canClose={!showActivities}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion
