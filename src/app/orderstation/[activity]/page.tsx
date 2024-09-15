@@ -236,47 +236,48 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [activityCount, router])
 
 	return (
-		<main>
+		<div>
 			<div className="flex flex-col h-screen bg-zinc-100">
 				{/* Header */}
 				<header className="flex flex-row justify-center p-4 bg-white shadow-md">
-						<h1 className="text-2xl font-bold text-center text-gray-800">
-							{'Bestil til ' + activityName}
-						</h1>
+					<h1 className="text-2xl font-bold text-center text-gray-800">
+						{'Bestil til ' + activityName}
+					</h1>
 					{activityCount > 1 && (
-							<button
-								onClick={redirectToActivitySelection}
-								className="bg-blue-500 text-white rounded-md mx-2 py-2 px-4"
-								type="button"
-							>
-								{'Skift Aktivitet'}
-							</button>
+						<button
+							onClick={redirectToActivitySelection}
+							className="bg-blue-500 text-white rounded-md mx-2 py-2 px-4"
+							type="button"
+						>
+							{'Skift Aktivitet'}
+						</button>
 					)}
 				</header>
 
 				{/* Main Content */}
-				<div className="flex flex-1 overflow-hidden">
+				<main className="flex flex-1 overflow-hidden">
 					{/* Selection Window */}
 					<div className="flex-1 overflow-y-auto">
-					<SelectionWindow
+						<SelectionWindow
 							cart={cart}
-						products={products}
-						handleCartChange={handleCartChange}
-					/>
-				</div>
+							products={products}
+							handleCartChange={handleCartChange}
+						/>
+					</div>
 
 					{/* Cart Window */}
 					<div className="w-[300px] overflow-y-auto shadow-l-lg">
-					<CartWindow
-						price={totalPrice}
-						products={products}
-						options={options}
-						cart={cart}
-						onCartChange={handleCartChange}
-						onSubmit={handleSubmit}
-						formIsValid={isFormValid}
-					/>
-				</div>
+						<CartWindow
+							price={totalPrice}
+							products={products}
+							options={options}
+							cart={cart}
+							onCartChange={handleCartChange}
+							onSubmit={handleSubmit}
+							formIsValid={isFormValid}
+						/>
+					</div>
+				</main>
 			</div>
 			<div>
 				{isOrderConfirmationVisible &&
@@ -299,6 +300,6 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 					/>
 				}
 			</div>
-		</main>
+		</div>
 	)
 }
