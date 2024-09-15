@@ -36,16 +36,26 @@ const ProductCatalog = ({
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
 	return (
-		<div className="flex flex-wrap justify-between mx-5">
-			{products.filter(product => productAvailabilities[product._id]).map((product) => (
-				<Product
-					key={product._id}
-					product={product}
-					disabled={!productAvailabilities[product._id]}
-					onProductSelect={onProductSelect}
-					amount={cart.products[product._id]}
-				/>
-			))}
+		<div className="
+		grid
+		grid-cols-[repeat(auto-fit,minmax(200px,1fr))]
+		sm:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]
+		md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]
+		lg:grid-cols-[repeat(auto-fit,minmax(350px,1fr))]
+		gap-y-5
+		place-items-center
+	  ">
+			{products
+				.filter(product => productAvailabilities[product._id])
+				.map((product) => (
+					<Product
+						key={product._id}
+						product={product}
+						disabled={!productAvailabilities[product._id]}
+						onProductSelect={onProductSelect}
+						amount={cart.products[product._id]}
+					/>
+				))}
 		</div>
 	)
 }
