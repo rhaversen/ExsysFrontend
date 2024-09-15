@@ -1,14 +1,17 @@
 import AsyncImage from '@/components/ui/AsyncImage'
 import { type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
+import AmountIndicator from './AmountIndicator'
 
 const Product = ({
 	product,
 	disabled,
+	amount = 0,
 	onProductSelect
 }: {
 	product: ProductType
 	disabled: boolean
+	amount?: number
 	onProductSelect: (product: ProductType) => void
 }): ReactElement => {
 	return (
@@ -48,6 +51,13 @@ const Product = ({
 						priority={true}
 					/>
 				</button>
+				{amount > 0 && (
+					<div className="absolute bottom-5 right-5">
+						<AmountIndicator
+							amount={amount}
+						/>
+					</div>
+				)}
 			</div>
 		</div>
 	)

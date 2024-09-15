@@ -254,6 +254,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 						}
 					</div>
 					<SelectionWindow
+							cart={cart}
 						products={products}
 						handleCartChange={handleCartChange}
 					/>

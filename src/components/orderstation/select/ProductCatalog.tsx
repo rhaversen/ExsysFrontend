@@ -1,13 +1,16 @@
 import Product from '@/components/orderstation/select/Product'
 import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
+import { type CartType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 
 const ProductCatalog = ({
+	cart,
 	products,
 	onProductSelect
 }: {
+	cart: CartType
 	products: ProductType[]
 	onProductSelect: (product: ProductType) => void
 }): ReactElement => {
@@ -40,6 +43,7 @@ const ProductCatalog = ({
 					product={product}
 					disabled={!productAvailabilities[product._id]}
 					onProductSelect={onProductSelect}
+					amount={cart.products[product._id]}
 				/>
 			))}
 		</div>
