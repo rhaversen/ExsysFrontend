@@ -1,4 +1,5 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
@@ -77,69 +78,53 @@ const AddActivity = ({
 	}, [postActivity, activity])
 
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
+		<CloseableModal onClose={onClose}>
+			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="flex flex-col items-center justify-center">
-						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
-						<div className="font-bold p-2 text-gray-800">
-							<EditableField
-								fieldName="name"
-								placeholder="Navn"
-								italic={false}
-								minSize={10}
-								required={true}
-								editable={true}
-								onChange={handleNameChange}
-								validations={[{
-									validate: (v: string) => v.length <= 50,
-									message: 'Navn kan kun have 50 tegn'
-								}]}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
-						<EditableDropdown
-							options={rooms.map((room) => ({
-								value: room._id,
-								label: room.name
-							}))}
-							initialValue={activity.roomId ?? 'null-option'}
-							onChange={handleRoomIdChange}
-							placeholder="Vælg Spisested"
-							allowNullOption={true}
-							fieldName="roomId"
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
+					<div className="font-bold p-2 text-gray-800">
+						<EditableField
+							fieldName="name"
+							placeholder="Navn"
+							minSize={10}
+							required={true}
+							onChange={handleNameChange}
+							maxLength={50}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-				</div>
-				<div className="flex flex-row justify-center gap-4 pt-5">
-					<button
-						type="button"
-						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-						onClick={handleCancelPost}
-					>
-						{'Annuller'}
-					</button>
-					<button
-						type="button"
-						disabled={!formIsValid}
-						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-						onClick={handleCompletePost}
-					>
-						{'Færdig'}
-					</button>
+					<EditableDropdown
+						options={rooms.map((room) => ({
+							value: room._id,
+							label: room.name
+						}))}
+						initialValue={activity.roomId ?? 'null-option'}
+						onChange={handleRoomIdChange}
+						placeholder="Vælg Spisested"
+						allowNullOption={true}
+						fieldName="roomId"
+						onValidationChange={handleValidationChange}
+					/>
 				</div>
 			</div>
-		</div>
+			<div className="flex flex-row justify-center gap-4 pt-5">
+				<button
+					type="button"
+					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
+					onClick={handleCancelPost}
+				>
+					{'Annuller'}
+				</button>
+				<button
+					type="button"
+					disabled={!formIsValid}
+					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
+					onClick={handleCompletePost}
+				>
+					{'Færdig'}
+				</button>
+			</div>
+		</CloseableModal>
 	)
 }
 

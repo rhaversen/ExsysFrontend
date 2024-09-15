@@ -2,7 +2,7 @@ import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 // Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[], required: boolean, placeholder: string): {
+const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -12,14 +12,19 @@ const useValidation = (value: string, validations: Validation[], required: boole
 		const newErrors: string[] = []
 		if (required && value.length === 0) {
 			newErrors.push(placeholder + ' er påkrævet')
+		} else if (value.length > 0 && value.length < minLength) {
+			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
 		}
-		validations.forEach(validation => {
+		if (type === 'number' && parseInt(value) > maxValue) {
+			newErrors.push(placeholder + ' kan ikke være større end ' + maxValue)
+		}
+		validations?.forEach(validation => {
 			if (!validation.validate(value)) {
 				newErrors.push(validation.message)
 			}
 		})
 		return newErrors
-	}, [value, validations, required, placeholder])
+	}, [value, validations, required, placeholder, minLength, maxValue, type])
 
 	useEffect(() => {
 		const validationErrors = validate()
@@ -33,11 +38,15 @@ const useValidation = (value: string, validations: Validation[], required: boole
 }
 
 const EditableField = ({
+	type = 'text',
+	minLength = 0,
+	maxLength = 50,
+	maxValue = Number.MAX_SAFE_INTEGER,
 	fieldName,
 	initialText = '',
 	placeholder,
-	italic,
-	editable,
+	italic = false,
+	editable = true,
 	validations,
 	required = false,
 	minSize = 1,
@@ -45,12 +54,16 @@ const EditableField = ({
 	onChange,
 	onValidationChange
 }: {
+	type?: 'number' | 'text'
+	minLength?: number
+	maxLength?: number
+	maxValue?: number
 	fieldName: string
 	initialText?: string
 	placeholder: string
-	italic: boolean
-	editable: boolean
-	validations: Validation[]
+	italic?: boolean
+	editable?: boolean
+	validations?: Validation[]
 	required?: boolean
 	minSize?: number
 	upperCase?: boolean
@@ -64,16 +77,25 @@ const EditableField = ({
 	const {
 		errors,
 		isValid
-	} = useValidation(text, validations, required, placeholder)
+	} = useValidation(text, validations, required, placeholder, minLength, maxValue, type)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
+		const isNumberType = type === 'number'
+		const isInvalidNumber = isNumberType && (newValue !== '' && isNaN(Number(newValue)))
+		const exceedsMaxLength = isNumberType && newValue.length > maxLength
+
+		const allowChange = !exceedsMaxLength && !isInvalidNumber
+
 		if (upperCase) {
 			newValue = newValue.toUpperCase()
 		}
-		setText(newValue)
-		onChange(newValue)
-	}, [onChange, upperCase])
+
+		if (allowChange) {
+			setText(newValue)
+			onChange(newValue)
+		}
+	}, [type, onChange, upperCase, maxLength])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
@@ -91,16 +113,17 @@ const EditableField = ({
 		<div className="flex flex-col items-center">
 			{editable &&
 				<input
+					pattern={type === 'number' ? '[0-9]*' : undefined}
 					ref={inputRef}
+					maxLength={maxLength}
 					type="text"
 					value={text}
 					placeholder={placeholder}
-					onChange={handleChange}
-					onBlur={handleChange}
+					onInput={handleChange}
 					className={`${italic ? 'italic' : ''} border-blue-500 text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none`}
 					readOnly={!editable}
-					size={Math.max(text.length, minSize ?? 1, 1)}
-					aria-label={text}
+					size={Math.max(text.length, minSize, 1)}
+					aria-label={fieldName}
 				/>
 			}
 			{!editable &&

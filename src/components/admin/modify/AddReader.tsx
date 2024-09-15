@@ -1,13 +1,16 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Reader = ({
+	readers,
 	onReaderPosted,
 	onClose
 }: {
+	readers: ReaderType[]
 	onReaderPosted: (reader: ReaderType) => void
 	onClose: () => void
 }): ReactElement => {
@@ -69,77 +72,58 @@ const Reader = ({
 	}, [postReader])
 
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
+		<CloseableModal onClose={onClose}>
+			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<div className="flex flex-col items-center justify-center">
-						<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kortlæser'}</p>
-						<div className="font-bold p-2 text-gray-800">
-							<EditableField
-								upperCase={true}
-								fieldName="pairingCode"
-								placeholder="Parring Kode"
-								italic={false}
-								minSize={10}
-								required={true}
-								editable={true}
-								onChange={handlePairingCodeChange}
-								validations={[{
-									validate: (v: string) => v.length <= 10,
-									message: 'Kode kan kun have 10 tegn'
-								}]}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
-						<div className="font-bold p-2 text-gray-800">
-							<EditableField
-								fieldName="tag"
-								placeholder="Tag (Automatisk)"
-								italic={false}
-								minSize={15}
-								required={false}
-								editable={true}
-								onChange={handleReaderTagChange}
-								validations={[{
-									validate: (v: string) => v.length === 5 || v.length === 0,
-									message: 'Kortlæser tag skal være præcis 5 tal eller tomt'
-								}, {
-									validate: (v: string) => /^\d+$/.exec(v) !== null || v.length === 0,
-									message: 'Kortlæser tag må kun være tal'
-								}]}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kortlæser'}</p>
+					<div className="font-bold p-2 text-gray-800">
+						<EditableField
+							upperCase={true}
+							fieldName="pairingCode"
+							placeholder="Parring Kode"
+							minSize={10}
+							required={true}
+							onChange={handlePairingCodeChange}
+							maxLength={10}
+							onValidationChange={handleValidationChange}
+						/>
+					</div>
+					<div className="font-bold p-2 text-gray-800">
+						<EditableField
+							fieldName="tag"
+							placeholder="Tag (Automatisk)"
+							minSize={15}
+							onChange={handleReaderTagChange}
+							minLength={5}
+							maxLength={5}
+							validations={[{
+								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
+								message: 'Kortlæser tag er allerede i brug'
+							}]}
+							type="number"
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
 				</div>
-				<div className="flex flex-row justify-center gap-4 pt-5">
-					<button
-						type="button"
-						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-						onClick={handleCancelPost}
-					>
-						{'Annuller'}
-					</button>
-					<button
-						type="button"
-						disabled={!formIsValid}
-						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-						onClick={handleCompletePost}
-					>
-						{'Færdig'}
-					</button>
-				</div>
 			</div>
-		</div>
+			<div className="flex flex-row justify-center gap-4 pt-5">
+				<button
+					type="button"
+					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
+					onClick={handleCancelPost}
+				>
+					{'Annuller'}
+				</button>
+				<button
+					type="button"
+					disabled={!formIsValid}
+					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
+					onClick={handleCompletePost}
+				>
+					{'Færdig'}
+				</button>
+			</div>
+		</CloseableModal>
 	)
 }
 

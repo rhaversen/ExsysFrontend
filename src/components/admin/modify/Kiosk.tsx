@@ -11,12 +11,14 @@ import EditableDropdown from './ui/EditableDropdown'
 import Timestamps from './ui/Timestamps'
 
 const Kiosk = ({
+	kiosks,
 	kiosk,
 	activities,
 	readers,
 	onKioskPatched,
 	onKioskDeleted
 }: {
+	kiosks: KioskType[]
 	kiosk: KioskType
 	activities: ActivityType[]
 	readers: ReaderType[]
@@ -179,13 +181,9 @@ const Kiosk = ({
 							fieldName="name"
 							initialText={kiosk.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={10}
 							required={true}
-							validations={[{
-								validate: (v: string) => v.length <= 50,
-								message: 'Navn kan kun have 50 tegn'
-							}]}
+							maxLength={50}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -197,17 +195,16 @@ const Kiosk = ({
 							fieldName="kioskTag"
 							initialText={kiosk.kioskTag}
 							placeholder="Kiosk tag"
-							italic={false}
 							minSize={10}
 							required={true}
 							editable={isEditing}
 							onChange={handleKioskTagChange}
+							minLength={5}
+							maxLength={5}
+							type="number"
 							validations={[{
-								validate: (v: string) => v.length === 5,
-								message: 'Kiosk tag skal være præcis 5 tal'
-							}, {
-								validate: (v: string) => /^\d+$/.exec(v) !== null,
-								message: 'Kiosk tag må kun være tal'
+								validate: (v: string) => !kiosks.some((k) => k.kioskTag === v && k._id !== newKiosk._id),
+								message: 'Kiosk tag er allerede i brug'
 							}]}
 							onValidationChange={handleValidationChange}
 						/>
@@ -220,17 +217,9 @@ const Kiosk = ({
 									fieldName="password"
 									initialText={newPassword}
 									placeholder="Nyt Kodeord"
-									italic={false}
 									minSize={10}
-									required={false}
-									validations={[{
-										validate: (v: string) => v.length >= 4 || v.length === 0,
-										message: 'Kodeord skal mindst have 4 tegn'
-									},
-									{
-										validate: (v: string) => v.length <= 100,
-										message: 'Kodeord kan kun have 100 tegn'
-									}]}
+									minLength={4}
+									maxLength={100}
 									editable={isEditing}
 									onChange={handlePasswordChange}
 									onValidationChange={handleValidationChange}
@@ -282,6 +271,7 @@ const Kiosk = ({
 					handleCompleteEdit={handleCompleteEdit}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
+					canClose={!showActivities}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion

@@ -2,6 +2,7 @@ import OptionsWindow from '@/components/admin/modify/OptionsWindow'
 import Options from '@/components/admin/modify/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
 import { type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
@@ -172,200 +173,137 @@ const AddProduct = ({
 	}, [product, postProduct])
 
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">
-			<button
-				type="button"
-				className="absolute inset-0 w-full h-full"
-				onClick={onClose}
-			>
-				<span className="sr-only">
-					{'Close'}
-				</span>
-			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
-					<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-					<div className="flex flex-row items-center gap-2 justify-center">
-						<div className="font-bold text-gray-800">
-							<EditableField
-								fieldName="name"
-								placeholder="Navn"
-								italic={false}
-								minSize={5}
-								required={true}
-								validations={[{
-									validate: (v: string) => v.length <= 15,
-									message: 'Navn kan kun have 15 tegn'
-								}]}
-								editable={true}
-								onChange={handleNameChange}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
-						<div className="flex flex-row italic items-center text-gray-800">
-							<EditableField
-								fieldName="price"
-								placeholder="Pris"
-								italic={true}
-								required={true}
-								minSize={2}
-								validations={[{
-									validate: (v: string) => !isNaN(Number(v)),
-									message: 'Pris skal være et tal'
-								}, {
-									validate: (v: string) => Number(v) >= 0,
-									message: 'Pris skal være positiv'
-								}]}
-								editable={true}
-								onChange={handlePriceChange}
-								onValidationChange={handleValidationChange}
-							/>
-							<div className="pl-1">
-								{' kr'}
-							</div>
-						</div>
-					</div>
-					<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
-					<div className="flex flex-row text-gray-800">
+		<CloseableModal onClose={onClose} canClose={!showOptions}>
+			<div className="flex flex-col items-center justify-center">
+				<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
+				<p className="italic text-gray-500">{'Navn og Pris:'}</p>
+				<div className="flex flex-row items-center gap-2 justify-center">
+					<div className="font-bold text-gray-800">
 						<EditableField
-							fieldName="fromHour"
-							initialText={product.orderWindow.from.hour.toString()}
-							placeholder="Time"
-							italic={false}
+							fieldName="name"
+							placeholder="Navn"
+							minSize={5}
 							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Time skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 24)
-								},
-								message: 'Time skal være mellem 0 og 24'
-							}]}
-							editable={true}
-							onChange={handleOrderWindowFromHourChange}
-							onValidationChange={handleValidationChange}
-						/>
-						<div className="font-bold text-xl px-1">{':'}</div>
-						<EditableField
-							fieldName="fromMinute"
-							initialText={product.orderWindow.from.minute.toString()}
-							placeholder="Minut"
-							italic={false}
-							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Minutter skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 60)
-								},
-								message: 'Minutter skal være mellem 0 og 60'
-							}]}
-							editable={true}
-							onChange={handleOrderWindowFromMinuteChange}
-							onValidationChange={handleValidationChange}
-						/>
-						<div className="text-xl px-1">{'—'}</div>
-						<EditableField
-							fieldName="toHour"
-							initialText={product.orderWindow.to.hour.toString()}
-							placeholder="Time"
-							italic={false}
-							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Time skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 24)
-								},
-								message: 'Time skal være mellem 0 og 24'
-
-							}]}
-							editable={true}
-							onChange={handleOrderWindowToHourChange}
-							onValidationChange={handleValidationChange}
-						/>
-						<div className="font-bold text-xl px-1">{':'}</div>
-						<EditableField
-							fieldName="toMinute"
-							initialText={product.orderWindow.to.minute.toString()}
-							placeholder="Minut"
-							italic={false}
-							required={true}
-							validations={[{
-								validate: (v: string) => !isNaN(Number(v)),
-								message: 'Minutter skal være et tal'
-							}, {
-								validate: (v: string) => {
-									const num = Number(v)
-									return isNaN(num) || (num >= 0 && num < 60)
-								},
-								message: 'Minutter skal være mellem 0 og 60'
-							}]}
-							editable={true}
-							onChange={handleOrderWindowToMinuteChange}
+							maxLength={15}
+							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
-					<EditableImage
-						URL={product.imageURL}
-						editable={true}
-						edited={false}
-						onChange={handleImageChange}
+					<div className="flex flex-row italic items-center text-gray-800">
+						<EditableField
+							fieldName="price"
+							placeholder="Pris"
+							italic={true}
+							required={true}
+							minSize={2}
+							type="number"
+							onChange={handlePriceChange}
+							onValidationChange={handleValidationChange}
+						/>
+						<div className="pl-1">
+							{' kr'}
+						</div>
+					</div>
+				</div>
+				<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
+				<div className="flex flex-row text-gray-800">
+					<EditableField
+						fieldName="fromHour"
+						initialText={product.orderWindow.from.hour.toString()}
+						placeholder="Time"
+						required={true}
+						type="number"
+						maxValue={23}
+						maxLength={2}
+						onChange={handleOrderWindowFromHourChange}
+						onValidationChange={handleValidationChange}
 					/>
-					{product.options.length > 0 &&
-						<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
-					}
-					{product.options.length === 0 &&
-						<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
-					}
-					<Options
-						selectedOptions={options.filter((option) => product.options.includes(option._id))}
-						editable={true}
+					<div className="font-bold text-xl px-1">{':'}</div>
+					<EditableField
+						fieldName="fromMinute"
+						initialText={product.orderWindow.from.minute.toString()}
+						placeholder="Minut"
+						required={true}
+						type="number"
+						maxValue={59}
+						maxLength={2}
+						onChange={handleOrderWindowFromMinuteChange}
+						onValidationChange={handleValidationChange}
+					/>
+					<div className="text-xl px-1">{'—'}</div>
+					<EditableField
+						fieldName="toHour"
+						initialText={product.orderWindow.to.hour.toString()}
+						placeholder="Time"
+						required={true}
+						type="number"
+						maxValue={23}
+						maxLength={2}
+						onChange={handleOrderWindowToHourChange}
+						onValidationChange={handleValidationChange}
+					/>
+					<div className="font-bold text-xl px-1">{':'}</div>
+					<EditableField
+						fieldName="toMinute"
+						initialText={product.orderWindow.to.minute.toString()}
+						placeholder="Minut"
+						required={true}
+						type="number"
+						maxValue={59}
+						maxLength={2}
+						onChange={handleOrderWindowToMinuteChange}
+						onValidationChange={handleValidationChange}
+					/>
+				</div>
+				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
+				<EditableImage
+					URL={product.imageURL}
+					onChange={handleImageChange}
+				/>
+				{product.options.length > 0 &&
+					<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
+				}
+				{product.options.length === 0 &&
+					<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
+				}
+				<Options
+					selectedOptions={options.filter((option) => product.options.includes(option._id))}
+					onDeleteOption={handleDeleteOption}
+					showOptions={() => {
+						setShowOptions(true)
+					}}
+				/>
+				{showOptions &&
+					<OptionsWindow
+						productName={product.name}
+						options={options}
+						productOptions={options.filter((option) => product.options.includes(option._id))}
+						onAddOption={handleAddOption}
 						onDeleteOption={handleDeleteOption}
-						showOptions={() => {
-							setShowOptions(true)
+						onClose={() => {
+							setShowOptions(false)
 						}}
 					/>
-					{showOptions &&
-						<OptionsWindow
-							productName={product.name}
-							options={options}
-							productOptions={options.filter((option) => product.options.includes(option._id))}
-							onAddOption={handleAddOption}
-							onDeleteOption={handleDeleteOption}
-							onClose={() => {
-								setShowOptions(false)
-							}}
-						/>
-					}
-				</div>
-				<div className="flex flex-row justify-center gap-4 pt-5">
-					<button
-						type="button"
-						className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-						onClick={handleCancelPost}
-					>
-						{'Annuller'}
-					</button>
-					<button
-						type="button"
-						disabled={!formIsValid}
-						className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-						onClick={handleCompletePost}
-					>
-						{'Færdig'}
-					</button>
-				</div>
+				}
 			</div>
-		</div>
+			<div className="flex flex-row justify-center gap-4 pt-5">
+				<button
+					type="button"
+					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
+					onClick={handleCancelPost}
+				>
+					{'Annuller'}
+				</button>
+				<button
+					type="button"
+					disabled={!formIsValid}
+					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
+					onClick={handleCompletePost}
+				>
+					{'Færdig'}
+				</button>
+			</div>
+		</CloseableModal>
 	)
 }
 
