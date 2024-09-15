@@ -241,7 +241,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			<div className="w-full flex flex-col">
 				{/* Header */}
 				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
-					<h1 className="text-2xl font-bold text-center text-gray-800">
+					<h1 className="text-2xl font-bold text-center py-2 text-gray-800">
 						{'Bestil til ' + activityName}
 					</h1>
 					{activityCount > 1 && (
