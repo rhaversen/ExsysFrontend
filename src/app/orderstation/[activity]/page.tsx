@@ -236,8 +236,9 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [activityCount, router])
 
 	return (
-		<div>
-			<div className="flex flex-col h-screen bg-zinc-100">
+		<div className="flex flex-row h-screen bg-zinc-100">
+			{/* Left Column: Header + Selection Window */}
+			<div className="w-full flex flex-col">
 				{/* Header */}
 				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
 					<h1 className="text-2xl font-bold text-center text-gray-800">
@@ -254,52 +255,49 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 					)}
 				</header>
 
-				{/* Main Content */}
-				<main className="flex flex-1 overflow-hidden">
-					{/* Selection Window */}
-					<div className="flex-1 overflow-y-auto">
-						<SelectionWindow
-							cart={cart}
-							products={products}
-							handleCartChange={handleCartChange}
-						/>
-					</div>
+				{/* Selection Window */}
+				<div className="flex-1 overflow-y-auto">
+					<SelectionWindow
+						cart={cart}
+						products={products}
+						handleCartChange={handleCartChange}
+					/>
+				</div>
+			</div>
 
-					{/* Cart Window */}
+			{/* Cart Window */}
 			<div className="w-[300px] overflow-y-auto shadow-l-md ">
-						<CartWindow
-							price={totalPrice}
-							products={products}
-							options={options}
-							cart={cart}
-							onCartChange={handleCartChange}
-							onSubmit={handleSubmit}
-							formIsValid={isFormValid}
-						/>
-					</div>
-				</main>
+				<CartWindow
+					price={totalPrice}
+					products={products}
+					options={options}
+					cart={cart}
+					onCartChange={handleCartChange}
+					onSubmit={handleSubmit}
+					formIsValid={isFormValid}
+				/>
 			</div>
-			<div>
-				{isOrderConfirmationVisible &&
-					<OrderConfirmationWindow
-						price={totalPrice}
-						orderStatus={orderStatus}
-						onClose={reset}
-					/>
-				}
-			</div>
-			<div>
-				{isSelectPaymentWindowVisible &&
-					<SelectPaymentWindow
-						onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
-						onSubmit={checkoutMethod => {
-							submitOrder(checkoutMethod)
-							setIsOrderConfirmationVisible(true)
-							setIsSelectPaymentWindowVisible(false)
-						}}
-					/>
-				}
-			</div>
+
+			{/* Order Confirmation Modal */}
+			{isOrderConfirmationVisible && (
+				<OrderConfirmationWindow
+					price={totalPrice}
+					orderStatus={orderStatus}
+					onClose={reset}
+				/>
+			)}
+
+			{/* Select Payment Modal */}
+			{isSelectPaymentWindowVisible && (
+				<SelectPaymentWindow
+					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
+					onSubmit={checkoutMethod => {
+						submitOrder(checkoutMethod)
+						setIsOrderConfirmationVisible(true)
+						setIsSelectPaymentWindowVisible(false)
+					}}
+				/>
+			)}
 		</div>
 	)
 }
