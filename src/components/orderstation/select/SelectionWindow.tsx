@@ -41,21 +41,24 @@ const SelectionWindow = ({
 	}, [products, cart])
 
 	return (
-		<div>
+		<div className="flex flex-col h-full">
+			{/* Product Catalog Section */}
+			<div className="flex-1 overflow-y-auto">
 				<ProductCatalog
 					cart={cart}
 					products={products}
 					onProductSelect={handleProductSelect}
 				/>
-			{showOptions && (
-				<OptionsWindow
-					productOptions={selectedProductOptions}
+			</div>
+
+			{/* Options Bar at the Bottom */}
+			<div className="w-full bg-neutral-50 shadow-t-xl">
+				<OptionsBar
+					cart={cart}
+					options={productsOptions}
 					onOptionSelect={handleOptionSelect}
-					onClose={() => {
-						setShowOptions(false)
-					}}
 				/>
-			)}
+			</div>
 		</div>
 	)
 }
