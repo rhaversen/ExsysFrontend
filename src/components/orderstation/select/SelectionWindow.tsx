@@ -52,7 +52,7 @@ const SelectionWindow = ({
 			</div>
 
 			{/* Options Bar at the Bottom */}
-			<div className="w-full bg-neutral-50 shadow-t-xl">
+			<div className="w-full shadow-t-md">
 				<OptionsBar
 					cart={cart}
 					options={productsOptions}
