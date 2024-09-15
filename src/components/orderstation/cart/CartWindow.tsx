@@ -29,8 +29,8 @@ const CartWindow = ({
 	}, [cart])
 
 	return (
-		<div className="bg-gray-300 h-full flex flex-col">
-			<h2 className="text-2xl font-bold p-4 shadow-md text-center text-gray-800">
+		<div className="h-full flex flex-col">
+			<h2 className="text-2xl font-bold p-5 text-center text-gray-800">
 				{'Din Bestilling'}
 			</h2>
 			{cartIsEmpty
@@ -38,7 +38,7 @@ const CartWindow = ({
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
 						<br />
-						{'Vælg produkter på vinduet til venstre'}
+						{'Vælg produkter'}
 					</p>
 				</div>
 				: <div className="no-scrollbar overflow-y-auto flex-1">

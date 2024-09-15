@@ -1,7 +1,8 @@
 import Image from 'next/image'
-import React, { type ReactElement } from 'react'
+import React, { type ReactElement, useEffect } from 'react'
 
 const EditingControls = ({
+	canClose = true,
 	isEditing,
 	formIsValid,
 	setIsEditing,
@@ -9,6 +10,7 @@ const EditingControls = ({
 	handleCompleteEdit,
 	setShowDeleteConfirmation
 }: {
+	canClose?: boolean
 	isEditing: boolean
 	formIsValid: boolean
 	setIsEditing: (isEditing: boolean) => void
@@ -16,6 +18,24 @@ const EditingControls = ({
 	handleCompleteEdit: () => void
 	setShowDeleteConfirmation: (show: boolean) => void
 }): ReactElement => {
+	useEffect(() => {
+		if (!isEditing) return
+
+		const handleKeyDown = (event: KeyboardEvent): void => {
+			if (event.key === 'Escape' && canClose) {
+				handleUndoEdit()
+			}
+		}
+
+		// Attach the event listener
+		window.addEventListener('keydown', handleKeyDown)
+
+		// Cleanup the event listener on component unmount
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown)
+		}
+	}, [isEditing, handleUndoEdit, canClose])
+
 	if (isEditing) {
 		return (
 			<div className="flex flex-row gap-5">

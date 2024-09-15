@@ -7,11 +7,11 @@ import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
-	type PostOrderType,
 	type ActivityType,
 	type KioskTypeNonPopulated,
 	type OptionType,
 	type OrderType,
+	type PostOrderType,
 	type ProductType
 } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
@@ -236,61 +236,68 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	}, [activityCount, router])
 
 	return (
-		<main>
-			<div className="flex h-screen">
+		<div className="flex flex-row h-screen bg-zinc-100">
+			{/* Left Column: Header + Selection Window */}
+			<div className="w-full flex flex-col">
+				{/* Header */}
+				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
+					<h1 className="text-3xl font-bold text-center py-2 text-gray-800">
+						{'Bestil til ' + activityName}
+					</h1>
+					{activityCount > 1 && (
+						<button
+							onClick={redirectToActivitySelection}
+							className="bg-blue-500 rounded-md mx-5 py-2 px-4"
+							type="button"
+						>
+							{'Skift Aktivitet'}
+						</button>
+					)}
+				</header>
+
+				{/* Selection Window */}
 				<div className="flex-1 overflow-y-auto">
-					<div className="flex flex-row justify-center p-1 items-center">
-						<h1 className="text-2xl font-bold text-center text-gray-800">
-							{'Bestil til ' + activityName}
-						</h1>
-						{activityCount > 1 &&
-							<button
-								onClick={redirectToActivitySelection}
-								className="bg-blue-500 text-white rounded-md mx-2 py-2 px-4"
-								type="button"
-							>
-								{'Skift Aktivitet'}
-							</button>
-						}
-					</div>
 					<SelectionWindow
+						cart={cart}
 						products={products}
 						handleCartChange={handleCartChange}
 					/>
 				</div>
-				<div className="w-[300px] h-screen overflow-y-auto">
-					<CartWindow
-						price={totalPrice}
-						products={products}
-						options={options}
-						cart={cart}
-						onCartChange={handleCartChange}
-						onSubmit={handleSubmit}
-						formIsValid={isFormValid}
-					/>
-				</div>
 			</div>
-			<div>
-				{isOrderConfirmationVisible &&
-					<OrderConfirmationWindow
-						price={totalPrice}
-						orderStatus={orderStatus}
-						onClose={reset}
-					/>
-				}
+
+			{/* Cart Window */}
+			<div className="w-[500px] overflow-y-auto shadow-l-md ">
+				<CartWindow
+					price={totalPrice}
+					products={products}
+					options={options}
+					cart={cart}
+					onCartChange={handleCartChange}
+					onSubmit={handleSubmit}
+					formIsValid={isFormValid}
+				/>
 			</div>
-			<div>
-				{isSelectPaymentWindowVisible &&
-					<SelectPaymentWindow
-						onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
-						onSubmit={checkoutMethod => {
-							submitOrder(checkoutMethod)
-							setIsOrderConfirmationVisible(true)
-							setIsSelectPaymentWindowVisible(false)
-						}}
-					/>
-				}
-			</div>
-		</main>
+
+			{/* Order Confirmation Modal */}
+			{isOrderConfirmationVisible && (
+				<OrderConfirmationWindow
+					price={totalPrice}
+					orderStatus={orderStatus}
+					onClose={reset}
+				/>
+			)}
+
+			{/* Select Payment Modal */}
+			{isSelectPaymentWindowVisible && (
+				<SelectPaymentWindow
+					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
+					onSubmit={checkoutMethod => {
+						submitOrder(checkoutMethod)
+						setIsOrderConfirmationVisible(true)
+						setIsSelectPaymentWindowVisible(false)
+					}}
+				/>
+			)}
+		</div>
 	)
 }

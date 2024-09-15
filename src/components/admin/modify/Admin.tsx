@@ -8,10 +8,12 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Timestamps from './ui/Timestamps'
 
 const Admin = ({
+	admins,
 	admin,
 	onAdminPatched,
 	onAdminDeleted
 }: {
+	admins: AdminType[]
 	admin: AdminType
 	onAdminPatched: (admin: AdminType) => void
 	onAdminDeleted: (id: AdminType['_id']) => void
@@ -103,12 +105,12 @@ const Admin = ({
 							fieldName="name"
 							initialText={admin.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={10}
 							required={true}
+							maxLength={50}
 							validations={[{
-								validate: (v: string) => v.length <= 50,
-								message: 'Navn kan kun have 50 tegn'
+								validate: (v: string) => !admins.some((a) => a.name === v && a._id !== newAdmin._id),
+								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}
 							onChange={handleNameChange}
@@ -123,17 +125,9 @@ const Admin = ({
 									fieldName="password"
 									initialText={newPassword}
 									placeholder="Nyt Kodeord"
-									italic={false}
 									minSize={10}
-									required={false}
-									validations={[{
-										validate: (v: string) => v.length >= 4 || v.length === 0,
-										message: 'Kodeord skal mindst have 4 tegn'
-									},
-									{
-										validate: (v: string) => v.length <= 100,
-										message: 'Kodeord kan kun have 100 tegn'
-									}]}
+									minLength={4}
+									maxLength={100}
 									editable={isEditing}
 									onChange={handlePasswordChange}
 									onValidationChange={handleValidationChange}

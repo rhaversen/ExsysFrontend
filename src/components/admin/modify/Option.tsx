@@ -108,13 +108,9 @@ const Option = ({
 							fieldName="name"
 							initialText={option.name}
 							placeholder="Navn"
-							italic={false}
 							minSize={5}
 							required={true}
-							validations={[{
-								validate: (v) => v.length <= 20,
-								message: 'Navn kan kun have 20 tegn'
-							}]}
+							maxLength={20}
 							editable={isEditing}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
@@ -127,13 +123,8 @@ const Option = ({
 							placeholder="Pris"
 							italic={true}
 							minSize={2}
-							validations={[{
-								validate: (v) => !isNaN(Number(v)),
-								message: 'Prisen skal være et tal'
-							}, {
-								validate: (v) => Number(v) >= 0,
-								message: 'Prisen skal være positiv'
-							}]}
+							required={true}
+							type="number"
 							editable={isEditing}
 							onChange={handlePriceChange}
 							onValidationChange={handleValidationChange}
@@ -146,7 +137,6 @@ const Option = ({
 				<EditableImage
 					URL={newOption.imageURL}
 					editable={isEditing}
-					edited={newOption.imageURL !== option.imageURL}
 					onChange={handleImageChange}
 				/>
 				<Timestamps

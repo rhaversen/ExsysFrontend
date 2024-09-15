@@ -4,12 +4,12 @@ import { type ReactElement } from 'react'
 
 const Options = ({
 	selectedOptions,
-	editable,
+	editable = true,
 	onDeleteOption,
 	showOptions
 }: {
 	selectedOptions: OptionType[]
-	editable: boolean
+	editable?: boolean
 	onDeleteOption: (v: OptionType) => void
 	showOptions: () => void
 }): ReactElement => {
