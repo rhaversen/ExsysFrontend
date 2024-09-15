@@ -237,13 +237,13 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 
 	return (
 		<main>
-			<div className="flex h-screen">
-				<div className="flex-1 overflow-y-auto">
-					<div className="flex flex-row justify-center p-1 items-center">
+			<div className="flex flex-col h-screen bg-zinc-100">
+				{/* Header */}
+				<header className="flex flex-row justify-center p-4 bg-white shadow-md">
 						<h1 className="text-2xl font-bold text-center text-gray-800">
 							{'Bestil til ' + activityName}
 						</h1>
-						{activityCount > 1 &&
+					{activityCount > 1 && (
 							<button
 								onClick={redirectToActivitySelection}
 								className="bg-blue-500 text-white rounded-md mx-2 py-2 px-4"
@@ -251,15 +251,22 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 							>
 								{'Skift Aktivitet'}
 							</button>
-						}
-					</div>
+					)}
+				</header>
+
+				{/* Main Content */}
+				<div className="flex flex-1 overflow-hidden">
+					{/* Selection Window */}
+					<div className="flex-1 overflow-y-auto">
 					<SelectionWindow
 							cart={cart}
 						products={products}
 						handleCartChange={handleCartChange}
 					/>
 				</div>
-				<div className="w-[300px] h-screen overflow-y-auto">
+
+					{/* Cart Window */}
+					<div className="w-[300px] overflow-y-auto shadow-l-lg">
 					<CartWindow
 						price={totalPrice}
 						products={products}

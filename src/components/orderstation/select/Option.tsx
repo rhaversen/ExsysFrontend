@@ -13,7 +13,7 @@ const Option = ({
 	onOptionSelect: (option: OptionType) => void
 }): ReactElement => {
 	return (
-		<div className="p-2 mx-auto">
+		<div className="p-2">
 			<div className="relative">
 				<button
 					type="button"
