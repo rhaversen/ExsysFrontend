@@ -30,10 +30,10 @@ const Product = ({
 					disabled={disabled}
 				>
 					<div className="flex flex-row items-center justify-center">
-						<h3 className={`font-bold pr-2 ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
+						<h3 className={`font-bold text-lg pr-2 ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
 							{product.name}
 						</h3>
-						<p className={`italic ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
+						<p className={`italic text-lg ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
 							{product.price === 0 ? 'Gratis' : `${product.price} kr`}
 						</p>
 					</div>

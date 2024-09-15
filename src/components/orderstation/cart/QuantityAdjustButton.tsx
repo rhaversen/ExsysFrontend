@@ -10,7 +10,7 @@ const QuantityAdjustButton = ({
 	return (
 		<button
 			type="button"
-			className="w-10 h-10 bg-transparent border-2 font-bold rounded-full flex justify-center items-center border-blue-500 text-blue-500"
+			className="w-16 h-16 text-5xl border-4 rounded-full border-blue-500 text-blue-500"
 			onClick={onClick}
 		>
 			{text}

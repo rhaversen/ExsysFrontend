@@ -241,7 +241,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			<div className="w-full flex flex-col">
 				{/* Header */}
 				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
-					<h1 className="text-2xl font-bold text-center py-2 text-gray-800">
+					<h1 className="text-3xl font-bold text-center py-2 text-gray-800">
 						{'Bestil til ' + activityName}
 					</h1>
 					{activityCount > 1 && (
@@ -266,7 +266,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			</div>
 
 			{/* Cart Window */}
-			<div className="w-[300px] overflow-y-auto shadow-l-md ">
+			<div className="w-[500px] overflow-y-auto shadow-l-md ">
 				<CartWindow
 					price={totalPrice}
 					products={products}
