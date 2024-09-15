@@ -8,10 +8,12 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Timestamps from './ui/Timestamps'
 
 const Reader = ({
+	readers,
 	reader,
 	onReaderPatched,
 	onReaderDeleted
 }: {
+	readers: ReaderType[]
 	reader: ReaderType
 	onReaderPatched: (reader: ReaderType) => void
 	onReaderDeleted: (id: ReaderType['_id']) => void
@@ -93,16 +95,15 @@ const Reader = ({
 							fieldName="readerTag"
 							initialText={reader.readerTag}
 							placeholder="Kortlæser Tag"
-							italic={false}
 							minSize={10}
 							required={true}
+							minLength={5}
+							maxLength={5}
 							validations={[{
-								validate: (v: string) => v.length === 5,
-								message: 'Kortlæser tag skal være præcis 5 tal'
-							}, {
-								validate: (v: string) => /^\d+$/.exec(v) !== null,
-								message: 'Kortlæser tag må kun være tal'
+								validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
+								message: 'Kortlæser tag er allerede i brug'
 							}]}
+							type="number"
 							editable={isEditing}
 							onChange={handleReaderTagChange}
 							onValidationChange={handleValidationChange}
