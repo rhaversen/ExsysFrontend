@@ -6,8 +6,8 @@ const SelectPaymentWindow = ({
 	onSubmit,
 	onCancel
 }: {
-	checkoutMethods: { sumUp: boolean, cash: boolean }
-	onSubmit: (type: 'sumUp' | 'cash') => void
+	checkoutMethods: { sumUp: boolean, cash: boolean, mobilePay: boolean }
+	onSubmit: (type: 'sumUp' | 'cash' | 'mobilePay') => void
 	onCancel: () => void
 }): ReactElement => {
 	return (
@@ -50,6 +50,27 @@ const SelectPaymentWindow = ({
 							<AsyncImage
 								src="/orderStation/coins.svg"
 								alt="Kontant"
+								className="w-48 h-48"
+								width={200}
+								height={200}
+								quality={100}
+								priority={true}
+								draggable={false}
+							/>
+						</button>
+					)}
+					{checkoutMethods.mobilePay && (
+						<button
+							onClick={() => { onSubmit('mobilePay') }}
+							className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
+							type="button"
+						>
+							<div className="text-2xl font-bold text-center text-gray-800">
+								{'MobilePay'}
+							</div>
+							<AsyncImage
+								src="/orderStation/mobile-pay.svg"
+								alt="MobilePay"
 								className="w-48 h-48"
 								width={200}
 								height={200}

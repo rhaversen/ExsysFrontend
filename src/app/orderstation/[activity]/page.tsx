@@ -41,7 +41,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
-	const [checkoutMethods, setCheckoutMethods] = useState({ sumUp: false, cash: true })
+	const [checkoutMethods, setCheckoutMethods] = useState({ sumUp: false, cash: true, mobilePay: false })
 
 	const fetchActivityCount = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -181,7 +181,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		}
 	}, shouldFetchPaymentStatus ? 1000 : null)
 
-	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash'): void => {
+	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
@@ -223,7 +223,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		if (hasMultipleCheckoutMethods) {
 			setIsSelectPaymentWindowVisible(true)
 		} else {
-			submitOrder('sumUp')
+			submitOrder('cash')
 		}
 	}, [checkoutMethods, submitOrder])
 
