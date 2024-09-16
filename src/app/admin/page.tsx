@@ -11,7 +11,6 @@ import {
 	type AdminType,
 	type KioskType,
 	type OptionType,
-	type OrderType,
 	type ProductType,
 	type ReaderType,
 	type RoomType
@@ -27,7 +26,6 @@ export default function Page (): ReactElement {
 
 	const [selectedView, setSelectedView] = useState('Ordre Oversigt')
 
-	const [orders, setOrders] = useState<OrderType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
@@ -35,22 +33,6 @@ export default function Page (): ReactElement {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [admins, setAdmins] = useState<AdminType[]>([])
 	const [readers, setReaders] = useState<ReaderType[]>([])
-
-	const [fetching, setFetching] = useState<boolean>(true)
-
-	const getOrders = useCallback(async () => {
-		const fromDate = new Date()
-		fromDate.setHours(0, 0, 0, 0)
-		const toDate = new Date()
-		toDate.setHours(24, 0, 0, 0)
-
-		try {
-			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed&paymentStatus=successful`, { withCredentials: true })
-			const data = response.data as OrderType[]
-			setOrders(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
 
 	const getProducts = useCallback(async () => {
 		try {
@@ -120,12 +102,10 @@ export default function Page (): ReactElement {
 	}, [API_URL])
 
 	const fetchData = useCallback(() => {
-		setFetching(true)
 		Promise.all([
 			getRooms(),
 			getProducts(),
 			getOptions(),
-			getOrders(),
 			getActivities(),
 			getKiosks(),
 			getAdmins(),
@@ -133,25 +113,7 @@ export default function Page (): ReactElement {
 		]).catch((error: any) => {
 			addError(error)
 		})
-		setFetching(false)
-	}, [getOrders, getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins, getReaders])
-
-	const handleOrdersUpdate = useCallback((orders: OrderType[]) => {
-		// Only update the orders that were changed
-		setOrders((prevOrders) => {
-			const newOrders = [...prevOrders]
-			orders.forEach((newOrder) => {
-				const index = newOrders.findIndex((order) => order._id === newOrder._id)
-				if (index === -1) return
-				if (newOrder.status === 'delivered') {
-					newOrders.splice(index, 1)
-					return
-				}
-				newOrders[index] = newOrder
-			})
-			return newOrders
-		})
-	}, [])
+	}, [getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins, getReaders])
 
 	const handleUpdateProduct = useCallback((product: ProductType) => {
 		setProducts((prevProducts) => {
@@ -279,7 +241,6 @@ export default function Page (): ReactElement {
 		setReaders((prevReaders) => [...prevReaders, reader])
 	}, [])
 
-	useInterval(getOrders, 1000 * 10) // Fetch orders 10 seconds
 	useInterval(getProducts, 1000 * 60 * 60) // Fetch products every hour
 	useInterval(getOptions, 1000 * 60 * 60) // Fetch options every hour
 	useInterval(getRooms, 1000 * 60 * 60) // Fetch rooms every hour
@@ -305,13 +266,10 @@ export default function Page (): ReactElement {
 			/>
 			{selectedView === 'Ordre Oversigt' &&
 				<OverviewView
-					orders={orders}
 					products={products}
 					options={options}
 					rooms={rooms}
 					activities={activities}
-					isFetching={fetching}
-					onUpdatedOrders={handleOrdersUpdate}
 				/>
 			}
 			{selectedView === 'Rediger Katalog' &&

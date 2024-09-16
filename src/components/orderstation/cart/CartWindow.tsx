@@ -38,10 +38,11 @@ const CartWindow = ({
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
 						<br />
+						<br />
 						{'Vælg produkter'}
 					</p>
 				</div>
-				: <div className="no-scrollbar overflow-y-auto flex-1">
+				: <div className="overflow-y-auto flex-1">
 					<OrderSummary
 						products={products}
 						options={options}
@@ -51,13 +52,11 @@ const CartWindow = ({
 				</div>
 			}
 			{!cartIsEmpty &&
-				<div className="bottom-0 flex justify-center">
-					<SubmitButton
-						text={`Betal ${price} kr`}
-						disabled={!formIsValid}
-						onClick={onSubmit}
-					/>
-				</div>
+				<SubmitButton
+					text={`Betal ${price} kr`}
+					disabled={!formIsValid}
+					onClick={onSubmit}
+				/>
 			}
 		</div>
 	)

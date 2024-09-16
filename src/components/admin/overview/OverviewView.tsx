@@ -1,6 +1,7 @@
 'use client'
 
 import RoomCol from '@/components/admin/overview/RoomCol'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
 	type OptionType,
@@ -9,118 +10,136 @@ import {
 	type RoomType
 } from '@/types/backendDataTypes'
 import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { useInterval } from 'react-use'
 
 const OverviewView = ({
-	orders,
 	products,
 	options,
 	rooms,
-	activities,
-	isFetching,
-	onUpdatedOrders
+	activities
 }: {
-	orders: OrderType[]
 	products: ProductType[]
 	options: OptionType[]
 	rooms: RoomType[]
 	activities: ActivityType[]
-	isFetching: boolean
-	onUpdatedOrders: (orders: OrderType[]) => void
 }): ReactElement => {
-	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
-	const [roomOrders, setRoomOrders] = useState<Record<RoomType['_id'], OrderTypeWithNames[]>>({})
+	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 
-	const addNamesToOrders = useCallback(() => {
-		return orders.map((order) => ({
-			...order,
-			products: order.products.map((product) => ({
-				...product,
-				name: products.find((p) => p._id === product.id)?.name ?? 'Ukendt vare'
-			})),
-			options: order.options.map((option) => ({
-				...option,
-				name: options.find((o) => o._id === option.id)?.name ?? 'Ukendt tilvalg'
+	const [roomOrders, setRoomOrders] = useState<Record<string, OrderTypeWithNames[]>>({})
+
+	const fetchAndProcessOrders = useCallback(async () => {
+		const fromDate = new Date()
+		fromDate.setHours(0, 0, 0, 0)
+		const toDate = new Date()
+		toDate.setHours(24, 0, 0, 0)
+
+		try {
+			const { data: orders } = await axios.get<OrderType[]>(
+				`${API_URL}/v1/orders`,
+				{
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
+						status: 'pending,confirmed',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				}
+			)
+
+			const enrichedOrders: OrderTypeWithNames[] = orders.map(order => ({
+				...order,
+				products: order.products.map(product => ({
+					...product,
+					name: products.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
+				})),
+				options: order.options.map(option => ({
+					...option,
+					name: options.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
+				}))
 			}))
-		}))
-	}, [orders, products, options])
 
-	const groupOrdersByRoom = useCallback(() => {
-		const roomOrders: Record<string, OrderTypeWithNames[]> = {} // Use string for room name indexing
-		ordersWithNames.forEach((order) => {
-			// Find the activity corresponding to the order
-			const activity = activities.find(activity => activity._id === order.activityId)
-			if (activity === undefined) return // Skip if no activity found
+			const groupedOrders: Record<string, OrderTypeWithNames[]> = enrichedOrders.reduce<Record<string, OrderTypeWithNames[]>>((acc, order) => {
+				const activity = activities.find(a => a._id === order.activityId)
+				const room = (activity != null) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
+				const roomName = room?.name ?? 'no-room'
 
-			// Find the room using the roomId from the found activity
-			const room = rooms.find(room => room._id === activity.roomId?._id)
+				if (acc[roomName] === undefined) {
+					acc[roomName] = []
+				}
+				acc[roomName].push(order)
 
-			const roomName = room?.name ?? 'no-room'
-			if (roomOrders[roomName] === undefined) {
-				roomOrders[roomName] = []
-			}
-			roomOrders[roomName].push(order)
-		})
-		return roomOrders
-	}, [ordersWithNames, rooms, activities]) // Include activities in the dependency array
+				return acc
+			}, {})
+			setRoomOrders(groupedOrders)
+		} catch (error) {
+			addError(error)
+		}
+	}, [API_URL, products, options, activities, rooms, addError])
 
+	const handleFetchAndProcessOrders = useCallback(() => {
+		fetchAndProcessOrders().catch(addError)
+	}, [addError, fetchAndProcessOrders])
+
+	// Initial fetch
 	useEffect(() => {
-		setRoomOrders(groupOrdersByRoom())
-	}, [setRoomOrders, groupOrdersByRoom])
+		fetchAndProcessOrders().catch(addError)
+	}, [addError, fetchAndProcessOrders])
 
-	useEffect(() => {
-		setOrdersWithNames(addNamesToOrders())
-	}, [setOrdersWithNames, addNamesToOrders])
+	// Fetch orders every 10 seconds
+	useInterval(fetchAndProcessOrders, 10000)
 
 	return (
 		<div>
-			{isFetching &&
-				<div className="flex justify-center flex-row">
-					<p className="p-10 font-bold text-gray-800 text-2xl">{'Henter Order...'}</p>
-				</div>
-			}
-			{orders.length === 0 && !isFetching &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Ingen Ordrer '}&#128522;</p>
-			}
-			{orders.length === 0 &&
-				<div
-					className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center"
-				>
-					<Image
-						src="/orderStation/loading.svg"
-						alt="loading"
-						priority // Load image immediately
-						draggable="false"
-						width={100}
-						height={100}
-					/>
-				</div>
-			}
-			<div className="flex flex-row flex-wrap justify-evenly">
-				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
-					<RoomCol
-						key={room._id}
-						room={room}
-						orders={roomOrders[room.name] ?? []}
-						onUpdatedOrders={onUpdatedOrders}
-					/>
-				))}
-				{roomOrders['no-room'] !== undefined && roomOrders['no-room'].length > 0 &&
-					<RoomCol
-						key="no-room"
-						room={{
-							_id: 'no-room',
-							name: 'Ukendt Rum',
-							description: 'Aktivitet har intet rum tildelt',
-							createdAt: '',
-							updatedAt: ''
-						}}
-						orders={roomOrders['no-room'] ?? []}
-						onUpdatedOrders={onUpdatedOrders}
-					/>
-				}
-			</div>
+			{Object.keys(roomOrders).length === 0
+				? (
+					<>
+						<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">
+							{'Ingen Ordrer '}&#128522;{'\r'}
+						</p>
+						<div
+							className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
+							<Image
+								src="/orderStation/loading.svg"
+								alt="loading"
+								priority
+								draggable="false"
+								width={100}
+								height={100}
+							/>
+						</div>
+					</>
+				)
+				: (
+					<div className="flex flex-row flex-wrap justify-evenly">
+						{rooms.filter(room => roomOrders[room.name]?.length).map(room => (
+							<RoomCol
+								key={room._id}
+								room={room}
+								orders={roomOrders[room.name] ?? []}
+								onUpdatedOrders={handleFetchAndProcessOrders}
+							/>
+						))}
+						{roomOrders['no-room']?.length > 0 && (
+							<RoomCol
+								key="no-room"
+								room={{
+									_id: 'no-room',
+									name: 'Ukendt Rum',
+									description: 'Aktivitet har intet rum tildelt',
+									createdAt: '',
+									updatedAt: ''
+								}}
+								orders={roomOrders['no-room']}
+								onUpdatedOrders={handleFetchAndProcessOrders}
+							/>
+						)}
+					</div>
+				)}
 		</div>
 	)
 }
