@@ -13,7 +13,7 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useMemo, useState } from 'react'
 import { useInterval } from 'react-use'
 
 const OrderView = ({
@@ -34,10 +34,9 @@ const OrderView = ({
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-	const [isFormValid, setIsFormValid] = useState(false)
+	// State Management
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
-	const [totalPrice, setTotalPrice] = useState(0)
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [cart, setCart] = useState<CartType>({
 		products: {},
@@ -46,21 +45,26 @@ const OrderView = ({
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
 
-	// Check if any product is selected
-	useEffect(() => {
-		const isProductSelected = Object.values(cart.products).some(quantity => quantity > 0)
-		setIsFormValid(isProductSelected)
+	// Derived States using useMemo
+	const isFormValid = useMemo(() => {
+		return Object.values(cart.products).some(quantity => quantity > 0)
 	}, [cart])
 
-	// Calculate total price
-	useEffect(() => {
-		const calculatedPrice = (
-			Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
-			Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
-		)
-		setTotalPrice(calculatedPrice)
-	}, [cart, options, products])
+	const totalPrice = useMemo(() => {
+		const productsTotal = Object.entries(cart.products).reduce((acc, [_id, quantity]) => {
+			const product = products.find(p => p._id === _id)
+			return acc + (product?.price ?? 0) * quantity
+		}, 0)
 
+		const optionsTotal = Object.entries(cart.options).reduce((acc, [_id, quantity]) => {
+			const option = options.find(o => o._id === _id)
+			return acc + (option?.price ?? 0) * quantity
+		}, 0)
+
+		return productsTotal + optionsTotal
+	}, [cart, products, options])
+
+	// Handler to change cart items using functional updates
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		// Copy the cart object
 		const newCart = { ...cart }
@@ -79,19 +83,27 @@ const OrderView = ({
 		setCart(newCart)
 	}, [cart])
 
+	// Polling Payment Status
 	useInterval(() => {
-		if (shouldFetchPaymentStatus) {
-			axios.get(`${API_URL}/v1/orders/${order?._id}/paymentStatus`, { withCredentials: true })
-				.then(res => {
-					const paymentStatus = res.data.paymentStatus as 'pending' | 'successful' | 'failed'
-					if (paymentStatus === 'successful') {
-						setOrderStatus('success')
-						setShouldFetchPaymentStatus(false)
-					} else if (paymentStatus === 'failed') {
-						setOrderStatus('error')
-						setShouldFetchPaymentStatus(false)
-					} else if (paymentStatus === 'pending') {
-						setOrderStatus('awaitingPayment')
+		if (shouldFetchPaymentStatus && order !== null) {
+			axios.get(`${API_URL}/v1/orders/${order._id}/paymentStatus`, { withCredentials: true })
+				.then(response => {
+					const paymentStatus = response.data.paymentStatus as 'pending' | 'successful' | 'failed'
+
+					switch (paymentStatus) {
+						case 'successful':
+							setOrderStatus('success')
+							setShouldFetchPaymentStatus(false)
+							break
+						case 'failed':
+							setOrderStatus('error')
+							setShouldFetchPaymentStatus(false)
+							break
+						case 'pending':
+							setOrderStatus('awaitingPayment')
+							break
+						default:
+							throw new Error('Unknown payment status')
 					}
 				})
 				.catch(error => {
@@ -102,30 +114,28 @@ const OrderView = ({
 		}
 	}, shouldFetchPaymentStatus ? 1000 : null)
 
+	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
-		const productCart = Object.entries(cart.products).map(([item, quantity]) => ({
-			id: item,
-			quantity
-		}))
-		const optionCart = Object.entries(cart.options).map(([item, quantity]) => ({
-			id: item,
-			quantity
-		}))
+		const prepareCartItems = (items: Record<string, number>): Array<{ id: string, quantity: number }> =>
+			Object.entries(items).map(([id, quantity]) => ({
+				id,
+				quantity
+			}))
 
 		const data: PostOrderType = {
 			kioskId: kiosk._id,
 			activityId: activity._id,
-			products: productCart,
-			options: optionCart,
+			products: prepareCartItems(cart.products),
+			options: prepareCartItems(cart.options),
 			checkoutMethod
 		}
 
-		axios.post(`${API_URL}/v1/orders`, data, { withCredentials: true })
-			.then(res => {
-				setOrder(res.data as OrderType)
+		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
+			.then(response => {
+				setOrder(response.data)
 				if (checkoutMethod === 'sumUp') {
 					setShouldFetchPaymentStatus(true)
 				} else {
@@ -139,15 +149,17 @@ const OrderView = ({
 			})
 	}, [cart, kiosk, activity, API_URL, addError])
 
+	// Handle Checkout based on available methods
 	const handleCheckout = useCallback(() => {
-		const hasMultipleCheckoutMethods = Object.values(checkoutMethods).filter(Boolean).length > 1
-		if (hasMultipleCheckoutMethods) {
+		const availableMethods = Object.values(checkoutMethods).filter(Boolean)
+		if (availableMethods.length > 1) {
 			setIsSelectPaymentWindowVisible(true)
 		} else {
 			submitOrder('cash')
 		}
 	}, [checkoutMethods, submitOrder])
 
+	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
 		if (kiosk.activities.length > 1) {
 			onClose()
@@ -191,7 +203,7 @@ const OrderView = ({
 			</div>
 
 			{/* Cart Window */}
-			<div className="w-[400px] shadow-l-md ">
+			<div className="w-[400px] shadow-l-md">
 				<CartWindow
 					price={totalPrice}
 					products={products}
