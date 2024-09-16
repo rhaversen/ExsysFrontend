@@ -1,6 +1,7 @@
 'use client'
 
 import RoomCol from '@/components/admin/overview/RoomCol'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
 	type OptionType,
@@ -13,7 +14,6 @@ import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const OverviewView = ({
 	products,
@@ -29,124 +29,117 @@ const OverviewView = ({
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
-	const [orders, setOrders] = useState<OrderType[]>([])
-	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
-	const [roomOrders, setRoomOrders] = useState<Record<RoomType['_id'], OrderTypeWithNames[]>>({})
+	const [roomOrders, setRoomOrders] = useState<Record<string, OrderTypeWithNames[]>>({})
 
-	const fetchOrders = useCallback(async () => {
-		const fromDate = new Date().setHours(0, 0, 0, 0)
-		const toDate = new Date().setHours(24, 0, 0, 0)
+	const fetchAndProcessOrders = useCallback(async () => {
+		const fromDate = new Date()
+		fromDate.setHours(0, 0, 0, 0)
+		const toDate = new Date()
+		toDate.setHours(24, 0, 0, 0)
 
 		try {
-			const { data } = await axios.get(
+			const { data: orders } = await axios.get<OrderType[]>(
 				`${API_URL}/v1/orders`,
 				{
 					params: {
-						fromDate: new Date(fromDate).toISOString(),
-						toDate: new Date(toDate).toISOString(),
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
 						status: 'pending,confirmed',
 						paymentStatus: 'successful'
 					},
 					withCredentials: true
 				}
 			)
-			setOrders(data)
+
+			const enrichedOrders: OrderTypeWithNames[] = orders.map(order => ({
+				...order,
+				products: order.products.map(product => ({
+					...product,
+					name: products.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
+				})),
+				options: order.options.map(option => ({
+					...option,
+					name: options.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
+				}))
+			}))
+
+			const groupedOrders: Record<string, OrderTypeWithNames[]> = enrichedOrders.reduce<Record<string, OrderTypeWithNames[]>>((acc, order) => {
+				const activity = activities.find(a => a._id === order.activityId)
+				const room = (activity != null) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
+				const roomName = room?.name ?? 'no-room'
+
+				if (acc[roomName] === undefined) {
+					acc[roomName] = []
+				}
+				acc[roomName].push(order)
+
+				return acc
+			}, {})
+			setRoomOrders(groupedOrders)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL])
+	}, [API_URL, products, options, activities, rooms, addError])
 
-	const updateOrders = useCallback((updatedOrders: OrderType[]) => {
-		setOrders(prevOrders =>
-			prevOrders.map(order =>
-				updatedOrders.some(updated => updated._id === order._id && updated.status !== 'delivered')
-					? updatedOrders.find(updated => updated._id === order._id) || order
-					: order
-			).filter(order => order.status !== 'delivered')
-		)
-	}, [])
+	const handleFetchAndProcessOrders = useCallback(() => {
+		fetchAndProcessOrders().catch(addError)
+	}, [addError, fetchAndProcessOrders])
 
-	const enrichOrdersWithNames = useCallback(() =>
-		orders.map(order => ({
-			...order,
-			products: order.products.map(product => ({
-				...product,
-				name: products.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
-			})),
-			options: order.options.map(option => ({
-				...option,
-				name: options.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
-			}))
-		}))
-		, [orders, products, options])
-
-	const organizeOrdersByRoom = useCallback(() => {
-		return ordersWithNames.reduce((acc, order) => {
-			const activity = activities.find(a => a._id === order.activityId)
-			const room = rooms.find(r => r._id === activity?.roomId?._id)
-			const roomName = room?.name ?? 'no-room'
-
-			if (!acc[roomName]) {
-				acc[roomName] = []
-			}
-			acc[roomName].push(order)
-
-			return acc
-		}, {} as Record<string, OrderTypeWithNames[]>)
-	}, [ordersWithNames, rooms, activities])
-
+	// Initial fetch
 	useEffect(() => {
-		setOrdersWithNames(enrichOrdersWithNames())
-	}, [orders, enrichOrdersWithNames])
+		fetchAndProcessOrders().catch(addError)
+	}, [addError, fetchAndProcessOrders])
 
-	useEffect(() => {
-		setRoomOrders(organizeOrdersByRoom())
-	}, [ordersWithNames, organizeOrdersByRoom])
-
-	useInterval(fetchOrders, 10000) // Fetch orders every 10 seconds
+	// Fetch orders every 10 seconds
+	useInterval(fetchAndProcessOrders, 10000)
 
 	return (
 		<div>
-			{!orders.length ? (
-				<>
-					<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Ingen Ordrer &#128522;</p>
-					<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
-						<Image
-							src="/orderStation/loading.svg"
-							alt="loading"
-							priority
-							draggable="false"
-							width={100}
-							height={100}
-						/>
+			{Object.keys(roomOrders).length === 0
+				? (
+					<>
+						<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">
+							{'Ingen Ordrer '}&#128522;{'\r'}
+						</p>
+						<div
+							className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
+							<Image
+								src="/orderStation/loading.svg"
+								alt="loading"
+								priority
+								draggable="false"
+								width={100}
+								height={100}
+							/>
+						</div>
+					</>
+				)
+				: (
+					<div className="flex flex-row flex-wrap justify-evenly">
+						{rooms.filter(room => roomOrders[room.name]?.length).map(room => (
+							<RoomCol
+								key={room._id}
+								room={room}
+								orders={roomOrders[room.name] ?? []}
+								onUpdatedOrders={handleFetchAndProcessOrders}
+							/>
+						))}
+						{roomOrders['no-room']?.length > 0 && (
+							<RoomCol
+								key="no-room"
+								room={{
+									_id: 'no-room',
+									name: 'Ukendt Rum',
+									description: 'Aktivitet har intet rum tildelt',
+									createdAt: '',
+									updatedAt: ''
+								}}
+								orders={roomOrders['no-room']}
+								onUpdatedOrders={handleFetchAndProcessOrders}
+							/>
+						)}
 					</div>
-				</>
-			) : (
-				<div className="flex flex-row flex-wrap justify-evenly">
-					{rooms.filter(room => roomOrders[room.name]?.length).map(room => (
-						<RoomCol
-							key={room._id}
-							room={room}
-							orders={roomOrders[room.name] ?? []}
-							onUpdatedOrders={updateOrders}
-						/>
-					))}
-					{roomOrders['no-room']?.length > 0 && (
-						<RoomCol
-							key="no-room"
-							room={{
-								_id: 'no-room',
-								name: 'Ukendt Rum',
-								description: 'Aktivitet har intet rum tildelt',
-								createdAt: '',
-								updatedAt: ''
-							}}
-							orders={roomOrders['no-room']}
-							onUpdatedOrders={updateOrders}
-						/>
-					)}
-				</div>
-			)}
+				)}
 		</div>
 	)
 }
