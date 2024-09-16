@@ -26,15 +26,13 @@ const Item = ({
 
 	return (
 		<div className="py-3">
-			<div className='flex flex-row justify-evenly'>
-				<h3 className="text-xl font-bold text-gray-800 text-center pb-2">
+			<div className='flex flex-row justify-evenly pb-1'>
+				<h3 className="text-xl font-bold text-gray-800">
 					{name}
 				</h3>
-				<div className="flex-none w-24 text-right px-5">
-					<p className="italic text-xl font-semibold text-gray-800">
-						{price === 0 ? 'Gratis' : `${price * quantity} kr`}
-					</p>
-				</div>
+				<p className="text-lg font-semibold text-gray-800 italic">
+					{price === 0 ? 'Gratis' : `${price * quantity} kr`}
+				</p>
 			</div>
 			<div className="flex flex-row justify-evenly">
 				<AsyncImage
