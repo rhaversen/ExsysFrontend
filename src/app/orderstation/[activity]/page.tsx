@@ -41,7 +41,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
-	const [hasReader, setHasReader] = useState(false)
+	const [checkoutMethods, setCheckoutMethods] = useState({ sumUp: false, cash: true })
 
 	const fetchActivityCount = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
@@ -63,7 +63,10 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
 		const kiosk = kioskResponse.data as KioskTypeNonPopulated
 		setKioskId(kiosk._id)
-		setHasReader(kiosk.readerId !== null)
+		setCheckoutMethods(prev => ({
+			...prev,
+			sumUp: kiosk.readerId !== null
+		}))
 	}, [API_URL])
 
 	const fetchProductsAndOptions = useCallback(async () => {
@@ -215,13 +218,14 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			})
 	}, [API_URL, cart, params.activity, kioskId, addError])
 
-	const handleSubmit = useCallback(() => {
-		if (hasReader) {
+	const handleCheckout = useCallback(() => {
+		const hasMultipleCheckoutMethods = Object.values(checkoutMethods).filter(Boolean).length > 1
+		if (hasMultipleCheckoutMethods) {
 			setIsSelectPaymentWindowVisible(true)
 		} else {
 			submitOrder('sumUp')
 		}
-	}, [hasReader, submitOrder])
+	}, [checkoutMethods, submitOrder])
 
 	const reset = useCallback((): void => {
 		if (activityCount > 1) {
@@ -273,7 +277,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 					options={options}
 					cart={cart}
 					onCartChange={handleCartChange}
-					onSubmit={handleSubmit}
+					onSubmit={handleCheckout}
 					formIsValid={isFormValid}
 				/>
 			</div>
@@ -290,6 +294,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			{/* Select Payment Modal */}
 			{isSelectPaymentWindowVisible && (
 				<SelectPaymentWindow
+					checkoutMethods={checkoutMethods}
 					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
 					onSubmit={checkoutMethod => {
 						submitOrder(checkoutMethod)
