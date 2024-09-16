@@ -41,7 +41,11 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
-	const [checkoutMethods, setCheckoutMethods] = useState({ sumUp: false, cash: true, mobilePay: false })
+	const [checkoutMethods, setCheckoutMethods] = useState({
+		sumUp: false,
+		cash: true,
+		mobilePay: false
+	})
 
 	const fetchActivityCount = useCallback(async () => {
 		const [kioskResponse, activitiesResponse] = await Promise.all([
