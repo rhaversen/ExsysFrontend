@@ -274,7 +274,7 @@ export default function Page ({ params }: Readonly<{ params: { activity: Activit
 			</div>
 
 			{/* Cart Window */}
-			<div className="w-[500px] overflow-y-auto shadow-l-md ">
+			<div className="w-[400px] shadow-l-md ">
 				<CartWindow
 					price={totalPrice}
 					products={products}

@@ -26,34 +26,30 @@ const Item = ({
 
 	return (
 		<div className="py-3">
-			<h3 className="text-xl font-bold text-gray-800 text-center pb-2">
-				{name}
-			</h3>
-			<div className="flex flex-row items-center justify-between mx-5">
-				<div className="flex-none w-24">
-					<AsyncImage
-						className="w-16 h-16"
-						width={40}
-						height={40}
-						quality={40}
-						src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`} alt={name}
-						draggable={false}
-						priority={true}
-					/>
-				</div>
-
-				<div className="flex-grow flex justify-center">
-					<QuantityAdjuster
-						quantity={quantity}
-						onQuantityChange={handleQuantityChange}
-					/>
-				</div>
-
+			<div className='flex flex-row justify-evenly'>
+				<h3 className="text-xl font-bold text-gray-800 text-center pb-2">
+					{name}
+				</h3>
 				<div className="flex-none w-24 text-right px-5">
 					<p className="italic text-xl font-semibold text-gray-800">
 						{price === 0 ? 'Gratis' : `${price * quantity} kr`}
 					</p>
 				</div>
+			</div>
+			<div className="flex flex-row justify-evenly">
+				<AsyncImage
+					className="w-16 h-16"
+					width={40}
+					height={40}
+					quality={40}
+					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`} alt={name}
+					draggable={false}
+					priority={true}
+				/>
+				<QuantityAdjuster
+					quantity={quantity}
+					onQuantityChange={handleQuantityChange}
+				/>
 			</div>
 		</div>
 	)
