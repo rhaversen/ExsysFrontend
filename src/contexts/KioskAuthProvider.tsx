@@ -12,7 +12,7 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 
 	const checkAuthentication = useCallback(async (): Promise<void> => {
 		try {
-			await axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true })
+			await axios.get(`${API_URL}/v1/auth/is-authenticated`, { withCredentials: true })
 		} catch {
 			// Logout the user if they are not authenticated
 			await axios.post(`${API_URL}/v1/auth/logout-local`, { withCredentials: true })
@@ -21,14 +21,25 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 		}
 	}, [API_URL, router])
 
+	const checkAuthorization = useCallback(async (): Promise<void> => {
+		try {
+			await axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true })
+		} catch {
+			// Redirect to the login page
+			router.push('/login-kiosk')
+		}
+	}, [API_URL, router])
+
 	// Run the authentication check on component mount
 	useEffect(() => {
-		checkAuthentication().catch(addError)
+		// Must be done sequentially to lower database load
+		checkAuthentication().catch(checkAuthorization).catch(addError)
 	}, [addError, checkAuthentication])
 
 	// Continue running the authentication check every 10 seconds
 	useInterval(() => {
-		checkAuthentication().catch(addError)
+		// Must be done sequentially to lower database load
+		checkAuthentication().catch(checkAuthorization).catch(addError)
 	}, 1000 * 10)
 
 	return <>{children}</>
