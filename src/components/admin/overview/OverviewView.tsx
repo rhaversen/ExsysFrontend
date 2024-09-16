@@ -13,6 +13,7 @@ import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const OverviewView = ({
 	products,
@@ -26,128 +27,126 @@ const OverviewView = ({
 	activities: ActivityType[]
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [ordersWithNames, setOrdersWithNames] = useState<OrderTypeWithNames[]>([])
 	const [roomOrders, setRoomOrders] = useState<Record<RoomType['_id'], OrderTypeWithNames[]>>({})
 
-	const getOrders = useCallback(async () => {
-		const fromDate = new Date()
-		fromDate.setHours(0, 0, 0, 0)
-		const toDate = new Date()
-		toDate.setHours(24, 0, 0, 0)
+	const fetchOrders = useCallback(async () => {
+		const fromDate = new Date().setHours(0, 0, 0, 0)
+		const toDate = new Date().setHours(24, 0, 0, 0)
 
 		try {
-			const response = await axios.get(`${API_URL}/v1/orders?fromDate=${fromDate.toISOString()}&toDate=${toDate.toISOString()}&status=pending,confirmed&paymentStatus=successful`, { withCredentials: true })
-			const data = response.data as OrderType[]
+			const { data } = await axios.get(
+				`${API_URL}/v1/orders`,
+				{
+					params: {
+						fromDate: new Date(fromDate).toISOString(),
+						toDate: new Date(toDate).toISOString(),
+						status: 'pending,confirmed',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				}
+			)
 			setOrders(data)
-		} catch (error: any) {
+		} catch (error) {
+			addError(error)
 		}
 	}, [API_URL])
 
-	const handleOrdersUpdate = useCallback((orders: OrderType[]) => {
-		// Only update the orders that were changed
-		setOrders((prevOrders) => {
-			const newOrders = [...prevOrders]
-			orders.forEach((newOrder) => {
-				const index = newOrders.findIndex((order) => order._id === newOrder._id)
-				if (index === -1) return
-				if (newOrder.status === 'delivered') {
-					newOrders.splice(index, 1)
-					return
-				}
-				newOrders[index] = newOrder
-			})
-			return newOrders
-		})
+	const updateOrders = useCallback((updatedOrders: OrderType[]) => {
+		setOrders(prevOrders =>
+			prevOrders.map(order =>
+				updatedOrders.some(updated => updated._id === order._id && updated.status !== 'delivered')
+					? updatedOrders.find(updated => updated._id === order._id) || order
+					: order
+			).filter(order => order.status !== 'delivered')
+		)
 	}, [])
 
-	const addNamesToOrders = useCallback(() => {
-		return orders.map((order) => ({
+	const enrichOrdersWithNames = useCallback(() =>
+		orders.map(order => ({
 			...order,
-			products: order.products.map((product) => ({
+			products: order.products.map(product => ({
 				...product,
-				name: products.find((p) => p._id === product.id)?.name ?? 'Ukendt vare'
+				name: products.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
 			})),
-			options: order.options.map((option) => ({
+			options: order.options.map(option => ({
 				...option,
-				name: options.find((o) => o._id === option.id)?.name ?? 'Ukendt tilvalg'
+				name: options.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
 			}))
 		}))
-	}, [orders, products, options])
+		, [orders, products, options])
 
-	const groupOrdersByRoom = useCallback(() => {
-		const roomOrders: Record<string, OrderTypeWithNames[]> = {} // Use string for room name indexing
-		ordersWithNames.forEach((order) => {
-			// Find the activity corresponding to the order
-			const activity = activities.find(activity => activity._id === order.activityId)
-			if (activity === undefined) return // Skip if no activity found
-
-			// Find the room using the roomId from the found activity
-			const room = rooms.find(room => room._id === activity.roomId?._id)
-
+	const organizeOrdersByRoom = useCallback(() => {
+		return ordersWithNames.reduce((acc, order) => {
+			const activity = activities.find(a => a._id === order.activityId)
+			const room = rooms.find(r => r._id === activity?.roomId?._id)
 			const roomName = room?.name ?? 'no-room'
-			if (roomOrders[roomName] === undefined) {
-				roomOrders[roomName] = []
+
+			if (!acc[roomName]) {
+				acc[roomName] = []
 			}
-			roomOrders[roomName].push(order)
-		})
-		return roomOrders
+			acc[roomName].push(order)
+
+			return acc
+		}, {} as Record<string, OrderTypeWithNames[]>)
 	}, [ordersWithNames, rooms, activities])
 
 	useEffect(() => {
-		setRoomOrders(groupOrdersByRoom())
-	}, [setRoomOrders, groupOrdersByRoom])
+		setOrdersWithNames(enrichOrdersWithNames())
+	}, [orders, enrichOrdersWithNames])
 
 	useEffect(() => {
-		setOrdersWithNames(addNamesToOrders())
-	}, [setOrdersWithNames, addNamesToOrders])
+		setRoomOrders(organizeOrdersByRoom())
+	}, [ordersWithNames, organizeOrdersByRoom])
 
-	useInterval(getOrders, 1000 * 10) // Fetch orders every 10 seconds
+	useInterval(fetchOrders, 10000) // Fetch orders every 10 seconds
 
 	return (
 		<div>
-			{orders.length === 0 &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Ingen Ordrer '}&#128522;</p>
-			}
-			{orders.length === 0 &&
-				<div
-					className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center"
-				>
-					<Image
-						src="/orderStation/loading.svg"
-						alt="loading"
-						priority // Load image immediately
-						draggable="false"
-						width={100}
-						height={100}
-					/>
+			{!orders.length ? (
+				<>
+					<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">Ingen Ordrer &#128522;</p>
+					<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
+						<Image
+							src="/orderStation/loading.svg"
+							alt="loading"
+							priority
+							draggable="false"
+							width={100}
+							height={100}
+						/>
+					</div>
+				</>
+			) : (
+				<div className="flex flex-row flex-wrap justify-evenly">
+					{rooms.filter(room => roomOrders[room.name]?.length).map(room => (
+						<RoomCol
+							key={room._id}
+							room={room}
+							orders={roomOrders[room.name] ?? []}
+							onUpdatedOrders={updateOrders}
+						/>
+					))}
+					{roomOrders['no-room']?.length > 0 && (
+						<RoomCol
+							key="no-room"
+							room={{
+								_id: 'no-room',
+								name: 'Ukendt Rum',
+								description: 'Aktivitet har intet rum tildelt',
+								createdAt: '',
+								updatedAt: ''
+							}}
+							orders={roomOrders['no-room']}
+							onUpdatedOrders={updateOrders}
+						/>
+					)}
 				</div>
-			}
-			<div className="flex flex-row flex-wrap justify-evenly">
-				{rooms.filter(room => roomOrders[room.name] !== undefined && roomOrders[room.name].length > 0).map((room) => (
-					<RoomCol
-						key={room._id}
-						room={room}
-						orders={roomOrders[room.name] ?? []}
-						onUpdatedOrders={handleOrdersUpdate}
-					/>
-				))}
-				{roomOrders['no-room'] !== undefined && roomOrders['no-room'].length > 0 &&
-					<RoomCol
-						key="no-room"
-						room={{
-							_id: 'no-room',
-							name: 'Ukendt Rum',
-							description: 'Aktivitet har intet rum tildelt',
-							createdAt: '',
-							updatedAt: ''
-						}}
-						orders={roomOrders['no-room'] ?? []}
-						onUpdatedOrders={handleOrdersUpdate}
-					/>
-				}
-			</div>
+			)}
 		</div>
 	)
 }
