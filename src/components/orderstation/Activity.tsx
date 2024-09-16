@@ -6,13 +6,13 @@ const Activity = ({
 	onActivitySelect
 }: {
 	activity: ActivityType
-	onActivitySelect: (activityId: ActivityType['_id']) => void
+	onActivitySelect: (activity: ActivityType) => void
 }): ReactElement => {
 	return (
 		<button
 			type="button"
 			onClick={() => {
-				onActivitySelect(activity._id)
+				onActivitySelect(activity)
 			}}
 			className="p-10 m-5 bg-white rounded shadow-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
 		>
