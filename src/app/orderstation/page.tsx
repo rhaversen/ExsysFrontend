@@ -67,7 +67,6 @@ export default function Page (): ReactElement {
 
 		if (kioskActivities.length === 1) {
 			setSelectedActivity(activities[0])
-			console.log('Selected activity:', activities[0])
 		}
 
 		setActivities(kioskActivities)

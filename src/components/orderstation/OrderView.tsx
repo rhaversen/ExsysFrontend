@@ -54,7 +54,6 @@ const OrderView = ({
 
 	// Calculate total price
 	useEffect(() => {
-		console.log('useEffect')
 		const calculatedPrice = (
 			Object.entries(cart.products).reduce((acc, [_id, quantity]) => acc + (products.find(product => product._id === _id)?.price ?? 0) * quantity, 0) +
 			Object.entries(cart.options).reduce((acc, [_id, quantity]) => acc + (options.find(option => option._id === _id)?.price ?? 0) * quantity, 0)
@@ -63,7 +62,6 @@ const OrderView = ({
 	}, [cart, options, products])
 
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
-		console.log('handleCartChange')
 		// Copy the cart object
 		const newCart = { ...cart }
 		// If the item is not in the cart, add it with a quantity of 0
