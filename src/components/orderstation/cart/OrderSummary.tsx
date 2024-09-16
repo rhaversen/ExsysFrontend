@@ -16,6 +16,7 @@ const OrderSummary = ({
 }): ReactElement => {
 	const endOfCartRef = useRef<HTMLDivElement | null>(null)
 	const [cartItems, setCartItems] = useState<CartItemType[]>([])
+	const [prevCartLength, setPrevCartLength] = useState(cartItems.length)
 
 	const getCartItems = useCallback(() => {
 		return [...Object.entries(cart.products), ...Object.entries(cart.options)].map(([id, quantity]) => {
@@ -33,8 +34,7 @@ const OrderSummary = ({
 				price: item.price,
 				type,
 				quantity,
-				imageURL: item.imageURL,
-				isNew: true // mark as new item
+				imageURL: item.imageURL
 			}
 		})
 	}, [cart, products, options])
@@ -42,23 +42,16 @@ const OrderSummary = ({
 	// Update the cart items when the cart changes
 	useEffect(() => {
 		const newCartItems = getCartItems()
-		setCartItems((prevItems) => {
-			return newCartItems.map((item) => {
-				const prevItem = prevItems.find((prevItem) => prevItem.id === item.id)
-				return {
-					...item,
-					isNew: prevItem === undefined // update isNew flag
-				}
-			})
-		})
+		setCartItems(newCartItems)
 	}, [cart, getCartItems, setCartItems])
 
 	useEffect(() => {
-		const isNewItem = cartItems.some((item) => item.isNew)
-		if (isNewItem) {
+		const cartLengthIncreased = cartItems.length > prevCartLength
+		setPrevCartLength(cartItems.length)
+		if (cartLengthIncreased) {
 			endOfCartRef.current?.scrollIntoView({ behavior: 'smooth' })
 		}
-	}, [cartItems, endOfCartRef])
+	}, [cartItems, endOfCartRef, prevCartLength])
 
 	return (
 		<div className="pt-2">

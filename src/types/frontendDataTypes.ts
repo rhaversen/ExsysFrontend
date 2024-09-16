@@ -7,7 +7,6 @@ export interface CartItemType {
 	type: 'products' | 'options'
 	quantity: number
 	imageURL: string | undefined
-	isNew: boolean
 }
 
 export interface CartType {
