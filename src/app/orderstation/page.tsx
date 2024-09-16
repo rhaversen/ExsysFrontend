@@ -1,74 +1,117 @@
 'use client'
 
-import Activity from '@/components/orderstation/Activity'
+import ActivitySelection from '@/components/orderstation/ActivitySelection'
+import OrderView from '@/components/orderstation/OrderView'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskTypeNonPopulated } from '@/types/backendDataTypes'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import {
+	type ActivityType,
+	type KioskTypeNonPopulated,
+	type OptionType,
+	type ProductType
+} from '@/types/backendDataTypes'
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const [activities, setActivities] = useState<ActivityType[]>([])
-
-	const router = useRouter()
 	const { addError } = useError()
 
-	const fetchActivities = useCallback(async () => {
-		const [kioskResponse, activitiesResponse] = await Promise.all([
-			axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true }),
-			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+	const [products, setProducts] = useState<ProductType[]>([])
+	const [options, setOptions] = useState<OptionType[]>([])
+	const [kiosk, setKiosk] = useState<KioskTypeNonPopulated | null>(null)
+	const [checkoutMethods, setCheckoutMethods] = useState({
+		sumUp: false,
+		cash: false,
+		mobilePay: false
+	})
+	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
+	const [activities, setActivities] = useState<ActivityType[]>([])
+
+	// Helper function to fetch data with error handling
+	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
+		await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
+	}, [addError])
+
+	// Fetch products and options
+	const loadProductsAndOptions = useCallback(async (): Promise<void> => {
+		const [productsData, optionsData] = await Promise.all([
+			fetchData(`${API_URL}/v1/products`),
+			fetchData(`${API_URL}/v1/options`)
 		])
 
-		const kiosk = kioskResponse.data as KioskTypeNonPopulated
-		const activities = activitiesResponse.data as ActivityType[]
+		const processedProducts: ProductType[] = productsData.map((product: ProductType) => ({
+			...product,
+			orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+		}))
 
-		const kioskActivities = activities.filter(activity =>
-			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
+		setProducts(processedProducts)
+		setOptions(optionsData as OptionType[])
+	}, [API_URL, fetchData])
+
+	// Fetch kiosk information
+	const loadKioskInfo = useCallback(async (): Promise<void> => {
+		const kioskData: KioskTypeNonPopulated = await fetchData(`${API_URL}/v1/kiosks/me`)
+		setKiosk(kioskData)
+		setCheckoutMethods(prev => ({
+			...prev,
+			sumUp: kioskData.readerId !== null
+		}))
+	}, [API_URL, fetchData])
+
+	// Fetch activities and related kiosk activities
+	const loadActivities = useCallback(async (): Promise<void> => {
+		const [kioskData, activitiesData]: [KioskTypeNonPopulated, ActivityType[]] = await Promise.all([
+			fetchData(`${API_URL}/v1/kiosks/me`),
+			fetchData(`${API_URL}/v1/activities`)
+		])
+
+		const kioskActivities = activitiesData.filter(activity =>
+			kioskData.activities.some(kioskActivity => kioskActivity._id === activity._id)
 		)
 
 		setActivities(kioskActivities)
-	}, [API_URL, setActivities])
 
+		if (kioskActivities.length === 1) {
+			setSelectedActivity(kioskActivities[0])
+		}
+	}, [API_URL, fetchData])
+
+	// Initial data fetching on component mount
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
-		fetchActivities().catch((error) => {
-			addError(error)
-		})
-	}, [API_URL, addError, fetchActivities])
 
-	useEffect(() => {
-		if (activities.length === 1) {
-			router.push(`/orderstation/${activities[0]._id}`)
-		}
-	}, [activities, router, addError])
+		Promise.all([
+			loadProductsAndOptions(),
+			loadKioskInfo(),
+			loadActivities()
+		]).catch(addError)
+	}, [API_URL, addError, loadActivities, loadKioskInfo, loadProductsAndOptions])
 
-	const handleActivitySelect = useCallback((activityId: ActivityType['_id']): void => {
-		router.push(`/orderstation/${activityId}`)
-	}, [router])
-
-	useInterval(fetchActivities, 1000 * 60 * 60) // Fetch rooms every hour
+	// Set up intervals to refetch data every hour
+	useInterval(loadProductsAndOptions, 1000 * 60 * 60) // Every hour
+	useInterval(loadActivities, 1000 * 60 * 60) // Every hour
+	useInterval(loadKioskInfo, 1000 * 60 * 60) // Every hour
 
 	return (
-		<main className="flex flex-col justify-center items-center h-screen">
-			<h1 className="m-10 p-0 text-center text-gray-800 text-4xl">{'Bestil til aktivitet:'}</h1>
-			<div className="flex flex-wrap justify-center items-center p-20">
-				{activities.map((activity) => (
-					<Activity
-						key={activity._id}
-						activity={activity}
-						onActivitySelect={handleActivitySelect}
-					/>
-				))}
-				{activities.length === 0 && (
-					<div>
-						<p className="text-center text-gray-800 text-2xl">{'Der er ikke fundet nogle aktiviteter'}</p>
-						<p className="text-center text-gray-800 text-2xl">{'Kontakt venligst personalet'}</p>
-					</div>
-				)}
-			</div>
-		</main>
+		<div>
+			{selectedActivity === null && (
+				<ActivitySelection
+					activities={activities}
+					onActivitySelect={setSelectedActivity}
+				/>
+			)}
+			{selectedActivity !== null && kiosk !== null && (
+				<OrderView
+					kiosk={kiosk}
+					products={products}
+					options={options}
+					activity={selectedActivity}
+					checkoutMethods={checkoutMethods}
+					onClose={() => { setSelectedActivity(null) }}
+				/>
+			)}
+		</div>
 	)
 }
