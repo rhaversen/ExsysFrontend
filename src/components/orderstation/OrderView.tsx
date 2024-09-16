@@ -66,22 +66,29 @@ const OrderView = ({
 
 	// Handler to change cart items using functional updates
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
-		// Copy the cart object
-		const newCart = { ...cart }
-		// If the item is not in the cart, add it with a quantity of 0
-		if (newCart[type][_id] === undefined) newCart[type][_id] = 0
-		// Change the quantity of the item
-		newCart[type][_id] += change
-		// If the quantity is 0 or less, remove the item from the cart
-		if (newCart[type][_id] <= 0) {
-			newCart[type] = Object.entries(newCart[type]).reduce<CartType[typeof type]>((acc, [key, value]) => {
-				// If the item is not the one to remove, add it to the accumulator
-				if (key !== _id) acc[key] = value
-				return acc
-			}, {})
-		}
-		setCart(newCart)
-	}, [cart])
+		setCart((prevCart) => {
+			const currentQuantity = prevCart[type][_id] === 0 || isNaN(prevCart[type][_id]) ? 0 : prevCart[type][_id]
+			const newQuantity = currentQuantity + change
+
+			// If the new quantity is less than or equal to zero, remove the item
+			if (newQuantity <= 0) {
+				const { [_id]: _, ...updatedItems } = prevCart[type]
+				return {
+					...prevCart,
+					[type]: updatedItems
+				}
+			}
+
+			// Otherwise, update the quantity of the item
+			return {
+				...prevCart,
+				[type]: {
+					...prevCart[type],
+					[_id]: newQuantity
+				}
+			}
+		})
+	}, [])
 
 	// Polling Payment Status
 	useInterval(() => {
