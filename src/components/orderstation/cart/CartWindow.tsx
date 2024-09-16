@@ -38,6 +38,7 @@ const CartWindow = ({
 					<p className="text-center italic text-xl text-gray-500">
 						{'Din kurv er tom'}
 						<br />
+						<br />
 						{'Vælg produkter'}
 					</p>
 				</div>
