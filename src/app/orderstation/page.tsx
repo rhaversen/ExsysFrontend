@@ -29,70 +29,71 @@ export default function Page (): ReactElement {
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
 
-	const fetchProductsAndOptions = useCallback(async () => {
-		const productsResponse = await axios.get(`${API_URL}/v1/products`, { withCredentials: true })
-		const products = productsResponse.data as ProductType[]
-		products.forEach(product => {
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-		})
-		setProducts(products)
+	// Helper function to fetch data with error handling
+	const fetchData = async (url: string, config = {}): Promise<any> => {
+		const response = await axios.get(url, { withCredentials: true, ...config })
+		return response.data
+	}
 
-		const optionsResponse = await axios.get(`${API_URL}/v1/options`, { withCredentials: true })
-		const options = optionsResponse.data as OptionType[]
-		setOptions(options)
+	// Fetch products and options
+	const loadProductsAndOptions = useCallback(async (): Promise<void> => {
+		const [productsData, optionsData] = await Promise.all([
+			fetchData(`${API_URL}/v1/products`),
+			fetchData(`${API_URL}/v1/options`)
+		])
+
+		const processedProducts: ProductType[] = productsData.map((product: ProductType) => ({
+			...product,
+			orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+		}))
+
+		setProducts(processedProducts)
+		setOptions(optionsData as OptionType[])
 	}, [API_URL])
 
-	const fetchKioskInfo = useCallback(async () => {
-		const kioskResponse = await axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
-		const kiosk = kioskResponse.data as KioskTypeNonPopulated
-		setKiosk(kiosk)
+	// Fetch kiosk information
+	const loadKioskInfo = useCallback(async (): Promise<void> => {
+		const kioskData: KioskTypeNonPopulated = await fetchData(`${API_URL}/v1/kiosks/me`)
+		setKiosk(kioskData)
 		setCheckoutMethods(prev => ({
 			...prev,
-			sumUp: kiosk.readerId !== null
+			sumUp: kioskData.readerId !== null
 		}))
 	}, [API_URL])
 
-	const fetchActivities = useCallback(async () => {
-		const [kioskResponse, activitiesResponse] = await Promise.all([
-			axios.get(`${API_URL}/v1/kiosks/me`, { withCredentials: true }),
-			axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+	// Fetch activities and related kiosk activities
+	const loadActivities = useCallback(async (): Promise<void> => {
+		const [kioskData, activitiesData]: [KioskTypeNonPopulated, ActivityType[]] = await Promise.all([
+			fetchData(`${API_URL}/v1/kiosks/me`),
+			fetchData(`${API_URL}/v1/activities`)
 		])
 
-		const kiosk = kioskResponse.data as KioskTypeNonPopulated
-		const activities = activitiesResponse.data as ActivityType[]
-
-		const kioskActivities = activities.filter(activity =>
-			kiosk.activities.some(kioskActivity => kioskActivity._id === activity._id)
+		const kioskActivities = activitiesData.filter(activity =>
+			kioskData.activities.some(kioskActivity => kioskActivity._id === activity._id)
 		)
 
-		if (kioskActivities.length === 1) {
-			setSelectedActivity(activities[0])
-		}
-
 		setActivities(kioskActivities)
-	}, [API_URL, setActivities])
 
+		if (kioskActivities.length === 1) {
+			setSelectedActivity(kioskActivities[0])
+		}
+	}, [API_URL])
+
+	// Initial data fetching on component mount
 	useEffect(() => {
-		if (API_URL === null) return
-		fetchActivities().catch((error) => {
-			addError(error)
-		})
-	}, [API_URL, addError, fetchActivities])
+		if (API_URL === undefined || API_URL === null || API_URL === '') return
 
-	// Fetch products and options on mount
-	useEffect(() => {
-		if (API_URL === null) return
-		fetchProductsAndOptions().catch(addError)
-	}, [API_URL, fetchProductsAndOptions, addError])
+		Promise.all([
+			loadProductsAndOptions(),
+			loadKioskInfo(),
+			loadActivities()
+		]).catch(addError)
+	}, [API_URL, addError, loadActivities, loadKioskInfo, loadProductsAndOptions])
 
-	// Fetch kiosk info
-	useEffect(() => {
-		if (API_URL === null) return
-		fetchKioskInfo().catch(addError)
-	}, [API_URL, fetchKioskInfo, addError])
-
-	useInterval(fetchProductsAndOptions, 1000 * 60 * 60) // Fetch products and options every hour
-	useInterval(fetchActivities, 1000 * 60 * 60) // Fetch activities every hour
+	// Set up intervals to refetch data every hour
+	useInterval(loadProductsAndOptions, 1000 * 60 * 60) // Every hour
+	useInterval(loadActivities, 1000 * 60 * 60) // Every hour
+	useInterval(loadKioskInfo, 1000 * 60 * 60) // Every hour
 
 	return (
 		<div>
