@@ -26,7 +26,7 @@ const Item = ({
 
 	return (
 		<div className="py-3">
-			<div className='flex flex-row justify-evenly pb-1'>
+			<div className="flex flex-row justify-evenly pb-1">
 				<h3 className="text-xl font-bold text-gray-800">
 					{name}
 				</h3>
