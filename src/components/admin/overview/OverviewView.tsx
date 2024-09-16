@@ -19,7 +19,7 @@ const OverviewView = ({
 	products,
 	options,
 	rooms,
-	activities,
+	activities
 }: {
 	products: ProductType[]
 	options: OptionType[]

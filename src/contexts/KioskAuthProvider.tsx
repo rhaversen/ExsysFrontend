@@ -34,7 +34,7 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 	useEffect(() => {
 		// Must be done sequentially to lower database load
 		checkAuthentication().catch(checkAuthorization).catch(addError)
-	}, [addError, checkAuthentication])
+	}, [addError, checkAuthentication, checkAuthorization])
 
 	// Continue running the authentication check every 10 seconds
 	useInterval(() => {

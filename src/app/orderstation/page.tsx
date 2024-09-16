@@ -30,10 +30,9 @@ export default function Page (): ReactElement {
 	const [activities, setActivities] = useState<ActivityType[]>([])
 
 	// Helper function to fetch data with error handling
-	const fetchData = async (url: string, config = {}): Promise<any> => {
-		const response = await axios.get(url, { withCredentials: true, ...config })
-		return response.data
-	}
+	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
+		await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
+	}, [addError])
 
 	// Fetch products and options
 	const loadProductsAndOptions = useCallback(async (): Promise<void> => {
@@ -49,7 +48,7 @@ export default function Page (): ReactElement {
 
 		setProducts(processedProducts)
 		setOptions(optionsData as OptionType[])
-	}, [API_URL])
+	}, [API_URL, fetchData])
 
 	// Fetch kiosk information
 	const loadKioskInfo = useCallback(async (): Promise<void> => {
@@ -59,7 +58,7 @@ export default function Page (): ReactElement {
 			...prev,
 			sumUp: kioskData.readerId !== null
 		}))
-	}, [API_URL])
+	}, [API_URL, fetchData])
 
 	// Fetch activities and related kiosk activities
 	const loadActivities = useCallback(async (): Promise<void> => {
@@ -77,7 +76,7 @@ export default function Page (): ReactElement {
 		if (kioskActivities.length === 1) {
 			setSelectedActivity(kioskActivities[0])
 		}
-	}, [API_URL])
+	}, [API_URL, fetchData])
 
 	// Initial data fetching on component mount
 	useEffect(() => {
