@@ -31,11 +31,13 @@ export default function Page (): ReactElement {
 
 	// Helper function to fetch data with error handling
 	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
-		await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
+		return await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
 	}, [addError])
 
 	// Fetch products and options
 	const loadProductsAndOptions = useCallback(async (): Promise<void> => {
+		if (API_URL === undefined || API_URL === null || API_URL === '') return
+
 		const [productsData, optionsData] = await Promise.all([
 			fetchData(`${API_URL}/v1/products`),
 			fetchData(`${API_URL}/v1/options`)
@@ -52,6 +54,8 @@ export default function Page (): ReactElement {
 
 	// Fetch kiosk information
 	const loadKioskInfo = useCallback(async (): Promise<void> => {
+		if (API_URL === undefined || API_URL === null || API_URL === '') return
+
 		const kioskData: KioskTypeNonPopulated = await fetchData(`${API_URL}/v1/kiosks/me`)
 		setKiosk(kioskData)
 		setCheckoutMethods(prev => ({
@@ -62,6 +66,8 @@ export default function Page (): ReactElement {
 
 	// Fetch activities and related kiosk activities
 	const loadActivities = useCallback(async (): Promise<void> => {
+		if (API_URL === undefined || API_URL === null || API_URL === '') return
+
 		const [kioskData, activitiesData]: [KioskTypeNonPopulated, ActivityType[]] = await Promise.all([
 			fetchData(`${API_URL}/v1/kiosks/me`),
 			fetchData(`${API_URL}/v1/activities`)
