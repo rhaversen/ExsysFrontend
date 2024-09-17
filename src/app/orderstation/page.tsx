@@ -31,7 +31,7 @@ export default function Page (): ReactElement {
 
 	// Helper function to fetch data with error handling
 	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
-		await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
+		return await axios.get(url, { withCredentials: true, ...config }).then(res => { return res.data }).catch(addError)
 	}, [addError])
 
 	// Fetch products and options
