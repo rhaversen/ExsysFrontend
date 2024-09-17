@@ -16,7 +16,9 @@ import Product from '@/components/admin/modify/Product'
 import Reader from '@/components/admin/modify/Reader'
 import Room from '@/components/admin/modify/Room'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import type sortConfig from '@/lib/SortConfig'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type AdminType,
@@ -26,70 +28,25 @@ import {
 	type ReaderType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { useInterval } from 'react-use'
 import SortingControl from './SortingControl'
 
-const ModifyView = ({
-	products,
-	options,
-	rooms,
-	activities,
-	kiosks,
-	admins,
-	readers,
-	onUpdatedProduct,
-	onDeletedProduct,
-	onAddedProduct,
-	onUpdatedOption,
-	onDeletedOption,
-	onAddedOption,
-	onUpdatedRoom,
-	onDeletedRoom,
-	onAddedRoom,
-	onAddedActivity,
-	onUpdatedActivity,
-	onDeletedActivity,
-	onAddedKiosk,
-	onUpdatedKiosk,
-	onDeletedKiosk,
-	onAddedAdmin,
-	onUpdatedAdmin,
-	onDeletedAdmin,
-	onAddedReader,
-	onUpdatedReader,
-	onDeletedReader
-}: {
-	products: ProductType[]
-	options: OptionType[]
-	rooms: RoomType[]
-	activities: ActivityType[]
-	kiosks: KioskType[]
-	admins: AdminType[]
-	readers: ReaderType[]
-	onUpdatedProduct: (product: ProductType) => void
-	onDeletedProduct: (id: string) => void
-	onAddedProduct: (product: ProductType) => void
-	onUpdatedOption: (option: OptionType) => void
-	onDeletedOption: (id: string) => void
-	onAddedOption: (option: OptionType) => void
-	onUpdatedRoom: (room: RoomType) => void
-	onDeletedRoom: (id: string) => void
-	onAddedRoom: (room: RoomType) => void
-	onAddedActivity: (activity: ActivityType) => void
-	onUpdatedActivity: (activity: ActivityType) => void
-	onDeletedActivity: (id: string) => void
-	onAddedKiosk: (kiosk: KioskType) => void
-	onUpdatedKiosk: (kiosk: KioskType) => void
-	onDeletedKiosk: (id: string) => void
-	onAddedAdmin: (admin: AdminType) => void
-	onUpdatedAdmin: (admin: AdminType) => void
-	onDeletedAdmin: (id: string) => void
-	onAddedReader: (reader: ReaderType) => void
-	onUpdatedReader: (reader: ReaderType) => void
-	onDeletedReader: (id: string) => void
-}): ReactElement => {
+const ModifyView = (): ReactElement => {
+	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
+
 	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
+
+	const [products, setProducts] = useState<ProductType[]>([])
+	const [options, setOptions] = useState<OptionType[]>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
+	const [kiosks, setKiosks] = useState<KioskType[]>([])
+	const [admins, setAdmins] = useState<AdminType[]>([])
+	const [readers, setReaders] = useState<ReaderType[]>([])
 
 	const [showAddRoom, setShowAddRoom] = useState(false)
 	const [showAddOption, setShowAddOption] = useState(false)
@@ -135,6 +92,219 @@ const ModifyView = ({
 		})
 	}
 
+	const getProducts = useCallback(async () => {
+		try {
+			const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
+			const products = productsResponse.data as ProductType[]
+			// Convert orderWindow to local time for all products
+			products.forEach((product) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			})
+			setProducts(products)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getOptions = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/options', { withCredentials: true })
+			const data = response.data as OptionType[]
+			setOptions(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getRooms = useCallback(async () => {
+		try {
+			const roomsResponse = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
+			const rooms = roomsResponse.data as RoomType[]
+			setRooms(rooms)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getActivities = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/activities', { withCredentials: true })
+			const data = response.data as ActivityType[]
+			setActivities(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getKiosks = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/kiosks', { withCredentials: true })
+			const data = response.data as KioskType[]
+			setKiosks(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getAdmins = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/admins', { withCredentials: true })
+			const data = response.data as AdminType[]
+			setAdmins(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getReaders = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/readers', { withCredentials: true })
+			const data = response.data as ReaderType[]
+			setReaders(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const fetchData = useCallback(() => {
+		Promise.all([
+			getRooms(),
+			getProducts(),
+			getOptions(),
+			getActivities(),
+			getKiosks(),
+			getAdmins(),
+			getReaders()
+		]).catch((error: any) => {
+			addError(error)
+		})
+	}, [getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins, getReaders])
+
+	const handleUpdateProduct = useCallback((product: ProductType) => {
+		setProducts((prevProducts) => {
+			const index = prevProducts.findIndex((p) => p._id === product._id)
+			if (index === -1) return prevProducts
+			const newProducts = [...prevProducts]
+			newProducts[index] = product
+			return newProducts
+		})
+	}, [])
+
+	const handleDeleteProduct = useCallback((id: string) => {
+		setProducts((prevProducts) => prevProducts.filter((p) => p._id !== id))
+	}, [])
+
+	const handleAddProduct = useCallback((product: ProductType) => {
+		setProducts((prevProducts) => [...prevProducts, product])
+	}, [])
+
+	const handleUpdateOption = useCallback((option: OptionType) => {
+		setOptions((prevOptions) => {
+			const index = prevOptions.findIndex((o) => o._id === option._id)
+			if (index === -1) return prevOptions
+			const newOptions = [...prevOptions]
+			newOptions[index] = option
+			return newOptions
+		})
+	}, [])
+
+	const handleDeleteOption = useCallback((id: string) => {
+		setOptions((prevOptions) => prevOptions.filter((o) => o._id !== id))
+	}, [])
+
+	const handleAddOption = useCallback((option: OptionType) => {
+		setOptions((prevOptions) => [...prevOptions, option])
+	}, [])
+
+	const handleUpdateRoom = useCallback((room: RoomType) => {
+		setRooms((prevRooms) => {
+			const index = prevRooms.findIndex((r) => r._id === room._id)
+			if (index === -1) return prevRooms
+			const newRooms = [...prevRooms]
+			newRooms[index] = room
+			return newRooms
+		})
+	}, [])
+
+	const handleDeleteRoom = useCallback((id: string) => {
+		setRooms((prevRooms) => prevRooms.filter((r) => r._id !== id))
+	}, [])
+
+	const handleAddRoom = useCallback((room: RoomType) => {
+		setRooms((prevRooms) => [...prevRooms, room])
+	}, [])
+
+	const handleUpdateActivity = useCallback((activity: ActivityType) => {
+		setActivities((prevActivities) => {
+			const index = prevActivities.findIndex((a) => a._id === activity._id)
+			if (index === -1) return prevActivities
+			const newActivities = [...prevActivities]
+			newActivities[index] = activity
+			return newActivities
+		})
+	}, [])
+
+	const handleDeleteActivity = useCallback((id: string) => {
+		setActivities((prevActivities) => prevActivities.filter((a) => a._id !== id))
+	}, [])
+
+	const handleAddActivity = useCallback((activity: ActivityType) => {
+		setActivities((prevActivities) => [...prevActivities, activity])
+	}, [])
+
+	const handleUpdateKiosk = useCallback((kiosk: KioskType) => {
+		setKiosks((prevKiosks) => {
+			const index = prevKiosks.findIndex((k) => k._id === kiosk._id)
+			if (index === -1) return prevKiosks
+			const newKiosks = [...prevKiosks]
+			newKiosks[index] = kiosk
+			return newKiosks
+		})
+	}, [])
+
+	const handleDeleteKiosk = useCallback((id: string) => {
+		setKiosks((prevKiosks) => prevKiosks.filter((k) => k._id !== id))
+	}, [])
+
+	const handleAddKiosk = useCallback((kiosk: KioskType) => {
+		setKiosks((prevKiosks) => [...prevKiosks, kiosk])
+	}, [])
+
+	const handleUpdateAdmin = useCallback((admin: AdminType) => {
+		setAdmins((prevAdmins) => {
+			const index = prevAdmins.findIndex((a) => a._id === admin._id)
+			if (index === -1) return prevAdmins
+			const newAdmins = [...prevAdmins]
+			newAdmins[index] = admin
+			return newAdmins
+		})
+	}, [])
+
+	const handleDeleteAdmin = useCallback((id: string) => {
+		setAdmins((prevAdmins) => prevAdmins.filter((a) => a._id !== id))
+	}, [])
+
+	const handleAddAdmin = useCallback((admin: AdminType) => {
+		setAdmins((prevAdmins) => [...prevAdmins, admin])
+	}, [])
+
+	const handleUpdateReader = useCallback((reader: ReaderType) => {
+		setReaders((prevReaders) => {
+			const index = prevReaders.findIndex((r) => r._id === reader._id)
+			if (index === -1) return prevReaders
+			const newReaders = [...prevReaders]
+			newReaders[index] = reader
+			return newReaders
+		})
+	}, [])
+
+	const handleDeleteReader = useCallback((id: string) => {
+		setReaders((prevReaders) => prevReaders.filter((r) => r._id !== id))
+	}, [])
+
+	const handleAddReader = useCallback((reader: ReaderType) => {
+		setReaders((prevReaders) => [...prevReaders, reader])
+	}, [])
+
+	useEffect(() => {
+		fetchData()
+	}, [fetchData])
+
+	useInterval(fetchData, 1000 * 60 * 60) // Fetch data every hour
+
 	return (
 		<div>
 			<ViewSelectionBar
@@ -167,8 +337,8 @@ const ModifyView = ({
 							<Product
 								options={options}
 								product={product}
-								onProductPatched={onUpdatedProduct}
-								onProductDeleted={onDeletedProduct}
+								onProductPatched={handleUpdateProduct}
+								onProductDeleted={handleDeleteProduct}
 							/>
 						</div>
 					))}
@@ -188,8 +358,8 @@ const ModifyView = ({
 						>
 							<Option
 								option={option}
-								onOptionPatched={onUpdatedOption}
-								onOptionDeleted={onDeletedOption}
+								onOptionPatched={handleUpdateOption}
+								onOptionDeleted={handleDeleteOption}
 							/>
 						</div>
 					))}
@@ -210,8 +380,8 @@ const ModifyView = ({
 							<Room
 								rooms={rooms}
 								room={room}
-								onRoomPatched={onUpdatedRoom}
-								onRoomDeleted={onDeletedRoom}
+								onRoomPatched={handleUpdateRoom}
+								onRoomDeleted={handleDeleteRoom}
 							/>
 						</div>
 					))}
@@ -232,8 +402,8 @@ const ModifyView = ({
 							<Activity
 								activity={activity}
 								rooms={rooms}
-								onActivityPatched={onUpdatedActivity}
-								onActivityDeleted={onDeletedActivity}
+								onActivityPatched={handleUpdateActivity}
+								onActivityDeleted={handleDeleteActivity}
 							/>
 						</div>
 					))}
@@ -256,8 +426,8 @@ const ModifyView = ({
 								kiosk={kiosk}
 								activities={activities}
 								readers={readers}
-								onKioskPatched={onUpdatedKiosk}
-								onKioskDeleted={onDeletedKiosk}
+								onKioskPatched={handleUpdateKiosk}
+								onKioskDeleted={handleDeleteKiosk}
 							/>
 						</div>
 					))}
@@ -278,8 +448,8 @@ const ModifyView = ({
 							<Admin
 								admins={admins}
 								admin={admin}
-								onAdminPatched={onUpdatedAdmin}
-								onAdminDeleted={onDeletedAdmin}
+								onAdminPatched={handleUpdateAdmin}
+								onAdminDeleted={handleDeleteAdmin}
 							/>
 						</div>
 					))}
@@ -300,8 +470,8 @@ const ModifyView = ({
 							<Reader
 								readers={readers}
 								reader={reader}
-								onReaderPatched={onUpdatedReader}
-								onReaderDeleted={onDeletedReader}
+								onReaderPatched={handleUpdateReader}
+								onReaderDeleted={handleDeleteReader}
 							/>
 						</div>
 					))}
@@ -310,7 +480,7 @@ const ModifyView = ({
 			{showAddProduct &&
 				<AddProduct
 					options={options}
-					onProductPosted={onAddedProduct}
+					onProductPosted={handleAddProduct}
 					onClose={() => {
 						setShowAddProduct(false)
 					}}
@@ -318,7 +488,7 @@ const ModifyView = ({
 			}
 			{showAddOption &&
 				<AddOption
-					onOptionPosted={onAddedOption}
+					onOptionPosted={handleAddOption}
 					onClose={() => {
 						setShowAddOption(false)
 					}}
@@ -327,7 +497,7 @@ const ModifyView = ({
 			{showAddRoom &&
 				<AddRoom
 					rooms={rooms}
-					onRoomPosted={onAddedRoom}
+					onRoomPosted={handleAddRoom}
 					onClose={() => {
 						setShowAddRoom(false)
 					}}
@@ -336,7 +506,7 @@ const ModifyView = ({
 			{showAddActivity &&
 				<AddActivity
 					rooms={rooms}
-					onActivityPosted={onAddedActivity}
+					onActivityPosted={handleAddActivity}
 					onClose={() => {
 						setShowAddActivity(false)
 					}}
@@ -347,7 +517,7 @@ const ModifyView = ({
 					kiosks={kiosks}
 					activities={activities}
 					readers={readers}
-					onKioskPosted={onAddedKiosk}
+					onKioskPosted={handleAddKiosk}
 					onClose={() => {
 						setShowAddKiosk(false)
 					}}
@@ -356,7 +526,7 @@ const ModifyView = ({
 			{showAddAdmin &&
 				<AddAdmin
 					admins={admins}
-					onAdminPosted={onAddedAdmin}
+					onAdminPosted={handleAddAdmin}
 					onClose={() => {
 						setShowAddAdmin(false)
 					}}
@@ -365,7 +535,7 @@ const ModifyView = ({
 			{showAddReader &&
 				<AddReader
 					readers={readers}
-					onReaderPosted={onAddedReader}
+					onReaderPosted={handleAddReader}
 					onClose={() => {
 						setShowAddReader(false)
 					}}

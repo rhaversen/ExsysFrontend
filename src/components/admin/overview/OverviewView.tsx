@@ -2,6 +2,7 @@
 
 import RoomCol from '@/components/admin/overview/RoomCol'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type OptionType,
@@ -15,21 +16,56 @@ import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 
-const OverviewView = ({
-	products,
-	options,
-	rooms,
-	activities
-}: {
-	products: ProductType[]
-	options: OptionType[]
-	rooms: RoomType[]
-	activities: ActivityType[]
-}): ReactElement => {
+const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderTypeWithNames[]>>({})
+
+	const [products, setProducts] = useState<ProductType[]>([])
+	const [options, setOptions] = useState<OptionType[]>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
+
+	const getProducts = useCallback(async () => {
+		try {
+			const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
+			const products = productsResponse.data as ProductType[]
+			// Convert orderWindow to local time for all products
+			products.forEach((product) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			})
+			setProducts(products)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getOptions = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/options', { withCredentials: true })
+			const data = response.data as OptionType[]
+			setOptions(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getRooms = useCallback(async () => {
+		try {
+			const roomsResponse = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
+			const rooms = roomsResponse.data as RoomType[]
+			setRooms(rooms)
+		} catch (error: any) {
+		}
+	}, [API_URL])
+
+	const getActivities = useCallback(async () => {
+		try {
+			const response = await axios.get(API_URL + '/v1/activities', { withCredentials: true })
+			const data = response.data as ActivityType[]
+			setActivities(data)
+		} catch (error: any) {
+		}
+	}, [API_URL])
 
 	const fetchAndProcessOrders = useCallback(async () => {
 		const fromDate = new Date()
@@ -85,13 +121,31 @@ const OverviewView = ({
 		fetchAndProcessOrders().catch(addError)
 	}, [addError, fetchAndProcessOrders])
 
-	// Initial fetch
+	const fetchData = useCallback(() => {
+		Promise.all([
+			getRooms(),
+			getProducts(),
+			getOptions(),
+			getActivities()
+		]).catch((error: any) => {
+			addError(error)
+		})
+	}, [getProducts, getOptions, getRooms, addError, getActivities])
+
+	// Initial fetch of orders
 	useEffect(() => {
+		console.log('Fetching orders')
 		fetchAndProcessOrders().catch(addError)
 	}, [addError, fetchAndProcessOrders])
 
-	// Fetch orders every 10 seconds
-	useInterval(fetchAndProcessOrders, 10000)
+	// Initial fetch of data
+	useEffect(() => {
+		console.log('Fetching data')
+		fetchData()
+	}, [addError, fetchData])
+
+	useInterval(fetchData, 1000 * 60 * 60) // Fetch data every hour
+	useInterval(fetchAndProcessOrders, 1000 * 10) // Fetch orders every 10 seconds
 
 	return (
 		<div>
