@@ -1,6 +1,6 @@
 import Block from '@/components/admin/overview/Block'
-import { type OrderType, type RoomType } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import { type RoomType } from '@/types/backendDataTypes'
+import { type OrderTypeWithNames, type UpdatedOrderType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const RoomCol = ({
@@ -10,7 +10,7 @@ const RoomCol = ({
 }: {
 	room: RoomType
 	orders: OrderTypeWithNames[]
-	onUpdatedOrders: (orders: OrderType[]) => void
+	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderTypeWithNames[]>>({})
 	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})

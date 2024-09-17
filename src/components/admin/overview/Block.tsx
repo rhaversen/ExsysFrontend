@@ -1,6 +1,6 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import { type OrderTypeWithNames, type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -11,7 +11,7 @@ const Block = ({
 }: {
 	orders: OrderTypeWithNames[]
 	activityId: string
-	onUpdatedOrders: (orders: OrderType[]) => void
+	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -23,7 +23,7 @@ const Block = ({
 	const [activityName, setActivityName] = useState('')
 
 	// Ref to store the previous orders for reverting in case of failure
-	const previousOrdersRef = useRef<OrderType[]>([])
+	const previousOrdersRef = useRef<UpdatedOrderType[]>([])
 
 	const getActivityName = useCallback(() => {
 		const response = axios.get(`${API_URL}/v1/activities/${activityId}`, { withCredentials: true })
@@ -69,15 +69,19 @@ const Block = ({
 	const patchOrders = useCallback(
 		async (status: PatchOrderType['status']) => {
 			// Store the previous state of orders
-			const previousOrders = orders.map(order => ({ ...order }))
+			const previousOrders = orders.map(order => ({
+				_id: order._id,
+				status: order.status
+			}))
 			previousOrdersRef.current = previousOrders
 
-			// Optimistically update the orders
+			// Update the status of the orders
 			const updatedOrders = orders.map(order => ({
-				...order,
+				_id: order._id,
 				status
 			}))
 
+			// Optimistically update the orders
 			onUpdatedOrders(updatedOrders)
 
 			try {

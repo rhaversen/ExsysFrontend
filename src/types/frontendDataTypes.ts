@@ -23,3 +23,8 @@ export interface Validation {
 	validate: (value: string) => boolean
 	message: string
 }
+
+export interface UpdatedOrderType {
+	_id: OrderType['_id']
+	status: 'pending' | 'confirmed' | 'delivered'
+}
