@@ -29,7 +29,7 @@ import {
 	type RoomType
 } from '@/types/backendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 import SortingControl from './SortingControl'
 
@@ -58,6 +58,9 @@ const ModifyView = (): ReactElement => {
 	const [sortField, setSortField] = useState('name')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
+	// Flag to prevent double fetching
+	const hasFetchedData = useRef(false)
+
 	const resolveProperty = (obj: any, path: string): any => {
 		return path.split('.').reduce((acc, part) => acc != null ? acc[part] : undefined, obj)
 	}
@@ -70,7 +73,7 @@ const ModifyView = (): ReactElement => {
 		return 0
 	}
 
-	const compareValues = (valA: any, valB: any, sortDirection: string): number => {
+	const compareValues = (valA: any, valB: any): number => {
 		if (typeof valA === 'string' && typeof valB === 'string') {
 			return compareStrings(valA, valB)
 		}
@@ -88,91 +91,49 @@ const ModifyView = (): ReactElement => {
 		return items.slice().sort((a: any, b: any) => {
 			const valA = resolveProperty(a, sortField)
 			const valB = resolveProperty(b, sortField)
-			return compareValues(valA, valB, sortDirection)
+			return compareValues(valA, valB)
 		})
 	}
 
-	const getProducts = useCallback(async () => {
+	// Fetch all data in parallel
+	const fetchData = useCallback(async (): Promise<void> => {
 		try {
-			const productsResponse = await axios.get(API_URL + '/v1/products', { withCredentials: true })
-			const products = productsResponse.data as ProductType[]
+			const [
+				productsResponse,
+				optionsResponse,
+				roomsResponse,
+				activitiesResponse,
+				kiosksResponse,
+				adminsResponse,
+				readersResponse
+			] = await Promise.all([
+				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/rooms`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/activities`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/kiosks`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/admins`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/readers`, { withCredentials: true })
+			])
+
+			const productsData = productsResponse.data as ProductType[]
 			// Convert orderWindow to local time for all products
-			products.forEach((product) => {
+			productsData.forEach((product) => {
 				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			})
-			setProducts(products)
+			setProducts(productsData)
+			setOptions(optionsResponse.data as OptionType[])
+			setRooms(roomsResponse.data as RoomType[])
+			setActivities(activitiesResponse.data as ActivityType[])
+			setKiosks(kiosksResponse.data as KioskType[])
+			setAdmins(adminsResponse.data as AdminType[])
+			setReaders(readersResponse.data as ReaderType[])
 		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getOptions = useCallback(async () => {
-		try {
-			const response = await axios.get(API_URL + '/v1/options', { withCredentials: true })
-			const data = response.data as OptionType[]
-			setOptions(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getRooms = useCallback(async () => {
-		try {
-			const roomsResponse = await axios.get(API_URL + '/v1/rooms', { withCredentials: true })
-			const rooms = roomsResponse.data as RoomType[]
-			setRooms(rooms)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getActivities = useCallback(async () => {
-		try {
-			const response = await axios.get(API_URL + '/v1/activities', { withCredentials: true })
-			const data = response.data as ActivityType[]
-			setActivities(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getKiosks = useCallback(async () => {
-		try {
-			const response = await axios.get(API_URL + '/v1/kiosks', { withCredentials: true })
-			const data = response.data as KioskType[]
-			setKiosks(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getAdmins = useCallback(async () => {
-		try {
-			const response = await axios.get(API_URL + '/v1/admins', { withCredentials: true })
-			const data = response.data as AdminType[]
-			setAdmins(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const getReaders = useCallback(async () => {
-		try {
-			const response = await axios.get(API_URL + '/v1/readers', { withCredentials: true })
-			const data = response.data as ReaderType[]
-			setReaders(data)
-		} catch (error: any) {
-		}
-	}, [API_URL])
-
-	const fetchData = useCallback(() => {
-		Promise.all([
-			getRooms(),
-			getProducts(),
-			getOptions(),
-			getActivities(),
-			getKiosks(),
-			getAdmins(),
-			getReaders()
-		]).catch((error: any) => {
 			addError(error)
-		})
-	}, [getProducts, getOptions, getRooms, addError, getActivities, getKiosks, getAdmins, getReaders])
+		}
+	}, [API_URL, addError])
 
+	// Define handlers with useCallback and appropriate dependencies
 	const handleUpdateProduct = useCallback((product: ProductType) => {
 		setProducts((prevProducts) => {
 			const index = prevProducts.findIndex((p) => p._id === product._id)
@@ -299,11 +260,18 @@ const ModifyView = (): ReactElement => {
 		setReaders((prevReaders) => [...prevReaders, reader])
 	}, [])
 
+	// Fetch data on component mount
 	useEffect(() => {
-		fetchData()
-	}, [fetchData])
+		if (hasFetchedData.current) return // Prevent double fetching
+		hasFetchedData.current = true
 
-	useInterval(fetchData, 1000 * 60 * 60) // Fetch data every hour
+		fetchData().catch(addError)
+	}, [fetchData, addError])
+
+	// Refresh data every hour
+	useInterval(() => {
+		fetchData().catch(addError)
+	}, 1000 * 60 * 60) // Every hour
 
 	return (
 		<div>
@@ -316,7 +284,7 @@ const ModifyView = (): ReactElement => {
 			{selectedView !== null &&
 				<SortingControl
 					onSortFieldChange={setSortField}
-					onSortDirectionChange={(sortDirection: string) => { setSortDirection(sortDirection as 'asc' | 'desc') }}
+					onSortDirectionChange={(direction: string) => { setSortDirection(direction as 'asc' | 'desc') }}
 					type={selectedView as keyof typeof sortConfig}
 				/>
 			}
