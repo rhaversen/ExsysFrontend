@@ -10,7 +10,6 @@ import {
 	type ProductType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
@@ -20,7 +19,7 @@ const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
-	const [roomOrders, setRoomOrders] = useState<Record<string, OrderTypeWithNames[]>>({})
+	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
 
 	const productsRef = useRef<ProductType[]>([])
 	const optionsRef = useRef<OptionType[]>([])
@@ -83,19 +82,7 @@ const OverviewView = (): ReactElement => {
 				}
 			)
 
-			const enrichedOrders: OrderTypeWithNames[] = orders.map(order => ({
-				...order,
-				products: order.products.map(product => ({
-					...product,
-					name: productsRef.current.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
-				})),
-				options: order.options.map(option => ({
-					...option,
-					name: optionsRef.current.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
-				}))
-			}))
-
-			const groupedOrders: Record<string, OrderTypeWithNames[]> = enrichedOrders.reduce<Record<string, OrderTypeWithNames[]>>((acc, order) => {
+			const groupedOrders: Record<string, OrderType[]> = orders.reduce<Record<string, OrderType[]>>((acc, order) => {
 				const activity = activitiesRef.current.find(a => a._id === order.activityId)
 				const room = (activity !== null && activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
 				const roomName = room?.name ?? 'no-room'

@@ -1,6 +1,6 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames, type UpdatedOrderType } from '@/types/frontendDataTypes'
+import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -9,7 +9,7 @@ const Block = ({
 	activityId,
 	onUpdatedOrders
 }: {
-	orders: OrderTypeWithNames[]
+	orders: OrderType[]
 	activityId: string
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
@@ -35,7 +35,7 @@ const Block = ({
 		})
 	}, [API_URL, activityId, addError])
 
-	const countOrders = useCallback((orders: OrderTypeWithNames[]) => {
+	const countOrders = useCallback((orders: OrderType[]) => {
 		const counts: Record<string, number> = {}
 		orders.forEach((order) => {
 			order.products.forEach((product) => {
