@@ -142,15 +142,20 @@ const OverviewView = (): ReactElement => {
 				)
 				: (
 					<div className="flex flex-row flex-wrap justify-evenly">
-						{roomsRef.current.filter(room => roomOrders[room.name]?.length).map(room => (
+						{roomsRef.current
+							.filter(
+								room =>
+									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
+							)
+							.map(room => (
 							<RoomCol
 								key={room._id}
-								room={room}
-								orders={roomOrders[room.name] ?? []}
+									room={room}
+									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
 								onUpdatedOrders={handleFetchAndProcessOrders}
 							/>
 						))}
-						{roomOrders['no-room']?.length > 0 && (
+						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
 							<RoomCol
 								key="no-room"
 								room={{
@@ -160,7 +165,7 @@ const OverviewView = (): ReactElement => {
 									createdAt: '',
 									updatedAt: ''
 								}}
-								orders={roomOrders['no-room']}
+								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
 								onUpdatedOrders={handleFetchAndProcessOrders}
 							/>
 						)}
