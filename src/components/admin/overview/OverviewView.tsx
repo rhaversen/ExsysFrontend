@@ -10,6 +10,7 @@ import {
 	type ProductType,
 	type RoomType
 } from '@/types/backendDataTypes'
+import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
@@ -94,11 +95,36 @@ const OverviewView = (): ReactElement => {
 
 				return acc
 			}, {})
+
 			setRoomOrders(groupedOrders)
 		} catch (error) {
 			addError(error)
 		}
 	}, [API_URL, addError])
+
+	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
+		try {
+			setRoomOrders((prevRoomOrders) => {
+				const newRoomOrders = { ...prevRoomOrders }
+
+				updatedOrders.forEach((updatedOrder) => {
+					for (const roomName in newRoomOrders) {
+						const orders = newRoomOrders[roomName]
+						const index = orders.findIndex((order) => order._id === updatedOrder._id)
+						if (index !== -1) {
+							// Update the status of the order
+							orders[index].status = updatedOrder.status
+							break // Exit the loop once the order is found
+						}
+					}
+				})
+
+				return newRoomOrders
+			})
+		} catch (error: any) {
+			addError(error)
+		}
+	}, [addError])
 
 	const handleFetchAndProcessOrders = useCallback(() => {
 		fetchAndProcessOrders().catch(addError)
@@ -148,13 +174,13 @@ const OverviewView = (): ReactElement => {
 									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
 							)
 							.map(room => (
-							<RoomCol
-								key={room._id}
+								<RoomCol
+									key={room._id}
 									room={room}
 									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
-								onUpdatedOrders={handleFetchAndProcessOrders}
-							/>
-						))}
+									onUpdatedOrders={handleUpdatedOrders}
+								/>
+							))}
 						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
 							<RoomCol
 								key="no-room"
@@ -166,7 +192,7 @@ const OverviewView = (): ReactElement => {
 									updatedAt: ''
 								}}
 								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
-								onUpdatedOrders={handleFetchAndProcessOrders}
+								onUpdatedOrders={handleUpdatedOrders}
 							/>
 						)}
 					</div>
