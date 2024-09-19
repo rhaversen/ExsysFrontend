@@ -60,7 +60,7 @@ export default function Page (): ReactElement {
 		setKiosk(kioskData)
 		setCheckoutMethods(prev => ({
 			...prev,
-			sumUp: kioskData.readerId !== null
+			sumUp: kioskData.readerId !== null && kioskData.readerId !== undefined
 		}))
 	}, [API_URL, fetchData])
 
