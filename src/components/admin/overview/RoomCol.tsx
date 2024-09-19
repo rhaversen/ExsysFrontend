@@ -1,6 +1,6 @@
 import Block from '@/components/admin/overview/Block'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const RoomCol = ({
@@ -9,15 +9,15 @@ const RoomCol = ({
 	onUpdatedOrders
 }: {
 	room: RoomType
-	orders: OrderTypeWithNames[]
-	onUpdatedOrders: (orders: OrderType[]) => void
+	orders: OrderType[]
+	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
-	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderTypeWithNames[]>>({})
+	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderType[]>>({})
 	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
 	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
 
 	const groupOrdersByActivity = useCallback(() => {
-		const groupedOrders: Record<string, OrderTypeWithNames[]> = {}
+		const groupedOrders: Record<string, OrderType[]> = {}
 		orders.forEach((order) => {
 			if (groupedOrders[order.activityId] === undefined) {
 				groupedOrders[order.activityId] = []

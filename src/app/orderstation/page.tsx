@@ -23,7 +23,7 @@ export default function Page (): ReactElement {
 	const [kiosk, setKiosk] = useState<KioskTypeNonPopulated | null>(null)
 	const [checkoutMethods, setCheckoutMethods] = useState({
 		sumUp: false,
-		cash: false,
+		cash: true,
 		mobilePay: false
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
@@ -60,7 +60,7 @@ export default function Page (): ReactElement {
 		setKiosk(kioskData)
 		setCheckoutMethods(prev => ({
 			...prev,
-			sumUp: kioskData.readerId !== null
+			sumUp: kioskData.readerId !== null && kioskData.readerId !== undefined
 		}))
 	}, [API_URL, fetchData])
 

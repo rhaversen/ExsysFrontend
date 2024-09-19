@@ -9,16 +9,20 @@ const OrderConfirmationWindow = ({
 	onClose
 }: {
 	price: number
-	orderStatus: 'success' | 'error' | 'loading' | 'awaitingPayment'
+	orderStatus: 'success' | 'error' | 'loading' | 'awaitingPayment' | 'failed'
 	onClose: () => void
 }): ReactElement => {
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal
+			onClose={onClose}
+			canClose={['success', 'error', 'failed'].includes(orderStatus)}
+		>
 			<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
 				{orderStatus === 'awaitingPayment' && 'Betal på skærmen'}
 				{orderStatus === 'success' && 'Tak For Din Bestilling'}
 				{orderStatus === 'error' && 'Der Skete En Fejl'}
 				{orderStatus === 'loading' && 'Sender Bestilling...'}
+				{orderStatus === 'failed' && 'Betalingen Mislykkedes'}
 			</h2>
 			<p className="mb-4 flex justify-center text-gray-800">
 				{orderStatus === 'success' && `Husk at lægge ${price} kr i skålen`}
@@ -26,7 +30,7 @@ const OrderConfirmationWindow = ({
 			<p className="mb-4 flex justify-center text-center text-gray-800">
 				{orderStatus === 'error' && (
 					<>
-						{'Der skete en fejl, prøv igen senere.'}
+						{'Der skete en ukendt fejl, prøv igen senere.'}
 						<br />
 						{'Hvis problemet fortsætter, kontakt venligst personalet.'}
 					</>
@@ -62,6 +66,14 @@ const OrderConfirmationWindow = ({
 						<Image
 							src="/orderStation/arrow.svg"
 							alt="Awaiting Payment"
+							width={200}
+							height={200}
+						/>
+					}
+					{orderStatus === 'failed' &&
+						<Image
+							src="/orderStation/cross.svg"
+							alt="Payment Failed"
 							width={200}
 							height={200}
 						/>
