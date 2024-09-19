@@ -23,7 +23,7 @@ export default function Page (): ReactElement {
 	const [kiosk, setKiosk] = useState<KioskTypeNonPopulated | null>(null)
 	const [checkoutMethods, setCheckoutMethods] = useState({
 		sumUp: false,
-		cash: false,
+		cash: true,
 		mobilePay: false
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
