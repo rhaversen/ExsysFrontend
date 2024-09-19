@@ -198,7 +198,7 @@ const OrderView = ({
 	return (
 		<main className="flex flex-row h-screen bg-zinc-100">
 			{/* Left Column: Header + Selection Window */}
-			<div className="w-full flex flex-col bg-red-500">
+			<div className="w-full flex flex-col">
 				{/* Header */}
 				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
 					<h1 className="text-3xl font-bold text-center py-2 text-gray-800">
