@@ -1,50 +1,78 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+interface PendingUpdate {
+	id: number
+	status: OrderType['status']
+}
+
+interface LocalOrder extends OrderType {
+	baseStatus: OrderType['status']
+	pendingUpdates: PendingUpdate[]
+}
 
 const Block = ({
 	orders,
 	activityId,
 	onUpdatedOrders
 }: {
-	orders: OrderTypeWithNames[]
+	orders: OrderType[]
 	activityId: string
-	onUpdatedOrders: (orders: OrderType[]) => void
+	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
+	const [localOrders, setLocalOrders] = useState<LocalOrder[]>([])
 	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
-	const [orderStatus, setOrderStatus] = useState<OrderType['status']>(orders[0].status)
+	const [orderStatus, setOrderStatus] = useState<OrderType['status']>('pending')
 	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
 	const [activityName, setActivityName] = useState('')
 
-	// Ref to store the previous orders for reverting in case of failure
-	const previousOrdersRef = useRef<OrderType[]>([])
+	useEffect(() => {
+		setLocalOrders(
+			orders.map(order => ({
+				...order,
+				baseStatus: order.status,
+				pendingUpdates: []
+			}))
+		)
+	}, [orders])
+
+	const getCurrentStatus = (order: LocalOrder): OrderType['status'] => {
+		if (order.pendingUpdates.length > 0) {
+			return order.pendingUpdates[order.pendingUpdates.length - 1].status
+		} else {
+			return order.baseStatus
+		}
+	}
 
 	const getActivityName = useCallback(() => {
-		const response = axios.get(`${API_URL}/v1/activities/${activityId}`, { withCredentials: true })
-		response.then((response) => {
-			const data = response.data as ActivityType
-			setActivityName(data.name)
-		}).catch((error: any) => {
-			addError(error)
-		})
+		axios
+			.get(`${API_URL}/v1/activities/${activityId}`, { withCredentials: true })
+			.then(response => {
+				const data = response.data as ActivityType
+				setActivityName(data.name)
+			})
+			.catch((error: any) => {
+				addError(error)
+			})
 	}, [API_URL, activityId, addError])
 
-	const countOrders = useCallback((orders: OrderTypeWithNames[]) => {
+	const countOrders = useCallback((orders: LocalOrder[]) => {
 		const counts: Record<string, number> = {}
-		orders.forEach((order) => {
-			order.products.forEach((product) => {
+		orders.forEach(order => {
+			order.products.forEach(product => {
 				if (counts[product.name] === undefined) {
 					counts[product.name] = 0
 				}
 				counts[product.name] += product.quantity
 			})
-			order.options.forEach((option) => {
+			order.options.forEach(option => {
 				if (counts[option.name] === undefined) {
 					counts[option.name] = 0
 				}
@@ -55,8 +83,7 @@ const Block = ({
 	}, [])
 
 	const determineOrderStatus = useCallback(() => {
-		// Set the status to the most severe status (pending > confirmed > delivered)
-		const statuses = orders.map((order) => order.status)
+		const statuses = localOrders.map(order => getCurrentStatus(order))
 		if (statuses.includes('pending')) {
 			return 'pending'
 		}
@@ -64,42 +91,59 @@ const Block = ({
 			return 'confirmed'
 		}
 		return 'delivered'
-	}, [orders])
+	}, [localOrders])
 
 	const patchOrders = useCallback(
 		async (status: PatchOrderType['status']) => {
-			// Store the previous state of orders
-			const previousOrders = orders.map(order => ({ ...order }))
-			previousOrdersRef.current = previousOrders
+			const updateId = Date.now()
 
-			// Optimistically update the orders
-			const updatedOrders = orders.map(order => ({
-				...order,
-				status
-			}))
-
-			onUpdatedOrders(updatedOrders)
+			// Optimistically update the localOrders
+			setLocalOrders(prevOrders =>
+				prevOrders.map(order => ({
+					...order,
+					pendingUpdates: [...order.pendingUpdates, {
+						id: updateId,
+						status
+					}]
+				}))
+			)
 
 			try {
 				const orderPatch: PatchOrderType = {
-					orderIds: orders.map(order => order._id),
+					orderIds: localOrders.map(order => order._id),
 					status
 				}
 
-				// Perform the patch request to the server
 				const response = await axios.patch<OrderType[]>(`${API_URL}/v1/orders`, orderPatch, {
 					withCredentials: true
 				})
 
-				// If successful, update the state with the server response
+				// On success, remove the pending update and update baseStatus
+				setLocalOrders(prevOrders =>
+					prevOrders.map(order => {
+						const pendingUpdates = order.pendingUpdates.filter(u => u.id !== updateId)
+						const updatedOrder = response.data.find(o => o._id === order._id)
+						return {
+							...order,
+							baseStatus: (updatedOrder !== undefined) ? updatedOrder.status : order.baseStatus,
+							pendingUpdates
+						}
+					})
+				)
+
 				onUpdatedOrders(response.data)
 			} catch (error: any) {
-				// If the patch request fails, revert to the previous state
-				onUpdatedOrders(previousOrdersRef.current)
+				// On failure, remove the pending update
+				setLocalOrders(prevOrders =>
+					prevOrders.map(order => ({
+						...order,
+						pendingUpdates: order.pendingUpdates.filter(u => u.id !== updateId)
+					}))
+				)
 				addError(error)
 			}
 		},
-		[API_URL, orders, onUpdatedOrders, addError]
+		[API_URL, localOrders, addError, onUpdatedOrders]
 	)
 
 	const handlePatchOrders = useCallback((orderStatus: PatchOrderType['status']) => {
@@ -107,15 +151,15 @@ const Block = ({
 	}, [patchOrders, addError])
 
 	useEffect(() => {
-		const pending = orders.filter(order => order.status === 'pending')
-		const confirmed = orders.filter(order => order.status === 'confirmed')
+		const pending = localOrders.filter(order => getCurrentStatus(order) === 'pending')
+		const confirmed = localOrders.filter(order => getCurrentStatus(order) === 'confirmed')
 
 		const pendingOrdersCount = countOrders(pending)
 		const confirmedOrdersCount = countOrders(confirmed)
 
 		setPendingOrders(pendingOrdersCount)
 		setConfirmedOrders(confirmedOrdersCount)
-	}, [orders, countOrders])
+	}, [localOrders, countOrders])
 
 	useEffect(() => {
 		setOrderStatus(determineOrderStatus())
@@ -129,20 +173,22 @@ const Block = ({
 		<div
 			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}>
 			<h3 className="text-center text-xl">{activityName}</h3>
-			{Object.keys({ ...pendingOrders, ...confirmedOrders }).sort().map((name) => {
-				const confirmedCount = confirmedOrders[name] ?? 0
-				const pendingCount = pendingOrders[name] ?? 0
-				const totalCount = pendingCount + confirmedCount
-				const diff = pendingCount
-				const diffText = diff > 0 ? ` (+${diff})` : diff < 0 ? ` (-${Math.abs(diff)})` : ''
+			{Object.keys({ ...pendingOrders, ...confirmedOrders })
+				.sort()
+				.map(name => {
+					const confirmedCount = confirmedOrders[name] ?? 0
+					const pendingCount = pendingOrders[name] ?? 0
+					const totalCount = pendingCount + confirmedCount
+					const diff = pendingCount
+					const diffText = diff > 0 ? ` (+${diff})` : diff < 0 ? ` (-${Math.abs(diff)})` : ''
 
-				return (
-					<p key={name}>
-						{totalCount} &times; {name}
-						{diffText}
-					</p>
-				)
-			})}
+					return (
+						<p key={name}>
+							{totalCount} &times; {name}
+							{diffText}
+						</p>
+					)
+				})}
 			<div className="mt-2">
 				{orderStatus === 'pending' && (
 					<button
@@ -179,8 +225,12 @@ const Block = ({
 						<span className="sr-only">{'Close'}</span>
 					</button>
 					<div className="absolute bg-white rounded-3xl p-10">
-						<h2 className="text-lg text-center font-bold text-gray-800">{'Er du sikker på du vil markere ordren som leveret?'}</h2>
-						<h3 className="text-md text-center font-bold text-gray-800">{'Denne handling kan ikke gøres om'}</h3>
+						<h2 className="text-lg text-center font-bold text-gray-800">
+							{'Er du sikker på du vil markere ordren som leveret?'}
+						</h2>
+						<h3 className="text-md text-center font-bold text-gray-800">
+							{'Denne handling kan ikke gøres om'}
+						</h3>
 						<div className="flex justify-center pt-5 gap-4">
 							<button
 								type="button"
