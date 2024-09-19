@@ -146,7 +146,11 @@ const OrderView = ({
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
 				setOrder(response.data)
-				setOrderStatus('awaitingPayment')
+				if (checkoutMethod === 'cash') {
+					setOrderStatus('success')
+				} else {
+					setOrderStatus('awaitingPayment')
+				}
 			})
 			.catch(error => {
 				addError(error)
