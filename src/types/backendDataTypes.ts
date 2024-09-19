@@ -106,8 +106,8 @@ export interface PatchRoomType {
 // Order types
 export interface OrderType {
 	_id: string
-	products: Array<{ id: ProductType['_id'], quantity: number }>
-	options: Array<{ id: OptionType['_id'], quantity: number }>
+	products: Array<{ _id: ProductType['_id'], name: string, quantity: number }>
+	options: Array<{ _id: OptionType['_id'], name: string, quantity: number }>
 	activityId: ActivityType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 	createdAt: string

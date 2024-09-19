@@ -2,6 +2,7 @@
 
 import RoomCol from '@/components/admin/overview/RoomCol'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type OptionType,
@@ -9,29 +10,60 @@ import {
 	type ProductType,
 	type RoomType
 } from '@/types/backendDataTypes'
-import { type OrderTypeWithNames } from '@/types/frontendDataTypes'
+import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 
-const OverviewView = ({
-	products,
-	options,
-	rooms,
-	activities
-}: {
-	products: ProductType[]
-	options: OptionType[]
-	rooms: RoomType[]
-	activities: ActivityType[]
-}): ReactElement => {
+const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
-	const [roomOrders, setRoomOrders] = useState<Record<string, OrderTypeWithNames[]>>({})
+	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
 
-	const fetchAndProcessOrders = useCallback(async () => {
+	const productsRef = useRef<ProductType[]>([])
+	const optionsRef = useRef<OptionType[]>([])
+	const roomsRef = useRef<RoomType[]>([])
+	const activitiesRef = useRef<ActivityType[]>([])
+	const dataReadyPromise = useRef<Promise<void> | null>(null) // Track data readiness
+
+	// Fetch initial data (products, options, rooms, activities)
+	const fetchData = useCallback(async (): Promise<void> => {
+		try {
+			const [
+				productsResponse,
+				optionsResponse,
+				roomsResponse,
+				activitiesResponse
+			] = await Promise.all([
+				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/rooms`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+			])
+
+			const productsData = productsResponse.data as ProductType[]
+			productsData.forEach((product) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			})
+
+			// Update refs
+			productsRef.current = productsData
+			optionsRef.current = optionsResponse.data as OptionType[]
+			roomsRef.current = roomsResponse.data as RoomType[]
+			activitiesRef.current = activitiesResponse.data as ActivityType[]
+		} catch (error: any) {
+			addError(error)
+		}
+	}, [API_URL, addError])
+
+	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
+		// Wait until data is loaded
+		if (dataReadyPromise.current !== null) {
+			await dataReadyPromise.current
+		}
+
 		const fromDate = new Date()
 		fromDate.setHours(0, 0, 0, 0)
 		const toDate = new Date()
@@ -51,21 +83,9 @@ const OverviewView = ({
 				}
 			)
 
-			const enrichedOrders: OrderTypeWithNames[] = orders.map(order => ({
-				...order,
-				products: order.products.map(product => ({
-					...product,
-					name: products.find(p => p._id === product.id)?.name ?? 'Ukendt vare'
-				})),
-				options: order.options.map(option => ({
-					...option,
-					name: options.find(o => o._id === option.id)?.name ?? 'Ukendt tilvalg'
-				}))
-			}))
-
-			const groupedOrders: Record<string, OrderTypeWithNames[]> = enrichedOrders.reduce<Record<string, OrderTypeWithNames[]>>((acc, order) => {
-				const activity = activities.find(a => a._id === order.activityId)
-				const room = (activity != null) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
+			const groupedOrders: Record<string, OrderType[]> = orders.reduce<Record<string, OrderType[]>>((acc, order) => {
+				const activity = activitiesRef.current.find(a => a._id === order.activityId)
+				const room = (activity !== null && activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
 				const roomName = room?.name ?? 'no-room'
 
 				if (acc[roomName] === undefined) {
@@ -75,23 +95,55 @@ const OverviewView = ({
 
 				return acc
 			}, {})
+
 			setRoomOrders(groupedOrders)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, products, options, activities, rooms, addError])
+	}, [API_URL, addError])
+
+	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
+		try {
+			setRoomOrders((prevRoomOrders) => {
+				const newRoomOrders = { ...prevRoomOrders }
+
+				updatedOrders.forEach((updatedOrder) => {
+					for (const roomName in newRoomOrders) {
+						const orders = newRoomOrders[roomName]
+						const index = orders.findIndex((order) => order._id === updatedOrder._id)
+						if (index !== -1) {
+							// Update the status of the order
+							orders[index].status = updatedOrder.status
+							break // Exit the loop once the order is found
+						}
+					}
+				})
+
+				return newRoomOrders
+			})
+		} catch (error: any) {
+			addError(error)
+		}
+	}, [addError])
 
 	const handleFetchAndProcessOrders = useCallback(() => {
 		fetchAndProcessOrders().catch(addError)
-	}, [addError, fetchAndProcessOrders])
+	}, [fetchAndProcessOrders, addError])
 
-	// Initial fetch
+	// Fetch data and orders on component mount
 	useEffect(() => {
-		fetchAndProcessOrders().catch(addError)
-	}, [addError, fetchAndProcessOrders])
+		// Start fetching data and store the promise
+		dataReadyPromise.current = fetchData()
+		// Start fetching orders
+		handleFetchAndProcessOrders()
+		const interval = setInterval(handleFetchAndProcessOrders, 1000 * 10) // Every 10 seconds
+		return () => { clearInterval(interval) }
+	}, [fetchData, addError, handleFetchAndProcessOrders])
 
-	// Fetch orders every 10 seconds
-	useInterval(fetchAndProcessOrders, 10000)
+	// Refresh data every hour
+	useInterval(() => {
+		dataReadyPromise.current = fetchData()
+	}, 1000 * 60 * 60) // Every hour
 
 	return (
 		<div>
@@ -116,15 +168,20 @@ const OverviewView = ({
 				)
 				: (
 					<div className="flex flex-row flex-wrap justify-evenly">
-						{rooms.filter(room => roomOrders[room.name]?.length).map(room => (
-							<RoomCol
-								key={room._id}
-								room={room}
-								orders={roomOrders[room.name] ?? []}
-								onUpdatedOrders={handleFetchAndProcessOrders}
-							/>
-						))}
-						{roomOrders['no-room']?.length > 0 && (
+						{roomsRef.current
+							.filter(
+								room =>
+									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
+							)
+							.map(room => (
+								<RoomCol
+									key={room._id}
+									room={room}
+									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+									onUpdatedOrders={handleUpdatedOrders}
+								/>
+							))}
+						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
 							<RoomCol
 								key="no-room"
 								room={{
@@ -134,8 +191,8 @@ const OverviewView = ({
 									createdAt: '',
 									updatedAt: ''
 								}}
-								orders={roomOrders['no-room']}
-								onUpdatedOrders={handleFetchAndProcessOrders}
+								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
+								onUpdatedOrders={handleUpdatedOrders}
 							/>
 						)}
 					</div>

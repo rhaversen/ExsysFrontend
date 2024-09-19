@@ -13,8 +13,8 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useMemo, useState } from 'react'
-import { useInterval } from 'react-use'
+import React, { type ReactElement, useCallback, useMemo, useState, useEffect } from 'react'
+import { io, type Socket } from 'socket.io-client'
 
 const OrderView = ({
 	kiosk,
@@ -33,17 +33,19 @@ const OrderView = ({
 }): ReactElement => {
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
-	// State Management
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
-	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
+	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment' | 'failed'>('loading')
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [cart, setCart] = useState<CartType>({
 		products: {},
 		options: {}
 	})
 	const [order, setOrder] = useState<OrderType | null>(null)
-	const [shouldFetchPaymentStatus, setShouldFetchPaymentStatus] = useState(false)
+
+	// WebSocket Connection
+	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Derived States using useMemo
 	const isFormValid = useMemo(() => {
@@ -90,36 +92,37 @@ const OrderView = ({
 		})
 	}, [])
 
-	// Polling Payment Status
-	useInterval(() => {
-		if (shouldFetchPaymentStatus && order !== null) {
-			axios.get(`${API_URL}/v1/orders/${order._id}/paymentStatus`, { withCredentials: true })
-				.then(response => {
-					const paymentStatus = response.data.paymentStatus as 'pending' | 'successful' | 'failed'
-
-					switch (paymentStatus) {
+	useEffect(() => {
+		if (socket !== null && order !== null) {
+			// Listen for payment status updates related to the order
+			const handlePaymentStatusUpdated = (update: { orderId: string, paymentStatus: 'successful' | 'failed' | 'pending' }): void => {
+				if (update.orderId === order._id) {
+					switch (update.paymentStatus) {
 						case 'successful':
 							setOrderStatus('success')
-							setShouldFetchPaymentStatus(false)
 							break
 						case 'failed':
-							setOrderStatus('error')
-							setShouldFetchPaymentStatus(false)
+							setOrderStatus('failed')
 							break
 						case 'pending':
 							setOrderStatus('awaitingPayment')
 							break
 						default:
-							throw new Error('Unknown payment status')
+							addError(new Error('Unknown payment status'))
+							setOrderStatus('error')
+							break
 					}
-				})
-				.catch(error => {
-					addError(error)
-					setOrderStatus('error')
-					setShouldFetchPaymentStatus(false)
-				})
+				}
+			}
+
+			socket.on('paymentStatusUpdated', handlePaymentStatusUpdated)
+
+			// Cleanup the listener when order or socket changes
+			return () => {
+				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
+			}
 		}
-	}, shouldFetchPaymentStatus ? 1000 : null)
+	}, [socket, order, addError])
 
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'): void => {
@@ -143,28 +146,32 @@ const OrderView = ({
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
 				setOrder(response.data)
-				if (checkoutMethod === 'sumUp') {
-					setShouldFetchPaymentStatus(true)
-				} else {
+				if (checkoutMethod === 'cash') {
 					setOrderStatus('success')
+				} else {
+					setOrderStatus('awaitingPayment')
 				}
 			})
 			.catch(error => {
 				addError(error)
 				setOrderStatus('error')
-				setShouldFetchPaymentStatus(false)
 			})
 	}, [cart, kiosk, activity, API_URL, addError])
 
 	// Handle Checkout based on available methods
 	const handleCheckout = useCallback(() => {
-		const availableMethods = Object.values(checkoutMethods).filter(Boolean)
+		const availableMethods = Object.entries(checkoutMethods)
+			.filter(([_, enabled]) => enabled)
+			.map(([method, _]) => method)
+
 		if (availableMethods.length > 1) {
 			setIsSelectPaymentWindowVisible(true)
+		} else if (availableMethods.length === 1) {
+			submitOrder(availableMethods[0] as 'sumUp' | 'cash' | 'mobilePay')
 		} else {
-			submitOrder('cash')
+			addError(new Error('No checkout methods available'))
 		}
-	}, [checkoutMethods, submitOrder])
+	}, [checkoutMethods, submitOrder, addError])
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
@@ -177,7 +184,20 @@ const OrderView = ({
 		})
 		setIsOrderConfirmationVisible(false)
 		setOrderStatus('loading')
+		setOrder(null)
 	}, [kiosk, onClose])
+
+	useEffect(() => {
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		// Initialize WebSocket connection
+		const socketInstance = io(WS_URL)
+		setSocket(socketInstance)
+
+		return () => {
+			// Cleanup WebSocket connection on component unmount
+			socketInstance.disconnect()
+		}
+	}, [WS_URL])
 
 	return (
 		<main className="flex flex-row h-screen bg-zinc-100">
