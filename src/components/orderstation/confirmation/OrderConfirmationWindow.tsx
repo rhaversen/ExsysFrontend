@@ -13,7 +13,10 @@ const OrderConfirmationWindow = ({
 	onClose: () => void
 }): ReactElement => {
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal
+			onClose={onClose}
+			canClose={['success', 'error', 'failed'].includes(orderStatus)}
+		>
 			<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
 				{orderStatus === 'awaitingPayment' && 'Betal på skærmen'}
 				{orderStatus === 'success' && 'Tak For Din Bestilling'}
