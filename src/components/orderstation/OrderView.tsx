@@ -36,7 +36,7 @@ const OrderView = ({
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
-	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment'>('loading')
+	const [orderStatus, setOrderStatus] = useState<'success' | 'error' | 'loading' | 'awaitingPayment' | 'failed'>('loading')
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [cart, setCart] = useState<CartType>({
 		products: {},
@@ -102,7 +102,7 @@ const OrderView = ({
 							setOrderStatus('success')
 							break
 						case 'failed':
-							setOrderStatus('error')
+							setOrderStatus('failed')
 							break
 						case 'pending':
 							setOrderStatus('awaitingPayment')
