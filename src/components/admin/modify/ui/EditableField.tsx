@@ -1,5 +1,6 @@
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
 
 // Separate validation logic into a hook
 const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
@@ -73,7 +74,6 @@ const EditableField = ({
 	const [text, setText] = useState<string>(initialText)
 	const inputRef = useRef<HTMLInputElement>(null)
 
-	// Use custom validation hook
 	const {
 		errors,
 		isValid
@@ -132,20 +132,9 @@ const EditableField = ({
 				</p>
 			}
 			{errors.length > 0 &&
-				<div
-					className="my-2 not-italic rounded-lg border-2 border-red-800 text-red-800 font-bold flex flex-row items-center">
-					<div
-						className="w-6 h-6 m-1 border-2 text-sm border-red-800 rounded-full flex justify-center items-center">
-						{'!'}
-					</div>
-					<div className="flex flex-col mx-2">
-						{errors.map((error, i) => (
-							<p key={i + error} className="text-sm">
-								{error}
-							</p>
-						))}
-					</div>
-				</div>
+				<ValidationErrorWindow
+					errors={errors}
+				/>
 			}
 		</div>
 	)
