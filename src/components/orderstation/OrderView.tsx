@@ -13,7 +13,7 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useMemo, useState, useEffect } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 const OrderView = ({
@@ -74,7 +74,10 @@ const OrderView = ({
 
 			// If the new quantity is less than or equal to zero, remove the item
 			if (newQuantity <= 0) {
-				const { [_id]: _, ...updatedItems } = prevCart[type]
+				const {
+					[_id]: _,
+					...updatedItems
+				} = prevCart[type]
 				return {
 					...prevCart,
 					[type]: updatedItems
@@ -95,7 +98,10 @@ const OrderView = ({
 	useEffect(() => {
 		if (socket !== null && order !== null) {
 			// Listen for payment status updates related to the order
-			const handlePaymentStatusUpdated = (update: { orderId: string, paymentStatus: 'successful' | 'failed' | 'pending' }): void => {
+			const handlePaymentStatusUpdated = (update: {
+				orderId: string
+				paymentStatus: 'successful' | 'failed' | 'pending'
+			}): void => {
 				if (update.orderId === order._id) {
 					switch (update.paymentStatus) {
 						case 'successful':

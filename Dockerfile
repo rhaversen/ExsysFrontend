@@ -25,8 +25,8 @@ RUN chown -R exsys_frontend_user:exsys_frontend_user /app
 # Switch to user for subsequent commands
 USER exsys_frontend_user
 
-# Install production dependencies
-RUN npm install --omit=dev
+# Clean install production dependencies
+RUN npm ci --omit=dev
 
 # Expose the port Next.js runs on
 EXPOSE 3000
