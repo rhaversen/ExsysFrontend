@@ -1,5 +1,5 @@
 import { type Validation } from '@/types/frontendDataTypes'
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
