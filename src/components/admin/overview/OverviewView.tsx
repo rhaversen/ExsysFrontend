@@ -26,7 +26,6 @@ const OverviewView = (): ReactElement => {
 	const optionsRef = useRef<OptionType[]>([])
 	const roomsRef = useRef<RoomType[]>([])
 	const activitiesRef = useRef<ActivityType[]>([])
-	const dataReadyPromise = useRef<Promise<void> | null>(null) // Track data readiness
 
 	// Fetch initial data (products, options, rooms, activities)
 	const fetchData = useCallback(async (): Promise<void> => {
@@ -59,11 +58,6 @@ const OverviewView = (): ReactElement => {
 	}, [API_URL, addError])
 
 	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
-		// Wait until data is loaded
-		if (dataReadyPromise.current !== null) {
-			await dataReadyPromise.current
-		}
-
 		const fromDate = new Date()
 		fromDate.setHours(0, 0, 0, 0)
 		const toDate = new Date()
@@ -132,17 +126,15 @@ const OverviewView = (): ReactElement => {
 
 	// Fetch data and orders on component mount
 	useEffect(() => {
-		// Start fetching data and store the promise
-		dataReadyPromise.current = fetchData()
-		// Start fetching orders
-		handleFetchAndProcessOrders()
+		// Must use Promise chaining to ensure data is loaded before orders
+		fetchData().then(fetchAndProcessOrders).catch(addError)
 		const interval = setInterval(handleFetchAndProcessOrders, 1000 * 10) // Every 10 seconds
 		return () => { clearInterval(interval) }
-	}, [fetchData, addError, handleFetchAndProcessOrders])
+	}, [addError, fetchAndProcessOrders, fetchData, handleFetchAndProcessOrders])
 
 	// Refresh data every hour
 	useInterval(() => {
-		dataReadyPromise.current = fetchData()
+		fetchData().catch(addError)
 	}, 1000 * 60 * 60) // Every hour
 
 	return (
