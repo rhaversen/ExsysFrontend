@@ -8,6 +8,7 @@ import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUt
 import { type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import InlineValidation from './ui/InlineValidation'
 
 const AddProduct = ({
 	options,
@@ -255,6 +256,20 @@ const AddProduct = ({
 						onValidationChange={handleValidationChange}
 					/>
 				</div>
+				<InlineValidation
+					fieldName="orderWindow"
+					validations={[
+						{
+							validate: () => {
+								const from = product.orderWindow.from
+								const to = product.orderWindow.to
+								return from.hour !== to.hour || from.minute !== to.minute
+							},
+							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
+						}
+					]}
+					onValidationChange={handleValidationChange}
+				/>
 				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 				<EditableImage
 					URL={product.imageURL}

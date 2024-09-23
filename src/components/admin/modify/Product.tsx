@@ -10,6 +10,7 @@ import { type OptionType, type PatchProductType, type ProductType } from '@/type
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Timestamps from './ui/Timestamps'
+import InlineValidation from './ui/InlineValidation'
 
 const Product = ({
 	product,
@@ -296,6 +297,20 @@ const Product = ({
 						onValidationChange={handleValidationChange}
 					/>
 				</div>
+				<InlineValidation
+					fieldName="orderWindow"
+					validations={[
+						{
+							validate: () => {
+								const from = newProduct.orderWindow.from
+								const to = newProduct.orderWindow.to
+								return from.hour !== to.hour || from.minute !== to.minute
+							},
+							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
+						}
+					]}
+					onValidationChange={handleValidationChange}
+				/>
 				<EditableImage
 					URL={newProduct.imageURL}
 					editable={isEditing}
