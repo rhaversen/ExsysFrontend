@@ -1,42 +1,7 @@
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import useValidation from '@/hooks/useValidation'
 import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
-
-// Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
-	errors: string[]
-	isValid: boolean
-} => {
-	const [errors, setErrors] = useState<string[]>([])
-
-	const validate = useCallback((): string[] => {
-		const newErrors: string[] = []
-		if (required && value.length === 0) {
-			newErrors.push(placeholder + ' er påkrævet')
-		} else if (value.length > 0 && value.length < minLength) {
-			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
-		}
-		if (type === 'number' && parseInt(value) > maxValue) {
-			newErrors.push(placeholder + ' kan ikke være større end ' + maxValue)
-		}
-		validations?.forEach(validation => {
-			if (!validation.validate(value)) {
-				newErrors.push(validation.message)
-			}
-		})
-		return newErrors
-	}, [value, validations, required, placeholder, minLength, maxValue, type])
-
-	useEffect(() => {
-		const validationErrors = validate()
-		setErrors(validationErrors)
-	}, [validate])
-
-	return {
-		errors,
-		isValid: errors.length === 0
-	}
-}
 
 const EditableField = ({
 	type = 'text',
