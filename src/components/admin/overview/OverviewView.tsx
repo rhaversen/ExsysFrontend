@@ -15,9 +15,12 @@ import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
+import { io, type Socket } from 'socket.io-client'
 
 const OverviewView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
+
 	const { addError } = useError()
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
@@ -26,7 +29,9 @@ const OverviewView = (): ReactElement => {
 	const optionsRef = useRef<OptionType[]>([])
 	const roomsRef = useRef<RoomType[]>([])
 	const activitiesRef = useRef<ActivityType[]>([])
-	const dataReadyPromise = useRef<Promise<void> | null>(null) // Track data readiness
+
+	// WebSocket Connection
+	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Fetch initial data (products, options, rooms, activities)
 	const fetchData = useCallback(async (): Promise<void> => {
@@ -58,12 +63,35 @@ const OverviewView = (): ReactElement => {
 		}
 	}, [API_URL, addError])
 
-	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
-		// Wait until data is loaded
-		if (dataReadyPromise.current !== null) {
-			await dataReadyPromise.current
-		}
+	const getRoomNameFromOrder = useCallback((order: OrderType): string => {
+		const activity = activitiesRef.current.find(a => a._id === order.activityId)
+		const room = (activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
+		return room?.name ?? 'no-room'
+	}, [])
 
+	const groupOrdersByRoomName = useCallback((orders: OrderType[]): Record<string, OrderType[]> => {
+		return orders.reduce<Record<string, OrderType[]>>((acc, order) => {
+			const roomName = getRoomNameFromOrder(order)
+			if (acc[roomName] === undefined) {
+				acc[roomName] = []
+			}
+			acc[roomName].push(order)
+			return acc
+		}, {})
+	}, [getRoomNameFromOrder])
+
+	const addOrderToRoomOrders = useCallback(
+		(prevRoomOrders: Record<string, OrderType[]>, order: OrderType): Record<string, OrderType[]> => {
+			const roomName = getRoomNameFromOrder(order)
+			return {
+				...prevRoomOrders,
+				[roomName]: [...(prevRoomOrders[roomName] ?? []), order]
+			}
+		},
+		[getRoomNameFromOrder]
+	)
+
+	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
 		const fromDate = new Date()
 		fromDate.setHours(0, 0, 0, 0)
 		const toDate = new Date()
@@ -83,24 +111,23 @@ const OverviewView = (): ReactElement => {
 				}
 			)
 
-			const groupedOrders: Record<string, OrderType[]> = orders.reduce<Record<string, OrderType[]>>((acc, order) => {
-				const activity = activitiesRef.current.find(a => a._id === order.activityId)
-				const room = (activity !== null && activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
-				const roomName = room?.name ?? 'no-room'
-
-				if (acc[roomName] === undefined) {
-					acc[roomName] = []
-				}
-				acc[roomName].push(order)
-
-				return acc
-			}, {})
-
+			const groupedOrders = groupOrdersByRoomName(orders)
 			setRoomOrders(groupedOrders)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, addError])
+	}, [API_URL, addError, groupOrdersByRoomName])
+
+	const handleNewOrder = useCallback(
+		(order: OrderType) => {
+			try {
+				setRoomOrders(prevRoomOrders => addOrderToRoomOrders(prevRoomOrders, order))
+			} catch (error: any) {
+				addError(error)
+			}
+		},
+		[addError, addOrderToRoomOrders]
+	)
 
 	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
 		try {
@@ -126,23 +153,42 @@ const OverviewView = (): ReactElement => {
 		}
 	}, [addError])
 
-	const handleFetchAndProcessOrders = useCallback(() => {
-		fetchAndProcessOrders().catch(addError)
-	}, [fetchAndProcessOrders, addError])
-
 	// Fetch data and orders on component mount
 	useEffect(() => {
-		// Start fetching data and store the promise
-		dataReadyPromise.current = fetchData()
-		// Start fetching orders
-		handleFetchAndProcessOrders()
-		const interval = setInterval(handleFetchAndProcessOrders, 1000 * 10) // Every 10 seconds
-		return () => { clearInterval(interval) }
-	}, [fetchData, addError, handleFetchAndProcessOrders])
+		// Must use Promise chaining to ensure data is loaded before orders
+		fetchData().then(fetchAndProcessOrders).catch(addError)
+	}, [addError, fetchAndProcessOrders, fetchData])
+
+	// Listen for new orders
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('orderPosted', (order: OrderType) => {
+				handleNewOrder(order)
+			})
+
+			// Cleanup the listener when order or socket changes
+			return () => {
+				socket.off('paymentStatusUpdated', handleNewOrder)
+			}
+		}
+	}, [socket, addError, handleNewOrder])
+
+	// Initialize WebSocket connection
+	useEffect(() => {
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		// Initialize WebSocket connection
+		const socketInstance = io(WS_URL)
+		setSocket(socketInstance)
+
+		return () => {
+			// Cleanup WebSocket connection on component unmount
+			socketInstance.disconnect()
+		}
+	}, [WS_URL])
 
 	// Refresh data every hour
 	useInterval(() => {
-		dataReadyPromise.current = fetchData()
+		fetchData().catch(addError)
 	}, 1000 * 60 * 60) // Every hour
 
 	return (
