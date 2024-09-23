@@ -57,6 +57,23 @@ const OverviewView = (): ReactElement => {
 		}
 	}, [API_URL, addError])
 
+	const getRoomNameFromOrder = useCallback((order: OrderType): string => {
+		const activity = activitiesRef.current.find(a => a._id === order.activityId)
+		const room = (activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
+		return room?.name ?? 'no-room'
+	}, [])
+
+	const groupOrdersByRoomName = useCallback((orders: OrderType[]): Record<string, OrderType[]> => {
+		return orders.reduce<Record<string, OrderType[]>>((acc, order) => {
+			const roomName = getRoomNameFromOrder(order)
+			if (acc[roomName] === undefined) {
+				acc[roomName] = []
+			}
+			acc[roomName].push(order)
+			return acc
+		}, {})
+	}, [getRoomNameFromOrder])
+
 	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
 		const fromDate = new Date()
 		fromDate.setHours(0, 0, 0, 0)
@@ -77,24 +94,12 @@ const OverviewView = (): ReactElement => {
 				}
 			)
 
-			const groupedOrders: Record<string, OrderType[]> = orders.reduce<Record<string, OrderType[]>>((acc, order) => {
-				const activity = activitiesRef.current.find(a => a._id === order.activityId)
-				const room = (activity !== null && activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
-				const roomName = room?.name ?? 'no-room'
-
-				if (acc[roomName] === undefined) {
-					acc[roomName] = []
-				}
-				acc[roomName].push(order)
-
-				return acc
-			}, {})
-
+			const groupedOrders = groupOrdersByRoomName(orders)
 			setRoomOrders(groupedOrders)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, addError])
+	}, [API_URL, addError, groupOrdersByRoomName])
 
 	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
 		try {
