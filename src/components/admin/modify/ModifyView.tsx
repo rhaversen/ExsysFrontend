@@ -289,7 +289,8 @@ const ModifyView = (): ReactElement => {
 				/>
 			}
 			{selectedView === null &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>}
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
+			}
 			{selectedView === 'Produkter' &&
 				<ItemList
 					buttonText="Nyt Produkt"
