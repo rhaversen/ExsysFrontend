@@ -5,8 +5,8 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type PatchActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import EditableDropdown from './ui/EditableDropdown'
-import Timestamps from './ui/Timestamps'
+import EditableDropdown from '../ui/EditableDropdown'
+import Timestamps from '../ui/Timestamps'
 
 const Activity = ({
 	activity,

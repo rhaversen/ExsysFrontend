@@ -1,5 +1,5 @@
-import OptionsWindow from '@/components/admin/modify/OptionsWindow'
-import Options from '@/components/admin/modify/productOptions/Options'
+import OptionsWindow from '@/components/admin/modify/product/OptionsWindow'
+import Options from '@/components/admin/modify/product/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
@@ -8,7 +8,7 @@ import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUt
 import { type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import InlineValidation from './ui/InlineValidation'
+import InlineValidation from '../ui/InlineValidation'
 
 const AddProduct = ({
 	options,

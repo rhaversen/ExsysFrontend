@@ -1,3 +1,4 @@
+import Activities from '@/components/admin/modify/kiosk/kioskActivities/Activities'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
@@ -5,10 +6,9 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type KioskType, type PatchKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import EditableDropdown from '../ui/EditableDropdown'
+import Timestamps from '../ui/Timestamps'
 import ActivitiesWindow from './ActivitiesWindow'
-import Activities from './kioskActivities/Activities'
-import EditableDropdown from './ui/EditableDropdown'
-import Timestamps from './ui/Timestamps'
 
 const Kiosk = ({
 	kiosks,

@@ -1,12 +1,12 @@
+import Activities from '@/components/admin/modify/kiosk/kioskActivities/Activities'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import EditableDropdown from '../ui/EditableDropdown'
 import ActivitiesWindow from './ActivitiesWindow'
-import Activities from './kioskActivities/Activities'
-import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
 	kiosks,

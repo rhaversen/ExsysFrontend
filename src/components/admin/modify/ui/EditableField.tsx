@@ -1,7 +1,7 @@
+import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
+import useValidation from '@/hooks/useValidation'
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import useValidation from '@/hooks/useValidation'
-import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
 
 const EditableField = ({
 	type = 'text',

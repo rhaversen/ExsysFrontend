@@ -6,7 +6,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type OptionType, type PatchOptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Timestamps from './ui/Timestamps'
+import Timestamps from '../ui/Timestamps'
 
 const Option = ({
 	option,

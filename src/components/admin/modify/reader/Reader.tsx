@@ -5,7 +5,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PatchReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Timestamps from './ui/Timestamps'
+import Timestamps from '../ui/Timestamps'
 
 const Reader = ({
 	readers,
