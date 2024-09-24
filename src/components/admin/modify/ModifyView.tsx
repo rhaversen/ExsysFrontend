@@ -276,7 +276,7 @@ const ModifyView = (): ReactElement => {
 	return (
 		<div>
 			<ViewSelectionBar
-				subBar={true}
+				subLevel={1}
 				views={views}
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
