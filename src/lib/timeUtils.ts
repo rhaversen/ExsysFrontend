@@ -93,3 +93,61 @@ export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 			(currentHour === toHour ? currentMinute < toMinute : true)
 	}
 }
+
+export function timeSince (dateString: string): string {
+	const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000)
+
+	let interval = Math.floor(seconds / 31536000)
+	if (interval >= 1) return `${interval} år siden`
+
+	interval = Math.floor(seconds / 2592000)
+	if (interval >= 1) return `${interval} måned${interval !== 1 ? 'er' : ''} siden`
+
+	interval = Math.floor(seconds / 86400)
+	if (interval >= 1) return `${interval} dag${interval !== 1 ? 'e' : ''} siden`
+
+	interval = Math.floor(seconds / 3600)
+	if (interval >= 1) return `${interval} time${interval !== 1 ? 'r' : ''} siden`
+
+	interval = Math.floor(seconds / 60)
+	if (interval >= 1) return `${interval} minut${interval !== 1 ? 'ter' : ''} siden`
+
+	return `${seconds} sekund${seconds !== 1 ? 'er' : ''} siden`
+}
+
+export function timeUntil (dateString: string | number): string {
+	const seconds = Math.floor((new Date(dateString).valueOf() - new Date().getTime()) / 1000)
+
+	if (seconds <= 0) return 'Udløbet'
+
+	let interval = Math.floor(seconds / 31536000)
+	if (interval >= 1) return `om ${interval} år`
+
+	interval = Math.floor(seconds / 2592000)
+	if (interval >= 1) return `om ${interval} måned${interval !== 1 ? 'er' : ''}`
+
+	interval = Math.floor(seconds / 86400)
+	if (interval >= 1) return `om ${interval} dag${interval !== 1 ? 'e' : ''}`
+
+	interval = Math.floor(seconds / 3600)
+	if (interval >= 1) return `om ${interval} time${interval !== 1 ? 'r' : ''}`
+
+	interval = Math.floor(seconds / 60)
+	if (interval >= 1) return `om ${interval} minut${interval !== 1 ? 'ter' : ''}`
+
+	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
+}
+
+export function formatDuration (ms: number): string {
+	const totalSeconds = Math.floor(ms / 1000)
+	const days = Math.floor(totalSeconds / 86400)
+	const hours = Math.floor((totalSeconds % 86400) / 3600)
+	const minutes = Math.floor((totalSeconds % 3600) / 60)
+
+	const parts = []
+	if (days > 0) parts.push(`${days} dag${days !== 1 ? 'e' : ''}`)
+	if (hours > 0) parts.push(`${hours} time${hours !== 1 ? 'r' : ''}`)
+	if (minutes > 0) parts.push(`${minutes} minut${minutes !== 1 ? 'ter' : ''}`)
+
+	return parts.join(', ') ?? 'Mindre end et minut'
+}

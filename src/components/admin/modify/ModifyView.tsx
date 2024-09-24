@@ -15,6 +15,7 @@ import AddReader from '@/components/admin/modify/reader/AddReader'
 import Reader from '@/components/admin/modify/reader/Reader'
 import AddRoom from '@/components/admin/modify/room/AddRoom'
 import Room from '@/components/admin/modify/room/Room'
+import SessionsView from '@/components/admin/modify/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import type sortConfig from '@/lib/SortConfig'
@@ -26,7 +27,8 @@ import {
 	type OptionType,
 	type ProductType,
 	type ReaderType,
-	type RoomType
+	type RoomType,
+	type SessionType
 } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
@@ -37,7 +39,7 @@ const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 
-	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins']
+	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins', 'Login Sessioner']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -47,6 +49,7 @@ const ModifyView = (): ReactElement => {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [admins, setAdmins] = useState<AdminType[]>([])
 	const [readers, setReaders] = useState<ReaderType[]>([])
+	const [sessions, setSessions] = useState<SessionType[]>([])
 
 	const [showAddRoom, setShowAddRoom] = useState(false)
 	const [showAddOption, setShowAddOption] = useState(false)
@@ -105,7 +108,8 @@ const ModifyView = (): ReactElement => {
 				activitiesResponse,
 				kiosksResponse,
 				adminsResponse,
-				readersResponse
+				readersResponse,
+				sessionsResponse
 			] = await Promise.all([
 				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
@@ -113,7 +117,8 @@ const ModifyView = (): ReactElement => {
 				axios.get(`${API_URL}/v1/activities`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/kiosks`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/admins`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/readers`, { withCredentials: true })
+				axios.get(`${API_URL}/v1/readers`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/sessions`, { withCredentials: true })
 			])
 
 			const productsData = productsResponse.data as ProductType[]
@@ -128,6 +133,7 @@ const ModifyView = (): ReactElement => {
 			setKiosks(kiosksResponse.data as KioskType[])
 			setAdmins(adminsResponse.data as AdminType[])
 			setReaders(readersResponse.data as ReaderType[])
+			setSessions(sessionsResponse.data as SessionType[])
 		} catch (error: any) {
 			addError(error)
 		}
@@ -260,6 +266,10 @@ const ModifyView = (): ReactElement => {
 		setReaders((prevReaders) => [...prevReaders, reader])
 	}, [])
 
+	const handleDeleteSession = useCallback((id: string) => {
+		setSessions((prevSessions) => prevSessions.filter((s) => s._id !== id))
+	}, [])
+
 	// Fetch data on component mount
 	useEffect(() => {
 		if (hasFetchedData.current) return // Prevent double fetching
@@ -281,7 +291,7 @@ const ModifyView = (): ReactElement => {
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{selectedView !== null &&
+			{selectedView !== null && selectedView !== 'Login Sessioner' &&
 				<SortingControl
 					onSortFieldChange={setSortField}
 					onSortDirectionChange={(direction: string) => { setSortDirection(direction as 'asc' | 'desc') }}
@@ -445,6 +455,14 @@ const ModifyView = (): ReactElement => {
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Login Sessioner' &&
+				<SessionsView
+					admins={admins}
+					kiosks={kiosks}
+					sessions={sessions}
+					onSessionDeleted={handleDeleteSession}
+				/>
 			}
 			{showAddProduct &&
 				<AddProduct

@@ -197,3 +197,17 @@ export interface KioskTypeNonPopulated {
 	readerId: ReaderType['_id'] | null
 	activities: ActivityTypeNonPopulated[]
 }
+
+// Session types
+export interface SessionType {
+	_id: string // Used for deletion and key in list
+	sessionExpires: number // Used to determine if session is expired (Uses rolling expiration) (ISO string)
+	originalMaxAge: string | null // Null if session is not persistent
+	type: 'admin' | 'kiosk' | 'unknown' // Used to infer user information
+	userId: AdminType['_id'] | KioskType['_id'] | null // Used to infer user information
+	ipAddress: string // Ip address of the user
+	loginTime: string // Time of login (ISO string)
+	lastActivity: string // Time of last activity (ISO string)
+	userAgent: string // Agent information
+	isCurrentSession: boolean // Used to determine if session is current
+}
