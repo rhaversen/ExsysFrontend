@@ -26,7 +26,11 @@ const ActivitiesWindow = ({
 	}, [kioskActivities, onDeleteActivity, onAddActivity])
 
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal
+			onComplete={onClose}
+			onClose={onClose}
+			canComplete={true}
+		>
 			<h2 className="text-lg font-bold text-gray-800">
 				{`Tilføj aktivitet til ${kioskName}`}
 			</h2>
