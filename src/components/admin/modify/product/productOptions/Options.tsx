@@ -1,4 +1,4 @@
-import Option from '@/components/admin/modify/productOptions/Option'
+import Option from '@/components/admin/modify/product/productOptions/Option'
 import { type OptionType } from '@/types/backendDataTypes'
 import { type ReactElement } from 'react'
 

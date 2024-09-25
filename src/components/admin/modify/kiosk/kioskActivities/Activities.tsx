@@ -1,4 +1,4 @@
-import Activity from '@/components/admin/modify/kioskActivities/Activity'
+import Activity from '@/components/admin/modify/kiosk/kioskActivities/Activity'
 import { type ActivityType } from '@/types/backendDataTypes'
 import { type ReactElement } from 'react'
 

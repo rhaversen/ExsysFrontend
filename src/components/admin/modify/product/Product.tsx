@@ -1,26 +1,23 @@
-import OptionsWindow from '@/components/admin/modify/OptionsWindow'
-import Options from '@/components/admin/modify/productOptions/Options'
+import OptionsWindow from '@/components/admin/modify/product/OptionsWindow'
+import Options from '@/components/admin/modify/product/productOptions/Options'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 import { type OptionType, type PatchProductType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Timestamps from './ui/Timestamps'
+import InlineValidation from '../ui/InlineValidation'
+import Timestamps from '../ui/Timestamps'
 
 const Product = ({
 	product,
-	options,
-	onProductPatched,
-	onProductDeleted
+	options
 }: {
 	product: ProductType
 	options: OptionType[]
-	onProductPatched: (product: ProductType) => void
-	onProductDeleted: (id: ProductType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -75,27 +72,21 @@ const Product = ({
 			...productPatch,
 			orderWindow: (productPatch.orderWindow !== undefined) && convertOrderWindowToUTC(productPatch.orderWindow)
 		}
-		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC, { withCredentials: true }).then((response) => {
-			const product = response.data as ProductType
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			onProductPatched(product)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewProduct(product)
 		})
-	}, [API_URL, onProductPatched, addError, product])
+	}, [API_URL, addError, product])
 
 	const deleteProduct = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/products/${product._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onProductDeleted(product._id)
 		}).catch((error) => {
 			addError(error)
 			setNewProduct(product)
 		})
-	}, [API_URL, onProductDeleted, addError, product])
+	}, [API_URL, addError, product])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewProduct({
@@ -296,6 +287,20 @@ const Product = ({
 						onValidationChange={handleValidationChange}
 					/>
 				</div>
+				<InlineValidation
+					fieldName="orderWindow"
+					validations={[
+						{
+							validate: () => {
+								const from = newProduct.orderWindow.from
+								const to = newProduct.orderWindow.to
+								return from.hour !== to.hour || from.minute !== to.minute
+							},
+							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
+						}
+					]}
+					onValidationChange={handleValidationChange}
+				/>
 				<EditableImage
 					URL={newProduct.imageURL}
 					editable={isEditing}

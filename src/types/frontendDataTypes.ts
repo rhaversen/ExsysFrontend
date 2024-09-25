@@ -19,6 +19,11 @@ export interface Validation {
 	message: string
 }
 
+export interface InlineValidation {
+	validate: () => boolean
+	message: string
+}
+
 export interface UpdatedOrderType {
 	_id: OrderType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'

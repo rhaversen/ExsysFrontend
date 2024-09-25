@@ -5,18 +5,14 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type AdminType, type PatchAdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Timestamps from './ui/Timestamps'
+import Timestamps from '../ui/Timestamps'
 
 const Admin = ({
 	admins,
-	admin,
-	onAdminPatched,
-	onAdminDeleted
+	admin
 }: {
 	admins: AdminType[]
 	admin: AdminType
-	onAdminPatched: (admin: AdminType) => void
-	onAdminDeleted: (id: AdminType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -45,25 +41,21 @@ const Admin = ({
 	}, [])
 
 	const patchAdmin = useCallback((adminPatch: PatchAdminType): void => {
-		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).then((response) => {
-			onAdminPatched(response.data as AdminType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminPatched, addError, admin])
+	}, [API_URL, addError, admin])
 
 	const deleteAdmin = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/admins/${admin._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onAdminDeleted(admin._id)
 		}).catch((error) => {
 			addError(error)
 			setNewAdmin(admin)
 		})
-	}, [API_URL, onAdminDeleted, addError, admin])
+	}, [API_URL, addError, admin])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewAdmin({

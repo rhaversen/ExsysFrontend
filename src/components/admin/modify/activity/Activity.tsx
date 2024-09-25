@@ -5,19 +5,15 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type PatchActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import EditableDropdown from './ui/EditableDropdown'
-import Timestamps from './ui/Timestamps'
+import EditableDropdown from '../ui/EditableDropdown'
+import Timestamps from '../ui/Timestamps'
 
 const Activity = ({
 	activity,
-	rooms,
-	onActivityPatched,
-	onActivityDeleted
+	rooms
 }: {
 	activity: ActivityType
 	rooms: RoomType[]
-	onActivityPatched: (activity: ActivityType) => void
-	onActivityDeleted: (id: ActivityType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -56,25 +52,21 @@ const Activity = ({
 	}, [])
 
 	const patchActivity = useCallback((activityPatch: PatchActivityType): void => {
-		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).then((response) => {
-			onActivityPatched(response.data as ActivityType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewActivity(activity)
 		})
-	}, [API_URL, onActivityPatched, addError, activity])
+	}, [API_URL, addError, activity])
 
 	const deleteActivity = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onActivityDeleted(activity._id)
 		}).catch((error) => {
 			addError(error)
 			setNewActivity(activity)
 		})
-	}, [API_URL, onActivityDeleted, addError, activity])
+	}, [API_URL, addError, activity])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewActivity({

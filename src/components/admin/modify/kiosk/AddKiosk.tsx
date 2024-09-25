@@ -1,24 +1,23 @@
+import Activities from '@/components/admin/modify/kiosk/kioskActivities/Activities'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import CompletePostControls from '../ui/CompletePostControls'
+import EditableDropdown from '../ui/EditableDropdown'
 import ActivitiesWindow from './ActivitiesWindow'
-import Activities from './kioskActivities/Activities'
-import EditableDropdown from './ui/EditableDropdown'
 
 const Kiosk = ({
 	kiosks,
 	activities,
 	readers,
-	onKioskPosted,
 	onClose
 }: {
 	kiosks: KioskType[]
 	activities: ActivityType[]
 	readers: ReaderType[]
-	onKioskPosted: (kiosk: KioskType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -53,12 +52,11 @@ const Kiosk = ({
 
 	const postKiosk = useCallback((kiosk: PostKioskType): void => {
 		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
-			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onKioskPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setKiosk({
@@ -194,23 +192,12 @@ const Kiosk = ({
 					}
 				</div>
 			</div>
-			<div className="flex flex-row justify-center gap-4 pt-5">
-				<button
-					type="button"
-					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-					onClick={handleCancelPost}
-				>
-					{'Annuller'}
-				</button>
-				<button
-					type="button"
-					disabled={!formIsValid}
-					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-					onClick={handleCompletePost}
-				>
-					{'Færdig'}
-				</button>
-			</div>
+			<CompletePostControls
+				canClose={!showActivities}
+				formIsValid={formIsValid}
+				handleCancelPost={handleCancelPost}
+				handleCompletePost={handleCompletePost}
+			/>
 		</CloseableModal>
 	)
 }
