@@ -12,13 +12,11 @@ const Kiosk = ({
 	kiosks,
 	activities,
 	readers,
-	onKioskPosted,
 	onClose
 }: {
 	kiosks: KioskType[]
 	activities: ActivityType[]
 	readers: ReaderType[]
-	onKioskPosted: (kiosk: KioskType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -53,12 +51,11 @@ const Kiosk = ({
 
 	const postKiosk = useCallback((kiosk: PostKioskType): void => {
 		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
-			onKioskPosted(response.data as KioskType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onKioskPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setKiosk({

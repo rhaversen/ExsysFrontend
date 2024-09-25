@@ -2,15 +2,13 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type PostOptionType } from '@/types/backendDataTypes'
+import { type PostOptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const Option = ({
-	onOptionPosted,
 	onClose
 }: {
-	onOptionPosted: (option: OptionType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -42,12 +40,11 @@ const Option = ({
 
 	const postOption = useCallback((option: PostOptionType): void => {
 		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
-			onOptionPosted(response.data as OptionType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onOptionPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setOption({

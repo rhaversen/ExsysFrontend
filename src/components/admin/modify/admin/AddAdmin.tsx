@@ -7,11 +7,9 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 
 const Admin = ({
 	admins,
-	onAdminPosted,
 	onClose
 }: {
 	admins: AdminType[]
-	onAdminPosted: (admin: AdminType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -42,12 +40,11 @@ const Admin = ({
 
 	const postAdmin = useCallback((admin: PostAdminType): void => {
 		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then((response) => {
-			onAdminPosted(response.data as AdminType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onAdminPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setAdmin({

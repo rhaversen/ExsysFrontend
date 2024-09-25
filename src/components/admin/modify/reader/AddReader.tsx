@@ -7,11 +7,9 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 
 const Reader = ({
 	readers,
-	onReaderPosted,
 	onClose
 }: {
 	readers: ReaderType[]
-	onReaderPosted: (reader: ReaderType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -42,12 +40,11 @@ const Reader = ({
 
 	const postReader = useCallback((): void => {
 		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
-			onReaderPosted(response.data as ReaderType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onReaderPosted, onClose, addError, reader])
+	}, [API_URL, onClose, addError, reader])
 
 	const handlePairingCodeChange = useCallback((v: string): void => {
 		setReader({

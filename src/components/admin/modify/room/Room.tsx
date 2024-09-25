@@ -9,14 +9,10 @@ import Timestamps from '../ui/Timestamps'
 
 const Room = ({
 	rooms,
-	room,
-	onRoomPatched,
-	onRoomDeleted
+	room
 }: {
 	rooms: RoomType[]
 	room: RoomType
-	onRoomPatched: (room: RoomType) => void
-	onRoomDeleted: (id: RoomType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -44,25 +40,21 @@ const Room = ({
 	}, [])
 
 	const patchRoom = useCallback((roomPatch: PatchRoomType): void => {
-		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).then((response) => {
-			onRoomPatched(response.data as RoomType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewRoom(room)
 		})
-	}, [API_URL, onRoomPatched, addError, room])
+	}, [API_URL, addError, room])
 
 	const deleteRoom = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onRoomDeleted(room._id)
 		}).catch((error) => {
 			addError(error)
 			setNewRoom(room)
 		})
-	}, [API_URL, onRoomDeleted, addError, room])
+	}, [API_URL, addError, room])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewRoom({

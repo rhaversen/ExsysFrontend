@@ -1,18 +1,16 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type PostActivityType, type RoomType } from '@/types/backendDataTypes'
+import { type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import EditableDropdown from '../ui/EditableDropdown'
 
 const AddActivity = ({
 	rooms,
-	onActivityPosted,
 	onClose
 }: {
 	rooms: RoomType[]
-	onActivityPosted: (activity: ActivityType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -43,12 +41,11 @@ const AddActivity = ({
 
 	const postActivity = useCallback((activity: PostActivityType): void => {
 		axios.post(API_URL + '/v1/activities', activity, { withCredentials: true }).then((response) => {
-			onActivityPosted(response.data as ActivityType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onActivityPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setActivity({

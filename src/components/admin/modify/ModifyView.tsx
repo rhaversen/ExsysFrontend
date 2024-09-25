@@ -33,10 +33,13 @@ import {
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
+import { io, type Socket } from 'socket.io-client'
 import SortingControl from './ui/SortingControl'
 
 const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
+
 	const { addError } = useError()
 
 	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins', 'Login Sessioner']
@@ -60,6 +63,9 @@ const ModifyView = (): ReactElement => {
 	const [showAddReader, setShowAddReader] = useState(false)
 	const [sortField, setSortField] = useState('name')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+	// WebSocket Connection
+	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Flag to prevent double fetching
 	const hasFetchedData = useRef(false)
@@ -266,8 +272,22 @@ const ModifyView = (): ReactElement => {
 		setReaders((prevReaders) => [...prevReaders, reader])
 	}, [])
 
+	const handleUpdateSession = useCallback((session: SessionType) => {
+		setSessions((prevSessions) => {
+			const index = prevSessions.findIndex((s) => s._id === session._id)
+			if (index === -1) return prevSessions
+			const newSessions = [...prevSessions]
+			newSessions[index] = session
+			return newSessions
+		})
+	}, [])
+
 	const handleDeleteSession = useCallback((id: string) => {
 		setSessions((prevSessions) => prevSessions.filter((s) => s._id !== id))
+	}, [])
+
+	const handleAddSession = useCallback((session: SessionType) => {
+		setSessions((prevSessions) => [...prevSessions, session])
 	}, [])
 
 	// Fetch data on component mount
@@ -277,6 +297,333 @@ const ModifyView = (): ReactElement => {
 
 		fetchData().catch(addError)
 	}, [fetchData, addError])
+
+	// Initialize WebSocket connection
+	useEffect(() => {
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		// Initialize WebSocket connection
+		const socketInstance = io(WS_URL)
+		setSocket(socketInstance)
+
+		return () => {
+			// Cleanup WebSocket connection on component unmount
+			socketInstance.disconnect()
+		}
+	}, [WS_URL])
+
+	// Listen for new activities
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('activityCreated', (activity: ActivityType) => {
+				handleAddActivity(activity)
+			})
+
+			return () => {
+				socket.off('activityCreated', handleAddActivity)
+			}
+		}
+	}, [socket, addError, handleAddActivity])
+
+	// Listen for updated activities
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('activityUpdated', (activity: ActivityType) => {
+				handleUpdateActivity(activity)
+			})
+
+			return () => {
+				socket.off('activityUpdated', handleUpdateActivity)
+			}
+		}
+	}, [socket, addError, handleUpdateActivity])
+
+	// Listen for deleted activities
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('activityDeleted', (id: string) => {
+				handleDeleteActivity(id)
+			})
+
+			return () => {
+				socket.off('activityDeleted', handleDeleteActivity)
+			}
+		}
+	}, [socket, addError, handleDeleteActivity])
+
+	// Listen for new admins
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('adminCreated', (admin: AdminType) => {
+				handleAddAdmin(admin)
+			})
+
+			return () => {
+				socket.off('adminCreated', handleAddAdmin)
+			}
+		}
+	}, [socket, addError, handleAddAdmin])
+
+	// Listen for updated admins
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('adminUpdated', (admin: AdminType) => {
+				handleUpdateAdmin(admin)
+			})
+
+			return () => {
+				socket.off('adminUpdated', handleUpdateAdmin)
+			}
+		}
+	}, [socket, addError, handleUpdateAdmin])
+
+	// Listen for deleted admins
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('adminDeleted', (id: string) => {
+				handleDeleteAdmin(id)
+			})
+
+			return () => {
+				socket.off('adminDeleted', handleDeleteAdmin)
+			}
+		}
+	}, [socket, addError, handleDeleteAdmin])
+
+	// Listen for new kiosks
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('kioskCreated', (kiosk: KioskType) => {
+				handleAddKiosk(kiosk)
+			})
+
+			return () => {
+				socket.off('kioskCreated', handleAddKiosk)
+			}
+		}
+	}, [socket, addError, handleAddKiosk])
+
+	// Listen for updated kiosks
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('kioskUpdated', (kiosk: KioskType) => {
+				handleUpdateKiosk(kiosk)
+			})
+
+			return () => {
+				socket.off('kioskUpdated', handleUpdateKiosk)
+			}
+		}
+	}, [socket, addError, handleUpdateKiosk])
+
+	// Listen for deleted kiosks
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('kioskDeleted', (id: string) => {
+				handleDeleteKiosk(id)
+			})
+
+			return () => {
+				socket.off('kioskDeleted', handleDeleteKiosk)
+			}
+		}
+	}, [socket, addError, handleDeleteKiosk])
+
+	// Listen for new options
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('optionCreated', (option: OptionType) => {
+				handleAddOption(option)
+			})
+
+			return () => {
+				socket.off('optionCreated', handleAddOption)
+			}
+		}
+	}, [socket, addError, handleAddOption])
+
+	// Listen for updated options
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('optionUpdated', (option: OptionType) => {
+				handleUpdateOption(option)
+			})
+
+			return () => {
+				socket.off('optionUpdated', handleUpdateOption)
+			}
+		}
+	}, [socket, addError, handleUpdateOption])
+
+	// Listen for deleted options
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('optionDeleted', (id: string) => {
+				handleDeleteOption(id)
+			})
+
+			return () => {
+				socket.off('optionDeleted', handleDeleteOption)
+			}
+		}
+	}, [socket, addError, handleDeleteOption])
+
+	// Listen for new products
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('productCreated', (product: ProductType) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+				handleAddProduct(product)
+			})
+
+			return () => {
+				socket.off('productCreated', handleAddProduct)
+			}
+		}
+	}, [socket, addError, handleAddProduct])
+
+	// Listen for updated products
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('productUpdated', (product: ProductType) => {
+				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+				handleUpdateProduct(product)
+			})
+
+			return () => {
+				socket.off('productUpdated', handleUpdateProduct)
+			}
+		}
+	}, [socket, addError, handleUpdateProduct])
+
+	// Listen for deleted products
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('productDeleted', (id: string) => {
+				handleDeleteProduct(id)
+			})
+
+			return () => {
+				socket.off('productDeleted', handleDeleteProduct)
+			}
+		}
+	}, [socket, addError, handleDeleteProduct])
+
+	// Listen for new rooms
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('roomCreated', (room: RoomType) => {
+				handleAddRoom(room)
+			})
+
+			return () => {
+				socket.off('roomCreated', handleAddRoom)
+			}
+		}
+	}, [socket, addError, handleAddRoom])
+
+	// Listen for updated rooms
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('roomUpdated', (room: RoomType) => {
+				handleUpdateRoom(room)
+			})
+
+			return () => {
+				socket.off('roomUpdated', handleUpdateRoom)
+			}
+		}
+	}, [socket, addError, handleUpdateRoom])
+
+	// Listen for deleted rooms
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('roomDeleted', (id: string) => {
+				handleDeleteRoom(id)
+			})
+
+			return () => {
+				socket.off('roomDeleted', handleDeleteRoom)
+			}
+		}
+	}, [socket, addError, handleDeleteRoom])
+
+	// Listen for new readers
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('readerCreated', (reader: ReaderType) => {
+				handleAddReader(reader)
+			})
+
+			return () => {
+				socket.off('readerCreated', handleAddReader)
+			}
+		}
+	}, [socket, addError, handleAddReader])
+
+	// Listen for updated readers
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('readerUpdated', (reader: ReaderType) => {
+				handleUpdateReader(reader)
+			})
+
+			return () => {
+				socket.off('readerUpdated', handleUpdateReader)
+			}
+		}
+	}, [socket, addError, handleUpdateReader])
+
+	// Listen for deleted readers
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('readerDeleted', (id: string) => {
+				handleDeleteReader(id)
+			})
+
+			return () => {
+				socket.off('readerDeleted', handleDeleteReader)
+			}
+		}
+	}, [socket, addError, handleDeleteReader])
+
+	// Listen for new sessions
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('sessionCreated', (session: SessionType) => {
+				handleAddSession(session)
+			})
+
+			return () => {
+				socket.off('sessionCreated', handleAddSession)
+			}
+		}
+	}, [socket, addError, handleAddSession])
+
+	// Listen for updated sessions
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('sessionUpdated', (session: SessionType) => {
+				handleUpdateSession(session)
+			})
+
+			return () => {
+				socket.off('sessionUpdated', handleUpdateSession)
+			}
+		}
+	}, [socket, addError, handleUpdateSession])
+
+	// Listen for deleted sessions
+	useEffect(() => {
+		if (socket !== null) {
+			socket.on('sessionDeleted', (id: string) => {
+				handleDeleteSession(id)
+			})
+
+			return () => {
+				socket.off('sessionDeleted', handleDeleteSession)
+			}
+		}
+	}, [socket, addError, handleDeleteSession])
 
 	// Refresh data every hour
 	useInterval(() => {
@@ -316,8 +663,6 @@ const ModifyView = (): ReactElement => {
 							<Product
 								options={options}
 								product={product}
-								onProductPatched={handleUpdateProduct}
-								onProductDeleted={handleDeleteProduct}
 							/>
 						</div>
 					))}
@@ -337,8 +682,6 @@ const ModifyView = (): ReactElement => {
 						>
 							<Option
 								option={option}
-								onOptionPatched={handleUpdateOption}
-								onOptionDeleted={handleDeleteOption}
 							/>
 						</div>
 					))}
@@ -359,8 +702,6 @@ const ModifyView = (): ReactElement => {
 							<Room
 								rooms={rooms}
 								room={room}
-								onRoomPatched={handleUpdateRoom}
-								onRoomDeleted={handleDeleteRoom}
 							/>
 						</div>
 					))}
@@ -381,8 +722,6 @@ const ModifyView = (): ReactElement => {
 							<Activity
 								activity={activity}
 								rooms={rooms}
-								onActivityPatched={handleUpdateActivity}
-								onActivityDeleted={handleDeleteActivity}
 							/>
 						</div>
 					))}
@@ -405,8 +744,6 @@ const ModifyView = (): ReactElement => {
 								kiosk={kiosk}
 								activities={activities}
 								readers={readers}
-								onKioskPatched={handleUpdateKiosk}
-								onKioskDeleted={handleDeleteKiosk}
 							/>
 						</div>
 					))}
@@ -427,8 +764,6 @@ const ModifyView = (): ReactElement => {
 							<Admin
 								admins={admins}
 								admin={admin}
-								onAdminPatched={handleUpdateAdmin}
-								onAdminDeleted={handleDeleteAdmin}
 							/>
 						</div>
 					))}
@@ -449,8 +784,6 @@ const ModifyView = (): ReactElement => {
 							<Reader
 								readers={readers}
 								reader={reader}
-								onReaderPatched={handleUpdateReader}
-								onReaderDeleted={handleDeleteReader}
 							/>
 						</div>
 					))}
@@ -461,13 +794,11 @@ const ModifyView = (): ReactElement => {
 					admins={admins}
 					kiosks={kiosks}
 					sessions={sessions}
-					onSessionDeleted={handleDeleteSession}
 				/>
 			}
 			{showAddProduct &&
 				<AddProduct
 					options={options}
-					onProductPosted={handleAddProduct}
 					onClose={() => {
 						setShowAddProduct(false)
 					}}
@@ -475,7 +806,6 @@ const ModifyView = (): ReactElement => {
 			}
 			{showAddOption &&
 				<AddOption
-					onOptionPosted={handleAddOption}
 					onClose={() => {
 						setShowAddOption(false)
 					}}
@@ -484,7 +814,6 @@ const ModifyView = (): ReactElement => {
 			{showAddRoom &&
 				<AddRoom
 					rooms={rooms}
-					onRoomPosted={handleAddRoom}
 					onClose={() => {
 						setShowAddRoom(false)
 					}}
@@ -493,7 +822,6 @@ const ModifyView = (): ReactElement => {
 			{showAddActivity &&
 				<AddActivity
 					rooms={rooms}
-					onActivityPosted={handleAddActivity}
 					onClose={() => {
 						setShowAddActivity(false)
 					}}
@@ -504,7 +832,6 @@ const ModifyView = (): ReactElement => {
 					kiosks={kiosks}
 					activities={activities}
 					readers={readers}
-					onKioskPosted={handleAddKiosk}
 					onClose={() => {
 						setShowAddKiosk(false)
 					}}
@@ -513,7 +840,6 @@ const ModifyView = (): ReactElement => {
 			{showAddAdmin &&
 				<AddAdmin
 					admins={admins}
-					onAdminPosted={handleAddAdmin}
 					onClose={() => {
 						setShowAddAdmin(false)
 					}}
@@ -522,7 +848,6 @@ const ModifyView = (): ReactElement => {
 			{showAddReader &&
 				<AddReader
 					readers={readers}
-					onReaderPosted={handleAddReader}
 					onClose={() => {
 						setShowAddReader(false)
 					}}

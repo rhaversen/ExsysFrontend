@@ -14,16 +14,12 @@ const Kiosk = ({
 	kiosks,
 	kiosk,
 	activities,
-	readers,
-	onKioskPatched,
-	onKioskDeleted
+	readers
 }: {
 	kiosks: KioskType[]
 	kiosk: KioskType
 	activities: ActivityType[]
 	readers: ReaderType[]
-	onKioskPatched: (kiosk: KioskType) => void
-	onKioskDeleted: (id: KioskType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -91,25 +87,21 @@ const Kiosk = ({
 	}, [])
 
 	const patchKiosk = useCallback((kioskPatch: PatchKioskType): void => {
-		axios.patch(API_URL + `/v1/kiosks/${kiosk._id}`, kioskPatch, { withCredentials: true }).then((response) => {
-			onKioskPatched(response.data as KioskType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/kiosks/${kiosk._id}`, kioskPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskPatched, addError, kiosk])
+	}, [API_URL, addError, kiosk])
 
 	const deleteKiosk = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/kiosks/${kiosk._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onKioskDeleted(kiosk._id)
 		}).catch((error) => {
 			addError(error)
 			setNewKiosk(kiosk)
 		})
-	}, [API_URL, onKioskDeleted, addError, kiosk])
+	}, [API_URL, addError, kiosk])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewKiosk({

@@ -4,19 +4,17 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
+import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { type OptionType, type PostProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import InlineValidation from '../ui/InlineValidation'
 
 const AddProduct = ({
 	options,
-	onProductPosted,
 	onClose
 }: {
 	options: OptionType[]
-	onProductPosted: (product: ProductType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -64,14 +62,11 @@ const AddProduct = ({
 			orderWindow: convertOrderWindowToUTC(product.orderWindow)
 		}
 		axios.post(API_URL + '/v1/products', productUTC, { withCredentials: true }).then((response) => {
-			const product = response.data as ProductType
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onProductPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setProduct({

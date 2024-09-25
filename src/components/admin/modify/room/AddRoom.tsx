@@ -7,11 +7,9 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 
 const Room = ({
 	rooms,
-	onRoomPosted,
 	onClose
 }: {
 	rooms: RoomType[]
-	onRoomPosted: (room: RoomType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -42,12 +40,11 @@ const Room = ({
 
 	const postRoom = useCallback((room: PostRoomType): void => {
 		axios.post(API_URL + '/v1/rooms', room, { withCredentials: true }).then((response) => {
-			onRoomPosted(response.data as RoomType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onRoomPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setRoom({

@@ -9,13 +9,11 @@ import SessionItem from './SessionItem'
 const SessionsView = ({
 	admins,
 	kiosks,
-	sessions,
-	onSessionDeleted
+	sessions
 }: {
 	admins: AdminType[]
 	kiosks: KioskType[]
 	sessions: SessionType[]
-	onSessionDeleted: (sessionId: string) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -86,14 +84,11 @@ const SessionsView = ({
 					data: { confirm: true },
 					withCredentials: true
 				})
-				.then(() => {
-					onSessionDeleted(id)
-				})
 				.catch((error) => {
 					addError(error)
 				})
 		},
-		[API_URL, addError, onSessionDeleted]
+		[API_URL, addError]
 	)
 
 	return (

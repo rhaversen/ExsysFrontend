@@ -9,13 +9,9 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import Timestamps from '../ui/Timestamps'
 
 const Option = ({
-	option,
-	onOptionPatched,
-	onOptionDeleted
+	option
 }: {
 	option: OptionType
-	onOptionPatched: (option: OptionType) => void
-	onOptionDeleted: (id: OptionType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -43,25 +39,21 @@ const Option = ({
 	}, [])
 
 	const patchOption = useCallback((optionPatch: PatchOptionType): void => {
-		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch, { withCredentials: true }).then((response) => {
-			onOptionPatched(response.data as OptionType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewOption(option)
 		})
-	}, [API_URL, onOptionPatched, addError, option])
+	}, [API_URL, addError, option])
 
 	const deleteOption = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/options/${option._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onOptionDeleted(option._id)
 		}).catch((error) => {
 			addError(error)
 			setNewOption(option)
 		})
-	}, [API_URL, onOptionDeleted, addError, option])
+	}, [API_URL, addError, option])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setNewOption({

@@ -9,14 +9,10 @@ import Timestamps from '../ui/Timestamps'
 
 const Reader = ({
 	readers,
-	reader,
-	onReaderPatched,
-	onReaderDeleted
+	reader
 }: {
 	readers: ReaderType[]
 	reader: ReaderType
-	onReaderPatched: (reader: ReaderType) => void
-	onReaderDeleted: (id: ReaderType['_id']) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -44,25 +40,21 @@ const Reader = ({
 	}, [])
 
 	const patchReader = useCallback((readerPatch: PatchReaderType): void => {
-		axios.patch(API_URL + `/v1/readers/${reader._id}`, readerPatch, { withCredentials: true }).then((response) => {
-			onReaderPatched(response.data as ReaderType)
-		}).catch((error) => {
+		axios.patch(API_URL + `/v1/readers/${reader._id}`, readerPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
 			setNewReader(reader)
 		})
-	}, [API_URL, onReaderPatched, addError, reader])
+	}, [API_URL, addError, reader])
 
 	const deleteReader = useCallback((confirm: boolean): void => {
 		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onReaderDeleted(reader._id)
 		}).catch((error) => {
 			addError(error)
 			setNewReader(reader)
 		})
-	}, [API_URL, onReaderDeleted, addError, reader])
+	}, [API_URL, addError, reader])
 
 	const handleReaderTagChange = useCallback((v: string): void => {
 		setNewReader({
