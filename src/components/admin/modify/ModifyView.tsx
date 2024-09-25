@@ -1,22 +1,24 @@
 'use client'
 
-import Activity from '@/components/admin/modify/Activity'
-import AddActivity from '@/components/admin/modify/AddActivity'
-import AddAdmin from '@/components/admin/modify/AddAdmin'
-import AddKiosk from '@/components/admin/modify/AddKiosk'
-import AddOption from '@/components/admin/modify/AddOption'
-import AddProduct from '@/components/admin/modify/AddProduct'
-import AddReader from '@/components/admin/modify/AddReader'
-import AddRoom from '@/components/admin/modify/AddRoom'
-import Admin from '@/components/admin/modify/Admin'
+import Activity from '@/components/admin/modify/activity/Activity'
+import AddActivity from '@/components/admin/modify/activity/AddActivity'
+import AddAdmin from '@/components/admin/modify/admin/AddAdmin'
+import Admin from '@/components/admin/modify/admin/Admin'
 import ItemList from '@/components/admin/modify/ItemList'
-import Kiosk from '@/components/admin/modify/Kiosk'
-import Option from '@/components/admin/modify/Option'
-import Product from '@/components/admin/modify/Product'
-import Reader from '@/components/admin/modify/Reader'
-import Room from '@/components/admin/modify/Room'
+import AddKiosk from '@/components/admin/modify/kiosk/AddKiosk'
+import Kiosk from '@/components/admin/modify/kiosk/Kiosk'
+import AddOption from '@/components/admin/modify/option/AddOption'
+import Option from '@/components/admin/modify/option/Option'
+import AddProduct from '@/components/admin/modify/product/AddProduct'
+import Product from '@/components/admin/modify/product/Product'
+import AddReader from '@/components/admin/modify/reader/AddReader'
+import Reader from '@/components/admin/modify/reader/Reader'
+import AddRoom from '@/components/admin/modify/room/AddRoom'
+import Room from '@/components/admin/modify/room/Room'
+import SessionsView from '@/components/admin/modify/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import type sortConfig from '@/lib/SortConfig'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
@@ -26,18 +28,21 @@ import {
 	type OptionType,
 	type ProductType,
 	type ReaderType,
-	type RoomType
+	type RoomType,
+	type SessionType
 } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { useInterval } from 'react-use'
-import SortingControl from './SortingControl'
+import { io, type Socket } from 'socket.io-client'
+import SortingControl from './ui/SortingControl'
 
 const ModifyView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
+
 	const { addError } = useError()
 
-	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins']
+	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins', 'Login Sessioner']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -47,6 +52,7 @@ const ModifyView = (): ReactElement => {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [admins, setAdmins] = useState<AdminType[]>([])
 	const [readers, setReaders] = useState<ReaderType[]>([])
+	const [sessions, setSessions] = useState<SessionType[]>([])
 
 	const [showAddRoom, setShowAddRoom] = useState(false)
 	const [showAddOption, setShowAddOption] = useState(false)
@@ -57,6 +63,9 @@ const ModifyView = (): ReactElement => {
 	const [showAddReader, setShowAddReader] = useState(false)
 	const [sortField, setSortField] = useState('name')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+	// WebSocket Connection
+	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Flag to prevent double fetching
 	const hasFetchedData = useRef(false)
@@ -105,7 +114,8 @@ const ModifyView = (): ReactElement => {
 				activitiesResponse,
 				kiosksResponse,
 				adminsResponse,
-				readersResponse
+				readersResponse,
+				sessionsResponse
 			] = await Promise.all([
 				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
@@ -113,7 +123,8 @@ const ModifyView = (): ReactElement => {
 				axios.get(`${API_URL}/v1/activities`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/kiosks`, { withCredentials: true }),
 				axios.get(`${API_URL}/v1/admins`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/readers`, { withCredentials: true })
+				axios.get(`${API_URL}/v1/readers`, { withCredentials: true }),
+				axios.get(`${API_URL}/v1/sessions`, { withCredentials: true })
 			])
 
 			const productsData = productsResponse.data as ProductType[]
@@ -128,137 +139,169 @@ const ModifyView = (): ReactElement => {
 			setKiosks(kiosksResponse.data as KioskType[])
 			setAdmins(adminsResponse.data as AdminType[])
 			setReaders(readersResponse.data as ReaderType[])
+			setSessions(sessionsResponse.data as SessionType[])
 		} catch (error: any) {
 			addError(error)
 		}
 	}, [API_URL, addError])
 
-	// Define handlers with useCallback and appropriate dependencies
-	const handleUpdateProduct = useCallback((product: ProductType) => {
-		setProducts((prevProducts) => {
-			const index = prevProducts.findIndex((p) => p._id === product._id)
-			if (index === -1) return prevProducts
-			const newProducts = [...prevProducts]
-			newProducts[index] = product
-			return newProducts
-		})
-	}, [])
+	// Generic update handler
+	const CreateUpdateHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => {
+					const index = prevItems.findIndex((i) => i._id === item._id)
+					if (index === -1) return prevItems
+					const newItems = [...prevItems]
+					newItems[index] = item
+					return newItems
+				})
+			},
+			[setState]
+		)
+	}
 
-	const handleDeleteProduct = useCallback((id: string) => {
-		setProducts((prevProducts) => prevProducts.filter((p) => p._id !== id))
-	}, [])
+	// Generic delete handler
+	const CreateDeleteHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (id: string) => void => {
+		return useCallback(
+			(id: string) => {
+				setState((prevItems) => prevItems.filter((i) => i._id !== id))
+			},
+			[setState]
+		)
+	}
 
-	const handleAddProduct = useCallback((product: ProductType) => {
-		setProducts((prevProducts) => [...prevProducts, product])
-	}, [])
+	// Generic add handler
+	const CreateAddHandler = <T, > (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => [...prevItems, item])
+			},
+			[setState]
+		)
+	}
 
-	const handleUpdateOption = useCallback((option: OptionType) => {
-		setOptions((prevOptions) => {
-			const index = prevOptions.findIndex((o) => o._id === option._id)
-			if (index === -1) return prevOptions
-			const newOptions = [...prevOptions]
-			newOptions[index] = option
-			return newOptions
-		})
-	}, [])
+	// Products
+	const handleUpdateProduct = CreateUpdateHandler<ProductType>(setProducts)
+	const handleDeleteProduct = CreateDeleteHandler<ProductType>(setProducts)
+	const handleAddProduct = CreateAddHandler<ProductType>(setProducts)
 
-	const handleDeleteOption = useCallback((id: string) => {
-		setOptions((prevOptions) => prevOptions.filter((o) => o._id !== id))
-	}, [])
+	// Options
+	const handleUpdateOption = CreateUpdateHandler<OptionType>(setOptions)
+	const handleDeleteOption = CreateDeleteHandler<OptionType>(setOptions)
+	const handleAddOption = CreateAddHandler<OptionType>(setOptions)
 
-	const handleAddOption = useCallback((option: OptionType) => {
-		setOptions((prevOptions) => [...prevOptions, option])
-	}, [])
+	// Rooms
+	const handleUpdateRoom = CreateUpdateHandler<RoomType>(setRooms)
+	const handleDeleteRoom = CreateDeleteHandler<RoomType>(setRooms)
+	const handleAddRoom = CreateAddHandler<RoomType>(setRooms)
 
-	const handleUpdateRoom = useCallback((room: RoomType) => {
-		setRooms((prevRooms) => {
-			const index = prevRooms.findIndex((r) => r._id === room._id)
-			if (index === -1) return prevRooms
-			const newRooms = [...prevRooms]
-			newRooms[index] = room
-			return newRooms
-		})
-	}, [])
+	// Activities
+	const handleUpdateActivity = CreateUpdateHandler<ActivityType>(setActivities)
+	const handleDeleteActivity = CreateDeleteHandler<ActivityType>(setActivities)
+	const handleAddActivity = CreateAddHandler<ActivityType>(setActivities)
 
-	const handleDeleteRoom = useCallback((id: string) => {
-		setRooms((prevRooms) => prevRooms.filter((r) => r._id !== id))
-	}, [])
+	// Kiosks
+	const handleUpdateKiosk = CreateUpdateHandler<KioskType>(setKiosks)
+	const handleDeleteKiosk = CreateDeleteHandler<KioskType>(setKiosks)
+	const handleAddKiosk = CreateAddHandler<KioskType>(setKiosks)
 
-	const handleAddRoom = useCallback((room: RoomType) => {
-		setRooms((prevRooms) => [...prevRooms, room])
-	}, [])
+	// Admins
+	const handleUpdateAdmin = CreateUpdateHandler<AdminType>(setAdmins)
+	const handleDeleteAdmin = CreateDeleteHandler<AdminType>(setAdmins)
+	const handleAddAdmin = CreateAddHandler<AdminType>(setAdmins)
 
-	const handleUpdateActivity = useCallback((activity: ActivityType) => {
-		setActivities((prevActivities) => {
-			const index = prevActivities.findIndex((a) => a._id === activity._id)
-			if (index === -1) return prevActivities
-			const newActivities = [...prevActivities]
-			newActivities[index] = activity
-			return newActivities
-		})
-	}, [])
+	// Readers
+	const handleUpdateReader = CreateUpdateHandler<ReaderType>(setReaders)
+	const handleDeleteReader = CreateDeleteHandler<ReaderType>(setReaders)
+	const handleAddReader = CreateAddHandler<ReaderType>(setReaders)
 
-	const handleDeleteActivity = useCallback((id: string) => {
-		setActivities((prevActivities) => prevActivities.filter((a) => a._id !== id))
-	}, [])
+	// Sessions
+	const handleUpdateSession = CreateUpdateHandler<SessionType>(setSessions)
+	const handleDeleteSession = CreateDeleteHandler<SessionType>(setSessions)
+	const handleAddSession = CreateAddHandler<SessionType>(setSessions)
 
-	const handleAddActivity = useCallback((activity: ActivityType) => {
-		setActivities((prevActivities) => [...prevActivities, activity])
-	}, [])
+	// Activities
+	useEntitySocketListeners<ActivityType>(
+		socket,
+		'activity',
+		handleAddActivity,
+		handleUpdateActivity,
+		handleDeleteActivity
+	)
 
-	const handleUpdateKiosk = useCallback((kiosk: KioskType) => {
-		setKiosks((prevKiosks) => {
-			const index = prevKiosks.findIndex((k) => k._id === kiosk._id)
-			if (index === -1) return prevKiosks
-			const newKiosks = [...prevKiosks]
-			newKiosks[index] = kiosk
-			return newKiosks
-		})
-	}, [])
+	// Admins
+	useEntitySocketListeners<AdminType>(
+		socket,
+		'admin',
+		handleAddAdmin,
+		handleUpdateAdmin,
+		handleDeleteAdmin
+	)
 
-	const handleDeleteKiosk = useCallback((id: string) => {
-		setKiosks((prevKiosks) => prevKiosks.filter((k) => k._id !== id))
-	}, [])
+	// Kiosks
+	useEntitySocketListeners<KioskType>(
+		socket,
+		'kiosk',
+		handleAddKiosk,
+		handleUpdateKiosk,
+		handleDeleteKiosk
+	)
 
-	const handleAddKiosk = useCallback((kiosk: KioskType) => {
-		setKiosks((prevKiosks) => [...prevKiosks, kiosk])
-	}, [])
+	// Options
+	useEntitySocketListeners<OptionType>(
+		socket,
+		'option',
+		handleAddOption,
+		handleUpdateOption,
+		handleDeleteOption
+	)
 
-	const handleUpdateAdmin = useCallback((admin: AdminType) => {
-		setAdmins((prevAdmins) => {
-			const index = prevAdmins.findIndex((a) => a._id === admin._id)
-			if (index === -1) return prevAdmins
-			const newAdmins = [...prevAdmins]
-			newAdmins[index] = admin
-			return newAdmins
-		})
-	}, [])
+	// Products with preprocessing
+	useEntitySocketListeners<ProductType>(
+		socket,
+		'product',
+		handleAddProduct,
+		handleUpdateProduct,
+		handleDeleteProduct,
+		(product) => {
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			return product
+		}
+	)
 
-	const handleDeleteAdmin = useCallback((id: string) => {
-		setAdmins((prevAdmins) => prevAdmins.filter((a) => a._id !== id))
-	}, [])
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		handleAddRoom,
+		handleUpdateRoom,
+		handleDeleteRoom
+	)
 
-	const handleAddAdmin = useCallback((admin: AdminType) => {
-		setAdmins((prevAdmins) => [...prevAdmins, admin])
-	}, [])
+	// Readers
+	useEntitySocketListeners<ReaderType>(
+		socket,
+		'reader',
+		handleAddReader,
+		handleUpdateReader,
+		handleDeleteReader
+	)
 
-	const handleUpdateReader = useCallback((reader: ReaderType) => {
-		setReaders((prevReaders) => {
-			const index = prevReaders.findIndex((r) => r._id === reader._id)
-			if (index === -1) return prevReaders
-			const newReaders = [...prevReaders]
-			newReaders[index] = reader
-			return newReaders
-		})
-	}, [])
-
-	const handleDeleteReader = useCallback((id: string) => {
-		setReaders((prevReaders) => prevReaders.filter((r) => r._id !== id))
-	}, [])
-
-	const handleAddReader = useCallback((reader: ReaderType) => {
-		setReaders((prevReaders) => [...prevReaders, reader])
-	}, [])
+	// Sessions
+	useEntitySocketListeners<SessionType>(
+		socket,
+		'session',
+		handleAddSession,
+		handleUpdateSession,
+		handleDeleteSession
+	)
 
 	// Fetch data on component mount
 	useEffect(() => {
@@ -268,20 +311,28 @@ const ModifyView = (): ReactElement => {
 		fetchData().catch(addError)
 	}, [fetchData, addError])
 
-	// Refresh data every hour
-	useInterval(() => {
-		fetchData().catch(addError)
-	}, 1000 * 60 * 60) // Every hour
+	// Initialize WebSocket connection
+	useEffect(() => {
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		// Initialize WebSocket connection
+		const socketInstance = io(WS_URL)
+		setSocket(socketInstance)
+
+		return () => {
+			// Cleanup WebSocket connection on component unmount
+			socketInstance.disconnect()
+		}
+	}, [WS_URL])
 
 	return (
 		<div>
 			<ViewSelectionBar
-				subBar={true}
+				subLevel={1}
 				views={views}
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{selectedView !== null &&
+			{selectedView !== null && selectedView !== 'Login Sessioner' &&
 				<SortingControl
 					onSortFieldChange={setSortField}
 					onSortDirectionChange={(direction: string) => { setSortDirection(direction as 'asc' | 'desc') }}
@@ -289,7 +340,8 @@ const ModifyView = (): ReactElement => {
 				/>
 			}
 			{selectedView === null &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>}
+				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
+			}
 			{selectedView === 'Produkter' &&
 				<ItemList
 					buttonText="Nyt Produkt"
@@ -305,8 +357,6 @@ const ModifyView = (): ReactElement => {
 							<Product
 								options={options}
 								product={product}
-								onProductPatched={handleUpdateProduct}
-								onProductDeleted={handleDeleteProduct}
 							/>
 						</div>
 					))}
@@ -326,8 +376,6 @@ const ModifyView = (): ReactElement => {
 						>
 							<Option
 								option={option}
-								onOptionPatched={handleUpdateOption}
-								onOptionDeleted={handleDeleteOption}
 							/>
 						</div>
 					))}
@@ -348,8 +396,6 @@ const ModifyView = (): ReactElement => {
 							<Room
 								rooms={rooms}
 								room={room}
-								onRoomPatched={handleUpdateRoom}
-								onRoomDeleted={handleDeleteRoom}
 							/>
 						</div>
 					))}
@@ -370,8 +416,6 @@ const ModifyView = (): ReactElement => {
 							<Activity
 								activity={activity}
 								rooms={rooms}
-								onActivityPatched={handleUpdateActivity}
-								onActivityDeleted={handleDeleteActivity}
 							/>
 						</div>
 					))}
@@ -394,8 +438,6 @@ const ModifyView = (): ReactElement => {
 								kiosk={kiosk}
 								activities={activities}
 								readers={readers}
-								onKioskPatched={handleUpdateKiosk}
-								onKioskDeleted={handleDeleteKiosk}
 							/>
 						</div>
 					))}
@@ -416,8 +458,6 @@ const ModifyView = (): ReactElement => {
 							<Admin
 								admins={admins}
 								admin={admin}
-								onAdminPatched={handleUpdateAdmin}
-								onAdminDeleted={handleDeleteAdmin}
 							/>
 						</div>
 					))}
@@ -438,17 +478,21 @@ const ModifyView = (): ReactElement => {
 							<Reader
 								readers={readers}
 								reader={reader}
-								onReaderPatched={handleUpdateReader}
-								onReaderDeleted={handleDeleteReader}
 							/>
 						</div>
 					))}
 				</ItemList>
 			}
+			{selectedView === 'Login Sessioner' &&
+				<SessionsView
+					admins={admins}
+					kiosks={kiosks}
+					sessions={sessions}
+				/>
+			}
 			{showAddProduct &&
 				<AddProduct
 					options={options}
-					onProductPosted={handleAddProduct}
 					onClose={() => {
 						setShowAddProduct(false)
 					}}
@@ -456,7 +500,6 @@ const ModifyView = (): ReactElement => {
 			}
 			{showAddOption &&
 				<AddOption
-					onOptionPosted={handleAddOption}
 					onClose={() => {
 						setShowAddOption(false)
 					}}
@@ -465,7 +508,6 @@ const ModifyView = (): ReactElement => {
 			{showAddRoom &&
 				<AddRoom
 					rooms={rooms}
-					onRoomPosted={handleAddRoom}
 					onClose={() => {
 						setShowAddRoom(false)
 					}}
@@ -474,7 +516,6 @@ const ModifyView = (): ReactElement => {
 			{showAddActivity &&
 				<AddActivity
 					rooms={rooms}
-					onActivityPosted={handleAddActivity}
 					onClose={() => {
 						setShowAddActivity(false)
 					}}
@@ -485,7 +526,6 @@ const ModifyView = (): ReactElement => {
 					kiosks={kiosks}
 					activities={activities}
 					readers={readers}
-					onKioskPosted={handleAddKiosk}
 					onClose={() => {
 						setShowAddKiosk(false)
 					}}
@@ -494,7 +534,6 @@ const ModifyView = (): ReactElement => {
 			{showAddAdmin &&
 				<AddAdmin
 					admins={admins}
-					onAdminPosted={handleAddAdmin}
 					onClose={() => {
 						setShowAddAdmin(false)
 					}}
@@ -503,7 +542,6 @@ const ModifyView = (): ReactElement => {
 			{showAddReader &&
 				<AddReader
 					readers={readers}
-					onReaderPosted={handleAddReader}
 					onClose={() => {
 						setShowAddReader(false)
 					}}

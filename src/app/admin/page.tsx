@@ -17,7 +17,7 @@ export default function Page (): ReactElement {
 				className="absolute top-0 right-0 m-3"
 			/>
 			<ViewSelectionBar
-				subBar={false}
+				subLevel={0}
 				views={views}
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}

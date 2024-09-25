@@ -2,17 +2,23 @@ import React, { type ReactElement, type ReactNode, useEffect } from 'react'
 
 const CloseableModal = ({
 	canClose = true,
+	canComplete = false,
 	onClose,
+	onComplete,
 	children
 }: {
 	canClose?: boolean
+	canComplete?: boolean
 	onClose: () => void
+	onComplete?: () => void
 	children: ReactNode
 }): ReactElement => {
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent): void => {
 			if (event.key === 'Escape' && canClose) {
 				onClose()
+			} else if (event.key === 'Enter' && canComplete && (onComplete !== undefined)) {
+				onComplete()
 			}
 		}
 
@@ -23,7 +29,7 @@ const CloseableModal = ({
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown)
 		}
-	}, [canClose, onClose])
+	}, [canClose, canComplete, onClose, onComplete])
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10">

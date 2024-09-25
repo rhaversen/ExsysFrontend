@@ -1,21 +1,21 @@
-import OptionsWindow from '@/components/admin/modify/OptionsWindow'
-import Options from '@/components/admin/modify/productOptions/Options'
+import OptionsWindow from '@/components/admin/modify/product/OptionsWindow'
+import Options from '@/components/admin/modify/product/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertOrderWindowFromUTC, convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
+import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { type OptionType, type PostProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import CompletePostControls from '../ui/CompletePostControls'
+import InlineValidation from '../ui/InlineValidation'
 
 const AddProduct = ({
 	options,
-	onProductPosted,
 	onClose
 }: {
 	options: OptionType[]
-	onProductPosted: (product: ProductType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -63,14 +63,11 @@ const AddProduct = ({
 			orderWindow: convertOrderWindowToUTC(product.orderWindow)
 		}
 		axios.post(API_URL + '/v1/products', productUTC, { withCredentials: true }).then((response) => {
-			const product = response.data as ProductType
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			onProductPosted(product)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onProductPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setProduct({
@@ -255,6 +252,20 @@ const AddProduct = ({
 						onValidationChange={handleValidationChange}
 					/>
 				</div>
+				<InlineValidation
+					fieldName="orderWindow"
+					validations={[
+						{
+							validate: () => {
+								const from = product.orderWindow.from
+								const to = product.orderWindow.to
+								return from.hour !== to.hour || from.minute !== to.minute
+							},
+							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
+						}
+					]}
+					onValidationChange={handleValidationChange}
+				/>
 				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
 				<EditableImage
 					URL={product.imageURL}
@@ -286,23 +297,12 @@ const AddProduct = ({
 					/>
 				}
 			</div>
-			<div className="flex flex-row justify-center gap-4 pt-5">
-				<button
-					type="button"
-					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-					onClick={handleCancelPost}
-				>
-					{'Annuller'}
-				</button>
-				<button
-					type="button"
-					disabled={!formIsValid}
-					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-					onClick={handleCompletePost}
-				>
-					{'Færdig'}
-				</button>
-			</div>
+			<CompletePostControls
+				canClose={!showOptions}
+				formIsValid={formIsValid}
+				handleCancelPost={handleCancelPost}
+				handleCompletePost={handleCompletePost}
+			/>
 		</CloseableModal>
 	)
 }

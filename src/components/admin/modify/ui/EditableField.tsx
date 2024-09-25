@@ -1,41 +1,7 @@
+import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
+import useValidation from '@/hooks/useValidation'
 import { type Validation } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-
-// Separate validation logic into a hook
-const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
-	errors: string[]
-	isValid: boolean
-} => {
-	const [errors, setErrors] = useState<string[]>([])
-
-	const validate = useCallback((): string[] => {
-		const newErrors: string[] = []
-		if (required && value.length === 0) {
-			newErrors.push(placeholder + ' er påkrævet')
-		} else if (value.length > 0 && value.length < minLength) {
-			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
-		}
-		if (type === 'number' && parseInt(value) > maxValue) {
-			newErrors.push(placeholder + ' kan ikke være større end ' + maxValue)
-		}
-		validations?.forEach(validation => {
-			if (!validation.validate(value)) {
-				newErrors.push(validation.message)
-			}
-		})
-		return newErrors
-	}, [value, validations, required, placeholder, minLength, maxValue, type])
-
-	useEffect(() => {
-		const validationErrors = validate()
-		setErrors(validationErrors)
-	}, [validate])
-
-	return {
-		errors,
-		isValid: errors.length === 0
-	}
-}
 
 const EditableField = ({
 	type = 'text',
@@ -73,7 +39,6 @@ const EditableField = ({
 	const [text, setText] = useState<string>(initialText)
 	const inputRef = useRef<HTMLInputElement>(null)
 
-	// Use custom validation hook
 	const {
 		errors,
 		isValid
@@ -132,20 +97,9 @@ const EditableField = ({
 				</p>
 			}
 			{errors.length > 0 &&
-				<div
-					className="my-2 not-italic rounded-lg border-2 border-red-800 text-red-800 font-bold flex flex-row items-center">
-					<div
-						className="w-6 h-6 m-1 border-2 text-sm border-red-800 rounded-full flex justify-center items-center">
-						{'!'}
-					</div>
-					<div className="flex flex-col mx-2">
-						{errors.map((error, i) => (
-							<p key={i + error} className="text-sm">
-								{error}
-							</p>
-						))}
-					</div>
-				</div>
+				<ValidationErrorWindow
+					errors={errors}
+				/>
 			}
 		</div>
 	)

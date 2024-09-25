@@ -26,7 +26,11 @@ const OptionsWindow = ({
 	}, [productOptions, onAddOption, onDeleteOption])
 
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal
+			onComplete={onClose}
+			onClose={onClose}
+			canComplete={true}
+		>
 			<h2 className="text-lg font-bold text-gray-800">
 				{`Tilføj tilvalg til ${productName}`}
 			</h2>

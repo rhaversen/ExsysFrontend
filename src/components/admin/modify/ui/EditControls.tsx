@@ -24,6 +24,8 @@ const EditingControls = ({
 		const handleKeyDown = (event: KeyboardEvent): void => {
 			if (event.key === 'Escape' && canClose) {
 				handleUndoEdit()
+			} else if (event.key === 'Enter' && formIsValid && canClose) {
+				handleCompleteEdit()
 			}
 		}
 
@@ -34,7 +36,7 @@ const EditingControls = ({
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown)
 		}
-	}, [isEditing, handleUndoEdit, canClose])
+	}, [isEditing, handleUndoEdit, canClose, formIsValid, handleCompleteEdit])
 
 	if (isEditing) {
 		return (

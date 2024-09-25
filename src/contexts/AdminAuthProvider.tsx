@@ -5,7 +5,7 @@ import React, { type ReactNode, useCallback, useEffect } from 'react'
 import { useInterval } from 'react-use'
 import { useError } from './ErrorContext/ErrorContext'
 
-export default function KioskAuthProvider ({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+export default function AdminAuthProvider ({ children }: Readonly<{ children: ReactNode }>): ReactNode {
 	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()

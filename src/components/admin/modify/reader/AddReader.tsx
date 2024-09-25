@@ -4,14 +4,13 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import CompletePostControls from '../ui/CompletePostControls'
 
 const Reader = ({
 	readers,
-	onReaderPosted,
 	onClose
 }: {
 	readers: ReaderType[]
-	onReaderPosted: (reader: ReaderType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -42,12 +41,11 @@ const Reader = ({
 
 	const postReader = useCallback((): void => {
 		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
-			onReaderPosted(response.data as ReaderType)
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onReaderPosted, onClose, addError, reader])
+	}, [API_URL, onClose, addError, reader])
 
 	const handlePairingCodeChange = useCallback((v: string): void => {
 		setReader({
@@ -106,23 +104,11 @@ const Reader = ({
 					</div>
 				</div>
 			</div>
-			<div className="flex flex-row justify-center gap-4 pt-5">
-				<button
-					type="button"
-					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-					onClick={handleCancelPost}
-				>
-					{'Annuller'}
-				</button>
-				<button
-					type="button"
-					disabled={!formIsValid}
-					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-					onClick={handleCompletePost}
-				>
-					{'Færdig'}
-				</button>
-			</div>
+			<CompletePostControls
+				formIsValid={formIsValid}
+				handleCancelPost={handleCancelPost}
+				handleCompletePost={handleCompletePost}
+			/>
 		</CloseableModal>
 	)
 }

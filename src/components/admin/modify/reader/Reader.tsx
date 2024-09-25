@@ -2,28 +2,24 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
+import { type PatchReaderType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import Timestamps from './ui/Timestamps'
+import Timestamps from '../ui/Timestamps'
 
-const Room = ({
-	rooms,
-	room,
-	onRoomPatched,
-	onRoomDeleted
+const Reader = ({
+	readers,
+	reader
 }: {
-	rooms: RoomType[]
-	room: RoomType
-	onRoomPatched: (room: RoomType) => void
-	onRoomDeleted: (id: RoomType['_id']) => void
+	readers: ReaderType[]
+	reader: ReaderType
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
 
 	const [isEditing, setIsEditing] = useState(false)
-	const [newRoom, setNewRoom] = useState<RoomType>(room)
+	const [newReader, setNewReader] = useState<ReaderType>(reader)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(true)
@@ -43,96 +39,72 @@ const Room = ({
 		})
 	}, [])
 
-	const patchRoom = useCallback((roomPatch: PatchRoomType): void => {
-		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).then((response) => {
-			onRoomPatched(response.data as RoomType)
-		}).catch((error) => {
+	const patchReader = useCallback((readerPatch: PatchReaderType): void => {
+		axios.patch(API_URL + `/v1/readers/${reader._id}`, readerPatch, { withCredentials: true }).catch((error) => {
 			addError(error)
-			setNewRoom(room)
+			setNewReader(reader)
 		})
-	}, [API_URL, onRoomPatched, addError, room])
+	}, [API_URL, addError, reader])
 
-	const deleteRoom = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
+	const deleteReader = useCallback((confirm: boolean): void => {
+		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).then(() => {
-			onRoomDeleted(room._id)
 		}).catch((error) => {
 			addError(error)
-			setNewRoom(room)
+			setNewReader(reader)
 		})
-	}, [API_URL, onRoomDeleted, addError, room])
+	}, [API_URL, addError, reader])
 
-	const handleNameChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
-			name: v
+	const handleReaderTagChange = useCallback((v: string): void => {
+		setNewReader({
+			...newReader,
+			readerTag: v
 		})
-	}, [newRoom])
-
-	const handleDescriptionChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
-			description: v
-		})
-	}, [newRoom])
+	}, [newReader])
 
 	const handleUndoEdit = useCallback((): void => {
-		setNewRoom(room)
+		setNewReader(reader)
 		setIsEditing(false)
-	}, [room])
+	}, [reader])
 
 	const handleCompleteEdit = useCallback((): void => {
-		patchRoom(newRoom)
+		patchReader(newReader)
 		setIsEditing(false)
-	}, [patchRoom, newRoom])
+	}, [patchReader, newReader])
 
-	const handleDeleteRoom = useCallback((confirm: boolean): void => {
-		deleteRoom(confirm)
-	}, [deleteRoom])
+	const handleDeleteReader = useCallback((confirm: boolean): void => {
+		deleteReader(confirm)
+	}, [deleteReader])
 
 	return (
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<p className="italic text-gray-500">{'Navn'}</p>
+					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
-							fieldName="name"
-							initialText={room.name}
-							placeholder="Navn"
+							fieldName="readerTag"
+							initialText={reader.readerTag}
+							placeholder="Kortlæser Tag"
 							minSize={10}
 							required={true}
-							maxLength={20}
+							minLength={5}
+							maxLength={5}
 							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
-								message: 'Navn er allerede i brug'
+								validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
+								message: 'Kortlæser tag er allerede i brug'
 							}]}
+							type="number"
 							editable={isEditing}
-							onChange={handleNameChange}
-							onValidationChange={handleValidationChange}
-						/>
-					</div>
-					<p className="italic text-gray-500">{'Beskrivelse'}</p>
-					<div className="text-gray-800">
-						<EditableField
-							fieldName="description"
-							initialText={room.description}
-							placeholder="Beskrivelse"
-							italic={true}
-							minSize={10}
-							required={true}
-							maxLength={20}
-							editable={isEditing}
-							onChange={handleDescriptionChange}
+							onChange={handleReaderTagChange}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>
 				<Timestamps
-					createdAt={room.createdAt}
-					updatedAt={room.updatedAt}
+					createdAt={reader.createdAt}
+					updatedAt={reader.updatedAt}
 				/>
 				<EditingControls
 					isEditing={isEditing}
@@ -145,13 +117,13 @@ const Room = ({
 			</div>
 			{showDeleteConfirmation &&
 				<ConfirmDeletion
-					itemName={room.name}
+					itemName={reader.readerTag}
 					onClose={() => {
 						setShowDeleteConfirmation(false)
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteRoom(confirm)
+						handleDeleteReader(confirm)
 					}}
 				/>
 			}
@@ -159,4 +131,4 @@ const Room = ({
 	)
 }
 
-export default Room
+export default Reader
