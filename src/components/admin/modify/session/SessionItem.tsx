@@ -15,7 +15,7 @@ const SessionItem = ({
 	const [sessionDurationFormatted, setSessionDurationFormatted] = useState<string>('')
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
 	const [loginTimeAgo, setLoginTimeAgo] = useState<string>('')
-	const [sessionExpiresIn, setSessionExpiresIn] = useState<string>('')
+	const [sessionExpiresIn, setSessionExpiresIn] = useState<string | null>('')
 
 	useEffect(() => {
 		const updateTimes = (): void => {
@@ -24,7 +24,7 @@ const SessionItem = ({
 			setSessionDurationFormatted(formatDuration(sessionDurationMs))
 			setLastActivityAgo(timeSince(session.lastActivity))
 			setLoginTimeAgo(timeSince(session.loginTime))
-			setSessionExpiresIn(timeUntil(session.sessionExpires))
+			setSessionExpiresIn(session.stayLoggedIn ? timeUntil(session.sessionExpires ?? '') : null)
 		}
 
 		// Initial call to set the times immediately
@@ -37,9 +37,7 @@ const SessionItem = ({
 		return () => { clearInterval(interval) }
 	}, [session])
 
-	const originalMaxAgeFormatted = session.originalMaxAge !== null ? 'Sandt' : 'Falsk'
-
-	const isExpired = new Date(session.sessionExpires).getTime() < Date.now()
+	const isExpired = !(!session.stayLoggedIn || new Date(session.sessionExpires ?? 0).getTime() > Date.now())
 	const statusIcon = isExpired ? <>&#10060;</> : <>&#9989;</>
 	const {
 		browser,
@@ -91,10 +89,10 @@ const SessionItem = ({
 						<strong>{'Session Længde:'}</strong> {sessionDurationFormatted}
 					</p>
 					<p>
-						<strong>{'Session Udløber:'}</strong> {sessionExpiresIn}
+						<strong>{'Session Udløber:'}</strong> {sessionExpiresIn ?? 'Ved Lukning'}
 					</p>
 					<p>
-						<strong>{'Forbliv Logget Ind:'}</strong> {originalMaxAgeFormatted}
+						<strong>{'Forbliv Logget Ind:'}</strong> {session.stayLoggedIn ? 'Ja' : 'Nej'}
 					</p>
 					<p className="text-wrap max-w-xl">
 						<strong>{'User Agent:'}</strong> {session.userAgent}
