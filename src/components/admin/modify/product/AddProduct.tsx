@@ -8,6 +8,7 @@ import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 import { type OptionType, type PostProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import CompletePostControls from '../ui/CompletePostControls'
 import InlineValidation from '../ui/InlineValidation'
 
 const AddProduct = ({
@@ -296,23 +297,12 @@ const AddProduct = ({
 					/>
 				}
 			</div>
-			<div className="flex flex-row justify-center gap-4 pt-5">
-				<button
-					type="button"
-					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-					onClick={handleCancelPost}
-				>
-					{'Annuller'}
-				</button>
-				<button
-					type="button"
-					disabled={!formIsValid}
-					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-					onClick={handleCompletePost}
-				>
-					{'Færdig'}
-				</button>
-			</div>
+			<CompletePostControls
+				canClose={!showOptions}
+				formIsValid={formIsValid}
+				handleCancelPost={handleCancelPost}
+				handleCompletePost={handleCompletePost}
+			/>
 		</CloseableModal>
 	)
 }
