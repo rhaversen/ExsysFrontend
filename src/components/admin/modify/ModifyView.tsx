@@ -18,6 +18,7 @@ import Room from '@/components/admin/modify/room/Room'
 import SessionsView from '@/components/admin/modify/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import type sortConfig from '@/lib/SortConfig'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
@@ -144,150 +145,163 @@ const ModifyView = (): ReactElement => {
 		}
 	}, [API_URL, addError])
 
-	// Define handlers with useCallback and appropriate dependencies
-	const handleUpdateProduct = useCallback((product: ProductType) => {
-		setProducts((prevProducts) => {
-			const index = prevProducts.findIndex((p) => p._id === product._id)
-			if (index === -1) return prevProducts
-			const newProducts = [...prevProducts]
-			newProducts[index] = product
-			return newProducts
-		})
-	}, [])
+	// Generic update handler
+	const CreateUpdateHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => {
+					const index = prevItems.findIndex((i) => i._id === item._id)
+					if (index === -1) return prevItems
+					const newItems = [...prevItems]
+					newItems[index] = item
+					return newItems
+				})
+			},
+			[setState]
+		)
+	}
 
-	const handleDeleteProduct = useCallback((id: string) => {
-		setProducts((prevProducts) => prevProducts.filter((p) => p._id !== id))
-	}, [])
+	// Generic delete handler
+	const CreateDeleteHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (id: string) => void => {
+		return useCallback(
+			(id: string) => {
+				setState((prevItems) => prevItems.filter((i) => i._id !== id))
+			},
+			[setState]
+		)
+	}
 
-	const handleAddProduct = useCallback((product: ProductType) => {
-		setProducts((prevProducts) => [...prevProducts, product])
-	}, [])
+	// Generic add handler
+	const CreateAddHandler = <T, > (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => [...prevItems, item])
+			},
+			[setState]
+		)
+	}
 
-	const handleUpdateOption = useCallback((option: OptionType) => {
-		setOptions((prevOptions) => {
-			const index = prevOptions.findIndex((o) => o._id === option._id)
-			if (index === -1) return prevOptions
-			const newOptions = [...prevOptions]
-			newOptions[index] = option
-			return newOptions
-		})
-	}, [])
+	// Products
+	const handleUpdateProduct = CreateUpdateHandler<ProductType>(setProducts)
+	const handleDeleteProduct = CreateDeleteHandler<ProductType>(setProducts)
+	const handleAddProduct = CreateAddHandler<ProductType>(setProducts)
 
-	const handleDeleteOption = useCallback((id: string) => {
-		setOptions((prevOptions) => prevOptions.filter((o) => o._id !== id))
-	}, [])
+	// Options
+	const handleUpdateOption = CreateUpdateHandler<OptionType>(setOptions)
+	const handleDeleteOption = CreateDeleteHandler<OptionType>(setOptions)
+	const handleAddOption = CreateAddHandler<OptionType>(setOptions)
 
-	const handleAddOption = useCallback((option: OptionType) => {
-		setOptions((prevOptions) => [...prevOptions, option])
-	}, [])
+	// Rooms
+	const handleUpdateRoom = CreateUpdateHandler<RoomType>(setRooms)
+	const handleDeleteRoom = CreateDeleteHandler<RoomType>(setRooms)
+	const handleAddRoom = CreateAddHandler<RoomType>(setRooms)
 
-	const handleUpdateRoom = useCallback((room: RoomType) => {
-		setRooms((prevRooms) => {
-			const index = prevRooms.findIndex((r) => r._id === room._id)
-			if (index === -1) return prevRooms
-			const newRooms = [...prevRooms]
-			newRooms[index] = room
-			return newRooms
-		})
-	}, [])
+	// Activities
+	const handleUpdateActivity = CreateUpdateHandler<ActivityType>(setActivities)
+	const handleDeleteActivity = CreateDeleteHandler<ActivityType>(setActivities)
+	const handleAddActivity = CreateAddHandler<ActivityType>(setActivities)
 
-	const handleDeleteRoom = useCallback((id: string) => {
-		setRooms((prevRooms) => prevRooms.filter((r) => r._id !== id))
-	}, [])
+	// Kiosks
+	const handleUpdateKiosk = CreateUpdateHandler<KioskType>(setKiosks)
+	const handleDeleteKiosk = CreateDeleteHandler<KioskType>(setKiosks)
+	const handleAddKiosk = CreateAddHandler<KioskType>(setKiosks)
 
-	const handleAddRoom = useCallback((room: RoomType) => {
-		setRooms((prevRooms) => [...prevRooms, room])
-	}, [])
+	// Admins
+	const handleUpdateAdmin = CreateUpdateHandler<AdminType>(setAdmins)
+	const handleDeleteAdmin = CreateDeleteHandler<AdminType>(setAdmins)
+	const handleAddAdmin = CreateAddHandler<AdminType>(setAdmins)
 
-	const handleUpdateActivity = useCallback((activity: ActivityType) => {
-		setActivities((prevActivities) => {
-			const index = prevActivities.findIndex((a) => a._id === activity._id)
-			if (index === -1) return prevActivities
-			const newActivities = [...prevActivities]
-			newActivities[index] = activity
-			return newActivities
-		})
-	}, [])
+	// Readers
+	const handleUpdateReader = CreateUpdateHandler<ReaderType>(setReaders)
+	const handleDeleteReader = CreateDeleteHandler<ReaderType>(setReaders)
+	const handleAddReader = CreateAddHandler<ReaderType>(setReaders)
 
-	const handleDeleteActivity = useCallback((id: string) => {
-		setActivities((prevActivities) => prevActivities.filter((a) => a._id !== id))
-	}, [])
+	// Sessions
+	const handleUpdateSession = CreateUpdateHandler<SessionType>(setSessions)
+	const handleDeleteSession = CreateDeleteHandler<SessionType>(setSessions)
+	const handleAddSession = CreateAddHandler<SessionType>(setSessions)
 
-	const handleAddActivity = useCallback((activity: ActivityType) => {
-		setActivities((prevActivities) => [...prevActivities, activity])
-	}, [])
+	// Activities
+	useEntitySocketListeners<ActivityType>(
+		socket,
+		'activity',
+		handleAddActivity,
+		handleUpdateActivity,
+		handleDeleteActivity
+	)
 
-	const handleUpdateKiosk = useCallback((kiosk: KioskType) => {
-		setKiosks((prevKiosks) => {
-			const index = prevKiosks.findIndex((k) => k._id === kiosk._id)
-			if (index === -1) return prevKiosks
-			const newKiosks = [...prevKiosks]
-			newKiosks[index] = kiosk
-			return newKiosks
-		})
-	}, [])
+	// Admins
+	useEntitySocketListeners<AdminType>(
+		socket,
+		'admin',
+		handleAddAdmin,
+		handleUpdateAdmin,
+		handleDeleteAdmin
+	)
 
-	const handleDeleteKiosk = useCallback((id: string) => {
-		setKiosks((prevKiosks) => prevKiosks.filter((k) => k._id !== id))
-	}, [])
+	// Kiosks
+	useEntitySocketListeners<KioskType>(
+		socket,
+		'kiosk',
+		handleAddKiosk,
+		handleUpdateKiosk,
+		handleDeleteKiosk
+	)
 
-	const handleAddKiosk = useCallback((kiosk: KioskType) => {
-		setKiosks((prevKiosks) => [...prevKiosks, kiosk])
-	}, [])
+	// Options
+	useEntitySocketListeners<OptionType>(
+		socket,
+		'option',
+		handleAddOption,
+		handleUpdateOption,
+		handleDeleteOption
+	)
 
-	const handleUpdateAdmin = useCallback((admin: AdminType) => {
-		setAdmins((prevAdmins) => {
-			const index = prevAdmins.findIndex((a) => a._id === admin._id)
-			if (index === -1) return prevAdmins
-			const newAdmins = [...prevAdmins]
-			newAdmins[index] = admin
-			return newAdmins
-		})
-	}, [])
+	// Products with preprocessing
+	useEntitySocketListeners<ProductType>(
+		socket,
+		'product',
+		handleAddProduct,
+		handleUpdateProduct,
+		handleDeleteProduct,
+		(product) => {
+			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			return product
+		}
+	)
 
-	const handleDeleteAdmin = useCallback((id: string) => {
-		setAdmins((prevAdmins) => prevAdmins.filter((a) => a._id !== id))
-	}, [])
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		handleAddRoom,
+		handleUpdateRoom,
+		handleDeleteRoom
+	)
 
-	const handleAddAdmin = useCallback((admin: AdminType) => {
-		setAdmins((prevAdmins) => [...prevAdmins, admin])
-	}, [])
+	// Readers
+	useEntitySocketListeners<ReaderType>(
+		socket,
+		'reader',
+		handleAddReader,
+		handleUpdateReader,
+		handleDeleteReader
+	)
 
-	const handleUpdateReader = useCallback((reader: ReaderType) => {
-		setReaders((prevReaders) => {
-			const index = prevReaders.findIndex((r) => r._id === reader._id)
-			if (index === -1) return prevReaders
-			const newReaders = [...prevReaders]
-			newReaders[index] = reader
-			return newReaders
-		})
-	}, [])
-
-	const handleDeleteReader = useCallback((id: string) => {
-		setReaders((prevReaders) => prevReaders.filter((r) => r._id !== id))
-	}, [])
-
-	const handleAddReader = useCallback((reader: ReaderType) => {
-		setReaders((prevReaders) => [...prevReaders, reader])
-	}, [])
-
-	const handleUpdateSession = useCallback((session: SessionType) => {
-		setSessions((prevSessions) => {
-			const index = prevSessions.findIndex((s) => s._id === session._id)
-			if (index === -1) return prevSessions
-			const newSessions = [...prevSessions]
-			newSessions[index] = session
-			return newSessions
-		})
-	}, [])
-
-	const handleDeleteSession = useCallback((id: string) => {
-		setSessions((prevSessions) => prevSessions.filter((s) => s._id !== id))
-	}, [])
-
-	const handleAddSession = useCallback((session: SessionType) => {
-		setSessions((prevSessions) => [...prevSessions, session])
-	}, [])
+	// Sessions
+	useEntitySocketListeners<SessionType>(
+		socket,
+		'session',
+		handleAddSession,
+		handleUpdateSession,
+		handleDeleteSession
+	)
 
 	// Fetch data on component mount
 	useEffect(() => {
@@ -309,320 +323,6 @@ const ModifyView = (): ReactElement => {
 			socketInstance.disconnect()
 		}
 	}, [WS_URL])
-
-	// Listen for new activities
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('activityCreated', (activity: ActivityType) => {
-				handleAddActivity(activity)
-			})
-
-			return () => {
-				socket.off('activityCreated', handleAddActivity)
-			}
-		}
-	}, [socket, addError, handleAddActivity])
-
-	// Listen for updated activities
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('activityUpdated', (activity: ActivityType) => {
-				handleUpdateActivity(activity)
-			})
-
-			return () => {
-				socket.off('activityUpdated', handleUpdateActivity)
-			}
-		}
-	}, [socket, addError, handleUpdateActivity])
-
-	// Listen for deleted activities
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('activityDeleted', (id: string) => {
-				handleDeleteActivity(id)
-			})
-
-			return () => {
-				socket.off('activityDeleted', handleDeleteActivity)
-			}
-		}
-	}, [socket, addError, handleDeleteActivity])
-
-	// Listen for new admins
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('adminCreated', (admin: AdminType) => {
-				handleAddAdmin(admin)
-			})
-
-			return () => {
-				socket.off('adminCreated', handleAddAdmin)
-			}
-		}
-	}, [socket, addError, handleAddAdmin])
-
-	// Listen for updated admins
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('adminUpdated', (admin: AdminType) => {
-				handleUpdateAdmin(admin)
-			})
-
-			return () => {
-				socket.off('adminUpdated', handleUpdateAdmin)
-			}
-		}
-	}, [socket, addError, handleUpdateAdmin])
-
-	// Listen for deleted admins
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('adminDeleted', (id: string) => {
-				handleDeleteAdmin(id)
-			})
-
-			return () => {
-				socket.off('adminDeleted', handleDeleteAdmin)
-			}
-		}
-	}, [socket, addError, handleDeleteAdmin])
-
-	// Listen for new kiosks
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('kioskCreated', (kiosk: KioskType) => {
-				handleAddKiosk(kiosk)
-			})
-
-			return () => {
-				socket.off('kioskCreated', handleAddKiosk)
-			}
-		}
-	}, [socket, addError, handleAddKiosk])
-
-	// Listen for updated kiosks
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('kioskUpdated', (kiosk: KioskType) => {
-				handleUpdateKiosk(kiosk)
-			})
-
-			return () => {
-				socket.off('kioskUpdated', handleUpdateKiosk)
-			}
-		}
-	}, [socket, addError, handleUpdateKiosk])
-
-	// Listen for deleted kiosks
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('kioskDeleted', (id: string) => {
-				handleDeleteKiosk(id)
-			})
-
-			return () => {
-				socket.off('kioskDeleted', handleDeleteKiosk)
-			}
-		}
-	}, [socket, addError, handleDeleteKiosk])
-
-	// Listen for new options
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('optionCreated', (option: OptionType) => {
-				handleAddOption(option)
-			})
-
-			return () => {
-				socket.off('optionCreated', handleAddOption)
-			}
-		}
-	}, [socket, addError, handleAddOption])
-
-	// Listen for updated options
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('optionUpdated', (option: OptionType) => {
-				handleUpdateOption(option)
-			})
-
-			return () => {
-				socket.off('optionUpdated', handleUpdateOption)
-			}
-		}
-	}, [socket, addError, handleUpdateOption])
-
-	// Listen for deleted options
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('optionDeleted', (id: string) => {
-				handleDeleteOption(id)
-			})
-
-			return () => {
-				socket.off('optionDeleted', handleDeleteOption)
-			}
-		}
-	}, [socket, addError, handleDeleteOption])
-
-	// Listen for new products
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('productCreated', (product: ProductType) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-				handleAddProduct(product)
-			})
-
-			return () => {
-				socket.off('productCreated', handleAddProduct)
-			}
-		}
-	}, [socket, addError, handleAddProduct])
-
-	// Listen for updated products
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('productUpdated', (product: ProductType) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-				handleUpdateProduct(product)
-			})
-
-			return () => {
-				socket.off('productUpdated', handleUpdateProduct)
-			}
-		}
-	}, [socket, addError, handleUpdateProduct])
-
-	// Listen for deleted products
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('productDeleted', (id: string) => {
-				handleDeleteProduct(id)
-			})
-
-			return () => {
-				socket.off('productDeleted', handleDeleteProduct)
-			}
-		}
-	}, [socket, addError, handleDeleteProduct])
-
-	// Listen for new rooms
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('roomCreated', (room: RoomType) => {
-				handleAddRoom(room)
-			})
-
-			return () => {
-				socket.off('roomCreated', handleAddRoom)
-			}
-		}
-	}, [socket, addError, handleAddRoom])
-
-	// Listen for updated rooms
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('roomUpdated', (room: RoomType) => {
-				handleUpdateRoom(room)
-			})
-
-			return () => {
-				socket.off('roomUpdated', handleUpdateRoom)
-			}
-		}
-	}, [socket, addError, handleUpdateRoom])
-
-	// Listen for deleted rooms
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('roomDeleted', (id: string) => {
-				handleDeleteRoom(id)
-			})
-
-			return () => {
-				socket.off('roomDeleted', handleDeleteRoom)
-			}
-		}
-	}, [socket, addError, handleDeleteRoom])
-
-	// Listen for new readers
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('readerCreated', (reader: ReaderType) => {
-				handleAddReader(reader)
-			})
-
-			return () => {
-				socket.off('readerCreated', handleAddReader)
-			}
-		}
-	}, [socket, addError, handleAddReader])
-
-	// Listen for updated readers
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('readerUpdated', (reader: ReaderType) => {
-				handleUpdateReader(reader)
-			})
-
-			return () => {
-				socket.off('readerUpdated', handleUpdateReader)
-			}
-		}
-	}, [socket, addError, handleUpdateReader])
-
-	// Listen for deleted readers
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('readerDeleted', (id: string) => {
-				handleDeleteReader(id)
-			})
-
-			return () => {
-				socket.off('readerDeleted', handleDeleteReader)
-			}
-		}
-	}, [socket, addError, handleDeleteReader])
-
-	// Listen for new sessions
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('sessionCreated', (session: SessionType) => {
-				handleAddSession(session)
-			})
-
-			return () => {
-				socket.off('sessionCreated', handleAddSession)
-			}
-		}
-	}, [socket, addError, handleAddSession])
-
-	// Listen for updated sessions
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('sessionUpdated', (session: SessionType) => {
-				handleUpdateSession(session)
-			})
-
-			return () => {
-				socket.off('sessionUpdated', handleUpdateSession)
-			}
-		}
-	}, [socket, addError, handleUpdateSession])
-
-	// Listen for deleted sessions
-	useEffect(() => {
-		if (socket !== null) {
-			socket.on('sessionDeleted', (id: string) => {
-				handleDeleteSession(id)
-			})
-
-			return () => {
-				socket.off('sessionDeleted', handleDeleteSession)
-			}
-		}
-	}, [socket, addError, handleDeleteSession])
 
 	return (
 		<div>
