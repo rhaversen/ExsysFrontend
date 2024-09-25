@@ -1,26 +1,26 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostRoomType, type RoomType } from '@/types/backendDataTypes'
+import { type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import CompletePostControls from '../ui/CompletePostControls'
+import EditableDropdown from '../ui/EditableDropdown'
 
-const Room = ({
+const AddActivity = ({
 	rooms,
-	onRoomPosted,
 	onClose
 }: {
 	rooms: RoomType[]
-	onRoomPosted: (room: RoomType) => void
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
 
-	const [room, setRoom] = useState<PostRoomType>({
+	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
-		description: ''
+		roomId: ''
 	})
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
@@ -40,42 +40,46 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = useCallback((room: PostRoomType): void => {
-		axios.post(API_URL + '/v1/rooms', room, { withCredentials: true }).then((response) => {
-			onRoomPosted(response.data as RoomType)
+	const postActivity = useCallback((activity: PostActivityType): void => {
+		axios.post(API_URL + '/v1/activities', activity, { withCredentials: true }).then((response) => {
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onRoomPosted, onClose, addError])
+	}, [API_URL, onClose, addError])
 
 	const handleNameChange = useCallback((v: string): void => {
-		setRoom({
-			...room,
+		setActivity({
+			...activity,
 			name: v
 		})
-	}, [room])
+	}, [activity])
 
-	const handleDescriptionChange = useCallback((v: string): void => {
-		setRoom({
-			...room,
-			description: v
+	const handleRoomIdChange = useCallback((v: string): void => {
+		// convert string to the object
+		const room = rooms.find((room) => room._id === v)
+		if (room === undefined && v !== 'null-option') {
+			return
+		}
+		setActivity({
+			...activity,
+			roomId: ((room?._id) != null) ? room._id : null
 		})
-	}, [room])
+	}, [activity, rooms])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
 	const handleCompletePost = useCallback((): void => {
-		postRoom(room)
-	}, [postRoom, room])
+		postActivity(activity)
+	}, [postActivity, activity])
 
 	return (
 		<CloseableModal onClose={onClose}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							fieldName="name"
@@ -84,46 +88,30 @@ const Room = ({
 							required={true}
 							onChange={handleNameChange}
 							maxLength={50}
-							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name === v),
-								message: 'Navn er allerede i brug'
-							}]}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<div className="text-gray-800">
-						<EditableField
-							fieldName="description"
-							placeholder="Beskrivelse"
-							italic={true}
-							minSize={10}
-							required={true}
-							onChange={handleDescriptionChange}
-							maxLength={50}
-							onValidationChange={handleValidationChange}
-						/>
-					</div>
+					<EditableDropdown
+						options={rooms.map((room) => ({
+							value: room._id,
+							label: room.name
+						}))}
+						initialValue={activity.roomId ?? 'null-option'}
+						onChange={handleRoomIdChange}
+						placeholder="Vælg Spisested"
+						allowNullOption={true}
+						fieldName="roomId"
+						onValidationChange={handleValidationChange}
+					/>
 				</div>
 			</div>
-			<div className="flex flex-row justify-center gap-4 pt-5">
-				<button
-					type="button"
-					className="bg-red-500 hover:bg-red-600 text-white rounded-md py-2 px-4"
-					onClick={handleCancelPost}
-				>
-					{'Annuller'}
-				</button>
-				<button
-					type="button"
-					disabled={!formIsValid}
-					className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
-					onClick={handleCompletePost}
-				>
-					{'Færdig'}
-				</button>
-			</div>
+			<CompletePostControls
+				formIsValid={formIsValid}
+				handleCancelPost={handleCancelPost}
+				handleCompletePost={handleCompletePost}
+			/>
 		</CloseableModal>
 	)
 }
 
-export default Room
+export default AddActivity

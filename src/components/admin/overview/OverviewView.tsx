@@ -162,13 +162,13 @@ const OverviewView = (): ReactElement => {
 	// Listen for new orders
 	useEffect(() => {
 		if (socket !== null) {
-			socket.on('orderPosted', (order: OrderType) => {
+			socket.on('orderCreated', (order: OrderType) => {
 				handleNewOrder(order)
 			})
 
 			// Cleanup the listener when order or socket changes
 			return () => {
-				socket.off('paymentStatusUpdated', handleNewOrder)
+				socket.off('orderCreated', handleNewOrder)
 			}
 		}
 	}, [socket, addError, handleNewOrder])
