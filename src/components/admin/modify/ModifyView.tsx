@@ -32,7 +32,6 @@ import {
 } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 import SortingControl from './ui/SortingControl'
 
@@ -624,11 +623,6 @@ const ModifyView = (): ReactElement => {
 			}
 		}
 	}, [socket, addError, handleDeleteSession])
-
-	// Refresh data every hour
-	useInterval(() => {
-		fetchData().catch(addError)
-	}, 1000 * 60 * 60) // Every hour
 
 	return (
 		<div>
