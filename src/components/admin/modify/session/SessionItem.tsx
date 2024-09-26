@@ -7,9 +7,11 @@ import { type ReactElement, useEffect, useState } from 'react'
 
 const SessionItem = ({
 	session,
+	currentSessionId,
 	onDelete
 }: {
 	session: SessionType
+	currentSessionId: string | null
 	onDelete: (sessionId: string) => void
 }): ReactElement => {
 	const [sessionDurationFormatted, setSessionDurationFormatted] = useState<string>('')
@@ -53,21 +55,24 @@ const SessionItem = ({
 						{isExpired ? 'Udløbet' : 'Aktiv'}
 					</span>
 				</div>
-				{!session.isCurrentSession
+				{currentSessionId === null
 					? (
-						<button
-							type="button"
-							onClick={() => {
-								onDelete(session._id)
-							}}
-							className="text-red-600 hover:text-red-800 flex items-center"
-						>
-							{'Log ud\r'}
-						</button>
+						<span className="text-gray-600 font-semibold">{'Henter Session ID...'}</span>
 					)
-					: (
-						<span className="text-blue-600 font-semibold">{'Denne Session'}</span>
-					)}
+					: session._id !== currentSessionId
+						? (
+							<button
+								type="button"
+								onClick={() => { onDelete(session._id) }}
+								className="text-red-600 hover:text-red-800 flex items-center"
+							>
+								{'Log ud'}
+							</button>
+						)
+						: (
+							<span className="text-blue-600 font-semibold">{'Denne Session'}</span>
+						)
+				}
 			</div>
 			<div className="text-gray-700 w-fit">
 				<div>

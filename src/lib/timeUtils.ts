@@ -95,7 +95,7 @@ export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 }
 
 export function timeSince (dateString: string): string {
-	const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000)
+	const seconds = Math.max(Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000), 0)
 
 	let interval = Math.floor(seconds / 31536000)
 	if (interval >= 1) return `${interval} år siden`
