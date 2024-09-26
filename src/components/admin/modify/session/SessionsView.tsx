@@ -3,7 +3,7 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { type ReactElement, useCallback, useMemo } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import SessionItem from './SessionItem'
 
 const SessionsView = ({
@@ -18,6 +18,8 @@ const SessionsView = ({
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
+
+	const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
 
 	const kioskSessions = useMemo(
 		() => sessions.filter((session) => session.type === 'kiosk' && session.userId !== null),
@@ -91,6 +93,22 @@ const SessionsView = ({
 		[API_URL, addError]
 	)
 
+	const getCurrentSessionId = useCallback(async () => {
+		try {
+			const { data } = await axios.get(`${API_URL}/v1/sessions/current`, {
+				withCredentials: true
+			})
+			setCurrentSessionId(data._id as string)
+			console.log(data)
+		} catch (error) {
+			addError(error)
+		}
+	}, [API_URL, addError])
+
+	useEffect(() => {
+		getCurrentSessionId().catch(addError)
+	}, [addError, getCurrentSessionId])
+
 	return (
 		<div className="p-4">
 			<div className="flex justify-evenly">
@@ -114,7 +132,8 @@ const SessionsView = ({
 								</div>
 								<div className="grid gap-4">
 									{sessionsList.map((session) => (
-										<SessionItem key={session._id} session={session} onDelete={deleteSession} />
+										<SessionItem key={session._id} session={session}
+											currentSessionId={currentSessionId} onDelete={deleteSession} />
 									))}
 								</div>
 							</div>
@@ -142,7 +161,8 @@ const SessionsView = ({
 								</div>
 								<div className="grid gap-4">
 									{sessionsList.map((session) => (
-										<SessionItem key={session._id} session={session} onDelete={deleteSession} />
+										<SessionItem key={session._id} session={session}
+											currentSessionId={currentSessionId} onDelete={deleteSession} />
 									))}
 								</div>
 							</div>
