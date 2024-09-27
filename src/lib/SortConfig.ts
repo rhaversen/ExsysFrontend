@@ -38,7 +38,7 @@ const sortConfig = {
 		prop: 'roomId.name',
 		name: 'Spisested'
 	}],
-	Rum: [{
+	Spisesteder: [{
 		prop: 'name',
 		name: 'Navn'
 	}, {

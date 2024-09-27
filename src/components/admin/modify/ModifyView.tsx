@@ -42,7 +42,7 @@ const ModifyView = (): ReactElement => {
 
 	const { addError } = useError()
 
-	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Rum', 'Kiosker', 'Kortlæsere', 'Admins', 'Login Sessioner']
+	const views = ['Produkter', 'Tilvalg', 'Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins', 'Login Sessioner']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -381,9 +381,9 @@ const ModifyView = (): ReactElement => {
 					))}
 				</ItemList>
 			}
-			{selectedView === 'Rum' &&
+			{selectedView === 'Spisesteder' &&
 				<ItemList
-					buttonText="Nyt Rum"
+					buttonText="Nyt Spisested"
 					onAdd={() => {
 						setShowAddRoom(true)
 					}}
