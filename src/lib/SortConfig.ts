@@ -11,6 +11,12 @@ const sortConfig = {
 	}, {
 		prop: 'price',
 		name: 'Pris'
+	}, {
+		prop: 'orderWindow.from.hour',
+		name: 'Fra'
+	}, {
+		prop: 'orderWindow.to.hour',
+		name: 'Til'
 	}],
 	Tilvalg: [{
 		prop: 'name',
@@ -38,7 +44,7 @@ const sortConfig = {
 		prop: 'roomId.name',
 		name: 'Spisested'
 	}],
-	Rum: [{
+	Spisesteder: [{
 		prop: 'name',
 		name: 'Navn'
 	}, {
