@@ -73,7 +73,7 @@ const Room = ({
 		<CloseableModal onClose={onClose}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Rum'}</p>
+					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Spisested'}</p>
 					<div className="font-bold p-2 text-gray-800">
 						<EditableField
 							fieldName="name"

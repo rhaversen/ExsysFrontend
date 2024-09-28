@@ -78,12 +78,6 @@ export interface PatchActivityType {
 	name?: string
 }
 
-export interface ActivityTypeNonPopulated {
-	_id: string
-	roomId: RoomType['_id'] | null
-	name: string
-}
-
 // Room types
 export interface RoomType {
 	_id: string
@@ -188,14 +182,6 @@ export interface PatchKioskType {
 	password?: string
 	readerId?: ReaderType['_id'] | null
 	activities?: Array<ActivityType['_id']>
-}
-
-export interface KioskTypeNonPopulated {
-	_id: string
-	name: string
-	kioskTag: string
-	readerId: ReaderType['_id'] | null
-	activities: ActivityTypeNonPopulated[]
 }
 
 // Session types

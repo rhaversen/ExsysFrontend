@@ -20,7 +20,7 @@ const RoomSelector = ({
 		<div className="p-5">
 			<select
 				className="p-5 border bg-blue-500 rounded-md shadow-sm text-white focus:outline-none cursor-pointer"
-				aria-label="Vælg rum"
+				aria-label="Vælg Spisested"
 				value={selectedRoom}
 				onChange={handleRoomChange}
 			>
@@ -29,7 +29,7 @@ const RoomSelector = ({
 					disabled
 					className="bg-white text-gray-800"
 				>
-					{'Vælg rum'}
+					{'Vælg Spisested'}
 				</option>
 				{rooms.map((room) => (
 					<option

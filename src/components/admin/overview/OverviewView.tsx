@@ -232,8 +232,8 @@ const OverviewView = (): ReactElement => {
 								key="no-room"
 								room={{
 									_id: 'no-room',
-									name: 'Ukendt Rum',
-									description: 'Aktivitet har intet rum tildelt',
+									name: 'Ukendt Spisested',
+									description: 'Aktivitet har intet spisested tildelt',
 									createdAt: '',
 									updatedAt: ''
 								}}

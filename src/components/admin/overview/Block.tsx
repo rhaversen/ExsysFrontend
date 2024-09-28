@@ -59,9 +59,10 @@ const Block = ({
 				setActivityName(data.name)
 			})
 			.catch((error: any) => {
-				addError(error)
+				setActivityName('Ukendt Aktivitet')
+				console.error(error)
 			})
-	}, [API_URL, activityId, addError])
+	}, [API_URL, activityId])
 
 	const countOrders = useCallback((orders: LocalOrder[]) => {
 		const counts: Record<string, number> = {}
