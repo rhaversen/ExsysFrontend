@@ -3,7 +3,7 @@
 # for production
 
 # Use an official Node.js runtime as the base image
-FROM --platform=linux/arm64 node:iron-bookworm-slim
+FROM node:iron-bookworm-slim
 
 # Use a non-interactive frontend for debconf
 ENV DEBIAN_FRONTEND=noninteractive

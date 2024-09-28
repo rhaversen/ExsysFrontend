@@ -5,7 +5,7 @@ import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
-	type KioskTypeNonPopulated,
+	type KioskType,
 	type OptionType,
 	type OrderType,
 	type PostOrderType,
@@ -24,7 +24,7 @@ const OrderView = ({
 	checkoutMethods,
 	onClose
 }: {
-	kiosk: KioskTypeNonPopulated
+	kiosk: KioskType
 	products: ProductType[]
 	options: OptionType[]
 	activity: ActivityType
