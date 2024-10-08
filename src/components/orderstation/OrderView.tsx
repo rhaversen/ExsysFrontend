@@ -1,5 +1,5 @@
 import CartWindow from '@/components/orderstation/cart/CartWindow'
-import SelectPaymentWindow from '@/components/orderstation/cart/SelectPaymentWindow'
+import SelectPaymentWindow from '@/components/orderstation/SelectPaymentWindow'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
