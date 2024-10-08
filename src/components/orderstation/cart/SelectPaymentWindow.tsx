@@ -7,8 +7,8 @@ const SelectPaymentWindow = ({
 	onSubmit,
 	onCancel
 }: {
-	checkoutMethods: { sumUp: boolean, cash: boolean, mobilePay: boolean }
-	onSubmit: (type: 'sumUp' | 'cash' | 'mobilePay') => void
+	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
+	onSubmit: (type: 'sumUp' | 'later' | 'mobilePay') => void
 	onCancel: () => void
 }): ReactElement => {
 	return (
@@ -38,18 +38,18 @@ const SelectPaymentWindow = ({
 						/>
 					</button>
 				)}
-				{checkoutMethods.cash && (
+				{checkoutMethods.later && (
 					<button
-						onClick={() => { onSubmit('cash') }}
+						onClick={() => { onSubmit('later') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
 						type="button"
 					>
 						<div className="text-2xl font-bold text-center text-gray-800">
-							{'Kontant'}
+							{'Betal Senere'}
 						</div>
 						<AsyncImage
 							src="/orderStation/coins.svg"
-							alt="Kontant"
+							alt="Betal Senere"
 							className="w-48 h-48"
 							width={200}
 							height={200}

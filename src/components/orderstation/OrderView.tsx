@@ -28,7 +28,7 @@ const OrderView = ({
 	products: ProductType[]
 	options: OptionType[]
 	activity: ActivityType
-	checkoutMethods: { sumUp: boolean, cash: boolean, mobilePay: boolean }
+	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
@@ -131,7 +131,7 @@ const OrderView = ({
 	}, [socket, order, addError])
 
 	// Submit Order Handler
-	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'): void => {
+	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'later' | 'mobilePay'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
@@ -152,7 +152,7 @@ const OrderView = ({
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
 				setOrder(response.data)
-				if (checkoutMethod === 'cash') {
+				if (checkoutMethod === 'later') {
 					setOrderStatus('success')
 				} else {
 					setOrderStatus('awaitingPayment')
