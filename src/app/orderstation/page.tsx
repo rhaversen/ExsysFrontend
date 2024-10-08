@@ -191,8 +191,8 @@ export default function Page (): ReactElement {
 			{selectedActivity !== null && kiosk !== null && (
 				<OrderView
 					kiosk={kiosk}
-					products={products.sort((a, b) => a.name.localeCompare(b.name))}
-					options={options.sort((a, b) => a.name.localeCompare(b.name))}
+					products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+					options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
 					activity={selectedActivity}
 					checkoutMethods={checkoutMethods}
 					onClose={() => { setSelectedActivity(null) }}
