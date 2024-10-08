@@ -164,21 +164,6 @@ const OrderView = ({
 			})
 	}, [cart, kiosk, activity, API_URL, addError])
 
-	// Handle Checkout based on available methods
-	const handleCheckout = useCallback(() => {
-		const availableMethods = Object.entries(checkoutMethods)
-			.filter(([_, enabled]) => enabled)
-			.map(([method, _]) => method)
-
-		if (availableMethods.length > 1) {
-			setIsSelectPaymentWindowVisible(true)
-		} else if (availableMethods.length === 1) {
-			submitOrder(availableMethods[0] as 'sumUp' | 'cash' | 'mobilePay')
-		} else {
-			addError(new Error('No checkout methods available'))
-		}
-	}, [checkoutMethods, submitOrder, addError])
-
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
 		if (kiosk.activities.length > 1) {
@@ -243,7 +228,7 @@ const OrderView = ({
 					options={options}
 					cart={cart}
 					onCartChange={handleCartChange}
-					onSubmit={handleCheckout}
+					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
 					formIsValid={isFormValid}
 				/>
 			</div>
