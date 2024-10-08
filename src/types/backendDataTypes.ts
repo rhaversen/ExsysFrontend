@@ -113,7 +113,7 @@ export interface PostOrderType {
 	options?: Array<{ id: OptionType['_id'], quantity: number }>
 	activityId: ActivityType['_id']
 	kioskId: KioskType['_id']
-	checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'
+	checkoutMethod: 'sumUp' | 'later' | 'mobilePay'
 }
 
 export interface PatchOrderType {

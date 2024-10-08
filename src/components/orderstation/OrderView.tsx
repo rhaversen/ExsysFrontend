@@ -1,5 +1,5 @@
 import CartWindow from '@/components/orderstation/cart/CartWindow'
-import SelectPaymentWindow from '@/components/orderstation/cart/SelectPaymentWindow'
+import SelectPaymentWindow from '@/components/orderstation/SelectPaymentWindow'
 import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -28,7 +28,7 @@ const OrderView = ({
 	products: ProductType[]
 	options: OptionType[]
 	activity: ActivityType
-	checkoutMethods: { sumUp: boolean, cash: boolean, mobilePay: boolean }
+	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
@@ -131,7 +131,7 @@ const OrderView = ({
 	}, [socket, order, addError])
 
 	// Submit Order Handler
-	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'cash' | 'mobilePay'): void => {
+	const submitOrder = useCallback((checkoutMethod: 'sumUp' | 'later' | 'mobilePay'): void => {
 		setOrderStatus('loading')
 		setIsOrderConfirmationVisible(true)
 
@@ -152,7 +152,7 @@ const OrderView = ({
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
 				setOrder(response.data)
-				if (checkoutMethod === 'cash') {
+				if (checkoutMethod === 'later') {
 					setOrderStatus('success')
 				} else {
 					setOrderStatus('awaitingPayment')
@@ -163,21 +163,6 @@ const OrderView = ({
 				setOrderStatus('error')
 			})
 	}, [cart, kiosk, activity, API_URL, addError])
-
-	// Handle Checkout based on available methods
-	const handleCheckout = useCallback(() => {
-		const availableMethods = Object.entries(checkoutMethods)
-			.filter(([_, enabled]) => enabled)
-			.map(([method, _]) => method)
-
-		if (availableMethods.length > 1) {
-			setIsSelectPaymentWindowVisible(true)
-		} else if (availableMethods.length === 1) {
-			submitOrder(availableMethods[0] as 'sumUp' | 'cash' | 'mobilePay')
-		} else {
-			addError(new Error('No checkout methods available'))
-		}
-	}, [checkoutMethods, submitOrder, addError])
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
@@ -243,7 +228,7 @@ const OrderView = ({
 					options={options}
 					cart={cart}
 					onCartChange={handleCartChange}
-					onSubmit={handleCheckout}
+					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
 					formIsValid={isFormValid}
 				/>
 			</div>
