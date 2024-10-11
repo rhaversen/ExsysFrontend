@@ -28,3 +28,6 @@ export interface UpdatedOrderType {
 	_id: OrderType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 }
+
+// Order Station
+export type OrderStatus = 'success' | 'error' | 'loading' | 'awaitingPayment' | 'paymentFailed'

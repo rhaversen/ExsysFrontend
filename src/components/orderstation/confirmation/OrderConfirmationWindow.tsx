@@ -1,5 +1,6 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
 
@@ -9,7 +10,7 @@ const OrderConfirmationWindow = ({
 	onClose
 }: {
 	price: number
-	orderStatus: 'success' | 'error' | 'loading' | 'awaitingPayment' | 'failed'
+	orderStatus: OrderStatus
 	onClose: () => void
 }): ReactElement => {
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
