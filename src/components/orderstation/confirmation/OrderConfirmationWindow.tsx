@@ -1,16 +1,18 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
-import { type OrderStatus } from '@/types/frontendDataTypes'
+import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
 
 const OrderConfirmationWindow = ({
 	price,
 	orderStatus,
+	checkoutMethod,
 	onClose
 }: {
 	price: number
 	orderStatus: OrderStatus
+	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 }): ReactElement => {
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
@@ -48,11 +50,44 @@ const OrderConfirmationWindow = ({
 
 	const imageProps = images[orderStatus]
 
-	const paragraphContent: Record<string, React.ReactNode> = {
-		success: `Husk at lægge ${price} kr i skålen`,
+	// The order was completed successfully
+	let successMessage = ''
+	if (checkoutMethod === 'later') {
+		successMessage = `Husk at betale ${price} kr når du modtager din bestilling`
+	} else if (checkoutMethod === 'sumUp') {
+		successMessage = 'Betalingen blev gennemført med kort'
+	} else if (checkoutMethod === 'mobilePay') {
+		successMessage = 'Betalingen blev gennemført med MobilePay'
+	}
+
+	// The order could not be completed
+	let errorMessage = ''
+	if (checkoutMethod === 'later') {
+		errorMessage = 'Fejl ved oprettelse af bestilling'
+	} else if (checkoutMethod === 'sumUp') {
+		errorMessage = 'Fejl ved kortbetaling'
+	} else if (checkoutMethod === 'mobilePay') {
+		errorMessage = 'Fejl ved MobilePay-betaling'
+	}
+
+	// The payment failed
+	let paymentFailedMessage = ''
+	if (checkoutMethod === 'later') {
+		paymentFailedMessage = 'Betalingen mislykkedes. Prøv igen eller vælg en anden metode'
+	} else if (checkoutMethod === 'sumUp') {
+		paymentFailedMessage = 'Kortbetaling mislykkedes. Prøv igen eller vælg en anden metode'
+	} else if (checkoutMethod === 'mobilePay') {
+		paymentFailedMessage = 'MobilePay-betaling mislykkedes. Prøv igen eller vælg en anden metode'
+	}
+
+	const paragraphContent: Record<OrderStatus, ReactElement> = {
+		loading: <>{'Sender Bestilling'}</>,
+		awaitingPayment: <>{'Afventer betaling'}</>,
+		success: <>{successMessage}</>,
+		paymentFailed: <>{paymentFailedMessage}</>,
 		error: (
 			<>
-				{'Der skete en ukendt fejl, prøv igen senere.'}
+				{errorMessage}
 				<br />
 				{'Hvis problemet fortsætter, kontakt venligst personalet.'}
 			</>

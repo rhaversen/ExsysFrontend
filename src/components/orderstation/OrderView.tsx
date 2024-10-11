@@ -11,7 +11,7 @@ import {
 	type PostOrderType,
 	type ProductType
 } from '@/types/backendDataTypes'
-import { type OrderStatus, type CartType } from '@/types/frontendDataTypes'
+import { type OrderStatus, type CartType, type CheckoutMethod } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
@@ -43,6 +43,7 @@ const OrderView = ({
 		options: {}
 	})
 	const [order, setOrder] = useState<OrderType | null>(null)
+	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -133,6 +134,7 @@ const OrderView = ({
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
 		setOrderStatus('loading')
+		setCheckoutMethod(checkoutMethod)
 		setIsOrderConfirmationVisible(true)
 
 		const prepareCartItems = (items: Record<string, number>): Array<{ id: string, quantity: number }> =>
@@ -238,6 +240,7 @@ const OrderView = ({
 				<OrderConfirmationWindow
 					price={totalPrice}
 					orderStatus={orderStatus}
+					checkoutMethod={checkoutMethod}
 					onClose={reset}
 				/>
 			)}
