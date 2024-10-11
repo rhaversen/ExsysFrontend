@@ -11,7 +11,7 @@ import {
 	type PostOrderType,
 	type ProductType
 } from '@/types/backendDataTypes'
-import { type CartType } from '@/types/frontendDataTypes'
+import { type OrderStatus, type CartType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
