@@ -96,6 +96,45 @@ const OrderView = ({
 		})
 	}, [])
 
+	// Synchronize cart with available products and options
+	useEffect(() => {
+		setCart((prevCart) => {
+			const availableProductIds = new Set(products.map(p => p._id))
+			const availableOptionIds = new Set(options.map(o => o._id))
+
+			let updated = false
+			let newProducts = { ...prevCart.products }
+			let newOptions = { ...prevCart.options }
+
+			// Check products
+			Object.keys(newProducts).forEach(id => {
+				if (!availableProductIds.has(id)) {
+					const { [id]: _, ...rest } = newProducts
+					newProducts = rest
+					updated = true
+				}
+			})
+
+			// Check options
+			Object.keys(newOptions).forEach(id => {
+				if (!availableOptionIds.has(id)) {
+					const { [id]: _, ...rest } = newOptions
+					newOptions = rest
+					updated = true
+				}
+			})
+
+			if (updated) {
+				return {
+					products: newProducts,
+					options: newOptions
+				}
+			}
+
+			return prevCart
+		})
+	}, [products, options])
+
 	useEffect(() => {
 		if (socket !== null && order !== null) {
 			// Listen for payment status updates related to the order

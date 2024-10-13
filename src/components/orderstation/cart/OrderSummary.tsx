@@ -1,7 +1,7 @@
 import Item from '@/components/orderstation/cart/Item'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartItemType, type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useEffect, useMemo, useRef } from 'react'
+import React, { type ReactElement, useCallback, useMemo, useRef, useEffect } from 'react'
 
 const OrderSummary = ({
 	products,
@@ -18,26 +18,26 @@ const OrderSummary = ({
 	const prevCartLengthRef = useRef<number>(0)
 
 	// Helper function to map cart entries to CartItemType
-	const mapCartEntries = (
+	const mapCartEntries = useCallback((
 		entries: Record<string, number>,
 		items: ProductType[] | OptionType[],
 		type: 'products' | 'options'
 	): CartItemType[] => {
-		return Object.entries(entries).map(([id, quantity]) => {
+		return Object.entries(entries).reduce<CartItemType[]>((acc, [id, quantity]) => {
 			const item = items.find(i => i._id === id)
-			if (item === undefined) {
-				throw new Error(`Item with id ${id} not found in ${type}`)
+			if (item !== undefined) {
+				acc.push({
+					id: item._id,
+					name: item.name,
+					price: item.price,
+					type,
+					quantity,
+					imageURL: item.imageURL
+				})
 			}
-			return {
-				id: item._id,
-				name: item.name,
-				price: item.price,
-				type,
-				quantity,
-				imageURL: item.imageURL
-			}
-		})
-	}
+			return acc
+		}, [])
+	}, [])
 
 	// Memoize cart items to prevent unnecessary recalculations
 	const cartItems: CartItemType[] = useMemo(() => {
