@@ -70,15 +70,12 @@ const OrderView = ({
 	// Handler to change cart items using functional updates
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
 		setCart((prevCart) => {
-			const currentQuantity = prevCart[type][_id] === 0 || isNaN(prevCart[type][_id]) ? 0 : prevCart[type][_id]
+			const currentQuantity = prevCart[type][_id] ?? 0
 			const newQuantity = currentQuantity + change
 
 			// If the new quantity is less than or equal to zero, remove the item
 			if (newQuantity <= 0) {
-				const {
-					[_id]: _,
-					...updatedItems
-				} = prevCart[type]
+				const { [_id]: _, ...updatedItems } = prevCart[type]
 				return {
 					...prevCart,
 					[type]: updatedItems

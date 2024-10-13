@@ -45,7 +45,7 @@ const OrderSummary = ({
 			...mapCartEntries(cart.products, products, 'products'),
 			...mapCartEntries(cart.options, options, 'options')
 		]
-	}, [cart, products, options])
+	}, [mapCartEntries, cart, products, options])
 
 	// Handle scrolling to the end of the cart when items are added
 	useEffect(() => {
