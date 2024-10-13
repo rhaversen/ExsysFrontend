@@ -23,7 +23,7 @@ export default function Page (): ReactElement {
 	const [kiosk, setKiosk] = useState<KioskType | null>(null)
 	const [checkoutMethods, setCheckoutMethods] = useState({
 		sumUp: false,
-		cash: true,
+		later: true,
 		mobilePay: false
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
@@ -191,8 +191,8 @@ export default function Page (): ReactElement {
 			{selectedActivity !== null && kiosk !== null && (
 				<OrderView
 					kiosk={kiosk}
-					products={products.sort((a, b) => a.name.localeCompare(b.name))}
-					options={options.sort((a, b) => a.name.localeCompare(b.name))}
+					products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+					options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
 					activity={selectedActivity}
 					checkoutMethods={checkoutMethods}
 					onClose={() => { setSelectedActivity(null) }}
