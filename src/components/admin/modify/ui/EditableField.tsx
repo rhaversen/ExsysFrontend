@@ -39,6 +39,7 @@ const EditableField = ({
 	const [text, setText] = useState<string>(initialText)
 	const [borderColor, setBorderColor] = useState<'red' | 'blue' | 'green'>('blue')
 	const inputRef = useRef<HTMLInputElement>(null)
+	const [isModified, setIsModified] = useState<boolean>(false)
 
 	const {
 		errors,
@@ -60,24 +61,34 @@ const EditableField = ({
 		if (allowChange) {
 			setText(newValue)
 			onChange(newValue)
-			if (required && newValue === '') {
-				setBorderColor('red')
-			} else {
-				setBorderColor('green')
-			}
 		}
-	}, [type, maxLength, upperCase, onChange, required])
+
+		setIsModified(true)
+	}, [type, maxLength, upperCase, onChange])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
 		onValidationChange(fieldName, isValid)
 	}, [isValid, fieldName, onValidationChange])
 
+	// Update border color based on validation errors and text changes
+	useEffect(() => {
+		if (!isModified) {
+			return
+		}
+		if (!isValid) {
+			setBorderColor('red')
+		} else {
+			setBorderColor('green')
+		}
+	}, [isModified, isValid])
+
 	// Reset text and border color when editable prop changes
 	useEffect(() => {
 		if (!editable) {
 			setText(initialText)
 			setBorderColor('blue')
+			setIsModified(false)
 		}
 	}, [editable, initialText])
 
