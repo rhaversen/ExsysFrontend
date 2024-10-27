@@ -181,7 +181,7 @@ const Kiosk = ({
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Tag - Brugernavn til kiosk login'}</p>
+					<p className="italic text-gray-500">{'Kiosk Tag - Brugernavn til kiosk login'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName="kioskTag"
