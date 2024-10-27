@@ -33,7 +33,7 @@ const SessionsView = ({
 
 	// Map user IDs to kiosks
 	const kioskUserMap = useMemo(() => {
-		const map: Record<string, KioskType> = {}
+		const map: Record<string, KioskType | undefined> = {}
 		kiosks.forEach((kiosk) => {
 			map[kiosk._id] = kiosk
 		})
@@ -42,7 +42,7 @@ const SessionsView = ({
 
 	// Map user IDs to admins
 	const adminUserMap = useMemo(() => {
-		const map: Record<string, AdminType> = {}
+		const map: Record<typeof admins[0]['_id'], AdminType | undefined> = {}
 		admins.forEach((admin) => {
 			map[admin._id] = admin
 		})
@@ -124,7 +124,7 @@ const SessionsView = ({
 						return (
 							<div key={userId} className="mb-8">
 								<div className="flex justify-between items-center mb-2">
-									<h3 className="text-xl text-gray-700 font-semibold">{`"${user.name}" sessioner`}</h3>
+									<h3 className="text-xl text-gray-700 font-semibold">{`"${user?.name ?? 'Ukendt navn'}" sessioner`}</h3>
 									<span className="text-gray-600">
 										{sessionsList.length}{' session'}
 										{sessionsList.length !== 1 ? 'er' : ''}
@@ -153,7 +153,7 @@ const SessionsView = ({
 						return (
 							<div key={userId} className="mb-8 max-w-fit">
 								<div className="flex justify-between items-center mb-2">
-									<h3 className="text-xl text-gray-700 font-semibold">{`"${user.name}" sessioner`}</h3>
+									<h3 className="text-xl text-gray-700 font-semibold">{`"${user?.name ?? 'Ukendt Navn'}" sessioner`}</h3>
 									<span className="text-gray-600">
 										{sessionsList.length}{' session'}
 										{sessionsList.length !== 1 ? 'er' : ''}
