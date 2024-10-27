@@ -43,7 +43,7 @@ const EditableField = ({
 	const {
 		errors,
 		isValid
-	} = useValidation(text, validations, placeholder, minLength, maxValue, type)
+	} = useValidation(text, validations, required, placeholder, minLength, maxValue, type)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value

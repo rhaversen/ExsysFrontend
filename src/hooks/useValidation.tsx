@@ -1,7 +1,7 @@
 import { type Validation } from '@/types/frontendDataTypes'
 import { useCallback, useEffect, useState } from 'react'
 
-const useValidation = (value: string, validations: Validation[] | undefined, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
+const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -30,7 +30,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, pla
 
 	return {
 		errors,
-		isValid: errors.length === 0
+		isValid: required ? value.length > 0 && errors.length === 0 : errors.length === 0
 	}
 }
 
