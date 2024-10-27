@@ -37,12 +37,13 @@ const EditableField = ({
 	onValidationChange: (fieldName: string, isValid: boolean) => void
 }): ReactElement => {
 	const [text, setText] = useState<string>(initialText)
+	const [borderColor, setBorderColor] = useState<'red' | 'blue' | 'green'>('blue')
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	const {
 		errors,
 		isValid
-	} = useValidation(text, validations, required, placeholder, minLength, maxValue, type)
+	} = useValidation(text, validations, placeholder, minLength, maxValue, type)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
@@ -59,18 +60,24 @@ const EditableField = ({
 		if (allowChange) {
 			setText(newValue)
 			onChange(newValue)
+			if (required && newValue === '') {
+				setBorderColor('red')
+			} else {
+				setBorderColor('green')
+			}
 		}
-	}, [type, onChange, upperCase, maxLength])
+	}, [type, maxLength, upperCase, onChange, required])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
 		onValidationChange(fieldName, isValid)
 	}, [isValid, fieldName, onValidationChange])
 
-	// Reset text when no longer editable
+	// Reset text and border color when editable prop changes
 	useEffect(() => {
 		if (!editable) {
 			setText(initialText)
+			setBorderColor('blue')
 		}
 	}, [editable, initialText])
 
@@ -85,7 +92,7 @@ const EditableField = ({
 					value={text}
 					placeholder={placeholder}
 					onInput={handleChange}
-					className={`${italic ? 'italic' : ''} border-blue-500 text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none`}
+					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none ${borderColor === 'red' ? 'border-red-500' : borderColor === 'blue' ? 'border-blue-500' : 'border-green-500'}`}
 					readOnly={!editable}
 					size={Math.max(text.length, minSize, 1)}
 					aria-label={fieldName}

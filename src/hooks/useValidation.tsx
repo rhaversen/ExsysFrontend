@@ -1,7 +1,7 @@
 import { type Validation } from '@/types/frontendDataTypes'
 import { useCallback, useEffect, useState } from 'react'
 
-const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
+const useValidation = (value: string, validations: Validation[] | undefined, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -9,9 +9,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 
 	const validate = useCallback((): string[] => {
 		const newErrors: string[] = []
-		if (required && value.length === 0) {
-			newErrors.push(placeholder + ' er påkrævet')
-		} else if (value.length > 0 && value.length < minLength) {
+		if (value.length > 0 && value.length < minLength) {
 			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
 		}
 		if (type === 'number' && parseInt(value) > maxValue) {
@@ -23,7 +21,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 			}
 		})
 		return newErrors
-	}, [value, validations, required, placeholder, minLength, maxValue, type])
+	}, [value, validations, placeholder, minLength, maxValue, type])
 
 	useEffect(() => {
 		const validationErrors = validate()
