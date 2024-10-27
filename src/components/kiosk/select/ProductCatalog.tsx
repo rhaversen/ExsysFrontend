@@ -1,4 +1,4 @@
-import Product from '@/components/orderstation/select/Product'
+import Product from '@/components/kiosk/select/Product'
 import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'

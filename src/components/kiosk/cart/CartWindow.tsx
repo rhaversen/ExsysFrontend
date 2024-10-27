@@ -1,4 +1,4 @@
-import OrderSummary from '@/components/orderstation/cart/OrderSummary'
+import OrderSummary from '@/components/kiosk/cart/OrderSummary'
 import SubmitButton from '@/components/ui/SubmitButton'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'

@@ -1,4 +1,4 @@
-import Activity from '@/components/orderstation/Activity'
+import Activity from '@/components/kiosk/Activity'
 import { type ActivityType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 		default: 'Bestil'
 	},
 	alternates: {
-		canonical: 'https://www.kantine.nyskivehus.dk/orderstation'
+		canonical: 'https://www.kantine.nyskivehus.dk/kiosk'
 	}
 }
 

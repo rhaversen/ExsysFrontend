@@ -1,5 +1,5 @@
-import OptionsBar from '@/components/orderstation/select/OptionsBar'
-import ProductCatalog from '@/components/orderstation/select/ProductCatalog'
+import OptionsBar from '@/components/kiosk/select/OptionsBar'
+import ProductCatalog from '@/components/kiosk/select/ProductCatalog'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'

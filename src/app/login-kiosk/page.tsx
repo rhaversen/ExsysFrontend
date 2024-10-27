@@ -13,7 +13,7 @@ export default function Page (): ReactElement {
 	const login = useCallback(async (credentials: any) => {
 		try {
 			await axios.post(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
-			router.push('/orderstation')
+			router.push('/kiosk')
 		} catch (error: any) {
 			addError(error)
 		}
@@ -21,7 +21,7 @@ export default function Page (): ReactElement {
 
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true }).then(() => {
-			router.push('/orderstation')
+			router.push('/kiosk')
 		}).catch(() => {
 			// Do nothing
 		})

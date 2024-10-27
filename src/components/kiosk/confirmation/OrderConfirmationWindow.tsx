@@ -27,23 +27,23 @@ const OrderConfirmationWindow = ({
 
 	const images: Record<string, { src: string, alt: string }> = {
 		loading: {
-			src: '/orderStation/loading.svg',
+			src: '/kiosk/loading.svg',
 			alt: 'Loading'
 		},
 		success: {
-			src: '/orderStation/checkmark.svg',
+			src: '/kiosk/checkmark.svg',
 			alt: 'Order Confirmed'
 		},
 		error: {
-			src: '/orderStation/question-mark.svg',
+			src: '/kiosk/question-mark.svg',
 			alt: 'Error'
 		},
 		awaitingPayment: {
-			src: '/orderStation/arrow.svg',
+			src: '/kiosk/arrow.svg',
 			alt: 'Awaiting Payment'
 		},
 		failed: {
-			src: '/orderStation/cross.svg',
+			src: '/kiosk/cross.svg',
 			alt: 'Payment Failed'
 		}
 	}

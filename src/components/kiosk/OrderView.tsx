@@ -1,7 +1,7 @@
-import CartWindow from '@/components/orderstation/cart/CartWindow'
-import SelectPaymentWindow from '@/components/orderstation/SelectPaymentWindow'
-import OrderConfirmationWindow from '@/components/orderstation/confirmation/OrderConfirmationWindow'
-import SelectionWindow from '@/components/orderstation/select/SelectionWindow'
+import CartWindow from '@/components/kiosk/cart/CartWindow'
+import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
+import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
+import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,

@@ -1,4 +1,4 @@
-import QuantityAdjuster from '@/components/orderstation/cart/QuantityAdjuster'
+import QuantityAdjuster from '@/components/kiosk/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback } from 'react'

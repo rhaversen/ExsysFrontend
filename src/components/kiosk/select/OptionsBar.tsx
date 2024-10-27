@@ -1,4 +1,4 @@
-import Option from '@/components/orderstation/select/Option'
+import Option from '@/components/kiosk/select/Option'
 import { type OptionType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import React, { type ReactElement } from 'react'
