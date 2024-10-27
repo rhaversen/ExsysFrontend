@@ -37,7 +37,7 @@ const EditableImage = ({
 					src={`${URL === undefined || URL === '' ? '/none.svg' : URL}`}
 					alt={URL?.split('/').pop() ?? 'Item Image'}
 					draggable={false}
-					priority={true}
+					priority={false}
 				/>
 			</button>
 			{showImageList && (
