@@ -154,10 +154,15 @@ const Kiosk = ({
 					</div>
 					<p className="italic text-gray-500">{'Kortlæser'}</p>
 					<EditableDropdown
-						options={readers.map((reader) => ({
-							value: reader._id,
-							label: reader.readerTag
-						}))}
+						options={
+							readers.filter((reader) =>
+								// Include reader if NOT assigned to any kiosk
+								!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id)
+							).map((reader) => ({
+								value: reader._id,
+								label: reader.readerTag
+							}))
+						}
 						initialValue={kiosk.readerId ?? 'null-option'}
 						onChange={handleReaderIdChange}
 						fieldName="readerId"
