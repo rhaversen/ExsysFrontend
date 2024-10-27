@@ -4,7 +4,7 @@ import ActivitySelection from '@/components/kiosk/ActivitySelection'
 import OrderView from '@/components/kiosk/OrderView'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
@@ -28,7 +28,7 @@ export default function Page (): ReactElement {
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
-
+	const [isActive, setIsActive] = useState(true)
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
 
@@ -56,8 +56,16 @@ export default function Page (): ReactElement {
 		return productsData.map(processProductData)
 	}, [])
 
+	// Function to check if the current time has any active order windows
+	const hasActiveOrderWindow = useCallback((products: ProductType[] | ProductType): boolean => {
+		if (!Array.isArray(products)) {
+			return isCurrentTimeInOrderWindow(products.orderWindow)
+		}
+		return products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
+	}, [])
+
 	// Load all data
-	const loadData = useCallback(async (): Promise<void> => {
+	const initialSetup = useCallback(async (): Promise<void> => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') return
 
 		try {
@@ -73,14 +81,19 @@ export default function Page (): ReactElement {
 				fetchData(`${API_URL}/v1/activities`)
 			])
 
+			const processedProducts = processProductsData(productsData)
+
 			// Process and set data
 			setKiosk(kioskData)
-			setProducts(processProductsData(productsData))
+			setProducts(processedProducts)
 			setOptions(optionsData)
 			setActivities(activitiesData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
+
+			// Check if the current time has any active order windows
+			setIsActive(hasActiveOrderWindow(processedProducts))
 
 			// If only one activity is available, select it
 			if (kioskData.activities.length === 1) {
@@ -89,12 +102,21 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, updateCheckoutMethods, processProductsData, addError])
+	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, hasActiveOrderWindow, addError])
 
-	// Initialize data on mount
+	// Check if the current time has any active order windows every minute
 	useEffect(() => {
-		loadData().catch(addError)
-	}, [addError, loadData])
+		const interval = setInterval(() => {
+			setIsActive(hasActiveOrderWindow(products))
+		}, 60000)
+
+		return () => { clearInterval(interval) }
+	}, [products, hasActiveOrderWindow, addError])
+
+	// Initialize on mount
+	useEffect(() => {
+		initialSetup().catch(addError)
+	}, [addError, initialSetup])
 
 	// Initialize WebSocket connection
 	useEffect(() => {
@@ -111,14 +133,27 @@ export default function Page (): ReactElement {
 	useEntitySocketListeners<ProductType>(
 		socket,
 		'product',
-		item => { setProducts(prev => [...prev, processProductData(item)]) },
+		item => {
+			setProducts(prev => [...prev, processProductData(item)])
+			if (!isActive) {
+				setIsActive(hasActiveOrderWindow(item))
+			}
+		},
 		item => {
 			setProducts(prev => {
 				const updated = processProductData(item)
-				return prev.map(p => (p._id === updated._id ? updated : p))
+				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
+				setIsActive(newProducts.some(hasActiveOrderWindow))
+				return newProducts
 			})
 		},
-		id => { setProducts(prev => prev.filter(p => p._id !== id)) }
+		id => {
+			setProducts(prev => {
+				const products = prev.filter(p => p._id !== id)
+				setIsActive(hasActiveOrderWindow(products))
+				return products
+			})
+		}
 	)
 
 	// Options
@@ -182,13 +217,21 @@ export default function Page (): ReactElement {
 
 	return (
 		<div>
-			{selectedActivity === null && (
+			{!isActive && (
+				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
+					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
+						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
+						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
+					</div>
+				</div>
+			)}
+			{selectedActivity === null && isActive && (
 				<ActivitySelection
 					activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
 					onActivitySelect={setSelectedActivity}
 				/>
 			)}
-			{selectedActivity !== null && kiosk !== null && (
+			{selectedActivity !== null && kiosk !== null && isActive && (
 				<OrderView
 					kiosk={kiosk}
 					products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
