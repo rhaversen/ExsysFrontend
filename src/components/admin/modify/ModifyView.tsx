@@ -295,7 +295,7 @@ const ModifyView = (): ReactElement => {
 			{selectedView !== null && selectedView !== 'Login Sessioner' &&
 				<SortingControl
 					onSortFieldChange={setSortField}
-					onSortDirectionChange={(direction: string) => { setSortDirection(direction as 'asc' | 'desc') }}
+					onSortDirectionChange={setSortDirection}
 					type={selectedView as keyof typeof sortConfig}
 				/>
 			}

@@ -10,7 +10,7 @@ const SortingControl = ({
 }: {
 	type: keyof typeof sortConfig
 	onSortFieldChange: (sortField: string) => void
-	onSortDirectionChange: (sortDirection: string) => void
+	onSortDirectionChange: (sortDirection: 'asc' | 'desc') => void
 
 }): ReactElement => {
 	return (
@@ -29,7 +29,7 @@ const SortingControl = ({
 				</select>
 				<select
 					className="mx-2 rounded-sm text-center"
-					onChange={(e) => { onSortDirectionChange(e.target.value) }}
+					onChange={(e) => { onSortDirectionChange(e.target.value as 'asc' | 'desc') }}
 					title="Sorteringsretning"
 					defaultValue="asc"
 				>
