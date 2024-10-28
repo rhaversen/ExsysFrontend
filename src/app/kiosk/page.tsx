@@ -57,11 +57,14 @@ export default function Page (): ReactElement {
 	}, [])
 
 	// Function to check if the current time has any active order windows
-	const hasActiveOrderWindow = useCallback((products: ProductType[] | ProductType): boolean => {
+	const updateKioskActiveStatus = useCallback((products: ProductType[] | ProductType) => {
+		let shouldBeActive = false
 		if (!Array.isArray(products)) {
-			return isCurrentTimeInOrderWindow(products.orderWindow)
+			shouldBeActive = isCurrentTimeInOrderWindow(products.orderWindow)
+		} else if (products.length > 0) {
+			shouldBeActive = products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
 		}
-		return products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
+		setIsActive(shouldBeActive)
 	}, [])
 
 	// Load all data
@@ -93,7 +96,7 @@ export default function Page (): ReactElement {
 			updateCheckoutMethods(kioskData)
 
 			// Check if the current time has any active order windows
-			setIsActive(hasActiveOrderWindow(processedProducts))
+			updateKioskActiveStatus(processedProducts)
 
 			// If only one activity is available, select it
 			if (kioskData.activities.length === 1) {
@@ -104,21 +107,21 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, hasActiveOrderWindow, addError])
+	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, updateKioskActiveStatus, addError])
 
 	// Check if the current time has any active order windows every minute
 	useEffect(() => {
 		const interval = setInterval(() => {
-			setIsActive(hasActiveOrderWindow(products))
+			updateKioskActiveStatus(products)
 		}, 60000)
 
 		return () => { clearInterval(interval) }
-	}, [products, hasActiveOrderWindow, addError])
+	}, [products, updateKioskActiveStatus])
 
-	// Initialize on mount
+	// Initialize on mount and when active status changes
 	useEffect(() => {
 		initialSetup().catch(addError)
-	}, [addError, initialSetup])
+	}, [isActive, initialSetup, addError])
 
 	// Initialize WebSocket connection
 	useEffect(() => {
@@ -138,21 +141,21 @@ export default function Page (): ReactElement {
 		item => {
 			setProducts(prev => [...prev, processProductData(item)])
 			if (!isActive) {
-				setIsActive(hasActiveOrderWindow(item))
+				updateKioskActiveStatus(item)
 			}
 		},
 		item => {
 			setProducts(prev => {
 				const updated = processProductData(item)
 				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				setIsActive(newProducts.some(hasActiveOrderWindow))
+				updateKioskActiveStatus(newProducts)
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				setIsActive(hasActiveOrderWindow(products))
+				updateKioskActiveStatus(products)
 				return products
 			})
 		}
@@ -205,7 +208,7 @@ export default function Page (): ReactElement {
 					setSelectedActivity(null)
 				}
 
-				// If only one activity is available, select it¨
+				// If only one activity is available, select it
 				if (kioskUpdate.activities.length === 1) {
 					setSelectedActivity(kioskUpdate.activities[0])
 				}
