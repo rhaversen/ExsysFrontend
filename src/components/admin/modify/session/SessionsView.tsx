@@ -99,7 +99,6 @@ const SessionsView = ({
 				withCredentials: true
 			})
 			setCurrentSessionId(data._id as string)
-			console.log(data)
 		} catch (error) {
 			addError(error)
 		}
