@@ -1,46 +1,89 @@
 'use client'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactNode, useCallback, useEffect } from 'react'
-import { useInterval } from 'react-use'
+import React, { useEffect, type ReactNode, useCallback, useState } from 'react'
+import { io, type Socket } from 'socket.io-client'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { type SessionType } from '@/types/backendDataTypes'
 import { useError } from './ErrorContext/ErrorContext'
+import { useUser } from './UserProvider'
 
 export default function AdminAuthProvider ({ children }: Readonly<{ children: ReactNode }>): ReactNode {
-	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
+
 	const { addError } = useError()
+	const { setCurrentUser } = useUser()
+	const router = useRouter()
+
+	const [currentSession, setCurrentSession] = useState<string | null>(null)
+	const [socket, setSocket] = useState<Socket | null>(null)
 
 	const checkAuthentication = useCallback(async (): Promise<void> => {
 		try {
-			await axios.get(`${API_URL}/v1/auth/is-authenticated`, { withCredentials: true })
+			const response = await axios.get<string>(`${API_URL}/v1/auth/is-authenticated`, { withCredentials: true })
+			setCurrentSession(response.data)
 		} catch {
-			// Logout the user if they are not authenticated
+			// If not authenticated, log out and redirect to admin login page
+			setCurrentUser(null)
+			setCurrentSession(null)
 			await axios.post(`${API_URL}/v1/auth/logout-local`, { withCredentials: true })
-			// Redirect to the login page
 			router.push('/login-admin')
 		}
-	}, [API_URL, router])
+	}, [API_URL, router, setCurrentUser])
 
 	const checkAuthorization = useCallback(async (): Promise<void> => {
 		try {
+			// Check if user is an admin
 			await axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true })
+			// If admin, do nothing (let them stay on the current page)
 		} catch {
-			// Redirect to the login page
-			router.push('/login-admin')
+			try {
+				// Check if user is a kiosk
+				await axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true })
+				// If kiosk, redirect to kiosk main page
+				router.push('/kiosk')
+			} catch {
+				// If neither admin nor kiosk, redirect to login page
+				router.push('/login-admin')
+			}
 		}
 	}, [API_URL, router])
 
-	// Run the authentication check on component mount
+	// Run the authentication and authorization checks on component mount
 	useEffect(() => {
-		// Must be done sequentially to lower database load
-		checkAuthentication().catch(checkAuthorization).catch(addError)
-	}, [addError, checkAuthentication, checkAuthorization])
+		if (currentSession === null) {
+			checkAuthentication().then(checkAuthorization).catch(addError)
+		}
+	}, [currentSession, checkAuthentication, checkAuthorization, addError])
 
-	// Continue running the authentication check every 10 seconds
-	useInterval(() => {
-		// Must be done sequentially to lower database load
-		checkAuthentication().catch(checkAuthorization).catch(addError)
-	}, 1000 * 10)
+	// Initialize WebSocket connection
+	useEffect(() => {
+		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		const socketInstance = io(WS_URL)
+		setSocket(socketInstance)
+
+		return () => {
+			socketInstance.disconnect()
+		}
+	}, [API_URL, WS_URL])
+
+	// Listen for session CUD events
+	useEntitySocketListeners<SessionType>(
+		socket,
+		'session',
+		(_newSession) => { /* Do nothing */ },
+		(_updatedSession) => { /* Do nothing */ },
+		(deletedSessionId) => {
+			// If the current session is deleted, log out the user
+			if (deletedSessionId === currentSession) {
+				setCurrentUser(null)
+				setCurrentSession(null)
+				addError('Du er blevet logget ud')
+				router.push('/login-admin')
+			}
+		}
+	)
 
 	return <>{children}</>
 }
