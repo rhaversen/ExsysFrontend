@@ -117,29 +117,29 @@ const ModifyView = (): ReactElement => {
 				readersResponse,
 				sessionsResponse
 			] = await Promise.all([
-				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/rooms`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/activities`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/kiosks`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/admins`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/readers`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/sessions`, { withCredentials: true })
+				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get<OptionType[]>(`${API_URL}/v1/options`, { withCredentials: true }),
+				axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
+				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
+				axios.get<AdminType[]>(`${API_URL}/v1/admins`, { withCredentials: true }),
+				axios.get<ReaderType[]>(`${API_URL}/v1/readers`, { withCredentials: true }),
+				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
 			])
 
-			const productsData = productsResponse.data as ProductType[]
+			const productsData = productsResponse.data
 			// Convert orderWindow to local time for all products
 			productsData.forEach((product) => {
 				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			})
 			setProducts(productsData)
-			setOptions(optionsResponse.data as OptionType[])
-			setRooms(roomsResponse.data as RoomType[])
-			setActivities(activitiesResponse.data as ActivityType[])
-			setKiosks(kiosksResponse.data as KioskType[])
-			setAdmins(adminsResponse.data as AdminType[])
-			setReaders(readersResponse.data as ReaderType[])
-			setSessions(sessionsResponse.data as SessionType[])
+			setOptions(optionsResponse.data)
+			setRooms(roomsResponse.data)
+			setActivities(activitiesResponse.data)
+			setKiosks(kiosksResponse.data)
+			setAdmins(adminsResponse.data)
+			setReaders(readersResponse.data)
+			setSessions(sessionsResponse.data)
 		} catch (error: any) {
 			addError(error)
 		}
