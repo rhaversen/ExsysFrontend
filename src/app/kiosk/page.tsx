@@ -98,6 +98,8 @@ export default function Page (): ReactElement {
 			// If only one activity is available, select it
 			if (kioskData.activities.length === 1) {
 				setSelectedActivity(kioskData.activities[0])
+			} else {
+				setSelectedActivity(null)
 			}
 		} catch (error) {
 			addError(error)
