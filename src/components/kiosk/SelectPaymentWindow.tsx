@@ -27,7 +27,7 @@ const SelectPaymentWindow = ({
 							{'Kort'}
 						</div>
 						<AsyncImage
-							src="/kiosk/credit-card.svg"
+							src="/images/kiosk/credit-card.svg"
 							alt="Kort"
 							className="w-48 h-48"
 							width={200}
@@ -48,7 +48,7 @@ const SelectPaymentWindow = ({
 							{'Betal Senere'}
 						</div>
 						<AsyncImage
-							src="/kiosk/coins.svg"
+							src="/images/kiosk/coins.svg"
 							alt="Betal Senere"
 							className="w-48 h-48"
 							width={200}
@@ -69,7 +69,7 @@ const SelectPaymentWindow = ({
 							{'MobilePay'}
 						</div>
 						<AsyncImage
-							src="/kiosk/mobile-pay.svg"
+							src="/images/kiosk/mobile-pay.svg"
 							alt="MobilePay"
 							className="w-48 h-48"
 							width={200}

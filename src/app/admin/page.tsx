@@ -1,33 +1,13 @@
 'use client'
 
-import ModifyView from '@/components/admin/modify/ModifyView'
-import OverviewView from '@/components/admin/overview/OverviewView'
-import SessionInfoBar from '@/components/admin/SessionInfoBar'
-import ViewSelectionBar from '@/components/admin/ViewSelectionBar'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement } from 'react'
 
 export default function Page (): ReactElement {
-	const views = ['Ordre Oversigt', 'Rediger Katalog']
-
-	const [selectedView, setSelectedView] = useState('Ordre Oversigt')
-
 	return (
-		<main className="flex flex-col min-h-screen">
-			<ViewSelectionBar
-				subLevel={0}
-				views={views}
-				selectedView={selectedView}
-				setSelectedView={setSelectedView}
-			/>
-			<div className="flex-grow">
-				{selectedView === 'Ordre Oversigt' &&
-					<OverviewView />
-				}
-				{selectedView === 'Rediger Katalog' &&
-					<ModifyView />
-				}
-			</div>
-			<SessionInfoBar />
+		<main className="flex flex-col items-center justify-center h-screen">
+			<a href="/admin/modify">{'Modificer'}</a>
+			<a href="/admin/statistics">{'Statistik'}</a>
+			<a href="/admin/kitchen">{'Køkken'}</a>
 		</main>
 	)
 }

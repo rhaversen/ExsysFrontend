@@ -54,7 +54,7 @@ const ImageList = ({
 						width={70}
 						height={70}
 						quality={30}
-						src="/none.svg"
+						src="/images/none.svg"
 						alt="none"
 						className="w-full h-full object-cover"
 					/>
