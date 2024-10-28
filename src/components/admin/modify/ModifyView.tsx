@@ -187,120 +187,80 @@ const ModifyView = (): ReactElement => {
 		)
 	}
 
-	// Products
-	const handleUpdateProduct = CreateUpdateHandler<ProductType>(setProducts)
-	const handleDeleteProduct = CreateDeleteHandler<ProductType>(setProducts)
-	const handleAddProduct = CreateAddHandler<ProductType>(setProducts)
-
-	// Options
-	const handleUpdateOption = CreateUpdateHandler<OptionType>(setOptions)
-	const handleDeleteOption = CreateDeleteHandler<OptionType>(setOptions)
-	const handleAddOption = CreateAddHandler<OptionType>(setOptions)
-
-	// Rooms
-	const handleUpdateRoom = CreateUpdateHandler<RoomType>(setRooms)
-	const handleDeleteRoom = CreateDeleteHandler<RoomType>(setRooms)
-	const handleAddRoom = CreateAddHandler<RoomType>(setRooms)
-
-	// Activities
-	const handleUpdateActivity = CreateUpdateHandler<ActivityType>(setActivities)
-	const handleDeleteActivity = CreateDeleteHandler<ActivityType>(setActivities)
-	const handleAddActivity = CreateAddHandler<ActivityType>(setActivities)
-
-	// Kiosks
-	const handleUpdateKiosk = CreateUpdateHandler<KioskType>(setKiosks)
-	const handleDeleteKiosk = CreateDeleteHandler<KioskType>(setKiosks)
-	const handleAddKiosk = CreateAddHandler<KioskType>(setKiosks)
-
-	// Admins
-	const handleUpdateAdmin = CreateUpdateHandler<AdminType>(setAdmins)
-	const handleDeleteAdmin = CreateDeleteHandler<AdminType>(setAdmins)
-	const handleAddAdmin = CreateAddHandler<AdminType>(setAdmins)
-
-	// Readers
-	const handleUpdateReader = CreateUpdateHandler<ReaderType>(setReaders)
-	const handleDeleteReader = CreateDeleteHandler<ReaderType>(setReaders)
-	const handleAddReader = CreateAddHandler<ReaderType>(setReaders)
-
-	// Sessions
-	const handleUpdateSession = CreateUpdateHandler<SessionType>(setSessions)
-	const handleDeleteSession = CreateDeleteHandler<SessionType>(setSessions)
-	const handleAddSession = CreateAddHandler<SessionType>(setSessions)
-
-	// Activities
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		handleAddActivity,
-		handleUpdateActivity,
-		handleDeleteActivity
-	)
-
-	// Admins
-	useEntitySocketListeners<AdminType>(
-		socket,
-		'admin',
-		handleAddAdmin,
-		handleUpdateAdmin,
-		handleDeleteAdmin
-	)
-
-	// Kiosks
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		handleAddKiosk,
-		handleUpdateKiosk,
-		handleDeleteKiosk
-	)
-
-	// Options
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		handleAddOption,
-		handleUpdateOption,
-		handleDeleteOption
-	)
-
 	// Products with preprocessing
 	useEntitySocketListeners<ProductType>(
 		socket,
 		'product',
-		handleAddProduct,
-		handleUpdateProduct,
-		handleDeleteProduct,
+		CreateAddHandler<ProductType>(setProducts),
+		CreateUpdateHandler<ProductType>(setProducts),
+		CreateDeleteHandler<ProductType>(setProducts),
 		(product) => {
 			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
 			return product
 		}
 	)
 
+	// Options
+	useEntitySocketListeners<OptionType>(
+		socket,
+		'option',
+		CreateAddHandler<OptionType>(setOptions),
+		CreateUpdateHandler<OptionType>(setOptions),
+		CreateDeleteHandler<OptionType>(setOptions)
+	)
+
+	// Activities
+	useEntitySocketListeners<ActivityType>(
+		socket,
+		'activity',
+		CreateAddHandler<ActivityType>(setActivities),
+		CreateUpdateHandler<ActivityType>(setActivities),
+		CreateDeleteHandler<ActivityType>(setActivities)
+	)
+
 	// Rooms
 	useEntitySocketListeners<RoomType>(
 		socket,
 		'room',
-		handleAddRoom,
-		handleUpdateRoom,
-		handleDeleteRoom
+		CreateAddHandler<RoomType>(setRooms),
+		CreateUpdateHandler<RoomType>(setRooms),
+		CreateDeleteHandler<RoomType>(setRooms)
+	)
+
+	// Kiosks
+	useEntitySocketListeners<KioskType>(
+		socket,
+		'kiosk',
+		CreateAddHandler<KioskType>(setKiosks),
+		CreateUpdateHandler<KioskType>(setKiosks),
+		CreateDeleteHandler<KioskType>(setKiosks)
 	)
 
 	// Readers
 	useEntitySocketListeners<ReaderType>(
 		socket,
 		'reader',
-		handleAddReader,
-		handleUpdateReader,
-		handleDeleteReader
+		CreateAddHandler<ReaderType>(setReaders),
+		CreateUpdateHandler<ReaderType>(setReaders),
+		CreateDeleteHandler<ReaderType>(setReaders)
+	)
+
+	// Admins
+	useEntitySocketListeners<AdminType>(
+		socket,
+		'admin',
+		CreateAddHandler<AdminType>(setAdmins),
+		CreateUpdateHandler<AdminType>(setAdmins),
+		CreateDeleteHandler<AdminType>(setAdmins)
 	)
 
 	// Sessions
 	useEntitySocketListeners<SessionType>(
 		socket,
 		'session',
-		handleAddSession,
-		handleUpdateSession,
-		handleDeleteSession
+		CreateAddHandler<SessionType>(setSessions),
+		CreateUpdateHandler<SessionType>(setSessions),
+		CreateDeleteHandler<SessionType>(setSessions)
 	)
 
 	// Fetch data on component mount
