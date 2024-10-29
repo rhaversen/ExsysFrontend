@@ -2,7 +2,6 @@
 
 import ActivitySelection from '@/components/kiosk/activities/ActivitySelection'
 import OrderView from '@/components/kiosk/OrderView'
-import SessionInfoBar from '@/components/kiosk/SessionInfoBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
@@ -247,7 +246,6 @@ export default function Page (): ReactElement {
 					onClose={() => { setSelectedActivity(null) }}
 				/>
 			)}
-			<SessionInfoBar />
 		</div>
 	)
 }
