@@ -11,24 +11,18 @@ const useCUDOperations = <T,>(entityPath: string): {
 	const { addError } = useError()
 
 	const createEntity = useCallback((data: T) => {
-		axios.post(`${API_URL}${entityPath}`, data, { withCredentials: true }).catch((error) => {
-			addError(error)
-		})
+		axios.post(`${API_URL}${entityPath}`, data, { withCredentials: true }).catch(addError)
 	}, [API_URL, entityPath, addError])
 
 	const updateEntity = useCallback((id: string, data: Partial<T>) => {
-		axios.patch(`${API_URL}${entityPath}/${id}`, data, { withCredentials: true }).catch((error) => {
-			addError(error)
-		})
+		axios.patch(`${API_URL}${entityPath}/${id}`, data, { withCredentials: true }).catch(addError)
 	}, [API_URL, entityPath, addError])
 
 	const deleteEntity = useCallback((id: string, confirm: boolean) => {
 		axios.delete(`${API_URL}${entityPath}/${id}`, {
 			data: { confirm },
 			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-		})
+		}).catch(addError)
 	}, [API_URL, entityPath, addError])
 
 	return { createEntity, updateEntity, deleteEntity }
