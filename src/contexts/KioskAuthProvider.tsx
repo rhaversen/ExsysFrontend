@@ -79,7 +79,6 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 			if (deletedSessionId === currentSession) {
 				setCurrentUser(null)
 				setCurrentSession(null)
-				addError('Du er blevet logget ud')
 				router.push('/login-kiosk')
 			}
 		}
