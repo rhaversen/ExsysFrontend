@@ -1,3 +1,4 @@
+import Header from '@/components/admin/ui/header/Header'
 import AdminAuthProvider from '@/contexts/AdminAuthProvider'
 import { type Metadata } from 'next'
 
@@ -16,5 +17,10 @@ export default function AdminLayout ({
 }: Readonly<{
 	children: React.ReactNode
 }>): React.JSX.Element {
-	return <AdminAuthProvider>{children}</AdminAuthProvider>
+	return (
+		<AdminAuthProvider>
+			<Header />
+			{children}
+		</AdminAuthProvider>
+	)
 }
