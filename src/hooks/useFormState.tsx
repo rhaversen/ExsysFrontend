@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import set from 'lodash/set'
 
 const useFormState = <T extends Record<string, any>>(initialState: T): {
-	formState: any
+	formState: T
 	handleFieldChange: (path: string, value: any) => void
 	handleValidationChange: (fieldName: string, isValid: boolean) => void
 	formIsValid: boolean
