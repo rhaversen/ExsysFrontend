@@ -34,7 +34,7 @@ const EditableImage = ({
 					width={90}
 					height={90}
 					quality={50}
-					src={`${URL === undefined || URL === '' ? '/none.svg' : URL}`}
+					src={`${URL === undefined || URL === '' ? '/images/none.svg' : URL}`}
 					alt={URL?.split('/').pop() ?? 'Item Image'}
 					draggable={false}
 					priority={false}

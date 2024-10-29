@@ -34,7 +34,7 @@ const Option = ({
 						width={100}
 						height={100}
 						quality={80}
-						src={`${option.imageURL === undefined || option.imageURL === '' ? '/none.svg' : option.imageURL}`}
+						src={`${option.imageURL === undefined || option.imageURL === '' ? '/images/none.svg' : option.imageURL}`}
 						alt={option.name}
 						draggable={false}
 						priority={true}

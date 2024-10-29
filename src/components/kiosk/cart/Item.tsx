@@ -40,7 +40,7 @@ const Item = ({
 					width={40}
 					height={40}
 					quality={40}
-					src={`${imageURL === undefined || imageURL === '' ? '/none.svg' : imageURL}`} alt={name}
+					src={`${imageURL === undefined || imageURL === '' ? '/images/none.svg' : imageURL}`} alt={name}
 					draggable={false}
 					priority={true}
 				/>
