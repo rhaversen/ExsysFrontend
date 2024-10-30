@@ -1,10 +1,10 @@
 const ProductImages = [
-	'/productImages/cake.webp',
-	'/productImages/cheese.webp',
-	'/productImages/coffee.webp',
-	'/productImages/spansk_rundstykke.webp',
-	'/productImages/strawberry_jam.webp',
-	'/productImages/tea.webp'
+	'/images/productImages/cake.webp',
+	'/images/productImages/cheese.webp',
+	'/images/productImages/coffee.webp',
+	'/images/productImages/spansk_rundstykke.webp',
+	'/images/productImages/strawberry_jam.webp',
+	'/images/productImages/tea.webp'
 ] as string[]
 
 export default ProductImages
