@@ -28,9 +28,10 @@ const useFormState = <T extends Record<string, any>>(initialState: T): {
 		setFieldValidations(prev => ({ ...prev, [fieldName]: isValid }))
 	}, [])
 
-	const resetFormState = (): void => {
+	const resetFormState = useCallback((): void => {
 		setFormState(initialState)
-	}
+		setFieldValidations({})
+	}, [initialState])
 
 	return { formState, handleFieldChange, handleValidationChange, resetFormState, formIsValid }
 }
