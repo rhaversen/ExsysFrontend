@@ -5,6 +5,7 @@ const useFormState = <T extends Record<string, any>>(initialState: T): {
 	formState: T
 	handleFieldChange: (path: string, value: any) => void
 	handleValidationChange: (fieldName: string, isValid: boolean) => void
+	resetFormState: () => void
 	formIsValid: boolean
 } => {
 	const [formState, setFormState] = useState<T>(initialState)
@@ -27,7 +28,11 @@ const useFormState = <T extends Record<string, any>>(initialState: T): {
 		setFieldValidations(prev => ({ ...prev, [fieldName]: isValid }))
 	}, [])
 
-	return { formState, handleFieldChange, handleValidationChange, formIsValid }
+	const resetFormState = (): void => {
+		setFormState(initialState)
+	}
+
+	return { formState, handleFieldChange, handleValidationChange, resetFormState, formIsValid }
 }
 
 export default useFormState
