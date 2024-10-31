@@ -2,6 +2,7 @@
 
 import ActivitySelection from '@/components/kiosk/activities/ActivitySelection'
 import OrderView from '@/components/kiosk/OrderView'
+import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
@@ -221,7 +222,7 @@ export default function Page (): ReactElement {
 	)
 
 	return (
-		<div>
+		<div className="flex flex-col h-screen">
 			{!isActive && (
 				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
@@ -230,22 +231,29 @@ export default function Page (): ReactElement {
 					</div>
 				</div>
 			)}
-			{selectedActivity === null && isActive && (
-				<ActivitySelection
-					activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
-					onActivitySelect={setSelectedActivity}
-				/>
-			)}
-			{selectedActivity !== null && kiosk !== null && isActive && (
-				<OrderView
-					kiosk={kiosk}
-					products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
-					options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
-					activity={selectedActivity}
-					checkoutMethods={checkoutMethods}
-					onClose={() => { setSelectedActivity(null) }}
-				/>
-			)}
+			<div className="flex-1 overflow-y-auto">
+				{selectedActivity === null && isActive && (
+					<ActivitySelection
+						activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
+						onActivitySelect={setSelectedActivity}
+					/>
+				)}
+				{selectedActivity !== null && kiosk !== null && isActive && (
+					<OrderView
+						kiosk={kiosk}
+						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
+						activity={selectedActivity}
+						checkoutMethods={checkoutMethods}
+						onClose={() => { setSelectedActivity(null) }}
+					/>
+				)}
+			</div>
+			<div className="flex-shrink-0">
+				{isActive && (
+					<KioskSessionInfo />
+				)}
+			</div>
 		</div>
 	)
 }

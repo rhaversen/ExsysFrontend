@@ -10,7 +10,7 @@ const ActivitySelection = ({
 	onActivitySelect: (activity: ActivityType) => void
 }): ReactElement => {
 	return (
-		<main className="flex flex-col justify-center items-center h-screen">
+		<main className="flex flex-col justify-center items-center h-full">
 			<h1 className="m-10 p-0 text-center text-gray-800 text-4xl">{'Bestil til aktivitet:'}</h1>
 			<div className="flex flex-wrap justify-center items-center p-20">
 				{activities.map((activity) => (

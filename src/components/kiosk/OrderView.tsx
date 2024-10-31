@@ -229,7 +229,7 @@ const OrderView = ({
 	}, [WS_URL])
 
 	return (
-		<main className="flex flex-row h-screen bg-zinc-100">
+		<main className="flex flex-row bg-zinc-100 h-full">
 			{/* Left Column: Header + Selection Window */}
 			<div className="w-full flex flex-col">
 				{/* Header */}
