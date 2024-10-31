@@ -86,6 +86,18 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL, addError])
 
+	// Generic add handler
+	const CreateAddHandler = <T,>(
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => [...prevItems, item])
+			},
+			[setState]
+		)
+	}
+
 	// Generic update handler
 	const CreateUpdateHandler = <T extends { _id: string }>(
 		setState: React.Dispatch<React.SetStateAction<T[]>>
@@ -223,18 +235,6 @@ export default function Page (): ReactElement {
 			)
 		}, [setActivities, setRooms]
 	)
-
-	// Generic add handler
-	const CreateAddHandler = <T,>(
-		setState: React.Dispatch<React.SetStateAction<T[]>>
-	): (item: T) => void => {
-		return useCallback(
-			(item: T) => {
-				setState((prevItems) => [...prevItems, item])
-			},
-			[setState]
-		)
-	}
 
 	// Products with preprocessing
 	useEntitySocketListeners<ProductType>(
