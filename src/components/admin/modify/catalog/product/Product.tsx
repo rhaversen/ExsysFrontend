@@ -10,6 +10,7 @@ import InlineValidation from '../../ui/InlineValidation'
 import Timestamps from '../../ui/Timestamps'
 import useFormState from '@/hooks/useFormState'
 import useCUDOperations from '@/hooks/useCUDOperations'
+import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 
 const Product = ({
 	product,
@@ -18,8 +19,15 @@ const Product = ({
 	product: ProductType
 	options: OptionType[]
 }): ReactElement => {
+	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
+		return {
+			...product,
+			orderWindow: (product.orderWindow !== undefined) ? convertOrderWindowToUTC(product.orderWindow) : undefined
+		}
+	}
+
 	const { formState: newProduct, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(product)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products')
+	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
 	const [isEditing, setIsEditing] = useState(false)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
