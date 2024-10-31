@@ -49,6 +49,7 @@ const Header = (): ReactElement | null => {
 		}
 	}, [pathname])
 
+	// TODO: Dont return null if not client, return a loading spinner or something instead of user name
 	if (!isClient) {
 		return null
 	}
