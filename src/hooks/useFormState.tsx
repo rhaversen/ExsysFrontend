@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import set from 'lodash/set'
+import cloneDeep from 'lodash/cloneDeep'
 
 const useFormState = <T extends Record<string, any>>(initialState: T): {
 	formState: T
@@ -18,7 +19,7 @@ const useFormState = <T extends Record<string, any>>(initialState: T): {
 
 	const handleFieldChange = useCallback((path: string, value: any) => {
 		setFormState(prevState => {
-			const newState = { ...prevState }
+			const newState = cloneDeep(prevState)
 			set(newState, path, value)
 			return newState
 		})
@@ -29,7 +30,7 @@ const useFormState = <T extends Record<string, any>>(initialState: T): {
 	}, [])
 
 	const resetFormState = useCallback((): void => {
-		setFormState(initialState)
+		setFormState(cloneDeep(initialState))
 		setFieldValidations({})
 	}, [initialState])
 
