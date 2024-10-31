@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchReaderType, type ReaderType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PatchReaderType, type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
+import useFormState from '@/hooks/useFormState'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Reader = ({
 	readers,
@@ -14,68 +14,10 @@ const Reader = ({
 	readers: ReaderType[]
 	reader: ReaderType
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newReader, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(reader)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostReaderType, PatchReaderType>('/v1/readers')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newReader, setNewReader] = useState<ReaderType>(reader)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchReader = useCallback((readerPatch: PatchReaderType): void => {
-		axios.patch(API_URL + `/v1/readers/${reader._id}`, readerPatch, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewReader(reader)
-		})
-	}, [API_URL, addError, reader])
-
-	const deleteReader = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/readers/${reader._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewReader(reader)
-		})
-	}, [API_URL, addError, reader])
-
-	const handleReaderTagChange = useCallback((v: string): void => {
-		setNewReader({
-			...newReader,
-			readerTag: v
-		})
-	}, [newReader])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewReader(reader)
-		setIsEditing(false)
-	}, [reader])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchReader(newReader)
-		setIsEditing(false)
-	}, [patchReader, newReader])
-
-	const handleDeleteReader = useCallback((confirm: boolean): void => {
-		deleteReader(confirm)
-	}, [deleteReader])
 
 	return (
 		<div className="p-2 m-2">
@@ -97,7 +39,7 @@ const Reader = ({
 							}]}
 							type="number"
 							editable={isEditing}
-							onChange={handleReaderTagChange}
+							onChange={(value) => { handleFieldChange('readerTag', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -109,8 +51,15 @@ const Reader = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(newReader._id, newReader)
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 				/>
@@ -123,7 +72,7 @@ const Reader = ({
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteReader(confirm)
+						deleteEntity(reader._id, confirm)
 					}}
 				/>
 			}

@@ -2,94 +2,21 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type PatchOptionType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PatchOptionType, type PostOptionType, type OptionType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
+import useFormState from '@/hooks/useFormState'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Option = ({
 	option
 }: {
 	option: OptionType
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newOption, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(option)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostOptionType, PatchOptionType>('/v1/options')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newOption, setNewOption] = useState<OptionType>(option)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchOption = useCallback((optionPatch: PatchOptionType): void => {
-		axios.patch(API_URL + `/v1/options/${option._id}`, optionPatch, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewOption(option)
-		})
-	}, [API_URL, addError, option])
-
-	const deleteOption = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/options/${option._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewOption(option)
-		})
-	}, [API_URL, addError, option])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setNewOption({
-			...newOption,
-			name: v
-		})
-	}, [newOption])
-
-	const handlePriceChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9.]/g, '')
-		setNewOption({
-			...newOption,
-			price: Number(v)
-		})
-	}, [newOption])
-
-	const handleImageChange = useCallback((v: string): void => {
-		setNewOption({
-			...newOption,
-			imageURL: v
-		})
-	}, [newOption])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewOption(option)
-		setIsEditing(false)
-	}, [option])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchOption(newOption)
-		setIsEditing(false)
-	}, [patchOption, newOption])
-
-	const handleDeleteOption = useCallback((confirm: boolean): void => {
-		deleteOption(confirm)
-	}, [deleteOption])
 
 	return (
 		<div className="p-2 m-2">
@@ -104,7 +31,7 @@ const Option = ({
 							required={true}
 							maxLength={20}
 							editable={isEditing}
-							onChange={handleNameChange}
+							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -118,7 +45,7 @@ const Option = ({
 							required={true}
 							type="number"
 							editable={isEditing}
-							onChange={handlePriceChange}
+							onChange={(value) => { handleFieldChange('price', Number(value.replace(/[^0-9.]/g, ''))) }}
 							onValidationChange={handleValidationChange}
 						/>
 						<div className="pl-1">
@@ -129,7 +56,7 @@ const Option = ({
 				<EditableImage
 					URL={newOption.imageURL}
 					editable={isEditing}
-					onChange={handleImageChange}
+					onChange={(value) => { handleFieldChange('imageURL', value) }}
 				/>
 				<Timestamps
 					createdAt={option.createdAt}
@@ -138,8 +65,15 @@ const Option = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(newOption._id, newOption)
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 				/>
@@ -151,7 +85,7 @@ const Option = ({
 						}}
 						onSubmit={(confirm: boolean) => {
 							setShowDeleteConfirmation(false)
-							handleDeleteOption(confirm)
+							deleteEntity(option._id, confirm)
 						}}
 					/>
 				}

@@ -4,13 +4,12 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type PatchProductType, type ProductType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PatchProductType, type PostProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import InlineValidation from '../../ui/InlineValidation'
 import Timestamps from '../../ui/Timestamps'
+import useFormState from '@/hooks/useFormState'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Product = ({
 	product,
@@ -19,183 +18,11 @@ const Product = ({
 	product: ProductType
 	options: OptionType[]
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newProduct, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(product)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newProduct, setNewProduct] = useState<ProductType>(product)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-
-	// Update newProduct when options change
-	useEffect(() => {
-		setNewProduct(n => {
-			// Filter out options that are not in the options array
-			const filteredOptions = n.options.filter((option) =>
-				options.map((opt) => opt._id).includes(option._id)
-			)
-
-			// Update the remaining options with new data from the options array
-			const updatedOptions = filteredOptions.map((option) => {
-				const newOption = options.find((o) => o._id === option._id)
-				return newOption ?? option
-			})
-
-			return {
-				...n,
-				options: updatedOptions
-			}
-		})
-	}, [options])
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchProduct = useCallback((productPatch: PatchProductType): void => {
-		// Convert order window to UTC with convertOrderWindowToUTC
-		const productPatchUTC = {
-			...productPatch,
-			orderWindow: (productPatch.orderWindow !== undefined) && convertOrderWindowToUTC(productPatch.orderWindow)
-		}
-		axios.patch(API_URL + `/v1/products/${product._id}`, productPatchUTC, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewProduct(product)
-		})
-	}, [API_URL, addError, product])
-
-	const deleteProduct = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/products/${product._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewProduct(product)
-		})
-	}, [API_URL, addError, product])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setNewProduct({
-			...newProduct,
-			name: v
-		})
-	}, [newProduct])
-
-	const handlePriceChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9.]/g, '')
-		setNewProduct({
-			...newProduct,
-			price: Number(v)
-		})
-	}, [newProduct])
-
-	const handleImageChange = useCallback((v: string): void => {
-		setNewProduct({
-			...newProduct,
-			imageURL: v
-		})
-	}, [newProduct])
-
-	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setNewProduct({
-			...newProduct,
-			orderWindow: {
-				...newProduct.orderWindow,
-				from: {
-					...newProduct.orderWindow.from,
-					minute: Number(v)
-				}
-			}
-		})
-	}, [newProduct])
-
-	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setNewProduct({
-			...newProduct,
-			orderWindow: {
-				...newProduct.orderWindow,
-				from: {
-					...newProduct.orderWindow.from,
-					hour: Number(v)
-				}
-			}
-		})
-	}, [newProduct])
-
-	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setNewProduct({
-			...newProduct,
-			orderWindow: {
-				...newProduct.orderWindow,
-				to: {
-					...newProduct.orderWindow.to,
-					minute: Number(v)
-				}
-			}
-		})
-	}, [newProduct])
-
-	const handleOrderWindowToHourChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setNewProduct({
-			...newProduct,
-			orderWindow: {
-				...newProduct.orderWindow,
-				to: {
-					...newProduct.orderWindow.to,
-					hour: Number(v)
-				}
-			}
-		})
-	}, [newProduct])
-
-	const handleAddOption = useCallback((v: OptionType): void => {
-		setNewProduct({
-			...newProduct,
-			options: [...newProduct.options, v]
-		})
-	}, [newProduct])
-
-	const handleDeleteOption = useCallback((v: OptionType): void => {
-		setNewProduct({
-			...newProduct,
-			options: newProduct.options.filter((option) => option._id !== v._id)
-		})
-	}, [newProduct])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewProduct(product)
-		setIsEditing(false)
-	}, [product])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchProduct({
-			...newProduct,
-			options: newProduct.options.map((option) => option._id)
-		})
-		setIsEditing(false)
-	}, [patchProduct, newProduct])
-
-	const handleDeleteProduct = useCallback((confirm: boolean): void => {
-		deleteProduct(confirm)
-	}, [deleteProduct])
 
 	return (
 		<div className="p-2 m-2">
@@ -210,7 +37,7 @@ const Product = ({
 							required={true}
 							maxLength={15}
 							editable={isEditing}
-							onChange={handleNameChange}
+							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -224,7 +51,7 @@ const Product = ({
 							required={true}
 							type="number"
 							editable={isEditing}
-							onChange={handlePriceChange}
+							onChange={(value) => { handleFieldChange('price', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 						<div className="pl-1">
@@ -242,7 +69,7 @@ const Product = ({
 						maxValue={23}
 						maxLength={2}
 						editable={isEditing}
-						onChange={handleOrderWindowFromHourChange}
+						onChange={(value) => { handleFieldChange('orderWindow.from.hour', value) }}
 						onValidationChange={handleValidationChange}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
@@ -255,7 +82,7 @@ const Product = ({
 						maxValue={59}
 						maxLength={2}
 						editable={isEditing}
-						onChange={handleOrderWindowFromMinuteChange}
+						onChange={(value) => { handleFieldChange('orderWindow.from.minute', value) }}
 						onValidationChange={handleValidationChange}
 					/>
 					<div className={`${isEditing ? 'text-xl px-1' : 'px-0.5'}`}>
@@ -270,7 +97,7 @@ const Product = ({
 						maxValue={23}
 						maxLength={2}
 						editable={isEditing}
-						onChange={handleOrderWindowToHourChange}
+						onChange={(value) => { handleFieldChange('orderWindow.to.hour', value) }}
 						onValidationChange={handleValidationChange}
 					/>
 					<div className={`${isEditing ? 'font-bold text-xl px-1' : 'px-0.5'}`}>{':'}</div>
@@ -283,7 +110,7 @@ const Product = ({
 						maxValue={59}
 						maxLength={2}
 						editable={isEditing}
-						onChange={handleOrderWindowToMinuteChange}
+						onChange={(value) => { handleFieldChange('orderWindow.to.minute', value) }}
 						onValidationChange={handleValidationChange}
 					/>
 				</div>
@@ -292,9 +119,16 @@ const Product = ({
 					validations={[
 						{
 							validate: () => {
-								const from = newProduct.orderWindow.from
-								const to = newProduct.orderWindow.to
-								return from.hour !== to.hour || from.minute !== to.minute
+								const fromHour = Number(newProduct.orderWindow.from.hour)
+								const fromMinute = Number(newProduct.orderWindow.from.minute)
+								const toHour = Number(newProduct.orderWindow.to.hour)
+								const toMinute = Number(newProduct.orderWindow.to.minute)
+								// Check if hours and minutes are valid numbers
+								if (isNaN(fromHour) || isNaN(fromMinute) || isNaN(toHour) || isNaN(toMinute)) {
+									return false
+								}
+								// Proceed with validation
+								return fromHour !== toHour || fromMinute !== toMinute
 							},
 							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
 						}
@@ -304,7 +138,7 @@ const Product = ({
 				<EditableImage
 					URL={newProduct.imageURL}
 					editable={isEditing}
-					onChange={handleImageChange}
+					onChange={(value) => { handleFieldChange('imageURL', value) }}
 				/>
 				{product.options.length > 0 &&
 					<p className="italic text-gray-500">{'Tilvalg:'}</p>
@@ -319,7 +153,7 @@ const Product = ({
 					<Options
 						selectedOptions={newProduct.options}
 						editable={isEditing}
-						onDeleteOption={handleDeleteOption}
+						onDeleteOption={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
 						showOptions={() => {
 							setShowOptions(true)
 						}}
@@ -332,8 +166,18 @@ const Product = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(product._id, {
+							...newProduct,
+							options: newProduct.options.map(option => option._id)
+						})
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 					canClose={!showOptions}
@@ -346,7 +190,7 @@ const Product = ({
 						}}
 						onSubmit={(confirm: boolean) => {
 							setShowDeleteConfirmation(false)
-							handleDeleteProduct(confirm)
+							deleteEntity(product._id, confirm)
 						}}
 					/>
 				}
@@ -355,8 +199,8 @@ const Product = ({
 						productName={newProduct.name}
 						options={options}
 						productOptions={newProduct.options}
-						onAddOption={handleAddOption}
-						onDeleteOption={handleDeleteOption}
+						onAddOption={(v) => { handleFieldChange('options', [...newProduct.options, v]) }}
+						onDeleteOption={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
 						onClose={() => {
 							setShowOptions(false)
 						}}

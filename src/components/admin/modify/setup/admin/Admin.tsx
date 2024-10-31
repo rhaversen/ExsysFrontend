@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type AdminType, type PatchAdminType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PatchAdminType, type PostAdminType, type AdminType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
 
 const Admin = ({
 	admins,
@@ -14,78 +14,11 @@ const Admin = ({
 	admins: AdminType[]
 	admin: AdminType
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newAdmin, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(admin)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostAdminType, PatchAdminType>('/v1/admins')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newAdmin, setNewAdmin] = useState<AdminType>(admin)
+	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-	const [newPassword, setNewPassword] = useState<string>('')
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchAdmin = useCallback((adminPatch: PatchAdminType): void => {
-		axios.patch(API_URL + `/v1/admins/${admin._id}`, adminPatch, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewAdmin(admin)
-		})
-	}, [API_URL, addError, admin])
-
-	const deleteAdmin = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/admins/${admin._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewAdmin(admin)
-		})
-	}, [API_URL, addError, admin])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setNewAdmin({
-			...newAdmin,
-			name: v
-		})
-	}, [newAdmin])
-
-	const handlePasswordChange = useCallback((v: string): void => {
-		setNewPassword(v)
-	}, [])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewAdmin(admin)
-		setNewPassword('')
-		setIsEditing(false)
-	}, [admin])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchAdmin({
-			...newAdmin,
-			password: newPassword === '' ? undefined : newPassword
-		})
-		setNewPassword('')
-		setIsEditing(false)
-	}, [patchAdmin, newAdmin, newPassword])
-
-	const handleDeleteAdmin = useCallback((confirm: boolean): void => {
-		deleteAdmin(confirm)
-	}, [deleteAdmin])
 
 	return (
 		<div className="p-2 m-2">
@@ -105,7 +38,7 @@ const Admin = ({
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}
-							onChange={handleNameChange}
+							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -121,7 +54,7 @@ const Admin = ({
 									minLength={4}
 									maxLength={100}
 									editable={isEditing}
-									onChange={handlePasswordChange}
+									onChange={setNewPassword}
 									onValidationChange={handleValidationChange}
 								/>
 							</div>
@@ -135,8 +68,20 @@ const Admin = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						setNewPassword('')
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(newAdmin._id, {
+							name: newAdmin.name,
+							password: newPassword.length > 0 ? newPassword : undefined
+						})
+						setNewPassword('')
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 				/>
@@ -149,7 +94,7 @@ const Admin = ({
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteAdmin(confirm)
+						deleteEntity(admin._id, confirm)
 					}}
 				/>
 			}

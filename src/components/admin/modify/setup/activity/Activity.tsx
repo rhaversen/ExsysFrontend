@@ -1,12 +1,12 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type PatchActivityType, type RoomType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PatchActivityType, type PostActivityType, type ActivityType, type RoomType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import EditableDropdown from '../../ui/EditableDropdown'
 import Timestamps from '../../ui/Timestamps'
+import useFormState from '@/hooks/useFormState'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Activity = ({
 	activity,
@@ -15,94 +15,10 @@ const Activity = ({
 	activity: ActivityType
 	rooms: RoomType[]
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newActivity, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(activity)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newActivity, setNewActivity] = useState<ActivityType>(activity)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-
-	// update newActivity when room changes
-	useEffect(() => {
-		setNewActivity((prev) => {
-			const room = rooms.find((room) => room._id === prev.roomId?._id)
-			return {
-				...prev,
-				roomId: room ?? null
-			}
-		})
-	}, [rooms])
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchActivity = useCallback((activityPatch: PatchActivityType): void => {
-		axios.patch(API_URL + `/v1/activities/${activity._id}`, activityPatch, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewActivity(activity)
-		})
-	}, [API_URL, addError, activity])
-
-	const deleteActivity = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/activities/${activity._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewActivity(activity)
-		})
-	}, [API_URL, addError, activity])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setNewActivity({
-			...newActivity,
-			name: v
-		})
-	}, [newActivity])
-
-	const handleRoomIdChange = useCallback((v: string): void => {
-		// convert string to the object
-		const room = rooms.find((room) => room._id === v)
-		if (room === undefined && v !== 'null-option') {
-			return
-		}
-		setNewActivity({
-			...newActivity,
-			roomId: ((room?._id) !== undefined) ? room : null
-		})
-	}, [newActivity, rooms])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewActivity(activity)
-		setIsEditing(false)
-	}, [activity])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchActivity({
-			...newActivity,
-			roomId: newActivity.roomId === null ? null : newActivity.roomId._id
-		})
-		setIsEditing(false)
-	}, [patchActivity, newActivity])
-
-	const handleDeleteActivity = useCallback((confirm: boolean): void => {
-		deleteActivity(confirm)
-	}, [deleteActivity])
 
 	return (
 		<div className="p-2 m-2">
@@ -118,7 +34,7 @@ const Activity = ({
 							required={true}
 							maxLength={50}
 							editable={isEditing}
-							onChange={handleNameChange}
+							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -129,7 +45,10 @@ const Activity = ({
 							label: room.name
 						}))}
 						initialValue={newActivity.roomId?._id ?? 'null-option'}
-						onChange={handleRoomIdChange}
+						onChange={(value) => {
+							const room = rooms.find((room) => room._id === value)
+							handleFieldChange('roomId', room ?? null)
+						}}
 						editable={isEditing}
 						fieldName="roomId"
 						allowNullOption={true}
@@ -143,8 +62,15 @@ const Activity = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(newActivity._id, { ...newActivity, roomId: newActivity.roomId?._id ?? null })
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 				/>
@@ -157,7 +83,7 @@ const Activity = ({
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteActivity(confirm)
+						deleteEntity(activity._id, confirm)
 					}}
 				/>
 			}

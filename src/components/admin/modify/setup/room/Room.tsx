@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type PostRoomType, type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
+import useFormState from '@/hooks/useFormState'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Room = ({
 	rooms,
@@ -14,75 +14,10 @@ const Room = ({
 	rooms: RoomType[]
 	room: RoomType
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
-	const { addError } = useError()
-
+	const { formState: newRoom, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(room)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostRoomType, PatchRoomType>('/v1/rooms')
 	const [isEditing, setIsEditing] = useState(false)
-	const [newRoom, setNewRoom] = useState<RoomType>(room)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(true)
-
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
-
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const patchRoom = useCallback((roomPatch: PatchRoomType): void => {
-		axios.patch(API_URL + `/v1/rooms/${room._id}`, roomPatch, { withCredentials: true }).catch((error) => {
-			addError(error)
-			setNewRoom(room)
-		})
-	}, [API_URL, addError, room])
-
-	const deleteRoom = useCallback((confirm: boolean): void => {
-		axios.delete(API_URL + `/v1/rooms/${room._id}`, {
-			data: { confirm },
-			withCredentials: true
-		}).catch((error) => {
-			addError(error)
-			setNewRoom(room)
-		})
-	}, [API_URL, addError, room])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
-			name: v
-		})
-	}, [newRoom])
-
-	const handleDescriptionChange = useCallback((v: string): void => {
-		setNewRoom({
-			...newRoom,
-			description: v
-		})
-	}, [newRoom])
-
-	const handleUndoEdit = useCallback((): void => {
-		setNewRoom(room)
-		setIsEditing(false)
-	}, [room])
-
-	const handleCompleteEdit = useCallback((): void => {
-		patchRoom(newRoom)
-		setIsEditing(false)
-	}, [patchRoom, newRoom])
-
-	const handleDeleteRoom = useCallback((confirm: boolean): void => {
-		deleteRoom(confirm)
-	}, [deleteRoom])
 
 	return (
 		<div className="p-2 m-2">
@@ -102,7 +37,7 @@ const Room = ({
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}
-							onChange={handleNameChange}
+							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -117,7 +52,7 @@ const Room = ({
 							required={true}
 							maxLength={20}
 							editable={isEditing}
-							onChange={handleDescriptionChange}
+							onChange={(value) => { handleFieldChange('description', value) }}
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
@@ -129,8 +64,15 @@ const Room = ({
 				<EditingControls
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
-					handleUndoEdit={handleUndoEdit}
-					handleCompleteEdit={handleCompleteEdit}
+					handleUndoEdit={() => {
+						resetFormState()
+						setIsEditing(false)
+					}}
+					handleCompleteEdit={() => {
+						updateEntity(newRoom._id, newRoom)
+						resetFormState()
+						setIsEditing(false)
+					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
 				/>
@@ -143,7 +85,7 @@ const Room = ({
 					}}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
-						handleDeleteRoom(confirm)
+						deleteEntity(room._id, confirm)
 					}}
 				/>
 			}
