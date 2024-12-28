@@ -79,7 +79,7 @@ const EditingControls = ({
 							height={40}
 							className="absolute top-0 left-0 w-full h-full z-10"
 							src={NoneImage.src}
-							alt={NoneImage.alt}
+							alt='Invalid form'
 						/>
 					)}
 					<button
