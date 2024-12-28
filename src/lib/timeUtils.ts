@@ -23,7 +23,7 @@ export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow 
 	const toUTCDate = new Date(toDate.toUTCString())
 
 	// Return the new orderWindow object in UTC
-	return {
+	const orderWindowConverted = {
 		from: {
 			hour: fromUTCDate.getUTCHours(),
 			minute: fromUTCDate.getUTCMinutes()
@@ -33,6 +33,7 @@ export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow 
 			minute: toUTCDate.getUTCMinutes()
 		}
 	}
+	return orderWindowConverted
 }
 
 export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindow {
@@ -57,18 +58,17 @@ export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindo
 	}
 
 	// Return the new orderWindow object in local time
-	return {
+	const orderWindowConverted = {
 		from: {
 			hour: fromDate.getHours(),
 			minute: fromDate.getMinutes()
-
 		},
 		to: {
 			hour: toDate.getHours(),
 			minute: toDate.getMinutes()
-
 		}
 	}
+	return orderWindowConverted
 }
 
 export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {

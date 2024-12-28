@@ -53,7 +53,7 @@ const EditingControls = ({
 						width={20}
 						height={20}
 						className="w-full h-full"
-						src="/admin/modify/trashcan.svg"
+						src="/images/admin/modify/trashcan.svg"
 						alt="Delete"
 					/>
 				</button>
@@ -67,7 +67,7 @@ const EditingControls = ({
 						width={40}
 						height={40}
 						className="w-full h-full"
-						src="/admin/modify/undo.svg"
+						src="/images/admin/modify/undo.svg"
 						alt="Undo"
 					/>
 				</button>
@@ -77,7 +77,7 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="absolute top-0 left-0 w-full h-full z-10"
-							src="/none.svg"
+							src="/images/none.svg"
 							alt="Invalid form"
 						/>
 					)}
@@ -92,7 +92,7 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="w-full h-full"
-							src="/admin/modify/checkmark.svg"
+							src="/images/admin/modify/checkmark.svg"
 							alt="Accept"
 						/>
 					</button>
@@ -112,7 +112,7 @@ const EditingControls = ({
 					width={40}
 					height={40}
 					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
-					src="/admin/modify/pen.svg"
+					src="/images/admin/modify/pen.svg"
 					alt="Edit"
 				/>
 				<span className="sr-only">{'Edit'}</span>

@@ -44,7 +44,7 @@ const ImageList = ({
 					type="button"
 					className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 					onClick={() => {
-						onSelect('/none.svg')
+						onSelect('/images/none.svg')
 					}}
 				>
 					<span className="sr-only">
@@ -54,7 +54,7 @@ const ImageList = ({
 						width={70}
 						height={70}
 						quality={30}
-						src="/none.svg"
+						src="/images/none.svg"
 						alt="none"
 						className="w-full h-full object-cover"
 					/>

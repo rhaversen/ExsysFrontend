@@ -37,12 +37,14 @@ const EditableField = ({
 	onValidationChange: (fieldName: string, isValid: boolean) => void
 }): ReactElement => {
 	const [text, setText] = useState<string>(initialText)
+	const [borderColor, setBorderColor] = useState<'red' | 'blue' | 'green'>('blue')
 	const inputRef = useRef<HTMLInputElement>(null)
+	const [isModified, setIsModified] = useState<boolean>(false)
 
 	const {
 		errors,
 		isValid
-	} = useValidation(text, validations, required, placeholder, minLength, maxValue, type)
+	} = useValidation(text, validations, required, placeholder, minLength, maxLength, maxValue, type)
 
 	const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
 		let newValue = event.target.value
@@ -60,17 +62,33 @@ const EditableField = ({
 			setText(newValue)
 			onChange(newValue)
 		}
-	}, [type, onChange, upperCase, maxLength])
+
+		setIsModified(true)
+	}, [type, maxLength, upperCase, onChange])
 
 	// Notify parent component when validation changes
 	useEffect(() => {
 		onValidationChange(fieldName, isValid)
 	}, [isValid, fieldName, onValidationChange])
 
-	// Reset text when no longer editable
+	// Update border color based on validation errors and text changes
+	useEffect(() => {
+		if (!isModified) {
+			return
+		}
+		if (!isValid) {
+			setBorderColor('red')
+		} else {
+			setBorderColor('green')
+		}
+	}, [isModified, isValid])
+
+	// Reset text and border color when editable prop changes
 	useEffect(() => {
 		if (!editable) {
 			setText(initialText)
+			setBorderColor('blue')
+			setIsModified(false)
 		}
 	}, [editable, initialText])
 
@@ -85,7 +103,7 @@ const EditableField = ({
 					value={text}
 					placeholder={placeholder}
 					onInput={handleChange}
-					className={`${italic ? 'italic' : ''} border-blue-500 text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none`}
+					className={`${italic ? 'italic' : ''} text-center bg-transparent border-2 rounded-md cursor-text transition-colors focus:outline-none ${borderColor === 'red' ? 'border-red-500' : borderColor === 'blue' ? 'border-blue-500' : 'border-green-500'}`}
 					readOnly={!editable}
 					size={Math.max(text.length, minSize, 1)}
 					aria-label={fieldName}

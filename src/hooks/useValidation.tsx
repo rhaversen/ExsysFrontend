@@ -1,7 +1,7 @@
 import { type Validation } from '@/types/frontendDataTypes'
 import { useCallback, useEffect, useState } from 'react'
 
-const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxValue: number, type: 'text' | 'number'): {
+const useValidation = (value: string, validations: Validation[] | undefined, required: boolean, placeholder: string, minLength: number, maxLength: number, maxValue: number, type: 'text' | 'number'): {
 	errors: string[]
 	isValid: boolean
 } => {
@@ -9,10 +9,14 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 
 	const validate = useCallback((): string[] => {
 		const newErrors: string[] = []
-		if (required && value.length === 0) {
-			newErrors.push(placeholder + ' er påkrævet')
-		} else if (value.length > 0 && value.length < minLength) {
-			newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn')
+		if (required || value.length > 0) {
+			if (minLength === maxLength && value.length !== minLength) {
+				newErrors.push(placeholder + ' skal være præcis ' + minLength + ' tegn lang')
+			} else if (value.length < minLength) {
+				newErrors.push(placeholder + ' skal være mindst ' + minLength + ' tegn lang')
+			} else if (value.length > maxLength) {
+				newErrors.push(placeholder + ' kan ikke være længere end ' + maxLength + ' tegn')
+			}
 		}
 		if (type === 'number' && parseInt(value) > maxValue) {
 			newErrors.push(placeholder + ' kan ikke være større end ' + maxValue)
@@ -23,7 +27,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 			}
 		})
 		return newErrors
-	}, [value, validations, required, placeholder, minLength, maxValue, type])
+	}, [maxLength, maxValue, minLength, placeholder, required, type, validations, value])
 
 	useEffect(() => {
 		const validationErrors = validate()
@@ -32,7 +36,7 @@ const useValidation = (value: string, validations: Validation[] | undefined, req
 
 	return {
 		errors,
-		isValid: errors.length === 0
+		isValid: required ? value.length > 0 && errors.length === 0 : errors.length === 0
 	}
 }
 
