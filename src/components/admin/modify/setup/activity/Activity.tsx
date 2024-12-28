@@ -15,9 +15,9 @@ const Activity = ({
 	activity: ActivityType
 	rooms: RoomType[]
 }): ReactElement => {
-	const { formState: newActivity, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(activity)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newActivity, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(activity, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (
@@ -68,7 +68,6 @@ const Activity = ({
 					}}
 					handleCompleteEdit={() => {
 						updateEntity(newActivity._id, { ...newActivity, roomId: newActivity.roomId?._id ?? null })
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

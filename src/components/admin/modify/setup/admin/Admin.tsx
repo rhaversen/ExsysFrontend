@@ -14,9 +14,9 @@ const Admin = ({
 	admins: AdminType[]
 	admin: AdminType
 }): ReactElement => {
-	const { formState: newAdmin, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(admin)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostAdminType, PatchAdminType>('/v1/admins')
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newAdmin, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(admin, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostAdminType, PatchAdminType>('/v1/admins')
 	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
@@ -79,7 +79,6 @@ const Admin = ({
 							password: newPassword.length > 0 ? newPassword : undefined
 						})
 						setNewPassword('')
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

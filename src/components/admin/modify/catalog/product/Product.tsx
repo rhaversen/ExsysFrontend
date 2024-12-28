@@ -26,9 +26,9 @@ const Product = ({
 		}
 	}
 
-	const { formState: newProduct, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(product)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newProduct, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(product, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
 
@@ -183,7 +183,6 @@ const Product = ({
 							...newProduct,
 							options: newProduct.options.map(option => option._id)
 						})
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

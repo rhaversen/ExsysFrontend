@@ -14,9 +14,9 @@ const Reader = ({
 	readers: ReaderType[]
 	reader: ReaderType
 }): ReactElement => {
-	const { formState: newReader, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(reader)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostReaderType, PatchReaderType>('/v1/readers')
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newReader, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(reader, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostReaderType, PatchReaderType>('/v1/readers')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (
@@ -57,7 +57,6 @@ const Reader = ({
 					}}
 					handleCompleteEdit={() => {
 						updateEntity(newReader._id, newReader)
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

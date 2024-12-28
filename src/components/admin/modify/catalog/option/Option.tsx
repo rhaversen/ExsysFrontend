@@ -13,9 +13,9 @@ const Option = ({
 }: {
 	option: OptionType
 }): ReactElement => {
-	const { formState: newOption, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(option)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostOptionType, PatchOptionType>('/v1/options')
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newOption, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(option, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostOptionType, PatchOptionType>('/v1/options')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (
@@ -71,7 +71,6 @@ const Option = ({
 					}}
 					handleCompleteEdit={() => {
 						updateEntity(newOption._id, newOption)
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

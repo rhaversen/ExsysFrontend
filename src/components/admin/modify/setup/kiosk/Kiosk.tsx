@@ -21,9 +21,9 @@ const Kiosk = ({
 	activities: ActivityType[]
 	readers: ReaderType[]
 }): ReactElement => {
-	const { formState: newKiosk, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(kiosk)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
 	const [isEditing, setIsEditing] = useState(false)
+	const { formState: newKiosk, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(kiosk, isEditing)
+	const { updateEntity, deleteEntity } = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
 	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
@@ -144,7 +144,6 @@ const Kiosk = ({
 							activities: newKiosk.activities.map(activity => activity._id)
 						})
 						setNewPassword('')
-						resetFormState()
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
