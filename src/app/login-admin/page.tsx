@@ -1,6 +1,8 @@
 'use client'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { useUser } from '@/contexts/UserProvider'
+import { type AdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect } from 'react'
@@ -9,15 +11,18 @@ export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const router = useRouter()
 	const { addError } = useError()
+	const { setCurrentUser } = useUser()
 
 	const login = useCallback(async (credentials: any) => {
 		try {
-			await axios.post(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
+			const response = await axios.post<{ auth: true, user: AdminType }>(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
+			setCurrentUser(response.data.user)
 			router.push('/admin')
 		} catch (error: any) {
+			setCurrentUser(null)
 			addError(error)
 		}
-	}, [API_URL, addError, router])
+	}, [API_URL, addError, router, setCurrentUser])
 
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true }).then(() => {

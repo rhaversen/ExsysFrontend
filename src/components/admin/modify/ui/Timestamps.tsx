@@ -44,7 +44,7 @@ const Timestamps = ({
 			>
 				<Image
 					className="h-7 w-7 p-1.5 mx-1"
-					src="admin/created.svg"
+					src="/images/admin/created.svg"
 					alt="Oprettet"
 					width={10}
 					height={10}
@@ -57,7 +57,7 @@ const Timestamps = ({
 				>
 					<Image
 						className="h-7 w-7 p-1 mx-1"
-						src="admin/updated.svg"
+						src="/images/admin/updated.svg"
 						alt="Opdateret"
 						width={10}
 						height={10}
