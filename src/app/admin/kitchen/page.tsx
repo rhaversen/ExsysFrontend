@@ -16,6 +16,7 @@ import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
+import { LoadingImage } from '@/lib/images'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -202,8 +203,8 @@ export default function Page (): ReactElement {
 						<div
 							className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
 							<Image
-								src="/images/loading.svg"
-								alt="loading"
+								src={LoadingImage.src}
+								alt={LoadingImage.alt}
 								priority
 								draggable="false"
 								width={100}

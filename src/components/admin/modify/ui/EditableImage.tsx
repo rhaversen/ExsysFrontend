@@ -1,6 +1,7 @@
 import ImageList from '@/components/admin/modify/ui/ImageList'
 import AsyncImage from '@/components/ui/AsyncImage'
 import React, { type ReactElement, useState } from 'react'
+import { NoneImage } from '@/lib/images'
 
 const EditableImage = ({
 	URL,
@@ -34,8 +35,8 @@ const EditableImage = ({
 					width={90}
 					height={90}
 					quality={50}
-					src={`${URL === undefined || URL === '' ? '/images/none.svg' : URL}`}
-					alt={URL?.split('/').pop() ?? 'Item Image'}
+					src={`${URL === undefined || URL === '' ? NoneImage.src : URL}`}
+					alt={URL?.split('/').pop() ?? NoneImage.alt}
 					draggable={false}
 					priority={false}
 				/>
