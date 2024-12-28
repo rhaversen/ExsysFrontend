@@ -27,7 +27,7 @@ const OrderConfirmationWindow = ({
 
 	const images: Record<string, { src: string, alt: string }> = {
 		loading: {
-			src: '/images/kiosk/loading.svg',
+			src: '/images/loading.svg',
 			alt: 'Loading'
 		},
 		success: {
