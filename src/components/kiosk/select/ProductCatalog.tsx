@@ -38,11 +38,10 @@ const ProductCatalog = ({
 	return (
 		<div className="
 		grid
-		grid-cols-[repeat(auto-fit,minmax(200px,1fr))]
-		sm:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]
-		md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]
-		lg:grid-cols-[repeat(auto-fit,minmax(350px,1fr))]
-		gap-y-5
+		grid-cols-[repeat(auto-fit,minmax(100px,1fr))]
+		sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]
+		md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]
+		lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]
 		place-items-center
 	  ">
 			{products
