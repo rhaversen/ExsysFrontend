@@ -31,7 +31,7 @@ const Option = ({
 						</p>
 					</div>
 					<AsyncImage
-						className="w-48 h-48"
+						className="w-40 h-40"
 						width={100}
 						height={100}
 						quality={80}
