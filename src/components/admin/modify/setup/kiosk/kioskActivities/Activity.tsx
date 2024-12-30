@@ -1,6 +1,7 @@
 import { type ActivityType } from '@/types/backendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
+import { AdminImages } from '@/lib/images'
 
 const Option = ({
 	activity,
@@ -24,8 +25,8 @@ const Option = ({
 				>
 					<p className="sr-only">{'Delete'}</p>
 					<Image
-						src="/images/admin/modify/trashcan.svg"
-						alt="Delete"
+						src={AdminImages.modify.trashcan.src}
+						alt={AdminImages.modify.trashcan.alt}
 						width={15}
 						height={15}
 					/>
