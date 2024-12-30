@@ -1,6 +1,6 @@
 import AsyncImage from '@/components/ui/AsyncImage'
 import CloseableModal from '@/components/ui/CloseableModal'
-import ProductImages from '@/lib/ProductImages'
+import { ProductImages, NoneImage } from '@/lib/images'
 import Image from 'next/image'
 import { type ReactElement } from 'react'
 
@@ -44,7 +44,7 @@ const ImageList = ({
 					type="button"
 					className="w-32 h-32 rounded-md hover:border-2 border-blue-500 hover:scale-105 transition-transform duration-200 ease-in-out"
 					onClick={() => {
-						onSelect('/images/none.svg')
+						onSelect(NoneImage.src)
 					}}
 				>
 					<span className="sr-only">
@@ -54,8 +54,8 @@ const ImageList = ({
 						width={70}
 						height={70}
 						quality={30}
-						src="/images/none.svg"
-						alt="none"
+						src={NoneImage.src}
+						alt={NoneImage.alt}
 						className="w-full h-full object-cover"
 					/>
 				</button>

@@ -233,19 +233,22 @@ const OrderView = ({
 			{/* Left Column: Header + Selection Window */}
 			<div className="w-full flex flex-col">
 				{/* Header */}
-				<header className="flex flex-row p-5 items-center justify-center shadow-b-md">
-					<h1 className="text-3xl font-bold text-center py-2 text-gray-800">
-						{'Bestil til ' + activity.name}
+				<header className="flex flex-row p-2 items-center justify-between shadow-b-md">
+					<div className="flex-1" /> {/* Left spacer */}
+					<h1 className="text-3xl font-bold text-center text-gray-800">
+						{'Bestil Til ' + activity.name}
 					</h1>
-					{kiosk.activities.length > 1 && (
-						<button
-							onClick={onClose}
-							className="bg-blue-500 rounded-md mx-5 py-2 px-4"
-							type="button"
-						>
-							{'Skift Aktivitet'}
-						</button>
-					)}
+					<div className="flex-1 flex justify-end"> {/* Right container */}
+						{kiosk.activities.length > 1 && (
+							<button
+								onClick={onClose}
+								className="bg-blue-500 rounded-md mx-5 py-2 px-4"
+								type="button"
+							>
+								{'Vælg Anden Aktivitet'}
+							</button>
+						)}
+					</div>
 				</header>
 
 				{/* Selection Window */}

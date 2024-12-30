@@ -1,6 +1,7 @@
 import AsyncImage from '@/components/ui/AsyncImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import React, { type ReactElement } from 'react'
+import { KioskImages } from '@/lib/images'
 
 const SelectPaymentWindow = ({
 	checkoutMethods,
@@ -27,8 +28,8 @@ const SelectPaymentWindow = ({
 							{'Kort'}
 						</div>
 						<AsyncImage
-							src="/images/kiosk/credit-card.svg"
-							alt="Kort"
+							src={KioskImages.creditCard.src}
+							alt={KioskImages.creditCard.alt}
 							className="w-48 h-48"
 							width={200}
 							height={200}
@@ -48,8 +49,8 @@ const SelectPaymentWindow = ({
 							{'Betal Senere'}
 						</div>
 						<AsyncImage
-							src="/images/kiosk/coins.svg"
-							alt="Betal Senere"
+							src={KioskImages.coins.src}
+							alt={KioskImages.coins.alt}
 							className="w-48 h-48"
 							width={200}
 							height={200}
@@ -69,7 +70,7 @@ const SelectPaymentWindow = ({
 							{'MobilePay'}
 						</div>
 						<AsyncImage
-							src="/images/kiosk/mobile-pay.svg"
+							src={KioskImages.mobilepay.src}
 							alt="MobilePay"
 							className="w-48 h-48"
 							width={200}
