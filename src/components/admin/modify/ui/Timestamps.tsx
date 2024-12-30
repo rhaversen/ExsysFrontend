@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
+import { AdminImages } from '@/lib/images'
 
 const Timestamps = ({
 	createdAt,
@@ -44,8 +45,8 @@ const Timestamps = ({
 			>
 				<Image
 					className="h-7 w-7 p-1.5 mx-1"
-					src="/images/admin/created.svg"
-					alt="Oprettet"
+					src={AdminImages.created.src}
+					alt={AdminImages.created.alt}
 					width={10}
 					height={10}
 				/>
@@ -57,8 +58,8 @@ const Timestamps = ({
 				>
 					<Image
 						className="h-7 w-7 p-1 mx-1"
-						src="/images/admin/updated.svg"
-						alt="Opdateret"
+						src={AdminImages.updated.src}
+						alt={AdminImages.updated.alt}
 						width={10}
 						height={10}
 					/>

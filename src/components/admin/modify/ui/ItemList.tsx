@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import React, { type ReactElement, type ReactNode } from 'react'
+import { AdminImages } from '@/lib/images'
 
 const ItemList = ({
 	buttonText,
@@ -21,8 +22,8 @@ const ItemList = ({
 					<div className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center">
 						<Image
 							className="h-7 w-7"
-							src="/images/admin/modify/plus.svg"
-							alt="Tilføj"
+							src={AdminImages.modify.plus.src}
+							alt={AdminImages.modify.plus.alt}
 							width={10}
 							height={10}
 						/>

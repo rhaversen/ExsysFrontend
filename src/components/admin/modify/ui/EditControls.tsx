@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import React, { type ReactElement, useEffect } from 'react'
+import { AdminImages, NoneImage } from '@/lib/images'
 
 const EditingControls = ({
 	canClose = true,
@@ -53,8 +54,8 @@ const EditingControls = ({
 						width={20}
 						height={20}
 						className="w-full h-full"
-						src="/images/admin/modify/trashcan.svg"
-						alt="Delete"
+						src={AdminImages.modify.trashcan.src}
+						alt={AdminImages.modify.trashcan.alt}
 					/>
 				</button>
 				<button
@@ -67,8 +68,8 @@ const EditingControls = ({
 						width={40}
 						height={40}
 						className="w-full h-full"
-						src="/images/admin/modify/undo.svg"
-						alt="Undo"
+						src={AdminImages.modify.undo.src}
+						alt={AdminImages.modify.undo.alt}
 					/>
 				</button>
 				<div className="w-10 h-10 relative">
@@ -77,8 +78,8 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="absolute top-0 left-0 w-full h-full z-10"
-							src="/images/none.svg"
-							alt="Invalid form"
+							src={NoneImage.src}
+							alt='Invalid form'
 						/>
 					)}
 					<button
@@ -92,8 +93,8 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="w-full h-full"
-							src="/images/admin/modify/checkmark.svg"
-							alt="Accept"
+							src={AdminImages.modify.checkmark.src}
+							alt={AdminImages.modify.checkmark.alt}
 						/>
 					</button>
 				</div>
@@ -112,8 +113,8 @@ const EditingControls = ({
 					width={40}
 					height={40}
 					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
-					src="/images/admin/modify/pen.svg"
-					alt="Edit"
+					src={AdminImages.modify.pen.src}
+					alt={AdminImages.modify.pen.alt}
 				/>
 				<span className="sr-only">{'Edit'}</span>
 			</button>

@@ -2,6 +2,7 @@ import AsyncImage from '@/components/ui/AsyncImage'
 import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 import AmountIndicator from './AmountIndicator'
+import { NoneImage } from '@/lib/images'
 
 const Option = ({
 	option,
@@ -30,11 +31,11 @@ const Option = ({
 						</p>
 					</div>
 					<AsyncImage
-						className="w-48 h-48"
+						className="w-40 h-40"
 						width={100}
 						height={100}
 						quality={80}
-						src={`${option.imageURL === undefined || option.imageURL === '' ? '/images/none.svg' : option.imageURL}`}
+						src={`${option.imageURL === undefined || option.imageURL === '' ? NoneImage.src : option.imageURL}`}
 						alt={option.name}
 						draggable={false}
 						priority={true}

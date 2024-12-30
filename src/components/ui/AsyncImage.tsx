@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import React, { type ReactElement, useState } from 'react'
+import { LoadingImage } from '@/lib/images'
 
 const AsyncImage = ({
 	className,
@@ -30,8 +31,8 @@ const AsyncImage = ({
 					width={width}
 					height={height}
 					quality={quality}
-					src="/images/kiosk/loading.svg"
-					alt="Loading..."
+					src={LoadingImage.src}
+					alt='Loading...'
 					priority
 					className={`h-full w-full transition-opacity duration-300 ease-in-out ${loadingLoaded ? 'opacity-100' : 'opacity-0'}`}
 					draggable="false"
