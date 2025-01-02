@@ -64,14 +64,7 @@ const ProductCatalog = ({
 			ref={containerRef}
 			className="h-full overflow-y-auto overflow-x-hidden"
 		>
-			<div className="
-				grid
-				grid-cols-[repeat(auto-fit,minmax(100px,1fr))]
-				sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]
-				md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]
-				lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]
-				place-items-center
-			">
+			<div className="flex flex-wrap justify-center">
 				{products
 					.filter(product => productAvailabilities[product._id])
 					.map((product) => (
