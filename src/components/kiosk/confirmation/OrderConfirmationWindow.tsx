@@ -3,7 +3,7 @@ import SubmitButton from '@/components/ui/SubmitButton'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
-import React, { type ReactElement } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const OrderConfirmationWindow = ({
 	price,
@@ -16,7 +16,33 @@ const OrderConfirmationWindow = ({
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 }): ReactElement => {
+	// TODO: Make this configurable
+	const autocloseSeconds = 10
+
+	const [remainingSeconds, setRemainingSeconds] = useState(autocloseSeconds)
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
+
+	useEffect(() => {
+		const timer = setInterval(() => {
+			setRemainingSeconds((prev) => {
+				if (prev <= 1) {
+					clearInterval(timer)
+					return 0
+				}
+				return prev - 1
+			})
+		}, 1000)
+
+		return () => { clearInterval(timer) }
+	}, [])
+
+	useEffect(() => {
+		if (!canClose) return
+		const timeoutId = setTimeout(() => {
+			onClose()
+		}, autocloseSeconds * 1000)
+		return () => { clearTimeout(timeoutId) }
+	}, [canClose, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
@@ -91,6 +117,12 @@ const OrderConfirmationWindow = ({
 						disabled={!canClose}
 					/>
 				)}
+			</div>
+
+			<div className="text-center text-sm text-gray-800 mt-4">
+				{'Fortsætter om '}
+				<strong>{remainingSeconds}</strong>
+				{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
 			</div>
 		</CloseableModal>
 	)
