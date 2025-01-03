@@ -27,6 +27,7 @@ const Options = ({
 				<div className="m-1 text-center font-semibold border-2 border-blue-500 rounded-full">
 					<button
 						type="button"
+						title='Tilføj'
 						className="cursor-pointer"
 						onClick={() => {
 							showOptions()

@@ -16,6 +16,7 @@ const ItemList = ({
 			<div className="flex justify-center">
 				<button
 					type="button"
+					title='Tilføj'
 					className="relative w-1/4 m-5 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded items-center justify-center"
 					onClick={onAdd}
 				>

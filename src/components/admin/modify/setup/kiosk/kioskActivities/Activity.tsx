@@ -18,6 +18,7 @@ const Activity = ({
 			{editable && (
 				<button
 					type="button"
+					title="Fjern"
 					className="cursor-pointer"
 					onClick={() => {
 						onDelete(activity)
