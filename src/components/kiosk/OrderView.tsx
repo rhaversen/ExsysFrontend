@@ -147,41 +147,6 @@ const OrderView = ({
 		})
 	}, [products, options])
 
-	useEffect(() => {
-		if (socket !== null && order !== null) {
-			// Listen for payment status updates related to the order
-			const handlePaymentStatusUpdated = (update: {
-				orderId: string
-				paymentStatus: 'successful' | 'failed' | 'pending'
-			}): void => {
-				if (update.orderId === order._id) {
-					switch (update.paymentStatus) {
-						case 'successful':
-							setOrderStatus('success')
-							break
-						case 'failed':
-							setOrderStatus('paymentFailed')
-							break
-						case 'pending':
-							setOrderStatus('awaitingPayment')
-							break
-						default:
-							addError(new Error('Unknown payment status'))
-							setOrderStatus('error')
-							break
-					}
-				}
-			}
-
-			socket.on('paymentStatusUpdated', handlePaymentStatusUpdated)
-
-			// Cleanup the listener when order or socket changes
-			return () => {
-				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
-			}
-		}
-	}, [socket, order, addError])
-
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
 		setOrderStatus('loading')
@@ -284,6 +249,42 @@ const OrderView = ({
 			})
 		}
 	}, [resetTimer])
+
+	useEffect(() => {
+		if (socket !== null && order !== null) {
+			// Listen for payment status updates related to the order
+			const handlePaymentStatusUpdated = (update: {
+				orderId: string
+				paymentStatus: 'successful' | 'failed' | 'pending'
+			}): void => {
+				if (update.orderId === order._id) {
+					resetTimer() // Reset the timer on payment status update
+					switch (update.paymentStatus) {
+						case 'successful':
+							setOrderStatus('success')
+							break
+						case 'failed':
+							setOrderStatus('paymentFailed')
+							break
+						case 'pending':
+							setOrderStatus('awaitingPayment')
+							break
+						default:
+							addError(new Error('Unknown payment status'))
+							setOrderStatus('error')
+							break
+					}
+				}
+			}
+
+			socket.on('paymentStatusUpdated', handlePaymentStatusUpdated)
+
+			// Cleanup the listener when order or socket changes
+			return () => {
+				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
+			}
+		}
+	}, [socket, order, addError, resetTimer])
 
 	useEffect(() => {
 		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
