@@ -23,7 +23,7 @@ const OrderConfirmationWindow = ({
 		success: 'Tak For Din Bestilling',
 		error: 'Der Skete En Fejl',
 		loading: 'Sender Bestilling...',
-		failed: 'Betalingen Mislykkedes'
+		failed: 'Betaling Ikke Gennemført'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
@@ -37,46 +37,24 @@ const OrderConfirmationWindow = ({
 	const imageProps = images[orderStatus]
 
 	// The order was completed successfully
-	let successMessage = ''
+	let successMessage: ReactElement = <></>
 	if (checkoutMethod === 'later') {
-		successMessage = `Husk at betale ${price} kr når du modtager din bestilling`
-	} else if (checkoutMethod === 'sumUp') {
-		successMessage = 'Betalingen blev gennemført med kort'
-	} else if (checkoutMethod === 'mobilePay') {
-		successMessage = 'Betalingen blev gennemført med MobilePay'
-	}
-
-	// The order could not be completed
-	let errorMessage = ''
-	if (checkoutMethod === 'later') {
-		errorMessage = 'Fejl ved oprettelse af bestilling'
-	} else if (checkoutMethod === 'sumUp') {
-		errorMessage = 'Fejl ved kortbetaling'
-	} else if (checkoutMethod === 'mobilePay') {
-		errorMessage = 'Fejl ved MobilePay-betaling'
-	}
-
-	// The payment failed
-	let paymentFailedMessage = ''
-	if (checkoutMethod === 'later') {
-		paymentFailedMessage = 'Betalingen mislykkedes. Prøv igen eller vælg en anden metode'
-	} else if (checkoutMethod === 'sumUp') {
-		paymentFailedMessage = 'Kortbetaling mislykkedes. Prøv igen eller vælg en anden metode'
-	} else if (checkoutMethod === 'mobilePay') {
-		paymentFailedMessage = 'MobilePay-betaling mislykkedes. Prøv igen eller vælg en anden metode'
+		successMessage = <div className="flex items-center justify-center">
+			{'Betal'}
+			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
+			{'ved afhentning'}
+		</div>
+	} else {
+		successMessage = <>{'Betaling gennemført'}</>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
-		loading: <>{'Sender Bestilling'}</>,
+		loading: <>{'Vent venligst'}</>,
 		awaitingPayment: <>{'Afventer betaling'}</>,
-		success: <>{successMessage}</>,
-		paymentFailed: <>{paymentFailedMessage}</>,
+		success: successMessage,
+		paymentFailed: <>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</>,
 		error: (
-			<>
-				{errorMessage}
-				<br />
-				{'Hvis problemet fortsætter, kontakt venligst personalet.'}
-			</>
+			<>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</>
 		)
 	}
 
@@ -108,7 +86,7 @@ const OrderConfirmationWindow = ({
 			<div className="flex justify-center">
 				{showSubmitButton && (
 					<SubmitButton
-						text="Ny Bestilling"
+						text="OK"
 						onClick={onClose}
 						disabled={!canClose}
 					/>
