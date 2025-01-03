@@ -13,8 +13,9 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
+import TimeoutWarningWindow from './TimeoutWarningWindow'
 
 const OrderView = ({
 	kiosk,
@@ -44,6 +45,11 @@ const OrderView = ({
 	})
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
+	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
+
+	// TODO: Move these constants to a configuration file
+	const timeoutSeconds = 60
+	const warningOffsetSeconds = 10
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -225,6 +231,60 @@ const OrderView = ({
 		setOrder(null)
 	}, [kiosk, onClose])
 
+	const resetTimerRef = useRef<NodeJS.Timeout>()
+	const warningTimerRef = useRef<NodeJS.Timeout>()
+
+	const resetTimer = useCallback(() => {
+		if (resetTimerRef.current != null) {
+			clearTimeout(resetTimerRef.current)
+		}
+		if (warningTimerRef.current != null) {
+			clearTimeout(warningTimerRef.current)
+		}
+
+		// Set warning timer
+		warningTimerRef.current = setTimeout(() => {
+			setShowTimeoutWarning(true)
+		}, timeoutSeconds * 1000 - warningOffsetSeconds * 1000)
+
+		// Set reset timer
+		resetTimerRef.current = setTimeout(() => {
+			reset()
+		}, timeoutSeconds * 1000)
+	}, [reset])
+
+	// Reset timer on component mount
+	useEffect(() => {
+		resetTimer()
+	}, [resetTimer])
+
+	// Add global interaction listeners and cleanup
+	useEffect(() => {
+		const events = [
+			'mousedown',
+			'keydown',
+			'touchstart',
+			'scroll',
+			'wheel',
+			'pointermove',
+			'pointerdown',
+			'touchmove'
+		]
+
+		events.forEach(event => {
+			document.addEventListener(event, resetTimer, { passive: true })
+		})
+
+		return () => {
+			if (resetTimerRef.current != null) {
+				clearTimeout(resetTimerRef.current)
+			}
+			events.forEach(event => {
+				document.removeEventListener(event, resetTimer)
+			})
+		}
+	}, [resetTimer])
+
 	useEffect(() => {
 		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
 		// Initialize WebSocket connection
@@ -303,6 +363,17 @@ const OrderView = ({
 						submitOrder(checkoutMethod)
 						setIsOrderConfirmationVisible(true)
 						setIsSelectPaymentWindowVisible(false)
+					}}
+				/>
+			)}
+
+			{/* Timeout Warning Modal */}
+			{showTimeoutWarning && (
+				<TimeoutWarningWindow
+					warningOffsetSeconds={warningOffsetSeconds}
+					onClose={() => {
+						setShowTimeoutWarning(false)
+						resetTimer()
 					}}
 				/>
 			)}
