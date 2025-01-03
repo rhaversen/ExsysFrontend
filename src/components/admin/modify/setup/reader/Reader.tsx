@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
 import { type PatchReaderType, type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Reader = ({
 	readers,
@@ -15,8 +15,17 @@ const Reader = ({
 	reader: ReaderType
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newReader, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(reader, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostReaderType, PatchReaderType>('/v1/readers')
+	const {
+		formState: newReader,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(reader, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostReaderType, PatchReaderType>('/v1/readers')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (

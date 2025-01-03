@@ -41,7 +41,11 @@ const ProductCatalog = ({
 	const checkScrollIndicator = (): void => {
 		if (containerRef.current === null) return
 
-		const { scrollTop, clientHeight, scrollHeight } = containerRef.current
+		const {
+			scrollTop,
+			clientHeight,
+			scrollHeight
+		} = containerRef.current
 
 		if (scrollHeight <= clientHeight) {
 			setShowScrollIndicator(false)

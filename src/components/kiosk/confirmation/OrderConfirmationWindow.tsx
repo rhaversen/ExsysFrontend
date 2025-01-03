@@ -1,9 +1,9 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { KioskImages, LoadingImage } from '@/lib/images'
 
 const OrderConfirmationWindow = ({
 	price,

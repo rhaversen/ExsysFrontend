@@ -1,7 +1,7 @@
+import { AdminImages } from '@/lib/images'
 import { type ActivityType } from '@/types/backendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const Activity = ({
 	activity,

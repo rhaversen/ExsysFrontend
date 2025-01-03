@@ -1,6 +1,6 @@
-import React from 'react'
 import { KioskImages } from '@/lib/images'
 import Image from 'next/image'
+import React from 'react'
 
 const ScrollIndicator = (): React.ReactElement => {
 	return (

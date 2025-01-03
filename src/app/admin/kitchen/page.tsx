@@ -2,6 +2,7 @@
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { LoadingImage } from '@/lib/images'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
@@ -16,7 +17,6 @@ import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
-import { LoadingImage } from '@/lib/images'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

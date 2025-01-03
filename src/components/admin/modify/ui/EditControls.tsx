@@ -1,6 +1,6 @@
+import { AdminImages } from '@/lib/images'
 import Image from 'next/image'
 import React, { type ReactElement, useEffect } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const EditingControls = ({
 	canClose = true,
@@ -47,7 +47,7 @@ const EditingControls = ({
 						setShowDeleteConfirmation(true)
 					}}
 					type="button"
-					title='Slet'
+					title="Slet"
 					className="w-5 h-5 mx-2.5 place-self-center hover:bounceOrig"
 				>
 					<span className="sr-only">{'Delete'}</span>
@@ -62,7 +62,7 @@ const EditingControls = ({
 				<button
 					onClick={handleUndoEdit}
 					type="button"
-					title='Fortryd ændringer'
+					title="Fortryd ændringer"
 					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:-rotate-180"
 				>
 					<span className="sr-only">{'Undo changes'}</span>
@@ -87,7 +87,7 @@ const EditingControls = ({
 					<button
 						onClick={handleCompleteEdit}
 						type="button"
-						title='Gem ændringer'
+						title="Gem ændringer"
 						disabled={!formIsValid}
 						className={`w-full h-full place-self-center transition-transform duration-300 transform ${formIsValid ? 'hover:rotate-12 hover:scale-125' : 'scale-90'}`}
 					>
@@ -110,7 +110,7 @@ const EditingControls = ({
 					setIsEditing(true)
 				}}
 				type="button"
-				title='Rediger'
+				title="Rediger"
 				className="w-1/2 h-10 border-2 border-blue-500 rounded-full m-5"
 			>
 				<Image

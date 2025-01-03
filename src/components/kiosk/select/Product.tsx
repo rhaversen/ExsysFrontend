@@ -1,8 +1,8 @@
 import AsyncImage from '@/components/ui/AsyncImage'
+import { KioskImages } from '@/lib/images'
 import { type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 import AmountIndicator from './AmountIndicator'
-import { KioskImages } from '@/lib/images'
 
 const Product = ({
 	product,

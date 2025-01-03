@@ -1,7 +1,7 @@
 import AsyncImage from '@/components/ui/AsyncImage'
 import CloseableModal from '@/components/ui/CloseableModal'
-import React, { type ReactElement } from 'react'
 import { KioskImages } from '@/lib/images'
+import React, { type ReactElement } from 'react'
 
 const SelectPaymentWindow = ({
 	checkoutMethods,

@@ -1,7 +1,7 @@
 import CartWindow from '@/components/kiosk/cart/CartWindow'
-import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
+import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
@@ -11,7 +11,7 @@ import {
 	type PostOrderType,
 	type ProductType
 } from '@/types/backendDataTypes'
-import { type OrderStatus, type CartType, type CheckoutMethod } from '@/types/frontendDataTypes'
+import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
@@ -75,7 +75,10 @@ const OrderView = ({
 
 			// If the new quantity is less than or equal to zero, remove the item
 			if (newQuantity <= 0) {
-				const { [_id]: _, ...updatedItems } = prevCart[type]
+				const {
+					[_id]: _,
+					...updatedItems
+				} = prevCart[type]
 				return {
 					...prevCart,
 					[type]: updatedItems
@@ -106,7 +109,10 @@ const OrderView = ({
 			// Check products
 			Object.keys(newProducts).forEach(id => {
 				if (!availableProductIds.has(id)) {
-					const { [id]: _, ...rest } = newProducts
+					const {
+						[id]: _,
+						...rest
+					} = newProducts
 					newProducts = rest
 					updated = true
 				}
@@ -115,7 +121,10 @@ const OrderView = ({
 			// Check options
 			Object.keys(newOptions).forEach(id => {
 				if (!availableOptionIds.has(id)) {
-					const { [id]: _, ...rest } = newOptions
+					const {
+						[id]: _,
+						...rest
+					} = newOptions
 					newOptions = rest
 					updated = true
 				}
@@ -234,7 +243,8 @@ const OrderView = ({
 			<div className="w-full flex flex-col">
 				{/* Header */}
 				<header className="flex flex-row p-2 items-center justify-between shadow-b-md">
-					<div className="flex-1" /> {/* Left spacer */}
+					{/* Left spacer */}
+					<div className="flex-1" />
 					<h1 className="text-3xl font-bold text-center text-gray-800">
 						{'Bestil Til ' + activity.name}
 					</h1>

@@ -1,8 +1,8 @@
 'use client'
 
 import ActivitySelection from '@/components/kiosk/activities/ActivitySelection'
-import OrderView from '@/components/kiosk/OrderView'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
+import OrderView from '@/components/kiosk/OrderView'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'

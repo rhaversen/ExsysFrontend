@@ -1,6 +1,6 @@
 import AsyncImage from '@/components/ui/AsyncImage'
 import CloseableModal from '@/components/ui/CloseableModal'
-import { ProductImages, AdminImages } from '@/lib/images'
+import { AdminImages, ProductImages } from '@/lib/images'
 import Image from 'next/image'
 import { type ReactElement } from 'react'
 

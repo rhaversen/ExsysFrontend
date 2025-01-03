@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PostRoomType, type PatchRoomType, type RoomType } from '@/types/backendDataTypes'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
+import { type PatchRoomType, type PostRoomType, type RoomType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Room = ({
 	rooms,
@@ -15,8 +15,17 @@ const Room = ({
 	room: RoomType
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newRoom, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(room, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostRoomType, PatchRoomType>('/v1/rooms')
+	const {
+		formState: newRoom,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(room, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostRoomType, PatchRoomType>('/v1/rooms')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (

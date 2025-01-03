@@ -2,11 +2,11 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PatchOptionType, type PostOptionType, type OptionType } from '@/types/backendDataTypes'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
+import { type OptionType, type PatchOptionType, type PostOptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Option = ({
 	option
@@ -14,8 +14,17 @@ const Option = ({
 	option: OptionType
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newOption, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(option, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostOptionType, PatchOptionType>('/v1/options')
+	const {
+		formState: newOption,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(option, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostOptionType, PatchOptionType>('/v1/options')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (

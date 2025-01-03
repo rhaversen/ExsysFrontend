@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
-import set from 'lodash/set'
 import cloneDeep from 'lodash/cloneDeep'
+import set from 'lodash/set'
+import { useCallback, useEffect, useState } from 'react'
 
-const useFormState = <T extends Record<string, any>>(initialState: T, isEditing: boolean): {
+const useFormState = <T extends Record<string, any>> (initialState: T, isEditing: boolean): {
 	formState: T
 	handleFieldChange: (path: string, value: any) => void
 	handleValidationChange: (fieldName: string, isValid: boolean) => void
@@ -33,7 +33,10 @@ const useFormState = <T extends Record<string, any>>(initialState: T, isEditing:
 	}, [])
 
 	const handleValidationChange = useCallback((fieldName: string, isValid: boolean) => {
-		setFieldValidations(prev => ({ ...prev, [fieldName]: isValid }))
+		setFieldValidations(prev => ({
+			...prev,
+			[fieldName]: isValid
+		}))
 	}, [])
 
 	const resetFormState = useCallback((): void => {
@@ -41,7 +44,13 @@ const useFormState = <T extends Record<string, any>>(initialState: T, isEditing:
 		setFieldValidations({})
 	}, [initialState])
 
-	return { formState, handleFieldChange, handleValidationChange, resetFormState, formIsValid }
+	return {
+		formState,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	}
 }
 
 export default useFormState

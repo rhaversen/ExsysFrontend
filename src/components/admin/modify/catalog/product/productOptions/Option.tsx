@@ -1,7 +1,7 @@
+import { AdminImages } from '@/lib/images'
 import { type OptionType } from '@/types/backendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const Option = ({
 	option,
