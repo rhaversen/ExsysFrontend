@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { type ReactElement } from 'react'
 import UserProvider from '@/contexts/UserProvider'
+import DailyReloader from '@/components/DailyReloader'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,6 +32,7 @@ export default function RootLayout ({
 			<body className={inter.className}>
 				<ErrorProvider>
 					<UserProvider>
+						<DailyReloader />
 						{children}
 					</UserProvider>
 				</ErrorProvider>
