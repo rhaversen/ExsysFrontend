@@ -77,7 +77,7 @@ const EditingControls = ({
 						<Image
 							width={40}
 							height={40}
-							className="absolute top-0 left-0 w-full h-full z-10"
+							className="absolute top-0 left-0 w-full h-full z-10 cursor-not-allowed"
 							src={AdminImages.confirmModificationBlocked.src}
 							alt={AdminImages.confirmModificationBlocked.alt}
 						/>
