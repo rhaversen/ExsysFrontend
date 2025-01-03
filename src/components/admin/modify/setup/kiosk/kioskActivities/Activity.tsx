@@ -3,7 +3,7 @@ import Image from 'next/image'
 import React, { type ReactElement } from 'react'
 import { AdminImages } from '@/lib/images'
 
-const Option = ({
+const Activity = ({
 	activity,
 	editable,
 	onDelete
@@ -36,4 +36,4 @@ const Option = ({
 	)
 }
 
-export default Option
+export default Activity
