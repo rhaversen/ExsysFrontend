@@ -35,6 +35,10 @@ export const KioskImages = {
 	questionMark: {
 		src: '/images/kiosk/question-mark.svg',
 		alt: 'Error'
+	},
+	scrollIndicator: {
+		src: '/images/kiosk/arrow.svg',
+		alt: 'Scroll Down'
 	}
 }
 
