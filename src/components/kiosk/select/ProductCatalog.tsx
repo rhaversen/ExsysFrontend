@@ -16,7 +16,7 @@ const ProductCatalog = ({
 	onProductSelect: (product: ProductType) => void
 }): ReactElement => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<ProductType['_id'], boolean>>({})
-	const [showScrollIndicator, setShowScrollIndicator] = useState(true)
+	const [showScrollIndicator, setShowScrollIndicator] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	const updateProductAvailabilities = useCallback(() => {
@@ -38,26 +38,55 @@ const ProductCatalog = ({
 
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
-	// Show scroll indicator when not at the bottom
-	useEffect(() => {
-		const handleScroll = (): void => {
-			if (containerRef.current == null) return
+	const checkScrollIndicator = (): void => {
+		if (containerRef.current === null) return
+
 			const { scrollTop, clientHeight, scrollHeight } = containerRef.current
+
+		if (scrollHeight <= clientHeight) {
+			setShowScrollIndicator(false)
+			return
+		}
+
 			const nearBottom = scrollHeight - scrollTop <= clientHeight + 10
 			setShowScrollIndicator(!nearBottom)
 		}
 
-		const currentRef = containerRef.current
-		if (currentRef != null) {
-			currentRef.addEventListener('scroll', handleScroll)
+	// Check scroll indicator on scroll
+	useEffect(() => {
+		const el = containerRef.current
+		if (el !== null) {
+			el.addEventListener('scroll', checkScrollIndicator)
+			requestAnimationFrame(checkScrollIndicator)
 		}
 
 		return () => {
-			if (currentRef != null) {
-				currentRef.removeEventListener('scroll', handleScroll)
+			el?.removeEventListener('scroll', checkScrollIndicator)
 			}
+	}, [])
+
+	// Check scroll indicator on window resize
+	useEffect(() => {
+		window.addEventListener('resize', checkScrollIndicator)
+		return () => {
+			window.removeEventListener('resize', checkScrollIndicator)
 		}
 	}, [])
+
+	// Check scroll indicator on product availability change
+	useEffect(() => {
+		checkScrollIndicator()
+	}, [productAvailabilities])
+
+	// Check scroll indicator on cart change
+	useEffect(() => {
+		checkScrollIndicator()
+	}, [cart])
+
+	// Check scroll indicator on product change
+	useEffect(() => {
+		checkScrollIndicator()
+	}, [products])
 
 	return (
 		<div
