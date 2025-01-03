@@ -59,38 +59,38 @@ const ProductCatalog = ({
 	// Check scroll indicator on scroll
 	useEffect(() => {
 		const el = containerRef.current
+		const events = [
+			'mousedown',
+			'keydown',
+			'touchstart',
+			'scroll',
+			'wheel',
+			'pointermove',
+			'pointerdown',
+			'touchmove'
+		]
+
 		if (el !== null) {
-			el.addEventListener('scroll', checkScrollIndicator)
-			requestAnimationFrame(checkScrollIndicator)
+			events.forEach(event => {
+				el.addEventListener(event, checkScrollIndicator)
+				requestAnimationFrame(checkScrollIndicator)
+			})
 		}
 
 		return () => {
-			el?.removeEventListener('scroll', checkScrollIndicator)
+			if (el !== null) {
+				events.forEach(event => {
+					el.removeEventListener(event, checkScrollIndicator)
+				})
+			}
 		}
 	}, [])
 
-	// Check scroll indicator on window resize
+	// Check scroll indicator on prop change
 	useEffect(() => {
-		window.addEventListener('resize', checkScrollIndicator)
-		return () => {
-			window.removeEventListener('resize', checkScrollIndicator)
-		}
-	}, [])
-
-	// Check scroll indicator on product availability change
-	useEffect(() => {
-		checkScrollIndicator()
-	}, [productAvailabilities])
-
-	// Check scroll indicator on cart change
-	useEffect(() => {
-		checkScrollIndicator()
-	}, [cart])
-
-	// Check scroll indicator on product change
-	useEffect(() => {
-		checkScrollIndicator()
-	}, [products])
+		const timeoutId = setTimeout(() => { checkScrollIndicator() }, 10)
+		return () => { clearTimeout(timeoutId) }
+	}, [productAvailabilities, cart, products])
 
 	return (
 		<div
