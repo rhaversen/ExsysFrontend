@@ -13,10 +13,10 @@ const sortConfig = {
 		name: 'Pris'
 	}, {
 		prop: 'orderWindow.from.hour',
-		name: 'Fra'
+		name: 'Bestilling Fra'
 	}, {
 		prop: 'orderWindow.to.hour',
-		name: 'Til'
+		name: 'Bestilling Til'
 	}],
 	Tilvalg: [{
 		prop: 'name',
