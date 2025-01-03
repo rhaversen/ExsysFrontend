@@ -32,7 +32,7 @@ const AsyncImage = ({
 					height={height}
 					quality={quality}
 					src={LoadingImage.src}
-					alt='Loading...'
+					alt={LoadingImage.alt}
 					priority
 					className={`h-full w-full transition-opacity duration-300 ease-in-out ${loadingLoaded ? 'opacity-100' : 'opacity-0'}`}
 					draggable="false"

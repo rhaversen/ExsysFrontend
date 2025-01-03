@@ -49,8 +49,8 @@ const SelectPaymentWindow = ({
 							{'Betal Senere'}
 						</div>
 						<AsyncImage
-							src={KioskImages.coins.src}
-							alt={KioskImages.coins.alt}
+							src={KioskImages.payLater.src}
+							alt={KioskImages.payLater.alt}
 							className="w-48 h-48"
 							width={200}
 							height={200}
@@ -70,7 +70,7 @@ const SelectPaymentWindow = ({
 							{'MobilePay'}
 						</div>
 						<AsyncImage
-							src={KioskImages.mobilepay.src}
+							src={KioskImages.mobilePay.src}
 							alt="MobilePay"
 							className="w-48 h-48"
 							width={200}

@@ -25,8 +25,8 @@ const Option = ({
 				>
 					<p className="sr-only">{'Delete'}</p>
 					<Image
-						src={AdminImages.modify.trashcan.src}
-						alt={AdminImages.modify.trashcan.alt}
+						src={AdminImages.delete.src}
+						alt={AdminImages.delete.alt}
 						width={15}
 						height={15}
 					/>

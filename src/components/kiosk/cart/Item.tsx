@@ -2,7 +2,7 @@ import QuantityAdjuster from '@/components/kiosk/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback } from 'react'
-import { NoneImage } from '@/lib/images'
+import { KioskImages } from '@/lib/images'
 
 const Item = ({
 	imageURL,
@@ -41,7 +41,7 @@ const Item = ({
 					width={40}
 					height={40}
 					quality={40}
-					src={`${imageURL === undefined || imageURL === '' ? NoneImage.src : imageURL}`} alt={name}
+					src={`${imageURL === undefined || imageURL === '' ? KioskImages.noUrl.src : imageURL}`} alt={name}
 					draggable={false}
 					priority={true}
 				/>

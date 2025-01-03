@@ -3,7 +3,7 @@ import SubmitButton from '@/components/ui/SubmitButton'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { KioskImages, LoadingImage, NoneImage } from '@/lib/images'
+import { KioskImages, LoadingImage } from '@/lib/images'
 
 const OrderConfirmationWindow = ({
 	price,
@@ -28,10 +28,10 @@ const OrderConfirmationWindow = ({
 
 	const images: Record<string, { src: string, alt: string }> = {
 		loading: LoadingImage,
-		success: KioskImages.checkmark,
-		error: KioskImages.questionMark,
-		awaitingPayment: KioskImages.arrow,
-		failed: KioskImages.cross
+		success: KioskImages.orderConfirmed,
+		error: KioskImages.error,
+		awaitingPayment: KioskImages.awaitingPayment,
+		failed: KioskImages.paymentFailed
 	}
 
 	const imageProps = images[orderStatus]

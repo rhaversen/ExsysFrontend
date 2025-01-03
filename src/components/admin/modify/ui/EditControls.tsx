@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React, { type ReactElement, useEffect } from 'react'
-import { AdminImages, NoneImage } from '@/lib/images'
+import { AdminImages } from '@/lib/images'
 
 const EditingControls = ({
 	canClose = true,
@@ -54,8 +54,8 @@ const EditingControls = ({
 						width={20}
 						height={20}
 						className="w-full h-full"
-						src={AdminImages.modify.trashcan.src}
-						alt={AdminImages.modify.trashcan.alt}
+						src={AdminImages.delete.src}
+						alt={AdminImages.delete.alt}
 					/>
 				</button>
 				<button
@@ -68,8 +68,8 @@ const EditingControls = ({
 						width={40}
 						height={40}
 						className="w-full h-full"
-						src={AdminImages.modify.undo.src}
-						alt={AdminImages.modify.undo.alt}
+						src={AdminImages.undo.src}
+						alt={AdminImages.undo.alt}
 					/>
 				</button>
 				<div className="w-10 h-10 relative">
@@ -78,8 +78,8 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="absolute top-0 left-0 w-full h-full z-10"
-							src={NoneImage.src}
-							alt='Invalid form'
+							src={AdminImages.confirmModificationBlocked.src}
+							alt={AdminImages.confirmModificationBlocked.alt}
 						/>
 					)}
 					<button
@@ -93,8 +93,8 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="w-full h-full"
-							src={AdminImages.modify.checkmark.src}
-							alt={AdminImages.modify.checkmark.alt}
+							src={AdminImages.confirmModification.src}
+							alt={AdminImages.confirmModification.alt}
 						/>
 					</button>
 				</div>
@@ -113,8 +113,8 @@ const EditingControls = ({
 					width={40}
 					height={40}
 					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
-					src={AdminImages.modify.pen.src}
-					alt={AdminImages.modify.pen.alt}
+					src={AdminImages.edit.src}
+					alt={AdminImages.edit.alt}
 				/>
 				<span className="sr-only">{'Edit'}</span>
 			</button>
