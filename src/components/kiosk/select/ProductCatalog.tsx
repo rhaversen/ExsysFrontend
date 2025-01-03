@@ -41,16 +41,16 @@ const ProductCatalog = ({
 	const checkScrollIndicator = (): void => {
 		if (containerRef.current === null) return
 
-			const { scrollTop, clientHeight, scrollHeight } = containerRef.current
+		const { scrollTop, clientHeight, scrollHeight } = containerRef.current
 
 		if (scrollHeight <= clientHeight) {
 			setShowScrollIndicator(false)
 			return
 		}
 
-			const nearBottom = scrollHeight - scrollTop <= clientHeight + 10
-			setShowScrollIndicator(!nearBottom)
-		}
+		const nearBottom = scrollHeight - scrollTop <= clientHeight + 100
+		setShowScrollIndicator(!nearBottom)
+	}
 
 	// Check scroll indicator on scroll
 	useEffect(() => {
@@ -62,7 +62,7 @@ const ProductCatalog = ({
 
 		return () => {
 			el?.removeEventListener('scroll', checkScrollIndicator)
-			}
+		}
 	}, [])
 
 	// Check scroll indicator on window resize
@@ -91,7 +91,7 @@ const ProductCatalog = ({
 	return (
 		<div
 			ref={containerRef}
-			className="h-full overflow-y-auto overflow-x-hidden"
+			className="relative h-full overflow-y-auto overflow-x-hidden"
 		>
 			<div className="flex flex-wrap justify-center">
 				{products
@@ -106,9 +106,11 @@ const ProductCatalog = ({
 						/>
 					))}
 			</div>
-			{showScrollIndicator &&
-				<ScrollIndicator />
-			}
+			{showScrollIndicator && (
+				<div className="sticky bottom-14 left-0 w-full flex justify-center h-0">
+					<ScrollIndicator />
+				</div>
+			)}
 		</div>
 	)
 }
