@@ -179,7 +179,7 @@ const Block = ({
 
 	return (
 		<div
-			className={`text-gray-800 mx-4 mb-4 p-2 shadow-md border-2 ${orderStatus === 'pending' ? 'bg-blue-300' : ''} border-slate-800 rounded-md`}>
+			className={`text-gray-800 p-2 m-1 h-full border-2 shadow-xl shadow-slate-400 border-slate-800 rounded-md ${orderStatus === 'pending' ? 'bg-blue-300' : ''}`}>
 			<h3 className="text-center text-xl">{activityName}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders })
 				.sort()

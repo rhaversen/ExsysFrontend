@@ -2,7 +2,6 @@
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { LoadingImage } from '@/lib/images'
 import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
@@ -13,7 +12,6 @@ import {
 } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
@@ -193,57 +191,43 @@ export default function Page (): ReactElement {
 	}, 1000 * 60 * 60) // Every hour
 
 	return (
-		<div>
-			{Object.keys(roomOrders).length === 0
-				? (
-					<>
-						<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">
-							{'Ingen Ordrer '}&#128522;{'\r'}
-						</p>
-						<div
-							className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
-							<Image
-								src={LoadingImage.src}
-								alt={LoadingImage.alt}
-								priority
-								draggable="false"
-								width={100}
-								height={100}
-							/>
-						</div>
-					</>
+		<main className="p-2 flex flex-wrap justify-start">
+			{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
+				// Render a column for orders without a room
+				<RoomCol
+					key="no-room"
+					room={{
+						_id: 'no-room',
+						name: 'Ukendt Spisested',
+						description: 'Aktivitet har intet spisested tildelt',
+						createdAt: '',
+						updatedAt: ''
+					}}
+					orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
+					onUpdatedOrders={handleUpdatedOrders}
+				/>
+			)}
+			{roomsRef.current
+				// Filter out rooms without pending orders
+				.filter(
+					room =>
+						roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
 				)
-				: (
-					<div className="flex flex-row flex-wrap justify-evenly">
-						{roomsRef.current
-							.filter(
-								room =>
-									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
-							)
-							.map(room => (
-								<RoomCol
-									key={room._id}
-									room={room}
-									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
-									onUpdatedOrders={handleUpdatedOrders}
-								/>
-							))}
-						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
-							<RoomCol
-								key="no-room"
-								room={{
-									_id: 'no-room',
-									name: 'Ukendt Spisested',
-									description: 'Aktivitet har intet spisested tildelt',
-									createdAt: '',
-									updatedAt: ''
-								}}
-								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
-								onUpdatedOrders={handleUpdatedOrders}
-							/>
-						)}
-					</div>
-				)}
-		</div>
+				.sort((a, b) => {
+					const aOrders = roomOrders[a.name]?.filter(order => order.status !== 'delivered') ?? []
+					const bOrders = roomOrders[b.name]?.filter(order => order.status !== 'delivered') ?? []
+					const aEarliest = Math.min(...aOrders.map(order => new Date(order.updatedAt).getTime()))
+					const bEarliest = Math.min(...bOrders.map(order => new Date(order.updatedAt).getTime()))
+					return aEarliest - bEarliest
+				})
+				.map(room => (
+					<RoomCol
+						key={room._id}
+						room={room}
+						orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+						onUpdatedOrders={handleUpdatedOrders}
+					/>
+				))}
+		</main>
 	)
 }
