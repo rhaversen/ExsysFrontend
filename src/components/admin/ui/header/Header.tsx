@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useRef, type ReactElement } from 'react'
 import { useUser } from '@/contexts/UserProvider'
 import { type AdminType } from '@/types/backendDataTypes'
 import Link from 'next/link'
-import LogoutButton from '../LogoutButton'
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 import { usePathname } from 'next/navigation'
+import React, { type ReactElement, useEffect, useRef, useState } from 'react'
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
+import LogoutButton from '../LogoutButton'
 import PageLink from './PageLink'
 
 const Header = (): ReactElement | null => {
@@ -58,7 +58,8 @@ const Header = (): ReactElement | null => {
 
 	return (
 		<>
-			<header className={`w-full h-10 bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
+			<header
+				className={`w-full h-10 bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
 			>
 				<div className="flex items-center justify-between px-5">
 					{/* Left side: Home button */}
@@ -98,9 +99,10 @@ const Header = (): ReactElement | null => {
 										)}
 								</span>
 							</button>
-							<div className={`absolute right-0 w-24 mt-2 z-20 transform transition-all duration-200 ${dropdownOpen
-								? 'opacity-100 scale-100'
-								: 'opacity-0 scale-95 pointer-events-none'}`}
+							<div
+								className={`absolute right-0 w-24 mt-2 z-20 transform transition-all duration-200 ${dropdownOpen
+									? 'opacity-100 scale-100'
+									: 'opacity-0 scale-95 pointer-events-none'}`}
 							>
 								<LogoutButton />
 							</div>

@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
+import React, { type ReactElement, useState } from 'react'
 
 const Block = ({
 	text,

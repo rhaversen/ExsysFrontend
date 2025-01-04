@@ -1,8 +1,8 @@
 import AsyncImage from '@/components/ui/AsyncImage'
+import { KioskImages } from '@/lib/images'
 import { type OptionType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 import AmountIndicator from './AmountIndicator'
-import { NoneImage } from '@/lib/images'
 
 const Option = ({
 	option,
@@ -35,7 +35,7 @@ const Option = ({
 						width={100}
 						height={100}
 						quality={80}
-						src={`${option.imageURL === undefined || option.imageURL === '' ? NoneImage.src : option.imageURL}`}
+						src={`${option.imageURL === undefined || option.imageURL === '' ? KioskImages.noUrl.src : option.imageURL}`}
 						alt={option.name}
 						draggable={false}
 						priority={true}

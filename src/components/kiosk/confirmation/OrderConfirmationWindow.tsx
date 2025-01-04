@@ -1,9 +1,9 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
-import React, { type ReactElement } from 'react'
-import { KioskImages, LoadingImage, NoneImage } from '@/lib/images'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const OrderConfirmationWindow = ({
 	price,
@@ -16,67 +16,71 @@ const OrderConfirmationWindow = ({
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 }): ReactElement => {
+	// TODO: Make this configurable
+	const autocloseSeconds = 10
+
+	const [remainingSeconds, setRemainingSeconds] = useState(autocloseSeconds)
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
+
+	useEffect(() => {
+		const timer = setInterval(() => {
+			setRemainingSeconds((prev) => {
+				if (prev <= 1) {
+					clearInterval(timer)
+					return 0
+				}
+				return prev - 1
+			})
+		}, 1000)
+
+		return () => { clearInterval(timer) }
+	}, [])
+
+	useEffect(() => {
+		if (!canClose) return
+		const timeoutId = setTimeout(() => {
+			onClose()
+		}, autocloseSeconds * 1000)
+		return () => { clearTimeout(timeoutId) }
+	}, [canClose, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
 		success: 'Tak For Din Bestilling',
 		error: 'Der Skete En Fejl',
 		loading: 'Sender Bestilling...',
-		failed: 'Betalingen Mislykkedes'
+		failed: 'Betaling Ikke Gennemført'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
 		loading: LoadingImage,
-		success: KioskImages.checkmark,
-		error: KioskImages.questionMark,
-		awaitingPayment: KioskImages.arrow,
-		failed: KioskImages.cross
+		success: KioskImages.orderConfirmed,
+		error: KioskImages.error,
+		awaitingPayment: KioskImages.awaitingPayment,
+		failed: KioskImages.paymentFailed
 	}
 
 	const imageProps = images[orderStatus]
 
 	// The order was completed successfully
-	let successMessage = ''
+	let successMessage: ReactElement = <></>
 	if (checkoutMethod === 'later') {
-		successMessage = `Husk at betale ${price} kr når du modtager din bestilling`
-	} else if (checkoutMethod === 'sumUp') {
-		successMessage = 'Betalingen blev gennemført med kort'
-	} else if (checkoutMethod === 'mobilePay') {
-		successMessage = 'Betalingen blev gennemført med MobilePay'
-	}
-
-	// The order could not be completed
-	let errorMessage = ''
-	if (checkoutMethod === 'later') {
-		errorMessage = 'Fejl ved oprettelse af bestilling'
-	} else if (checkoutMethod === 'sumUp') {
-		errorMessage = 'Fejl ved kortbetaling'
-	} else if (checkoutMethod === 'mobilePay') {
-		errorMessage = 'Fejl ved MobilePay-betaling'
-	}
-
-	// The payment failed
-	let paymentFailedMessage = ''
-	if (checkoutMethod === 'later') {
-		paymentFailedMessage = 'Betalingen mislykkedes. Prøv igen eller vælg en anden metode'
-	} else if (checkoutMethod === 'sumUp') {
-		paymentFailedMessage = 'Kortbetaling mislykkedes. Prøv igen eller vælg en anden metode'
-	} else if (checkoutMethod === 'mobilePay') {
-		paymentFailedMessage = 'MobilePay-betaling mislykkedes. Prøv igen eller vælg en anden metode'
+		successMessage = <div className="flex items-center justify-center">
+			{'Betal'}
+			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
+			{'ved afhentning'}
+		</div>
+	} else {
+		successMessage = <>{'Betaling gennemført'}</>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
-		loading: <>{'Sender Bestilling'}</>,
+		loading: <>{'Vent venligst'}</>,
 		awaitingPayment: <>{'Afventer betaling'}</>,
-		success: <>{successMessage}</>,
-		paymentFailed: <>{paymentFailedMessage}</>,
+		success: successMessage,
+		paymentFailed: <>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</>,
 		error: (
-			<>
-				{errorMessage}
-				<br />
-				{'Hvis problemet fortsætter, kontakt venligst personalet.'}
-			</>
+			<>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</>
 		)
 	}
 
@@ -108,11 +112,17 @@ const OrderConfirmationWindow = ({
 			<div className="flex justify-center">
 				{showSubmitButton && (
 					<SubmitButton
-						text="Ny Bestilling"
+						text="OK"
 						onClick={onClose}
 						disabled={!canClose}
 					/>
 				)}
+			</div>
+
+			<div className="text-center text-sm text-gray-800 mt-4">
+				{'Fortsætter om '}
+				<strong>{remainingSeconds}</strong>
+				{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
 			</div>
 		</CloseableModal>
 	)

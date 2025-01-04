@@ -1,10 +1,10 @@
 'use client'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { type SessionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { type SessionType } from '@/types/backendDataTypes'
 import { useError } from './ErrorContext/ErrorContext'
 import { useUser } from './UserProvider'
 

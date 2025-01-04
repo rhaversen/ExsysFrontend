@@ -131,8 +131,12 @@ const SessionsView = ({
 								</div>
 								<div className="grid gap-4">
 									{sessionsList.map((session) => (
-										<SessionItem key={session._id} session={session}
-											currentSessionId={currentSessionId} onDelete={deleteSession} />
+										<SessionItem
+											key={session._id}
+											session={session}
+											currentSessionId={currentSessionId}
+											onDelete={deleteSession}
+										/>
 									))}
 								</div>
 							</div>
@@ -160,8 +164,12 @@ const SessionsView = ({
 								</div>
 								<div className="grid gap-4">
 									{sessionsList.map((session) => (
-										<SessionItem key={session._id} session={session}
-											currentSessionId={currentSessionId} onDelete={deleteSession} />
+										<SessionItem
+											key={session._id}
+											session={session}
+											currentSessionId={currentSessionId}
+											onDelete={deleteSession}
+										/>
 									))}
 								</div>
 							</div>

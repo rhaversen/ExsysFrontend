@@ -1,8 +1,8 @@
-import { useCallback } from 'react'
-import axios from 'axios'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import axios from 'axios'
+import { useCallback } from 'react'
 
-const useCUDOperations = <PostType, PatchType>(
+const useCUDOperations = <PostType, PatchType> (
 	entityPath: string,
 	preprocessItem?: (item: PostType | PatchType) => PostType | PatchType
 ): {
@@ -34,7 +34,11 @@ const useCUDOperations = <PostType, PatchType>(
 		}).catch(addError)
 	}, [API_URL, entityPath, addError])
 
-	return { createEntity, updateEntity, deleteEntity }
+	return {
+		createEntity,
+		updateEntity,
+		deleteEntity
+	}
 }
 
 export default useCUDOperations

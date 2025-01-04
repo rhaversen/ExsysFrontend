@@ -8,75 +8,88 @@ export const ProductImages = [
 ] as string[]
 
 export const KioskImages = {
-	arrow: {
-		src: '/images/kiosk/arrow.svg',
-		alt: 'Awaiting Payment'
+	awaitingPayment: {
+		src: '/images/arrow.svg',
+		alt: 'Afventer Betaling'
 	},
-	checkmark: {
-		src: '/images/kiosk/checkmark.svg',
-		alt: 'Order Confirmed'
+	orderConfirmed: {
+		src: '/images/checkmark_blue.svg',
+		alt: 'Ordre Bekræftet'
 	},
-	coins: {
-		src: '/images/kiosk/coins.svg',
-		alt: 'Pay Later'
+	payLater: {
+		src: '/images/coins.svg',
+		alt: 'Betal Senere'
 	},
 	creditCard: {
-		src: '/images/kiosk/credit-card.svg',
-		alt: 'Pay With Credit Card'
+		src: '/images/credit-card.svg',
+		alt: 'Betal Med Kort'
 	},
-	cross: {
-		src: '/images/kiosk/cross.svg',
-		alt: 'Payment Failed'
+	paymentFailed: {
+		src: '/images/cross.svg',
+		alt: 'Betaling Fejlede'
 	},
-	mobilepay: {
-		src: '/images/kiosk/mobile-pay.svg',
-		alt: 'Pay With MobilePay'
+	mobilePay: {
+		src: '/images/mobile-pay.svg',
+		alt: 'Betal Med MobilePay'
 	},
-	questionMark: {
-		src: '/images/kiosk/question-mark.svg',
-		alt: 'Error'
+	error: {
+		src: '/images/question-mark.svg',
+		alt: 'Fejl'
+	},
+	scrollIndicator: {
+		src: '/images/arrow.svg',
+		alt: 'Scroll Ned'
+	},
+	noUrl: {
+		src: '/images/none.svg',
+		alt: 'Produktbillede'
 	}
 }
 
 export const AdminImages = {
-	modify: {
-		checkmark: {
-			src: '/images/admin/modify/checkmark.svg',
-			alt: 'Confirm'
-		},
-		pen: {
-			src: '/images/admin/modify/pen.svg',
-			alt: 'Edit'
-		},
-		plus: {
-			src: '/images/admin/modify/plus.svg',
-			alt: 'Add'
-		},
-		trashcan: {
-			src: '/images/admin/modify/trashcan.svg',
-			alt: 'Delete'
-		},
-		undo: {
-			src: '/images/admin/modify/undo.svg',
-			alt: 'Undo'
-		}
+	confirmModification: {
+		src: '/images/checkmark_green.svg',
+		alt: 'Berkræft'
+	},
+	edit: {
+		src: '/images/pen_blue.svg',
+		alt: 'Rediger'
+	},
+	add: {
+		src: '/images/plus.svg',
+		alt: 'Tilføj'
+	},
+	delete: {
+		src: '/images/trashcan.svg',
+		alt: 'Slet'
+	},
+	undo: {
+		src: '/images/undo.svg',
+		alt: 'Fortryd'
+	},
+	confirmModificationBlocked: {
+		src: '/images/none.svg',
+		alt: 'Kan ikke bekræfte'
 	},
 	created: {
-		src: '/images/admin/created.svg',
-		alt: 'Created'
+		src: '/images/star.svg',
+		alt: 'Oprettet'
 	},
 	updated: {
-		src: '/images/admin/updated.svg',
-		alt: 'Updated'
+		src: '/images/pen_gray.svg',
+		alt: 'Opdateret'
+	},
+	noUrl: {
+		src: '/images/none.svg',
+		alt: 'Produktbillede'
+	},
+	noImage: {
+		src: '/images/none.svg',
+		alt: 'Intet billede'
 	}
 }
 
 export const LoadingImage = {
 	src: '/images/loading.svg',
-	alt: 'Loading'
-}
-
-export const NoneImage = {
-	src: '/images/none.svg',
-	alt: 'None'
+	alt: 'Henter'
 }

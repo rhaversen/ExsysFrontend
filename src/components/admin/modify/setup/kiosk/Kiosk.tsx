@@ -2,13 +2,19 @@ import Activities from '@/components/admin/modify/setup/kiosk/kioskActivities/Ac
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PatchKioskType, type PostKioskType, type ActivityType, type KioskType, type ReaderType } from '@/types/backendDataTypes'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
+import {
+	type ActivityType,
+	type KioskType,
+	type PatchKioskType,
+	type PostKioskType,
+	type ReaderType
+} from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import EditableDropdown from '../../ui/EditableDropdown'
 import Timestamps from '../../ui/Timestamps'
 import ActivitiesWindow from './ActivitiesWindow'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Kiosk = ({
 	kiosks,
@@ -22,8 +28,17 @@ const Kiosk = ({
 	readers: ReaderType[]
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newKiosk, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(kiosk, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
+	const {
+		formState: newKiosk,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(kiosk, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
 	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
