@@ -2,7 +2,8 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { AdminSounds } from '@/lib/sounds'
 
 interface PendingUpdate {
 	id: number
@@ -32,6 +33,7 @@ const Block = ({
 	const [orderStatus, setOrderStatus] = useState<OrderType['status']>('pending')
 	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
 	const [activityName, setActivityName] = useState('')
+	const newOrderAlert = useMemo(() => new Audio(AdminSounds.newOrderAlert), [])
 
 	useEffect(() => {
 		setLocalOrders(
@@ -162,9 +164,14 @@ const Block = ({
 		setConfirmedOrders(confirmedOrdersCount)
 	}, [localOrders, countOrders])
 
+	// Determine the order status and play a sound when order status changes from confirmed to pending
 	useEffect(() => {
-		setOrderStatus(determineOrderStatus())
-	}, [determineOrderStatus])
+		const newStatus = determineOrderStatus()
+		if (orderStatus === 'confirmed' && newStatus === 'pending') {
+			newOrderAlert.play().catch(console.error)
+		}
+		setOrderStatus(newStatus)
+	}, [determineOrderStatus, newOrderAlert, orderStatus])
 
 	useEffect(() => {
 		getActivityName()

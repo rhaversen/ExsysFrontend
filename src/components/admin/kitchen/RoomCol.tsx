@@ -1,7 +1,8 @@
 import Block from '@/components/admin/kitchen/Block'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState, useRef, useMemo } from 'react'
+import { AdminSounds } from '@/lib/sounds'
 
 const RoomCol = ({
 	room,
@@ -15,6 +16,8 @@ const RoomCol = ({
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderType[]>>({})
 	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
 	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
+	const prevBlockCountRef = useRef(0)
+	const newOrderAlert = useMemo(() => new Audio(AdminSounds.newOrderAlert), [])
 
 	const groupOrdersByActivity = useCallback(() => {
 		const groupedOrders: Record<string, OrderType[]> = {}
@@ -30,6 +33,15 @@ const RoomCol = ({
 	useEffect(() => {
 		groupOrdersByActivity()
 	}, [groupOrdersByActivity])
+
+	// Play a sound when a new block is added
+	useEffect(() => {
+		const currentBlockCount = Object.keys(ordersByActivity).length
+		if (currentBlockCount > prevBlockCountRef.current) {
+			newOrderAlert.play().catch(console.error)
+		}
+		prevBlockCountRef.current = currentBlockCount
+	}, [newOrderAlert, ordersByActivity, room])
 
 	useEffect(() => {
 		const productsCount: Record<string, number> = {}
