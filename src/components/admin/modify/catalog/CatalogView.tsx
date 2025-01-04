@@ -1,18 +1,15 @@
 'use client'
 
-import ItemList from '@/components/admin/modify/ui/ItemList'
 import AddOption from '@/components/admin/modify/catalog/option/AddOption'
 import Option from '@/components/admin/modify/catalog/option/Option'
 import AddProduct from '@/components/admin/modify/catalog/product/AddProduct'
 import Product from '@/components/admin/modify/catalog/product/Product'
+import ItemList from '@/components/admin/modify/ui/ItemList'
+import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import type sortConfig from '@/lib/SortConfig'
-import {
-	type OptionType,
-	type ProductType
-} from '@/types/backendDataTypes'
+import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
-import SortingControl from '@/components/admin/modify/ui/SortingControl'
 
 const CatalogView = ({
 	products,

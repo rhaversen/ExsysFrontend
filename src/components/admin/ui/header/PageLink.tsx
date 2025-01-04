@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, type ReactElement } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const PageLink = ({
 	text,

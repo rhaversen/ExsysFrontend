@@ -1,7 +1,7 @@
+import { AdminImages } from '@/lib/images'
 import { type OptionType } from '@/types/backendDataTypes'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const Option = ({
 	option,
@@ -18,6 +18,7 @@ const Option = ({
 			{editable && (
 				<button
 					type="button"
+					title="Fjern"
 					className="cursor-pointer"
 					onClick={() => {
 						onDelete(option)
@@ -25,8 +26,8 @@ const Option = ({
 				>
 					<p className="sr-only">{'Delete'}</p>
 					<Image
-						src={AdminImages.modify.trashcan.src}
-						alt={AdminImages.modify.trashcan.alt}
+						src={AdminImages.delete.src}
+						alt={AdminImages.delete.alt}
 						width={15}
 						height={15}
 					/>

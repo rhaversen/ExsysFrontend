@@ -1,6 +1,6 @@
+import { AdminImages } from '@/lib/images'
 import Image from 'next/image'
 import React, { type ReactElement } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const Timestamps = ({
 	createdAt,

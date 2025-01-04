@@ -1,12 +1,17 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PatchActivityType, type PostActivityType, type ActivityType, type RoomType } from '@/types/backendDataTypes'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
+import {
+	type ActivityType,
+	type PatchActivityType,
+	type PostActivityType,
+	type RoomType
+} from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import EditableDropdown from '../../ui/EditableDropdown'
 import Timestamps from '../../ui/Timestamps'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Activity = ({
 	activity,
@@ -16,8 +21,17 @@ const Activity = ({
 	rooms: RoomType[]
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newActivity, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(activity, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
+	const {
+		formState: newActivity,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(activity, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (
@@ -67,7 +81,10 @@ const Activity = ({
 						setIsEditing(false)
 					}}
 					handleCompleteEdit={() => {
-						updateEntity(newActivity._id, { ...newActivity, roomId: newActivity.roomId?._id ?? null })
+						updateEntity(newActivity._id, {
+							...newActivity,
+							roomId: newActivity.roomId?._id ?? null
+						})
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}

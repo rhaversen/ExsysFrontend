@@ -1,7 +1,7 @@
 'use client'
-import React, { useEffect, useState, type ReactElement } from 'react'
 import { useUser } from '@/contexts/UserProvider'
 import { type KioskType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useEffect, useState } from 'react'
 
 const KioskSessionInfo = (): ReactElement | null => {
 	const { currentUser } = useUser()

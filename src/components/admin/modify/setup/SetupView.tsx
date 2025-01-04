@@ -4,13 +4,14 @@ import Activity from '@/components/admin/modify/setup/activity/Activity'
 import AddActivity from '@/components/admin/modify/setup/activity/AddActivity'
 import AddAdmin from '@/components/admin/modify/setup/admin/AddAdmin'
 import Admin from '@/components/admin/modify/setup/admin/Admin'
-import ItemList from '@/components/admin/modify/ui/ItemList'
 import AddKiosk from '@/components/admin/modify/setup/kiosk/AddKiosk'
 import Kiosk from '@/components/admin/modify/setup/kiosk/Kiosk'
 import AddReader from '@/components/admin/modify/setup/reader/AddReader'
 import Reader from '@/components/admin/modify/setup/reader/Reader'
 import AddRoom from '@/components/admin/modify/setup/room/AddRoom'
 import Room from '@/components/admin/modify/setup/room/Room'
+import ItemList from '@/components/admin/modify/ui/ItemList'
+import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import type sortConfig from '@/lib/SortConfig'
 import {
@@ -21,7 +22,6 @@ import {
 	type RoomType
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
-import SortingControl from '@/components/admin/modify/ui/SortingControl'
 
 const SetupView = ({
 	activities,

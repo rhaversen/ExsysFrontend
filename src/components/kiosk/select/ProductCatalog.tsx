@@ -16,7 +16,7 @@ const ProductCatalog = ({
 	onProductSelect: (product: ProductType) => void
 }): ReactElement => {
 	const [productAvailabilities, setProductAvailabilities] = useState<Record<ProductType['_id'], boolean>>({})
-	const [showScrollIndicator, setShowScrollIndicator] = useState(true)
+	const [showScrollIndicator, setShowScrollIndicator] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	const updateProductAvailabilities = useCallback(() => {
@@ -38,40 +38,66 @@ const ProductCatalog = ({
 
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
-	// Show scroll indicator when not at the bottom
-	useEffect(() => {
-		const handleScroll = (): void => {
-			if (containerRef.current == null) return
-			const { scrollTop, clientHeight, scrollHeight } = containerRef.current
-			const nearBottom = scrollHeight - scrollTop <= clientHeight + 10
-			setShowScrollIndicator(!nearBottom)
+	const checkScrollIndicator = (): void => {
+		if (containerRef.current === null) return
+
+		const {
+			scrollTop,
+			clientHeight,
+			scrollHeight
+		} = containerRef.current
+
+		if (scrollHeight <= clientHeight) {
+			setShowScrollIndicator(false)
+			return
 		}
 
-		const currentRef = containerRef.current
-		if (currentRef != null) {
-			currentRef.addEventListener('scroll', handleScroll)
+		const nearBottom = scrollHeight - scrollTop <= clientHeight + 100
+		setShowScrollIndicator(!nearBottom)
+	}
+
+	// Check scroll indicator on scroll
+	useEffect(() => {
+		const el = containerRef.current
+		const events = [
+			'mousedown',
+			'keydown',
+			'touchstart',
+			'scroll',
+			'wheel',
+			'pointermove',
+			'pointerdown',
+			'touchmove'
+		]
+
+		if (el !== null) {
+			events.forEach(event => {
+				el.addEventListener(event, checkScrollIndicator)
+				requestAnimationFrame(checkScrollIndicator)
+			})
 		}
 
 		return () => {
-			if (currentRef != null) {
-				currentRef.removeEventListener('scroll', handleScroll)
+			if (el !== null) {
+				events.forEach(event => {
+					el.removeEventListener(event, checkScrollIndicator)
+				})
 			}
 		}
 	}, [])
 
+	// Check scroll indicator on prop change
+	useEffect(() => {
+		const timeoutId = setTimeout(() => { checkScrollIndicator() }, 10)
+		return () => { clearTimeout(timeoutId) }
+	}, [productAvailabilities, cart, products])
+
 	return (
 		<div
 			ref={containerRef}
-			className="h-full overflow-y-auto overflow-x-hidden"
+			className="relative h-full overflow-y-auto overflow-x-hidden"
 		>
-			<div className="
-				grid
-				grid-cols-[repeat(auto-fit,minmax(100px,1fr))]
-				sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]
-				md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]
-				lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]
-				place-items-center
-			">
+			<div className="flex flex-wrap justify-center">
 				{products
 					.filter(product => productAvailabilities[product._id])
 					.map((product) => (
@@ -84,9 +110,11 @@ const ProductCatalog = ({
 						/>
 					))}
 			</div>
-			{showScrollIndicator &&
-				<ScrollIndicator />
-			}
+			{showScrollIndicator && (
+				<div className="sticky bottom-14 left-0 w-full flex justify-center h-0">
+					<ScrollIndicator />
+				</div>
+			)}
 		</div>
 	)
 }
