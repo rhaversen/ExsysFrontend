@@ -88,7 +88,9 @@ const RoomCol = ({
 						{Object.entries(totalOptions).map(([name, quantity]) => (
 							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
 						))}
-
+						{Object.entries(totalProducts).length === 0 && Object.entries(totalOptions).length === 0 && (
+							<p>{'Intet'}</p>
+						)}
 					</div>
 				</div>
 			</div>
