@@ -1,6 +1,6 @@
+import { AdminImages } from '@/lib/images'
 import Image from 'next/image'
 import React, { type ReactElement, useEffect } from 'react'
-import { AdminImages, NoneImage } from '@/lib/images'
 
 const EditingControls = ({
 	canClose = true,
@@ -47,6 +47,7 @@ const EditingControls = ({
 						setShowDeleteConfirmation(true)
 					}}
 					type="button"
+					title="Slet"
 					className="w-5 h-5 mx-2.5 place-self-center hover:bounceOrig"
 				>
 					<span className="sr-only">{'Delete'}</span>
@@ -54,13 +55,14 @@ const EditingControls = ({
 						width={20}
 						height={20}
 						className="w-full h-full"
-						src={AdminImages.modify.trashcan.src}
-						alt={AdminImages.modify.trashcan.alt}
+						src={AdminImages.delete.src}
+						alt={AdminImages.delete.alt}
 					/>
 				</button>
 				<button
 					onClick={handleUndoEdit}
 					type="button"
+					title="Fortryd ændringer"
 					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:-rotate-180"
 				>
 					<span className="sr-only">{'Undo changes'}</span>
@@ -68,8 +70,8 @@ const EditingControls = ({
 						width={40}
 						height={40}
 						className="w-full h-full"
-						src={AdminImages.modify.undo.src}
-						alt={AdminImages.modify.undo.alt}
+						src={AdminImages.undo.src}
+						alt={AdminImages.undo.alt}
 					/>
 				</button>
 				<div className="w-10 h-10 relative">
@@ -77,14 +79,15 @@ const EditingControls = ({
 						<Image
 							width={40}
 							height={40}
-							className="absolute top-0 left-0 w-full h-full z-10"
-							src={NoneImage.src}
-							alt='Invalid form'
+							className="absolute top-0 left-0 w-full h-full z-10 cursor-not-allowed"
+							src={AdminImages.confirmModificationBlocked.src}
+							alt={AdminImages.confirmModificationBlocked.alt}
 						/>
 					)}
 					<button
 						onClick={handleCompleteEdit}
 						type="button"
+						title="Gem ændringer"
 						disabled={!formIsValid}
 						className={`w-full h-full place-self-center transition-transform duration-300 transform ${formIsValid ? 'hover:rotate-12 hover:scale-125' : 'scale-90'}`}
 					>
@@ -93,8 +96,8 @@ const EditingControls = ({
 							width={40}
 							height={40}
 							className="w-full h-full"
-							src={AdminImages.modify.checkmark.src}
-							alt={AdminImages.modify.checkmark.alt}
+							src={AdminImages.confirmModification.src}
+							alt={AdminImages.confirmModification.alt}
 						/>
 					</button>
 				</div>
@@ -107,14 +110,15 @@ const EditingControls = ({
 					setIsEditing(true)
 				}}
 				type="button"
+				title="Rediger"
 				className="w-1/2 h-10 border-2 border-blue-500 rounded-full m-5"
 			>
 				<Image
 					width={40}
 					height={40}
 					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
-					src={AdminImages.modify.pen.src}
-					alt={AdminImages.modify.pen.alt}
+					src={AdminImages.edit.src}
+					alt={AdminImages.edit.alt}
 				/>
 				<span className="sr-only">{'Edit'}</span>
 			</button>

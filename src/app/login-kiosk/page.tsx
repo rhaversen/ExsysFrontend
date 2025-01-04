@@ -15,7 +15,10 @@ export default function Page (): ReactElement {
 
 	const login = useCallback(async (credentials: any) => {
 		try {
-			const response = await axios.post<{ auth: boolean, user: KioskType }>(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
+			const response = await axios.post<{
+				auth: boolean
+				user: KioskType
+			}>(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			setCurrentUser(response.data.user)
 			router.push('/kiosk')
 		} catch (error: any) {

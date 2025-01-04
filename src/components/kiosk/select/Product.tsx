@@ -1,8 +1,8 @@
 import AsyncImage from '@/components/ui/AsyncImage'
+import { KioskImages } from '@/lib/images'
 import { type ProductType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 import AmountIndicator from './AmountIndicator'
-import { NoneImage } from '@/lib/images'
 
 const Product = ({
 	product,
@@ -45,7 +45,7 @@ const Product = ({
 					width={100}
 					height={100}
 					quality={80}
-					src={`${product.imageURL === undefined || product.imageURL === '' ? NoneImage.src : product.imageURL}`}
+					src={`${product.imageURL === undefined || product.imageURL === '' ? KioskImages.noUrl.src : product.imageURL}`}
 					alt={product.name}
 					draggable={false}
 					priority={true}

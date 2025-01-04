@@ -1,6 +1,8 @@
 'use client'
 
+import CatalogView from '@/components/admin/modify/catalog/CatalogView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
+import SetupView from '@/components/admin/modify/setup/SetupView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
@@ -18,8 +20,6 @@ import {
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import CatalogView from '@/components/admin/modify/catalog/CatalogView'
-import SetupView from '@/components/admin/modify/setup/SetupView'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -87,7 +87,7 @@ export default function Page (): ReactElement {
 	}, [API_URL, addError])
 
 	// Generic add handler
-	const CreateAddHandler = <T,>(
+	const CreateAddHandler = <T, > (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (item: T) => void => {
 		return useCallback(
@@ -99,7 +99,7 @@ export default function Page (): ReactElement {
 	}
 
 	// Generic update handler
-	const CreateUpdateHandler = <T extends { _id: string }>(
+	const CreateUpdateHandler = <T extends { _id: string }> (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (item: T) => void => {
 		return useCallback(
@@ -117,7 +117,7 @@ export default function Page (): ReactElement {
 	}
 
 	// Generic delete handler
-	const CreateDeleteHandler = <T extends { _id: string }>(
+	const CreateDeleteHandler = <T extends { _id: string }> (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (id: string) => void => {
 		return useCallback(

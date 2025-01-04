@@ -1,6 +1,6 @@
+import { AdminImages } from '@/lib/images'
 import Image from 'next/image'
 import React, { type ReactElement, type ReactNode } from 'react'
-import { AdminImages } from '@/lib/images'
 
 const ItemList = ({
 	buttonText,
@@ -16,14 +16,15 @@ const ItemList = ({
 			<div className="flex justify-center">
 				<button
 					type="button"
+					title="Tilføj"
 					className="relative w-1/4 m-5 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded items-center justify-center"
 					onClick={onAdd}
 				>
 					<div className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center">
 						<Image
 							className="h-7 w-7"
-							src={AdminImages.modify.plus.src}
-							alt={AdminImages.modify.plus.alt}
+							src={AdminImages.add.src}
+							alt={AdminImages.add.alt}
 							width={10}
 							height={10}
 						/>

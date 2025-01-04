@@ -1,7 +1,8 @@
 import Block from '@/components/admin/kitchen/Block'
+import { AdminSounds } from '@/lib/sounds'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const RoomCol = ({
 	room,
@@ -15,6 +16,8 @@ const RoomCol = ({
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderType[]>>({})
 	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
 	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
+	const prevBlockCountRef = useRef(0)
+	const newOrderAlert = useMemo(() => new Audio(AdminSounds.newOrderAlert), [])
 
 	const groupOrdersByActivity = useCallback(() => {
 		const groupedOrders: Record<string, OrderType[]> = {}
@@ -30,6 +33,15 @@ const RoomCol = ({
 	useEffect(() => {
 		groupOrdersByActivity()
 	}, [groupOrdersByActivity])
+
+	// Play a sound when a new block is added
+	useEffect(() => {
+		const currentBlockCount = Object.keys(ordersByActivity).length
+		if (currentBlockCount > prevBlockCountRef.current) {
+			newOrderAlert.play().catch(console.error)
+		}
+		prevBlockCountRef.current = currentBlockCount
+	}, [newOrderAlert, ordersByActivity, room])
 
 	useEffect(() => {
 		const productsCount: Record<string, number> = {}
@@ -56,18 +68,24 @@ const RoomCol = ({
 	}, [orders])
 
 	return (
-		<div className="m-2 h-full border-2 border-gray-400 rounded-3xl">
-			<h2 className="text-gray-800 font-bold text-2xl text-center m-2">{room.name}</h2>
-			{Object.keys(ordersByActivity).map((activityId) => (
-				<Block
-					key={activityId}
-					activityId={activityId}
-					orders={ordersByActivity[activityId]}
-					onUpdatedOrders={onUpdatedOrders}
-				/>
-			))}
-			<h3 className="text-gray-800 font-bold text-xl text-center m-2">{'Total'}</h3>
-			<div className="m-2 p-2 h-full border-2 border-gray-400 rounded-3xl">
+		<div className="rounded-lg m-1 p-1 bg-white overflow-y-auto max-w-[650px] h-full shadow-md">
+			<h2 className="text-gray-800 font-bold text-3xl text-center p-1">
+				{room.name}
+			</h2>
+			<div className="flex flex-wrap justify-center">
+				{Object.keys(ordersByActivity).map((activityId) => (
+					<Block
+						key={activityId}
+						activityId={activityId}
+						orders={ordersByActivity[activityId]}
+						onUpdatedOrders={onUpdatedOrders}
+					/>
+				))}
+			</div>
+			<div className="m-2">
+				<h3 className="text-gray-800 font-bold text-xl text-center">
+					{'Total'}
+				</h3>
 				<div className="flex flex-col items-center">
 					<div className="text-gray-800 text-lg">
 						{Object.entries(totalProducts).map(([name, quantity]) => (
@@ -76,7 +94,9 @@ const RoomCol = ({
 						{Object.entries(totalOptions).map(([name, quantity]) => (
 							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
 						))}
-
+						{Object.entries(totalProducts).length === 0 && Object.entries(totalOptions).length === 0 && (
+							<p>{'Intet'}</p>
+						)}
 					</div>
 				</div>
 			</div>

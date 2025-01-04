@@ -1,11 +1,11 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PatchAdminType, type PostAdminType, type AdminType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
-import Timestamps from '../../ui/Timestamps'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
+import { type AdminType, type PatchAdminType, type PostAdminType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
+import Timestamps from '../../ui/Timestamps'
 
 const Admin = ({
 	admins,
@@ -15,8 +15,17 @@ const Admin = ({
 	admin: AdminType
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newAdmin, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(admin, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostAdminType, PatchAdminType>('/v1/admins')
+	const {
+		formState: newAdmin,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(admin, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostAdminType, PatchAdminType>('/v1/admins')
 	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 

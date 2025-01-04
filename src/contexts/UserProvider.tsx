@@ -1,6 +1,14 @@
 'use client'
-import React, { createContext, useState, useContext, useEffect, type ReactNode, type Dispatch, type SetStateAction } from 'react'
 import { type AdminType, type KioskType } from '@/types/backendDataTypes'
+import React, {
+	createContext,
+	type Dispatch,
+	type ReactNode,
+	type SetStateAction,
+	useContext,
+	useEffect,
+	useState
+} from 'react'
 
 type UserType = KioskType | AdminType
 
@@ -33,7 +41,10 @@ export default function UserProvider ({ children }: { readonly children: ReactNo
 		}
 	}, [currentUser])
 
-	const value = React.useMemo(() => ({ currentUser, setCurrentUser }), [currentUser, setCurrentUser])
+	const value = React.useMemo(() => ({
+		currentUser,
+		setCurrentUser
+	}), [currentUser, setCurrentUser])
 
 	return (
 		<UserContext.Provider value={value}>

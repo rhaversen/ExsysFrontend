@@ -41,7 +41,7 @@ const CompletePostControls = ({
 			<button
 				type="button"
 				disabled={!formIsValid}
-				className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200'} text-white rounded-md py-2 px-4`}
+				className={`${formIsValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'} text-white rounded-md py-2 px-4`}
 				onClick={handleCompletePost}
 			>
 				{'Færdig'}

@@ -4,13 +4,18 @@ import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
-import { type PatchProductType, type PostProductType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
+import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import {
+	type OptionType,
+	type PatchProductType,
+	type PostProductType,
+	type ProductType
+} from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import InlineValidation from '../../ui/InlineValidation'
 import Timestamps from '../../ui/Timestamps'
-import useFormState from '@/hooks/useFormState'
-import useCUDOperations from '@/hooks/useCUDOperations'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
 
 const Product = ({
 	product,
@@ -27,8 +32,17 @@ const Product = ({
 	}
 
 	const [isEditing, setIsEditing] = useState(false)
-	const { formState: newProduct, handleFieldChange, handleValidationChange, resetFormState, formIsValid } = useFormState(product, isEditing)
-	const { updateEntity, deleteEntity } = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
+	const {
+		formState: newProduct,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(product, isEditing)
+	const {
+		updateEntity,
+		deleteEntity
+	} = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
 
