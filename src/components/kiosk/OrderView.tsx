@@ -188,13 +188,13 @@ const OrderView = ({
 		if (kiosk.activities.length > 1) {
 			onClose()
 		} else {
-		setCart({
-			products: {},
-			options: {}
-		})
-		setIsOrderConfirmationVisible(false)
-		setOrderStatus('loading')
-		setOrder(null)
+			setCart({
+				products: {},
+				options: {}
+			})
+			setIsOrderConfirmationVisible(false)
+			setOrderStatus('loading')
+			setOrder(null)
 		}
 	}, [kiosk, onClose])
 
