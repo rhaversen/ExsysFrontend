@@ -86,6 +86,20 @@ const ProductCatalog = ({
 		return () => { clearTimeout(timeoutId) }
 	}, [productAvailabilities, cart, products])
 
+	// Add reset scroll handler
+	useEffect(() => {
+		const handleResetScroll = (): void => {
+			if (containerRef.current !== null) {
+				containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+			}
+		}
+
+		window.addEventListener('resetScroll', handleResetScroll)
+		return () => {
+			window.removeEventListener('resetScroll', handleResetScroll)
+		}
+	}, [])
+
 	return (
 		<div
 			ref={containerRef}

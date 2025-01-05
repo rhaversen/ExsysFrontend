@@ -188,6 +188,7 @@ const OrderView = ({
 		if (kiosk.activities.length > 1) {
 			onClose()
 		} else {
+			window.dispatchEvent(new Event('resetScroll'))
 			setCart({
 				products: {},
 				options: {}
