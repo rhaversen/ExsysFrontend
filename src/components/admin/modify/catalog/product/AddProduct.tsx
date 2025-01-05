@@ -286,7 +286,7 @@ const AddProduct = ({
 				/>
 				{showOptions &&
 					<SelectionWindow
-						title={`Tilføj tilvalg til ${product.name}`}
+						title={`Tilføj tilvalg til ${product.name === '' ? 'Nyt Produkt' : product.name}`}
 						items={options}
 						selectedItems={options.filter((option) => product.options.includes(option._id))}
 						onAddItem={handleAddOption}

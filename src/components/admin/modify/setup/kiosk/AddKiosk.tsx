@@ -9,7 +9,7 @@ import CompletePostControls from '../../ui/CompletePostControls'
 import EditableDropdown from '../../ui/EditableDropdown'
 import SelectionWindow from '../../ui/SelectionWindow'
 
-const Kiosk = ({
+const AddKiosk = ({
 	kiosks,
 	activities,
 	readers,
@@ -185,7 +185,7 @@ const Kiosk = ({
 					/>
 					{showActivities &&
 						<SelectionWindow
-							title={`Tilføj aktiviteter til ${kiosk.name}`}
+							title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
 							items={activities}
 							selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 							onAddItem={handleAddActivity}
@@ -207,4 +207,4 @@ const Kiosk = ({
 	)
 }
 
-export default Kiosk
+export default AddKiosk
