@@ -1,17 +1,19 @@
 'use client'
 
-import sortConfig from '@/lib/SortConfig'
 import { type ReactElement } from 'react'
 
 const SortingControl = ({
-	type,
+	options,
+	currentField,
+	currentDirection,
 	onSortFieldChange,
 	onSortDirectionChange
 }: {
-	type: keyof typeof sortConfig
-	onSortFieldChange: (sortField: string) => void
-	onSortDirectionChange: (sortDirection: 'asc' | 'desc') => void
-
+	options: Array<{ prop: string, label: string }>
+	currentField: string
+	currentDirection: 'asc' | 'desc'
+	onSortFieldChange: (field: string) => void
+	onSortDirectionChange: (direction: 'asc' | 'desc') => void
 }): ReactElement => {
 	return (
 		<div className="absolute right-0 text-black flex flex-col items-center">
@@ -21,24 +23,20 @@ const SortingControl = ({
 					className="mx-2 rounded-md text-center"
 					onChange={(e) => { onSortFieldChange(e.target.value) }}
 					title="Sorteringsfelt"
-					defaultValue={sortConfig[type][0].prop}
+					value={currentField}
 				>
-					{sortConfig[type].map(prop => (
-						<option key={prop.prop} value={prop.prop}>{prop.name}</option>
+					{options.map(prop => (
+						<option key={prop.prop} value={prop.prop}>{prop.label}</option>
 					))}
 				</select>
 				<select
 					className="mx-2 rounded-sm text-center"
 					onChange={(e) => { onSortDirectionChange(e.target.value as 'asc' | 'desc') }}
 					title="Sorteringsretning"
-					defaultValue="asc"
+					value={currentDirection}
 				>
-					<option value="asc">
-						{'Stigende'}
-					</option>
-					<option value="desc">
-						{'Aftagende'}
-					</option>
+					<option value="asc">{'Stigende'}</option>
+					<option value="desc">{'Aftagende'}</option>
 				</select>
 			</div>
 		</div>

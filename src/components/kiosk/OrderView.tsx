@@ -184,71 +184,62 @@ const OrderView = ({
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
+		setShowTimeoutWarning(false)
 		if (kiosk.activities.length > 1) {
 			onClose()
+		} else {
+			window.dispatchEvent(new Event('resetScroll'))
+			setCart({
+				products: {},
+				options: {}
+			})
+			setIsOrderConfirmationVisible(false)
+			setOrderStatus('loading')
+			setOrder(null)
 		}
-		setCart({
-			products: {},
-			options: {}
-		})
-		setIsOrderConfirmationVisible(false)
-		setOrderStatus('loading')
-		setOrder(null)
 	}, [kiosk, onClose])
 
 	const resetTimerRef = useRef<NodeJS.Timeout>()
-	const warningTimerRef = useRef<NodeJS.Timeout>()
 
 	const resetTimer = useCallback(() => {
-		if (resetTimerRef.current != null) {
-			clearTimeout(resetTimerRef.current)
-		}
-		if (warningTimerRef.current != null) {
-			clearTimeout(warningTimerRef.current)
-		}
-
-		// Set warning timer
-		warningTimerRef.current = setTimeout(() => {
+		clearTimeout(resetTimerRef.current)
+		resetTimerRef.current = setTimeout(() => {
+			// Only show warning now
 			setShowTimeoutWarning(true)
 		}, timeoutSeconds * 1000 - warningOffsetSeconds * 1000)
-
-		// Set reset timer
-		resetTimerRef.current = setTimeout(() => {
-			reset()
-		}, timeoutSeconds * 1000)
-	}, [reset])
+	}, [])
 
 	// Reset timer on component mount
 	useEffect(() => {
-		resetTimer()
-	}, [resetTimer])
+		// For a single-activity kiosk, only start if cart is not empty
+		if (kiosk.activities.length > 1 || Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)) {
+			resetTimer()
+		}
+	}, [resetTimer, kiosk, cart])
 
 	// Add global interaction listeners and cleanup
 	useEffect(() => {
 		const events = [
-			'mousedown',
-			'keydown',
 			'touchstart',
-			'scroll',
-			'wheel',
-			'pointermove',
-			'pointerdown',
 			'touchmove'
 		]
 
+		const handleResetTimer = (): void => {
+			if (!showTimeoutWarning) {
+				resetTimer()
+			}
+		}
+
 		events.forEach(event => {
-			document.addEventListener(event, resetTimer, { passive: true })
+			document.addEventListener(event, handleResetTimer)
 		})
 
 		return () => {
-			if (resetTimerRef.current != null) {
-				clearTimeout(resetTimerRef.current)
-			}
 			events.forEach(event => {
-				document.removeEventListener(event, resetTimer)
+				document.removeEventListener(event, handleResetTimer)
 			})
 		}
-	}, [resetTimer])
+	}, [resetTimer, showTimeoutWarning])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
@@ -372,6 +363,7 @@ const OrderView = ({
 			{showTimeoutWarning && (
 				<TimeoutWarningWindow
 					warningOffsetSeconds={warningOffsetSeconds}
+					onTimeout={() => { reset() }}
 					onClose={() => {
 						setShowTimeoutWarning(false)
 						resetTimer()
