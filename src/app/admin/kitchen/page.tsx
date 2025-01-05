@@ -13,10 +13,10 @@ import {
 } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
+import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
-import Image from 'next/image'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

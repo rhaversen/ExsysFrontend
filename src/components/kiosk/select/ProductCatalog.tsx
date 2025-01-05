@@ -90,7 +90,10 @@ const ProductCatalog = ({
 	useEffect(() => {
 		const handleResetScroll = (): void => {
 			if (containerRef.current !== null) {
-				containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+				containerRef.current.scrollTo({
+					top: 0,
+					behavior: 'smooth'
+				})
 			}
 		}
 
