@@ -3,18 +3,24 @@ import React, { type ReactElement, useEffect, useState } from 'react'
 
 const TimeoutWarningWindow = ({
 	warningOffsetSeconds,
-	onClose
+	onClose,
+	onTimeout
 }: {
 	warningOffsetSeconds: number
 	onClose: () => void
+	onTimeout: () => void
 }): ReactElement => {
 	const [remainingSeconds, setRemainingSeconds] = useState(warningOffsetSeconds)
 
 	useEffect(() => {
 		const timer = setInterval(() => {
-			setRemainingSeconds((prev) => {
+			setRemainingSeconds(prev => {
 				if (prev <= 1) {
 					clearInterval(timer)
+					// Schedule timeout callback for next tick to avoid state updates during render
+					setTimeout(() => {
+						onTimeout()
+					}, 0)
 					return 0
 				}
 				return prev - 1
@@ -22,20 +28,16 @@ const TimeoutWarningWindow = ({
 		}, 1000)
 
 		return () => { clearInterval(timer) }
-	}, [])
+	}, [onTimeout])
 
 	return (
-		<CloseableModal
-			onClose={() => {
-				onClose()
-			}}
-		>
+		<CloseableModal onClose={() => { onClose() }}>
 			{/* We trea the entire modal as a button, since any interaction should qualify as a "keep alive" */}
 			<button
 				className="p-10 flex flex-col items-center gap-10 text-black"
 				type="button"
 				onClick={() => {
-					onClose()
+					onClose() // reset main timer
 				}}
 			>
 				<h2 className="text-xl font-bold">

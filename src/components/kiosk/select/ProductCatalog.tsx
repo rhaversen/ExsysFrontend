@@ -60,13 +60,7 @@ const ProductCatalog = ({
 	useEffect(() => {
 		const el = containerRef.current
 		const events = [
-			'mousedown',
-			'keydown',
 			'touchstart',
-			'scroll',
-			'wheel',
-			'pointermove',
-			'pointerdown',
 			'touchmove'
 		]
 
