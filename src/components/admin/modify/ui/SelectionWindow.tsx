@@ -35,14 +35,14 @@ const SelectionWindow = <T extends Item> ({
 			onClose={onClose}
 			canComplete={true}
 		>
-			<h2 className="text-lg font-bold text-gray-800">
+			<h2 className="text-lg font-bold text-gray-800 text-center">
 				{title}
 			</h2>
-			<div className="bg-white p-2 rounded">
+			<div className="bg-white p-2 rounded flex flex-col flex-wrap max-h-96">
 				{items.map((item) => (
 					<div
 						key={item._id}
-						className="flex flex-wrap flex-row items-center p-1 mb-2 text-gray-800"
+						className="flex items-center p-1 mb-2 text-gray-800"
 					>
 						<input
 							title="Add Option"
