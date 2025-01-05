@@ -3,33 +3,36 @@ const sortConfig = {
 		prop: 'name',
 		label: 'Navn'
 	}, {
-		prop: 'createdAt',
-		label: 'Oprettet'
-	}, {
-		prop: 'updatedAt',
-		label: 'Opdateret'
-	}, {
 		prop: 'price',
 		label: 'Pris'
+	}, {
+		prop: 'options.length',
+		label: 'Antal Tilvalg'
 	}, {
 		prop: 'orderWindow.from.hour',
 		label: 'Bestilling Fra'
 	}, {
 		prop: 'orderWindow.to.hour',
 		label: 'Bestilling Til'
-	}],
-	Tilvalg: [{
-		prop: 'name',
-		label: 'Navn'
 	}, {
 		prop: 'createdAt',
 		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
 		label: 'Opdateret'
+	}],
+	Tilvalg: [{
+		prop: 'name',
+		label: 'Navn'
 	}, {
 		prop: 'price',
 		label: 'Pris'
+	}, {
+		prop: 'createdAt',
+		label: 'Oprettet'
+	}, {
+		prop: 'updatedAt',
+		label: 'Opdateret'
 	}],
 	Aktiviteter: [{
 		prop: 'name',
@@ -59,26 +62,26 @@ const sortConfig = {
 	}],
 	Kiosker: [{
 		prop: 'name',
-		label: 'Navn'
+		label: 'Kiosk Navn'
+	}, {
+		prop: 'kioskTag',
+		label: 'Kiosk Tag'
+	}, {
+		prop: 'readerId.readerTag',
+		label: 'Kortlæser Tag'
+	}, {
+		prop: 'activities.length',
+		label: 'Antal Aktiviteter'
 	}, {
 		prop: 'createdAt',
 		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
 		label: 'Opdateret'
-	}, {
-		prop: 'kioskTag',
-		label: 'Kiosk Tag'
-	}, {
-		prop: 'readerId.readerTag',
-		label: 'Reader Tag'
-	}, {
-		prop: 'activities.length',
-		label: 'Antal Aktiviteter'
 	}],
 	Kortlæsere: [{
 		prop: 'readerTag',
-		label: 'Reader Tag'
+		label: 'Kortlæser Tag'
 	}, {
 		prop: 'createdAt',
 		label: 'Oprettet'
@@ -88,7 +91,7 @@ const sortConfig = {
 	}],
 	Admins: [{
 		prop: 'name',
-		label: 'Navn'
+		label: 'Brugernavn'
 	}, {
 		prop: 'createdAt',
 		label: 'Oprettet'
