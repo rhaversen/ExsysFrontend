@@ -13,8 +13,8 @@ import {
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import EditableDropdown from '../../ui/EditableDropdown'
+import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
-import ActivitiesWindow from './ActivitiesWindow'
 
 const Kiosk = ({
 	kiosks,
@@ -178,12 +178,18 @@ const Kiosk = ({
 					/>
 				}
 				{showActivities &&
-					<ActivitiesWindow
-						kioskName={newKiosk.name}
-						activities={activities}
-						kioskActivities={newKiosk.activities}
-						onAddActivity={(v: ActivityType) => { handleFieldChange('activities', [...newKiosk.activities, v]) }}
-						onDeleteActivity={(v: ActivityType) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity !== v)) }}
+					<SelectionWindow
+						title={`Tilføj aktivitet til ${newKiosk.name}`}
+						items={activities}
+						selectedItems={newKiosk.activities}
+						onAddItem={(v) => {
+							console.log(v)
+							handleFieldChange('activities', [...newKiosk.activities, {
+								...v,
+								_id: v._id
+							}])
+						}}
+						onDeleteItem={(v) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity._id !== v._id)) }}
 						onClose={() => {
 							setShowActivities(false)
 						}}

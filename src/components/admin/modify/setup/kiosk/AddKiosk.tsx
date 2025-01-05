@@ -7,7 +7,7 @@ import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
 import EditableDropdown from '../../ui/EditableDropdown'
-import ActivitiesWindow from './ActivitiesWindow'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Kiosk = ({
 	kiosks,
@@ -184,12 +184,12 @@ const Kiosk = ({
 						}}
 					/>
 					{showActivities &&
-						<ActivitiesWindow
-							kioskName={kiosk.name}
-							activities={activities}
-							kioskActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-							onAddActivity={handleAddActivity}
-							onDeleteActivity={handleDeleteActivity}
+						<SelectionWindow
+							title={`Tilføj aktiviteter til ${kiosk.name}`}
+							items={activities}
+							selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
+							onAddItem={handleAddActivity}
+							onDeleteItem={handleDeleteActivity}
 							onClose={() => {
 								setShowActivities(false)
 							}}

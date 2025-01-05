@@ -1,4 +1,3 @@
-import OptionsWindow from '@/components/admin/modify/catalog/product/OptionsWindow'
 import Options from '@/components/admin/modify/catalog/product/productOptions/Options'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
@@ -15,6 +14,7 @@ import {
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 import InlineValidation from '../../ui/InlineValidation'
+import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
 
 const Product = ({
@@ -216,12 +216,17 @@ const Product = ({
 					/>
 				}
 				{showOptions &&
-					<OptionsWindow
-						productName={newProduct.name}
-						options={options}
-						productOptions={newProduct.options}
-						onAddOption={(v) => { handleFieldChange('options', [...newProduct.options, v]) }}
-						onDeleteOption={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
+					<SelectionWindow
+						title={`Tilføj tilvalg til ${newProduct.name}`}
+						items={options}
+						selectedItems={newProduct.options}
+						onAddItem={(v) => {
+							handleFieldChange('options', [...newProduct.options, {
+								...v,
+								_id: v._id
+							}])
+						}}
+						onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
 						onClose={() => {
 							setShowOptions(false)
 						}}
