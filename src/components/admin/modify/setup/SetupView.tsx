@@ -13,6 +13,7 @@ import Room from '@/components/admin/modify/setup/room/Room'
 import ItemList from '@/components/admin/modify/ui/ItemList'
 import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
+import useSorting from '@/hooks/useSorting'
 import type sortConfig from '@/lib/SortConfig'
 import {
 	type ActivityType,
@@ -45,42 +46,15 @@ const SetupView = ({
 	const [showAddAdmin, setShowAddAdmin] = useState(false)
 	const [showAddReader, setShowAddReader] = useState(false)
 
-	const [sortField, setSortField] = useState('name')
-	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
-
-	const resolveProperty = (obj: any, path: string): any => {
-		return path.split('.').reduce((acc, part) => acc != null ? acc[part] : undefined, obj)
-	}
-
-	const compareStrings = (strA: string, strB: string): number => {
-		const lowerStrA = strA.toLowerCase()
-		const lowerStrB = strB.toLowerCase()
-		if (lowerStrA < lowerStrB) return sortDirection === 'asc' ? -1 : 1
-		if (lowerStrA > lowerStrB) return sortDirection === 'asc' ? 1 : -1
-		return 0
-	}
-
-	const compareValues = (valA: any, valB: any): number => {
-		if (typeof valA === 'string' && typeof valB === 'string') {
-			return compareStrings(valA, valB)
-		}
-
-		let result
-		if (sortDirection === 'asc') {
-			result = valA > valB ? 1 : -1
-		} else {
-			result = valA < valB ? 1 : -1
-		}
-		return result
-	}
-
-	const sortByField = (items: any[]): any[] => {
-		return items.slice().sort((a: any, b: any) => {
-			const valA = resolveProperty(a, sortField)
-			const valB = resolveProperty(b, sortField)
-			return compareValues(valA, valB)
-		})
-	}
+	const {
+		setSortField,
+		setSortDirection,
+		sortByField,
+		sortField,
+		sortDirection,
+		sortingOptions,
+		isEnabled
+	} = useSorting(selectedView as keyof typeof sortConfig)
 
 	return (
 		<div>
@@ -90,13 +64,15 @@ const SetupView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{selectedView !== null &&
+			{isEnabled && (
 				<SortingControl
+					options={sortingOptions}
+					currentField={sortField}
+					currentDirection={sortDirection}
 					onSortFieldChange={setSortField}
 					onSortDirectionChange={setSortDirection}
-					type={selectedView as keyof typeof sortConfig}
 				/>
-			}
+			)}
 			{selectedView === null &&
 				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
 			}
