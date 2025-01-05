@@ -187,7 +187,7 @@ const OrderView = ({
 		setShowTimeoutWarning(false)
 		if (kiosk.activities.length > 1) {
 			onClose()
-		}
+		} else {
 		setCart({
 			products: {},
 			options: {}
@@ -195,6 +195,7 @@ const OrderView = ({
 		setIsOrderConfirmationVisible(false)
 		setOrderStatus('loading')
 		setOrder(null)
+		}
 	}, [kiosk, onClose])
 
 	const resetTimerRef = useRef<NodeJS.Timeout>()
