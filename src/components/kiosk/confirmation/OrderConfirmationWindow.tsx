@@ -65,23 +65,21 @@ const OrderConfirmationWindow = ({
 	// The order was completed successfully
 	let successMessage: ReactElement = <></>
 	if (checkoutMethod === 'later') {
-		successMessage = <div className="flex items-center justify-center">
-			{'Betal'}
+		successMessage = <p className="flex items-center justify-center">
+			{'Betal '}
 			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
-			{'ved afhentning'}
-		</div>
+			{' ved afhentning'}
+		</p>
 	} else {
-		successMessage = <>{'Betaling gennemført'}</>
+		successMessage = <p>{'Betaling gennemført'}</p>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
-		loading: <>{'Vent venligst'}</>,
-		awaitingPayment: <>{'Afventer betaling'}</>,
+		loading: <p>{'Vent venligst'}</p>,
+		awaitingPayment: <p>{'Afventer betaling'}</p>,
 		success: successMessage,
-		paymentFailed: <>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</>,
-		error: (
-			<>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</>
-		)
+		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
+		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
 	}
 
 	const showSubmitButton = orderStatus !== 'loading'
@@ -93,9 +91,9 @@ const OrderConfirmationWindow = ({
 			</h2>
 
 			{paragraphContent[orderStatus] !== undefined && (
-				<p className="mb-4 flex justify-center text-center text-gray-800">
+				<div className="mb-4 flex justify-center text-center text-gray-800">
 					{paragraphContent[orderStatus]}
-				</p>
+				</div>
 			)}
 
 			<div className="flex justify-center">
