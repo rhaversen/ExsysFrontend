@@ -196,3 +196,13 @@ export interface SessionType {
 	lastActivity: string // Time of last activity (ISO string)
 	userAgent: string // Agent information
 }
+
+// Config types
+export interface ConfigType {
+	_id: string
+	kioskInactivityTimeoutMs: number
+	kioskInactivityTimeoutWarningMs: number
+	kioskOrderConfirmationTimeoutMs: number
+	createdAt: Date
+	updatedAt: Date
+}

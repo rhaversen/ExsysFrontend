@@ -1,5 +1,6 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
@@ -16,10 +17,11 @@ const OrderConfirmationWindow = ({
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 }): ReactElement => {
-	// TODO: Make this configurable
-	const autocloseSeconds = 10
+	const { config } = useConfig()
 
-	const [remainingSeconds, setRemainingSeconds] = useState(autocloseSeconds)
+	const autocloseMs = config?.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
+
+	const [remainingSeconds, setRemainingSeconds] = useState(autocloseMs / 1000)
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
 
 	useEffect(() => {
@@ -40,9 +42,9 @@ const OrderConfirmationWindow = ({
 		if (!canClose) return
 		const timeoutId = setTimeout(() => {
 			onClose()
-		}, autocloseSeconds * 1000)
+		}, autocloseMs)
 		return () => { clearTimeout(timeoutId) }
-	}, [canClose, onClose])
+	}, [autocloseMs, canClose, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',

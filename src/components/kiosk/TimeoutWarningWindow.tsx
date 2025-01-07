@@ -2,15 +2,15 @@ import CloseableModal from '@/components/ui/CloseableModal'
 import React, { type ReactElement, useEffect, useState } from 'react'
 
 const TimeoutWarningWindow = ({
-	warningOffsetSeconds,
+	warningOffsetMs,
 	onClose,
 	onTimeout
 }: {
-	warningOffsetSeconds: number
+	warningOffsetMs: number
 	onClose: () => void
 	onTimeout: () => void
 }): ReactElement => {
-	const [remainingSeconds, setRemainingSeconds] = useState(warningOffsetSeconds)
+	const [remainingSeconds, setRemainingSeconds] = useState(warningOffsetMs / 1000)
 
 	useEffect(() => {
 		const timer = setInterval(() => {
