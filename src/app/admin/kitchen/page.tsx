@@ -3,12 +3,9 @@
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { LoadingImage } from '@/lib/images'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 import {
 	type ActivityType,
-	type OptionType,
 	type OrderType,
-	type ProductType,
 	type RoomType
 } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
@@ -18,7 +15,7 @@ import React, { type ReactElement, useCallback, useEffect, useRef, useState } fr
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 
-export default function Page (): ReactElement {
+export default function Page(): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -26,8 +23,6 @@ export default function Page (): ReactElement {
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
 
-	const productsRef = useRef<ProductType[]>([])
-	const optionsRef = useRef<OptionType[]>([])
 	const roomsRef = useRef<RoomType[]>([])
 	const activitiesRef = useRef<ActivityType[]>([])
 
@@ -38,27 +33,16 @@ export default function Page (): ReactElement {
 	const fetchData = useCallback(async (): Promise<void> => {
 		try {
 			const [
-				productsResponse,
-				optionsResponse,
 				roomsResponse,
 				activitiesResponse
 			] = await Promise.all([
-				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/rooms`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+				axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true })
 			])
 
-			const productsData = productsResponse.data as ProductType[]
-			productsData.forEach((product) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			})
-
 			// Update refs
-			productsRef.current = productsData
-			optionsRef.current = optionsResponse.data as OptionType[]
-			roomsRef.current = roomsResponse.data as RoomType[]
-			activitiesRef.current = activitiesResponse.data as ActivityType[]
+			roomsRef.current = roomsResponse.data
+			activitiesRef.current = activitiesResponse.data
 		} catch (error: any) {
 			addError(error)
 		}
