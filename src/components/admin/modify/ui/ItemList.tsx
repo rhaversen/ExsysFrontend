@@ -4,10 +4,12 @@ import React, { type ReactElement, type ReactNode } from 'react'
 
 const ItemList = ({
 	buttonText,
+	headerText,
 	onAdd,
 	children
 }: {
 	buttonText: string
+	headerText?: string
 	onAdd: () => void
 	children: ReactNode[]
 }): ReactElement => {
@@ -28,6 +30,7 @@ const ItemList = ({
 				/>
 				<span className="p-2 mx-5 font-bold">{buttonText}</span>
 			</button>
+			<h2 className="text-md p-2 max-w-6xl text-center text-gray-800">{headerText}</h2>
 			<div className="flex flex-wrap justify-evenly">
 				{children}
 			</div>
