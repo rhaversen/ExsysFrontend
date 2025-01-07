@@ -1,16 +1,17 @@
 import CloseableModal from '@/components/ui/CloseableModal'
+import { useConfig } from '@/contexts/ConfigProvider'
 import React, { type ReactElement, useEffect, useState } from 'react'
 
 const TimeoutWarningWindow = ({
-	warningOffsetMs,
 	onClose,
 	onTimeout
 }: {
-	warningOffsetMs: number
 	onClose: () => void
 	onTimeout: () => void
 }): ReactElement => {
-	const [remainingSeconds, setRemainingSeconds] = useState(warningOffsetMs / 1000)
+	const { config } = useConfig()
+	const timeoutWarningMs = config?.configs.kioskInactivityTimeoutWarningMs ?? 1000 * 10
+	const [remainingSeconds, setRemainingSeconds] = useState(timeoutWarningMs / 1000)
 
 	useEffect(() => {
 		const timer = setInterval(() => {

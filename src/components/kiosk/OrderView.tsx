@@ -50,7 +50,6 @@ const OrderView = ({
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 
 	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
-	const warningOffsetMs = config?.configs.kioskInactivityTimeoutWarningMs ?? 1000 * 10
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -363,7 +362,6 @@ const OrderView = ({
 			{/* Timeout Warning Modal */}
 			{showTimeoutWarning && (
 				<TimeoutWarningWindow
-					warningOffsetMs={warningOffsetMs}
 					onTimeout={() => { reset() }}
 					onClose={() => {
 						setShowTimeoutWarning(false)
