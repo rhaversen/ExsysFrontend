@@ -11,7 +11,7 @@ import {
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 
@@ -22,37 +22,49 @@ export default function Page(): ReactElement {
 	const { addError } = useError()
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
+	const [rawOrders, setRawOrders] = useState<OrderType[]>([])
 
-	const roomsRef = useRef<RoomType[]>([])
-	const activitiesRef = useRef<ActivityType[]>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
 
-	// Fetch initial data (products, options, rooms, activities)
-	const fetchData = useCallback(async (): Promise<void> => {
+	// Combined fetch function for all initial data
+	const fetchAllData = useCallback(async (): Promise<void> => {
 		try {
-			const [
-				roomsResponse,
-				activitiesResponse
-			] = await Promise.all([
+			const fromDate = new Date()
+			fromDate.setHours(0, 0, 0, 0)
+			const toDate = new Date()
+			toDate.setHours(24, 0, 0, 0)
+
+			const [roomsResponse, activitiesResponse, ordersResponse] = await Promise.all([
 				axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
-				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true })
+				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
+						status: 'pending,confirmed',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				})
 			])
 
-			// Update refs
-			roomsRef.current = roomsResponse.data
-			activitiesRef.current = activitiesResponse.data
+			setRooms(roomsResponse.data)
+			setActivities(activitiesResponse.data)
+			setRawOrders(ordersResponse.data)
 		} catch (error: any) {
 			addError(error)
 		}
 	}, [API_URL, addError])
 
 	const getRoomNameFromOrder = useCallback((order: OrderType): string => {
-		const activity = activitiesRef.current.find(a => a._id === order.activityId)
-		const room = (activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
+		const activity = activities.find(a => a._id === order.activityId)
+		const room = (activity !== undefined) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
 		return room?.name ?? 'no-room'
-	}, [])
+	}, [activities, rooms])
 
 	const groupOrdersByRoomName = useCallback((orders: OrderType[]): Record<string, OrderType[]> => {
 		return orders.reduce<Record<string, OrderType[]>>((acc, order) => {
@@ -65,73 +77,33 @@ export default function Page(): ReactElement {
 		}, {})
 	}, [getRoomNameFromOrder])
 
-	const addOrderToRoomOrders = useCallback(
-		(prevRoomOrders: Record<string, OrderType[]>, order: OrderType): Record<string, OrderType[]> => {
-			const roomName = getRoomNameFromOrder(order)
-			return {
-				...prevRoomOrders,
-				[roomName]: [...(prevRoomOrders[roomName] ?? []), order]
-			}
-		},
-		[getRoomNameFromOrder]
-	)
-
-	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
-		const fromDate = new Date()
-		fromDate.setHours(0, 0, 0, 0)
-		const toDate = new Date()
-		toDate.setHours(24, 0, 0, 0)
-
-		try {
-			const { data: orders } = await axios.get<OrderType[]>(
-				`${API_URL}/v1/orders`,
-				{
-					params: {
-						fromDate: fromDate.toISOString(),
-						toDate: toDate.toISOString(),
-						status: 'pending,confirmed',
-						paymentStatus: 'successful'
-					},
-					withCredentials: true
-				}
-			)
-
-			const groupedOrders = groupOrdersByRoomName(orders)
-			setRoomOrders(groupedOrders)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError, groupOrdersByRoomName])
+	// Process orders whenever raw orders, rooms, or activities change
+	useEffect(() => {
+		const groupedOrders = groupOrdersByRoomName(rawOrders)
+		setRoomOrders(groupedOrders)
+	}, [rawOrders, groupOrdersByRoomName])
 
 	const handleNewOrder = useCallback(
 		(order: OrderType) => {
 			try {
-				setRoomOrders(prevRoomOrders => addOrderToRoomOrders(prevRoomOrders, order))
+				setRawOrders(prevOrders => [...prevOrders, order])
 			} catch (error: any) {
 				addError(error)
 			}
 		},
-		[addError, addOrderToRoomOrders]
+		[addError]
 	)
 
 	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
 		try {
-			setRoomOrders((prevRoomOrders) => {
-				const newRoomOrders = { ...prevRoomOrders }
-
-				updatedOrders.forEach((updatedOrder) => {
-					for (const roomName in newRoomOrders) {
-						const orders = newRoomOrders[roomName]
-						const index = orders.findIndex((order) => order._id === updatedOrder._id)
-						if (index !== -1) {
-							// Update the status of the order
-							orders[index].status = updatedOrder.status
-							break // Exit the loop once the order is found
-						}
+			setRawOrders(prevOrders => {
+				return prevOrders.map(order => {
+					const updatedOrder = updatedOrders.find(uo => uo._id === order._id)
+					if (updatedOrder) {
+						return { ...order, status: updatedOrder.status }
 					}
+					return order
 				})
-
-				return newRoomOrders
 			})
 		} catch (error: any) {
 			addError(error)
@@ -140,9 +112,8 @@ export default function Page(): ReactElement {
 
 	// Fetch data and orders on component mount
 	useEffect(() => {
-		// Must use Promise chaining to ensure data is loaded before orders
-		fetchData().then(fetchAndProcessOrders).catch(addError)
-	}, [addError, fetchAndProcessOrders, fetchData])
+		fetchAllData()
+	}, [fetchAllData])
 
 	// Listen for new orders
 	useEffect(() => {
@@ -173,7 +144,7 @@ export default function Page(): ReactElement {
 
 	// Refresh data every hour
 	useInterval(() => {
-		fetchData().catch(addError)
+		fetchAllData().catch(addError)
 	}, 1000 * 60 * 60) // Every hour
 
 	return (
@@ -214,7 +185,7 @@ export default function Page(): ReactElement {
 								onUpdatedOrders={handleUpdatedOrders}
 							/>
 						)}
-						{roomsRef.current
+						{rooms
 							// Filter out rooms without pending orders
 							.filter(
 								room =>
