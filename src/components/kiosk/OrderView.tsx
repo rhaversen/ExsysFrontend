@@ -49,8 +49,8 @@ const OrderView = ({
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 
-	const timeoutMs = config?.kioskInactivityTimeoutMs ?? 1000 * 60
-	const warningOffsetMs = config?.kioskInactivityTimeoutWarningMs ?? 1000 * 10
+	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
+	const warningOffsetMs = config?.configs.kioskInactivityTimeoutWarningMs ?? 1000 * 10
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)

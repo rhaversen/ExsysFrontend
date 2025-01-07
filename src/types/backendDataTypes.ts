@@ -198,11 +198,13 @@ export interface SessionType {
 }
 
 // Config types
-export interface ConfigType {
+export interface ConfigsType {
 	_id: string
-	kioskInactivityTimeoutMs: number
-	kioskInactivityTimeoutWarningMs: number
-	kioskOrderConfirmationTimeoutMs: number
+	configs: {
+		kioskInactivityTimeoutMs: number
+		kioskInactivityTimeoutWarningMs: number
+		kioskOrderConfirmationTimeoutMs: number
+	}
 	createdAt: Date
 	updatedAt: Date
 }

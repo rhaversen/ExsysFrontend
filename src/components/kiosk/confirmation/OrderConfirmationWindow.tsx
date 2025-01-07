@@ -19,7 +19,7 @@ const OrderConfirmationWindow = ({
 }): ReactElement => {
 	const { config } = useConfig()
 
-	const autocloseMs = config?.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
+	const autocloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
 	const [remainingSeconds, setRemainingSeconds] = useState(autocloseMs / 1000)
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
