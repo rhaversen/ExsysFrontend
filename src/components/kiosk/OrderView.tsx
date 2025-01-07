@@ -207,8 +207,8 @@ const OrderView = ({
 		resetTimerRef.current = setTimeout(() => {
 			// Only show warning now
 			setShowTimeoutWarning(true)
-		}, timeoutMs - warningOffsetMs)
-	}, [timeoutMs, warningOffsetMs])
+		}, timeoutMs)
+	}, [timeoutMs])
 
 	// Reset timer on component mount
 	useEffect(() => {
