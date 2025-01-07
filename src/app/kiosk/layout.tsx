@@ -1,3 +1,4 @@
+import ConfigProvider from '@/contexts/ConfigProvider'
 import KioskAuthProvider from '@/contexts/KioskAuthProvider'
 import { type Metadata } from 'next'
 
@@ -16,5 +17,11 @@ export default function SelectRoomLayout ({
 }: Readonly<{
 	children: React.ReactNode
 }>): React.JSX.Element {
-	return <KioskAuthProvider>{children}</KioskAuthProvider>
+	return (
+		<KioskAuthProvider>
+			<ConfigProvider>
+				{children}
+			</ConfigProvider>
+		</KioskAuthProvider>
+	)
 }

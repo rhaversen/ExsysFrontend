@@ -38,15 +38,8 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 			await axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true })
 			// If kiosk, do nothing (let them stay on the current page)
 		} catch {
-			try {
-				// Check if user is an admin
-				await axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true })
-				// If kiosk, redirect to admin main page
-				router.push('/admin')
-			} catch {
-				// If neither admin nor kiosk, redirect to login page
-				router.push('/login-kiosk')
-			}
+			// If not kiosk, redirect to login page
+			router.push('/login-kiosk')
 		}
 	}, [API_URL, router])
 

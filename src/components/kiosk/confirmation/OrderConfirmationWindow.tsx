@@ -1,5 +1,6 @@
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import Image from 'next/image'
@@ -16,10 +17,11 @@ const OrderConfirmationWindow = ({
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 }): ReactElement => {
-	// TODO: Make this configurable
-	const autocloseSeconds = 10
+	const { config } = useConfig()
 
-	const [remainingSeconds, setRemainingSeconds] = useState(autocloseSeconds)
+	const autocloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
+
+	const [remainingSeconds, setRemainingSeconds] = useState(autocloseMs / 1000)
 	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
 
 	useEffect(() => {
@@ -40,9 +42,9 @@ const OrderConfirmationWindow = ({
 		if (!canClose) return
 		const timeoutId = setTimeout(() => {
 			onClose()
-		}, autocloseSeconds * 1000)
+		}, autocloseMs)
 		return () => { clearTimeout(timeoutId) }
-	}, [canClose, onClose])
+	}, [autocloseMs, canClose, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
@@ -65,23 +67,21 @@ const OrderConfirmationWindow = ({
 	// The order was completed successfully
 	let successMessage: ReactElement = <></>
 	if (checkoutMethod === 'later') {
-		successMessage = <div className="flex items-center justify-center">
-			{'Betal'}
+		successMessage = <p className="flex items-center justify-center">
+			{'Betal '}
 			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
-			{'ved afhentning'}
-		</div>
+			{' ved afhentning'}
+		</p>
 	} else {
-		successMessage = <>{'Betaling gennemført'}</>
+		successMessage = <p>{'Betaling gennemført'}</p>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
-		loading: <>{'Vent venligst'}</>,
-		awaitingPayment: <>{'Afventer betaling'}</>,
+		loading: <p>{'Vent venligst'}</p>,
+		awaitingPayment: <p>{'Afventer betaling'}</p>,
 		success: successMessage,
-		paymentFailed: <>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</>,
-		error: (
-			<>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</>
-		)
+		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
+		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
 	}
 
 	const showSubmitButton = orderStatus !== 'loading'
@@ -93,9 +93,9 @@ const OrderConfirmationWindow = ({
 			</h2>
 
 			{paragraphContent[orderStatus] !== undefined && (
-				<p className="mb-4 flex justify-center text-center text-gray-800">
+				<div className="mb-4 flex justify-center text-center text-gray-800">
 					{paragraphContent[orderStatus]}
-				</p>
+				</div>
 			)}
 
 			<div className="flex justify-center">

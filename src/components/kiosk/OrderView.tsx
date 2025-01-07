@@ -2,6 +2,7 @@ import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
@@ -33,6 +34,7 @@ const OrderView = ({
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
+	const { config } = useConfig()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -47,9 +49,7 @@ const OrderView = ({
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 
-	// TODO: Move these constants to a configuration file
-	const timeoutSeconds = 60
-	const warningOffsetSeconds = 10
+	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -206,8 +206,8 @@ const OrderView = ({
 		resetTimerRef.current = setTimeout(() => {
 			// Only show warning now
 			setShowTimeoutWarning(true)
-		}, timeoutSeconds * 1000 - warningOffsetSeconds * 1000)
-	}, [])
+		}, timeoutMs)
+	}, [timeoutMs])
 
 	// Reset timer on component mount
 	useEffect(() => {
@@ -362,7 +362,6 @@ const OrderView = ({
 			{/* Timeout Warning Modal */}
 			{showTimeoutWarning && (
 				<TimeoutWarningWindow
-					warningOffsetSeconds={warningOffsetSeconds}
 					onTimeout={() => { reset() }}
 					onClose={() => {
 						setShowTimeoutWarning(false)
