@@ -28,15 +28,15 @@ const ConfigsView = (): ReactElement => {
 	const text = {
 		kioskInactivityTimeoutMs: {
 			readableLabel: 'Kiosk Inaktivitet Timeout',
-			description: 'Inaktivitetstiden før kiosken advarer brugeren om inaktivitet'
+			description: 'Den maksimale tid en bruger kan være inaktiv, før kiosken advarer om inaktivitet. Tiden starter forfra hver gang brugeren interagerer med skærmen.'
 		},
 		kioskInactivityTimeoutWarningMs: {
 			readableLabel: 'Kiosk Inaktivitet Timeout Advarsel',
-			description: 'Advarselstiden før kiosken sender brugeren tilbage til startskærmen'
+			description: 'Tid før kiosken advarer brugeren om inaktivitet og sender dem tilbage til startskærmen. Brugeren kan interagere med skærmen og forlænge tiden.'
 		},
 		kioskOrderConfirmationTimeoutMs: {
 			readableLabel: 'Kiosk Bestillingsbekræftelse Timeout',
-			description: 'Tiden før kiosken går tilbage til startskærmen efter en bestilling'
+			description: 'Den tid kiosken venter, før den går tilbage til startskærmen efter en bestilling er bekræftet. Brugeren kan også trykke på skærmen for at gå videre.'
 		}
 	}
 
