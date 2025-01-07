@@ -13,6 +13,7 @@ import Room from '@/components/admin/modify/setup/room/Room'
 import ItemList from '@/components/admin/modify/ui/ItemList'
 import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
+import ConfigsView from '@/components/admin/modify/setup/config/ConfigsView'
 import useSorting from '@/hooks/useSorting'
 import type sortConfig from '@/lib/SortConfig'
 import {
@@ -37,7 +38,7 @@ const SetupView = ({
 	readers: ReaderType[]
 	admins: AdminType[]
 }): ReactElement => {
-	const views = ['Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins']
+	const views = ['Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins', 'Konfiguration']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [showAddRoom, setShowAddRoom] = useState(false)
@@ -64,7 +65,7 @@ const SetupView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{isEnabled && (
+			{isEnabled && selectedView !== 'Konfiguration' && (
 				<SortingControl
 					options={sortingOptions}
 					currentField={sortField}
@@ -177,6 +178,9 @@ const SetupView = ({
 						</div>
 					))}
 				</ItemList>
+			}
+			{selectedView === 'Konfiguration' &&
+				<ConfigsView />
 			}
 			{showAddRoom &&
 				<AddRoom
