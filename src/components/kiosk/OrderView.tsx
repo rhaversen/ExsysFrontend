@@ -2,6 +2,7 @@ import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type ActivityType,
@@ -33,6 +34,7 @@ const OrderView = ({
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
+	const { config } = useConfig()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -47,9 +49,7 @@ const OrderView = ({
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 
-	// TODO: Move these constants to a configuration file
-	const timeoutSeconds = 60
-	const warningOffsetSeconds = 10
+	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -184,71 +184,62 @@ const OrderView = ({
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
+		setShowTimeoutWarning(false)
 		if (kiosk.activities.length > 1) {
 			onClose()
+		} else {
+			window.dispatchEvent(new Event('resetScroll'))
+			setCart({
+				products: {},
+				options: {}
+			})
+			setIsOrderConfirmationVisible(false)
+			setOrderStatus('loading')
+			setOrder(null)
 		}
-		setCart({
-			products: {},
-			options: {}
-		})
-		setIsOrderConfirmationVisible(false)
-		setOrderStatus('loading')
-		setOrder(null)
 	}, [kiosk, onClose])
 
 	const resetTimerRef = useRef<NodeJS.Timeout>()
-	const warningTimerRef = useRef<NodeJS.Timeout>()
 
 	const resetTimer = useCallback(() => {
-		if (resetTimerRef.current != null) {
-			clearTimeout(resetTimerRef.current)
-		}
-		if (warningTimerRef.current != null) {
-			clearTimeout(warningTimerRef.current)
-		}
-
-		// Set warning timer
-		warningTimerRef.current = setTimeout(() => {
-			setShowTimeoutWarning(true)
-		}, timeoutSeconds * 1000 - warningOffsetSeconds * 1000)
-
-		// Set reset timer
+		clearTimeout(resetTimerRef.current)
 		resetTimerRef.current = setTimeout(() => {
-			reset()
-		}, timeoutSeconds * 1000)
-	}, [reset])
+			// Only show warning now
+			setShowTimeoutWarning(true)
+		}, timeoutMs)
+	}, [timeoutMs])
 
 	// Reset timer on component mount
 	useEffect(() => {
-		resetTimer()
-	}, [resetTimer])
+		// For a single-activity kiosk, only start if cart is not empty
+		if (kiosk.activities.length > 1 || Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)) {
+			resetTimer()
+		}
+	}, [resetTimer, kiosk, cart])
 
 	// Add global interaction listeners and cleanup
 	useEffect(() => {
 		const events = [
-			'mousedown',
-			'keydown',
 			'touchstart',
-			'scroll',
-			'wheel',
-			'pointermove',
-			'pointerdown',
 			'touchmove'
 		]
 
+		const handleResetTimer = (): void => {
+			if (!showTimeoutWarning) {
+				resetTimer()
+			}
+		}
+
 		events.forEach(event => {
-			document.addEventListener(event, resetTimer, { passive: true })
+			document.addEventListener(event, handleResetTimer)
 		})
 
 		return () => {
-			if (resetTimerRef.current != null) {
-				clearTimeout(resetTimerRef.current)
-			}
 			events.forEach(event => {
-				document.removeEventListener(event, resetTimer)
+				document.removeEventListener(event, handleResetTimer)
 			})
 		}
-	}, [resetTimer])
+	}, [resetTimer, showTimeoutWarning])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
@@ -371,7 +362,7 @@ const OrderView = ({
 			{/* Timeout Warning Modal */}
 			{showTimeoutWarning && (
 				<TimeoutWarningWindow
-					warningOffsetSeconds={warningOffsetSeconds}
+					onTimeout={() => { reset() }}
 					onClose={() => {
 						setShowTimeoutWarning(false)
 						resetTimer()
