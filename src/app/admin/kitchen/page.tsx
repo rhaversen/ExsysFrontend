@@ -14,6 +14,7 @@ import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 
 export default function Page(): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -146,6 +147,66 @@ export default function Page(): ReactElement {
 	useInterval(() => {
 		fetchAllData().catch(addError)
 	}, 1000 * 60 * 60) // Every hour
+
+	// Generic add handler
+	const CreateAddHandler = <T,>(
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => [...prevItems, item])
+			},
+			[setState]
+		)
+	}
+
+	// Generic update handler
+	const CreateUpdateHandler = <T extends { _id: string }>(
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => {
+					const index = prevItems.findIndex((i) => i._id === item._id)
+					if (index === -1) return prevItems
+					const newItems = [...prevItems]
+					newItems[index] = item
+					return newItems
+				})
+			},
+			[setState]
+		)
+	}
+
+	// Generic delete handler  
+	const CreateDeleteHandler = <T extends { _id: string }>(
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (id: string) => void => {
+		return useCallback(
+			(id: string) => {
+				setState((prevItems) => prevItems.filter((i) => i._id !== id))
+			},
+			[setState]
+		)
+	}
+
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		CreateAddHandler<RoomType>(setRooms),
+		CreateUpdateHandler<RoomType>(setRooms),
+		CreateDeleteHandler<RoomType>(setRooms)
+	)
+
+	// Activities
+	useEntitySocketListeners<ActivityType>(
+		socket,
+		'activity',
+		CreateAddHandler<ActivityType>(setActivities),
+		CreateUpdateHandler<ActivityType>(setActivities),
+		CreateDeleteHandler<ActivityType>(setActivities)
+	)
 
 	return (
 		<main>
