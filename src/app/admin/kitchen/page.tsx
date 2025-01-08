@@ -16,7 +16,7 @@ import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 
-export default function Page(): ReactElement {
+export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -100,7 +100,7 @@ export default function Page(): ReactElement {
 			setRawOrders(prevOrders => {
 				return prevOrders.map(order => {
 					const updatedOrder = updatedOrders.find(uo => uo._id === order._id)
-					if (updatedOrder) {
+					if (updatedOrder !== undefined) {
 						return { ...order, status: updatedOrder.status }
 					}
 					return order
@@ -113,7 +113,7 @@ export default function Page(): ReactElement {
 
 	// Fetch data and orders on component mount
 	useEffect(() => {
-		fetchAllData()
+		fetchAllData().catch(addError)
 	}, [fetchAllData])
 
 	// Listen for new orders
@@ -178,7 +178,7 @@ export default function Page(): ReactElement {
 		)
 	}
 
-	// Generic delete handler  
+	// Generic delete handler
 	const CreateDeleteHandler = <T extends { _id: string }>(
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (id: string) => void => {
