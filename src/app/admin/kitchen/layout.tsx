@@ -1,3 +1,4 @@
+import SoundProvider from '@/contexts/SoundProvider'
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -15,5 +16,5 @@ export default function kitchenLayout ({
 }: Readonly<{
 	children: React.ReactNode
 }>): React.JSX.Element {
-	return <>{children}</>
+	return <SoundProvider>{children}</SoundProvider>
 }

@@ -1,100 +1,103 @@
 const sortConfig = {
 	Produkter: [{
 		prop: 'name',
-		name: 'Navn'
-	}, {
-		prop: 'createdAt',
-		name: 'Oprettet'
-	}, {
-		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Navn'
 	}, {
 		prop: 'price',
-		name: 'Pris'
+		label: 'Pris'
+	}, {
+		prop: 'options.length',
+		label: 'Antal Tilvalg'
 	}, {
 		prop: 'orderWindow.from.hour',
-		name: 'Bestilling Fra'
+		label: 'Bestilling Fra'
 	}, {
 		prop: 'orderWindow.to.hour',
-		name: 'Bestilling Til'
+		label: 'Bestilling Til'
+	}, {
+		prop: 'createdAt',
+		label: 'Oprettet'
+	}, {
+		prop: 'updatedAt',
+		label: 'Opdateret'
 	}],
 	Tilvalg: [{
 		prop: 'name',
-		name: 'Navn'
-	}, {
-		prop: 'createdAt',
-		name: 'Oprettet'
-	}, {
-		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Navn'
 	}, {
 		prop: 'price',
-		name: 'Pris'
+		label: 'Pris'
+	}, {
+		prop: 'createdAt',
+		label: 'Oprettet'
+	}, {
+		prop: 'updatedAt',
+		label: 'Opdateret'
 	}],
 	Aktiviteter: [{
 		prop: 'name',
-		name: 'Navn'
+		label: 'Navn'
 	}, {
 		prop: 'createdAt',
-		name: 'Oprettet'
+		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Opdateret'
 	}, {
 		prop: 'roomId.name',
-		name: 'Spisested'
+		label: 'Spisested'
 	}],
 	Spisesteder: [{
 		prop: 'name',
-		name: 'Navn'
+		label: 'Navn'
 	}, {
 		prop: 'createdAt',
-		name: 'Oprettet'
+		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Opdateret'
 	}, {
 		prop: 'description',
-		name: 'Beskrivelse'
+		label: 'Beskrivelse'
 	}],
 	Kiosker: [{
 		prop: 'name',
-		name: 'Navn'
-	}, {
-		prop: 'createdAt',
-		name: 'Oprettet'
-	}, {
-		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Kiosk Navn'
 	}, {
 		prop: 'kioskTag',
-		name: 'Kiosk Tag'
+		label: 'Kiosk Tag'
 	}, {
 		prop: 'readerId.readerTag',
-		name: 'Reader Tag'
+		label: 'Kortlæser Tag'
 	}, {
 		prop: 'activities.length',
-		name: 'Antal Aktiviteter'
+		label: 'Antal Aktiviteter'
+	}, {
+		prop: 'createdAt',
+		label: 'Oprettet'
+	}, {
+		prop: 'updatedAt',
+		label: 'Opdateret'
 	}],
 	Kortlæsere: [{
 		prop: 'readerTag',
-		name: 'Reader Tag'
+		label: 'Kortlæser Tag'
 	}, {
 		prop: 'createdAt',
-		name: 'Oprettet'
+		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Opdateret'
 	}],
 	Admins: [{
 		prop: 'name',
-		name: 'Navn'
+		label: 'Brugernavn'
 	}, {
 		prop: 'createdAt',
-		name: 'Oprettet'
+		label: 'Oprettet'
 	}, {
 		prop: 'updatedAt',
-		name: 'Opdateret'
+		label: 'Opdateret'
 	}]
 }
 

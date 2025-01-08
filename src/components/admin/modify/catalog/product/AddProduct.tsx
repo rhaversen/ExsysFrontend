@@ -1,4 +1,3 @@
-import OptionsWindow from '@/components/admin/modify/catalog/product/OptionsWindow'
 import Options from '@/components/admin/modify/catalog/product/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
@@ -10,6 +9,7 @@ import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
 import InlineValidation from '../../ui/InlineValidation'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const AddProduct = ({
 	options,
@@ -285,12 +285,12 @@ const AddProduct = ({
 					}}
 				/>
 				{showOptions &&
-					<OptionsWindow
-						productName={product.name}
-						options={options}
-						productOptions={options.filter((option) => product.options.includes(option._id))}
-						onAddOption={handleAddOption}
-						onDeleteOption={handleDeleteOption}
+					<SelectionWindow
+						title={`Tilføj tilvalg til ${product.name === '' ? 'Nyt Produkt' : product.name}`}
+						items={options}
+						selectedItems={options.filter((option) => product.options.includes(option._id))}
+						onAddItem={handleAddOption}
+						onDeleteItem={handleDeleteOption}
 						onClose={() => {
 							setShowOptions(false)
 						}}
