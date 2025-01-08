@@ -1,20 +1,16 @@
 'use client'
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'
+import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { useSound } from '@/contexts/SoundProvider'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { LoadingImage } from '@/lib/images'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
-import {
-	type ActivityType,
-	type OptionType,
-	type OrderType,
-	type ProductType,
-	type RoomType
-} from '@/types/backendDataTypes'
+import { type ActivityType, type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 
@@ -23,52 +19,57 @@ export default function Page (): ReactElement {
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { addError } = useError()
+	const {
+		isMuted,
+		setIsMuted
+	} = useSound()
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
+	const [rawOrders, setRawOrders] = useState<OrderType[]>([])
 
-	const productsRef = useRef<ProductType[]>([])
-	const optionsRef = useRef<OptionType[]>([])
-	const roomsRef = useRef<RoomType[]>([])
-	const activitiesRef = useRef<ActivityType[]>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
 
-	// Fetch initial data (products, options, rooms, activities)
-	const fetchData = useCallback(async (): Promise<void> => {
+	const [showSoundSettings, setShowSoundSettings] = useState(false)
+
+	// Combined fetch function for all initial data
+	const fetchAllData = useCallback(async (): Promise<void> => {
 		try {
-			const [
-				productsResponse,
-				optionsResponse,
-				roomsResponse,
-				activitiesResponse
-			] = await Promise.all([
-				axios.get(`${API_URL}/v1/products`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/options`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/rooms`, { withCredentials: true }),
-				axios.get(`${API_URL}/v1/activities`, { withCredentials: true })
+			const fromDate = new Date()
+			fromDate.setHours(0, 0, 0, 0)
+			const toDate = new Date()
+			toDate.setHours(24, 0, 0, 0)
+
+			const [roomsResponse, activitiesResponse, ordersResponse] = await Promise.all([
+				axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
+						status: 'pending,confirmed',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				})
 			])
 
-			const productsData = productsResponse.data as ProductType[]
-			productsData.forEach((product) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
-			})
-
-			// Update refs
-			productsRef.current = productsData
-			optionsRef.current = optionsResponse.data as OptionType[]
-			roomsRef.current = roomsResponse.data as RoomType[]
-			activitiesRef.current = activitiesResponse.data as ActivityType[]
+			setRooms(roomsResponse.data)
+			setActivities(activitiesResponse.data)
+			setRawOrders(ordersResponse.data)
 		} catch (error: any) {
 			addError(error)
 		}
 	}, [API_URL, addError])
 
 	const getRoomNameFromOrder = useCallback((order: OrderType): string => {
-		const activity = activitiesRef.current.find(a => a._id === order.activityId)
-		const room = (activity !== undefined) ? roomsRef.current.find(r => r._id === activity.roomId?._id) : undefined
+		const activity = activities.find(a => a._id === order.activityId)
+		const room = (activity !== undefined) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
 		return room?.name ?? 'no-room'
-	}, [])
+	}, [activities, rooms])
 
 	const groupOrdersByRoomName = useCallback((orders: OrderType[]): Record<string, OrderType[]> => {
 		return orders.reduce<Record<string, OrderType[]>>((acc, order) => {
@@ -81,73 +82,36 @@ export default function Page (): ReactElement {
 		}, {})
 	}, [getRoomNameFromOrder])
 
-	const addOrderToRoomOrders = useCallback(
-		(prevRoomOrders: Record<string, OrderType[]>, order: OrderType): Record<string, OrderType[]> => {
-			const roomName = getRoomNameFromOrder(order)
-			return {
-				...prevRoomOrders,
-				[roomName]: [...(prevRoomOrders[roomName] ?? []), order]
-			}
-		},
-		[getRoomNameFromOrder]
-	)
-
-	const fetchAndProcessOrders = useCallback(async (): Promise<void> => {
-		const fromDate = new Date()
-		fromDate.setHours(0, 0, 0, 0)
-		const toDate = new Date()
-		toDate.setHours(24, 0, 0, 0)
-
-		try {
-			const { data: orders } = await axios.get<OrderType[]>(
-				`${API_URL}/v1/orders`,
-				{
-					params: {
-						fromDate: fromDate.toISOString(),
-						toDate: toDate.toISOString(),
-						status: 'pending,confirmed',
-						paymentStatus: 'successful'
-					},
-					withCredentials: true
-				}
-			)
-
-			const groupedOrders = groupOrdersByRoomName(orders)
-			setRoomOrders(groupedOrders)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError, groupOrdersByRoomName])
+	// Process orders whenever raw orders, rooms, or activities change
+	useEffect(() => {
+		const groupedOrders = groupOrdersByRoomName(rawOrders)
+		setRoomOrders(groupedOrders)
+	}, [rawOrders, groupOrdersByRoomName])
 
 	const handleNewOrder = useCallback(
 		(order: OrderType) => {
 			try {
-				setRoomOrders(prevRoomOrders => addOrderToRoomOrders(prevRoomOrders, order))
+				setRawOrders(prevOrders => [...prevOrders, order])
 			} catch (error: any) {
 				addError(error)
 			}
 		},
-		[addError, addOrderToRoomOrders]
+		[addError]
 	)
 
 	const handleUpdatedOrders = useCallback((updatedOrders: UpdatedOrderType[]) => {
 		try {
-			setRoomOrders((prevRoomOrders) => {
-				const newRoomOrders = { ...prevRoomOrders }
-
-				updatedOrders.forEach((updatedOrder) => {
-					for (const roomName in newRoomOrders) {
-						const orders = newRoomOrders[roomName]
-						const index = orders.findIndex((order) => order._id === updatedOrder._id)
-						if (index !== -1) {
-							// Update the status of the order
-							orders[index].status = updatedOrder.status
-							break // Exit the loop once the order is found
+			setRawOrders(prevOrders => {
+				return prevOrders.map(order => {
+					const updatedOrder = updatedOrders.find(uo => uo._id === order._id)
+					if (updatedOrder !== undefined) {
+						return {
+							...order,
+							status: updatedOrder.status
 						}
 					}
+					return order
 				})
-
-				return newRoomOrders
 			})
 		} catch (error: any) {
 			addError(error)
@@ -156,9 +120,8 @@ export default function Page (): ReactElement {
 
 	// Fetch data and orders on component mount
 	useEffect(() => {
-		// Must use Promise chaining to ensure data is loaded before orders
-		fetchData().then(fetchAndProcessOrders).catch(addError)
-	}, [addError, fetchAndProcessOrders, fetchData])
+		fetchAllData().catch(addError)
+	}, [addError, fetchAllData])
 
 	// Listen for new orders
 	useEffect(() => {
@@ -189,8 +152,68 @@ export default function Page (): ReactElement {
 
 	// Refresh data every hour
 	useInterval(() => {
-		fetchData().catch(addError)
+		fetchAllData().catch(addError)
 	}, 1000 * 60 * 60) // Every hour
+
+	// Generic add handler
+	const CreateAddHandler = <T, > (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => [...prevItems, item])
+			},
+			[setState]
+		)
+	}
+
+	// Generic update handler
+	const CreateUpdateHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (item: T) => void => {
+		return useCallback(
+			(item: T) => {
+				setState((prevItems) => {
+					const index = prevItems.findIndex((i) => i._id === item._id)
+					if (index === -1) return prevItems
+					const newItems = [...prevItems]
+					newItems[index] = item
+					return newItems
+				})
+			},
+			[setState]
+		)
+	}
+
+	// Generic delete handler
+	const CreateDeleteHandler = <T extends { _id: string }> (
+		setState: React.Dispatch<React.SetStateAction<T[]>>
+	): (id: string) => void => {
+		return useCallback(
+			(id: string) => {
+				setState((prevItems) => prevItems.filter((i) => i._id !== id))
+			},
+			[setState]
+		)
+	}
+
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		CreateAddHandler<RoomType>(setRooms),
+		CreateUpdateHandler<RoomType>(setRooms),
+		CreateDeleteHandler<RoomType>(setRooms)
+	)
+
+	// Activities
+	useEntitySocketListeners<ActivityType>(
+		socket,
+		'activity',
+		CreateAddHandler<ActivityType>(setActivities),
+		CreateUpdateHandler<ActivityType>(setActivities),
+		CreateDeleteHandler<ActivityType>(setActivities)
+	)
 
 	return (
 		<main>
@@ -211,49 +234,95 @@ export default function Page (): ReactElement {
 								height={100}
 							/>
 						</div>
+						<div className="fixed bottom-4 right-4 z-20 flex">
+							<button
+								type="button"
+								onClick={() => { setIsMuted(!isMuted) }}
+								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+							>
+								<span>{isMuted ? '🔇' : '🔊'}</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => { setShowSoundSettings(!showSoundSettings) }}
+								className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors
+									${showSoundSettings
+						? 'bg-blue-500 text-white hover:bg-blue-600'
+						: 'bg-white text-gray-700 hover:bg-gray-50'
+					}`}
+							>
+								{'Lydindstillinger'}
+							</button>
+						</div>
 					</>
 				)
 				: (
-					<div className="p-2 flex flex-wrap justify-start">
-						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
-							// Render a column for orders without a room
-							<RoomCol
-								key="no-room"
-								room={{
-									_id: 'no-room',
-									name: 'Ukendt Spisested',
-									description: 'Aktivitet har intet spisested tildelt',
-									createdAt: '',
-									updatedAt: ''
-								}}
-								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
-								onUpdatedOrders={handleUpdatedOrders}
-							/>
-						)}
-						{roomsRef.current
-							// Filter out rooms without pending orders
-							.filter(
-								room =>
-									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
-							)
-							.sort((a, b) => {
-								const aOrders = roomOrders[a.name]?.filter(order => order.status !== 'delivered') ?? []
-								const bOrders = roomOrders[b.name]?.filter(order => order.status !== 'delivered') ?? []
-								const aEarliest = Math.min(...aOrders.map(order => new Date(order.updatedAt).getTime()))
-								const bEarliest = Math.min(...bOrders.map(order => new Date(order.updatedAt).getTime()))
-								return aEarliest - bEarliest
-							})
-							.map(room => (
+					<>
+						<div className="p-2 flex flex-wrap justify-start">
+							{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
+								// Render a column for orders without a room
 								<RoomCol
-									key={room._id}
-									room={room}
-									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+									key="no-room"
+									room={{
+										_id: 'no-room',
+										name: 'Ukendt Spisested',
+										description: 'Aktivitet har intet spisested tildelt',
+										createdAt: '',
+										updatedAt: ''
+									}}
+									orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
 									onUpdatedOrders={handleUpdatedOrders}
 								/>
-							))}
-					</div>
-				)
-			}
+							)}
+							{rooms
+								// Filter out rooms without pending orders
+								.filter(
+									room =>
+										roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
+								)
+								.sort((a, b) => {
+									const aOrders = roomOrders[a.name]?.filter(order => order.status !== 'delivered') ?? []
+									const bOrders = roomOrders[b.name]?.filter(order => order.status !== 'delivered') ?? []
+									const aEarliest = Math.min(...aOrders.map(order => new Date(order.updatedAt).getTime()))
+									const bEarliest = Math.min(...bOrders.map(order => new Date(order.updatedAt).getTime()))
+									return aEarliest - bEarliest
+								})
+								.map(room => (
+									<RoomCol
+										key={room._id}
+										room={room}
+										orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+										onUpdatedOrders={handleUpdatedOrders}
+									/>
+								))}
+						</div>
+						<div className="fixed bottom-4 right-4 z-20 flex">
+							<button
+								type="button"
+								onClick={() => { setIsMuted(!isMuted) }}
+								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+							>
+								<span>{isMuted ? '🔇' : '🔊'}</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => { setShowSoundSettings(!showSoundSettings) }}
+								className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors
+									${showSoundSettings
+						? 'bg-blue-500 text-white hover:bg-blue-600'
+						: 'bg-white text-gray-700 hover:bg-gray-50'
+					}`}
+							>
+								{'Lydindstillinger'}
+							</button>
+						</div>
+					</>
+				)}
+			{showSoundSettings && (
+				<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
+			)}
 		</main>
 	)
 }

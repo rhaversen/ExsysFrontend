@@ -183,7 +183,6 @@ const Kiosk = ({
 						items={activities}
 						selectedItems={newKiosk.activities}
 						onAddItem={(v) => {
-							console.log(v)
 							handleFieldChange('activities', [...newKiosk.activities, {
 								...v,
 								_id: v._id

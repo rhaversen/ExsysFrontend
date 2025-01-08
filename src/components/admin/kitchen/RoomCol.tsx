@@ -1,5 +1,5 @@
 import Block from '@/components/admin/kitchen/Block'
-import { AdminSounds } from '@/lib/sounds'
+import { useSound } from '@/contexts/SoundProvider'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -13,11 +13,15 @@ const RoomCol = ({
 	orders: OrderType[]
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 }): ReactElement => {
+	const {
+		isMuted,
+		soundUrl
+	} = useSound()
 	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderType[]>>({})
 	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
 	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
 	const prevBlockCountRef = useRef(0)
-	const newOrderAlert = useMemo(() => new Audio(AdminSounds.newOrderAlert), [])
+	const newOrderAlert = useMemo(() => new Audio(soundUrl), [soundUrl])
 
 	const groupOrdersByActivity = useCallback(() => {
 		const groupedOrders: Record<string, OrderType[]> = {}
@@ -37,11 +41,12 @@ const RoomCol = ({
 	// Play a sound when a new block is added
 	useEffect(() => {
 		const currentBlockCount = Object.keys(ordersByActivity).length
-		if (currentBlockCount > prevBlockCountRef.current) {
+		const increaseBlockCount = currentBlockCount > prevBlockCountRef.current
+		if (increaseBlockCount && !isMuted) {
 			newOrderAlert.play().catch(console.error)
 		}
 		prevBlockCountRef.current = currentBlockCount
-	}, [newOrderAlert, ordersByActivity, room])
+	}, [isMuted, newOrderAlert, ordersByActivity, room])
 
 	useEffect(() => {
 		const productsCount: Record<string, number> = {}

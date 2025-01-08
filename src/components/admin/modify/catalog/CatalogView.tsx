@@ -57,6 +57,7 @@ const CatalogView = ({
 			{selectedView === 'Produkter' &&
 				<ItemList
 					buttonText="Nyt Produkt"
+					headerText="Produkter er de primære bestillingsmuligheder og vises som det første på kiosken, efter en aktivitet er valgt. Tilvalg kan knyttes til produkter og bliver vist, hvis produktet de tilhører er valgt. Bestillingsvinduet bestemmer, hvornår produkter vises på kioskerne. Hvis der ikke er nogen produkter inden for bestillingsvinduet, går kiosken i dvale."
 					onAdd={() => {
 						setShowAddProduct(true)
 					}}
@@ -76,6 +77,7 @@ const CatalogView = ({
 			}
 			{selectedView === 'Tilvalg' &&
 				<ItemList
+					headerText="Tilvalg er sekundære bestillingsmuligheder, der knyttes til et eller flere produkter. De vises på kiosken, hvis mindst ét af de produkter, de er tilknyttet, er valgt."
 					buttonText="Nyt Tilvalg"
 					onAdd={() => {
 						setShowAddOption(true)
