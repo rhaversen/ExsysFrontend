@@ -1,7 +1,9 @@
 'use client'
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'
+import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { useSound } from '@/contexts/SoundProvider'
 import { LoadingImage } from '@/lib/images'
 import {
 	type ActivityType,
@@ -21,6 +23,10 @@ export default function Page (): ReactElement {
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { addError } = useError()
+	const {
+		isMuted,
+		setIsMuted
+	} = useSound()
 
 	const [roomOrders, setRoomOrders] = useState<Record<string, OrderType[]>>({})
 	const [rawOrders, setRawOrders] = useState<OrderType[]>([])
@@ -30,6 +36,8 @@ export default function Page (): ReactElement {
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
+
+	const [showSoundSettings, setShowSoundSettings] = useState(false)
 
 	// Combined fetch function for all initial data
 	const fetchAllData = useCallback(async (): Promise<void> => {
@@ -227,49 +235,95 @@ export default function Page (): ReactElement {
 								height={100}
 							/>
 						</div>
+						<div className="fixed bottom-4 right-4 z-20 flex">
+							<button
+								type="button"
+								onClick={() => { setIsMuted(!isMuted) }}
+								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+							>
+								<span>{isMuted ? '🔇' : '🔊'}</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => { setShowSoundSettings(!showSoundSettings) }}
+								className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors
+									${showSoundSettings
+						? 'bg-blue-500 text-white hover:bg-blue-600'
+						: 'bg-white text-gray-700 hover:bg-gray-50'
+					}`}
+							>
+								{'Lydindstillinger'}
+							</button>
+						</div>
 					</>
 				)
 				: (
-					<div className="p-2 flex flex-wrap justify-start">
-						{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
-							// Render a column for orders without a room
-							<RoomCol
-								key="no-room"
-								room={{
-									_id: 'no-room',
-									name: 'Ukendt Spisested',
-									description: 'Aktivitet har intet spisested tildelt',
-									createdAt: '',
-									updatedAt: ''
-								}}
-								orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
-								onUpdatedOrders={handleUpdatedOrders}
-							/>
-						)}
-						{rooms
-							// Filter out rooms without pending orders
-							.filter(
-								room =>
-									roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
-							)
-							.sort((a, b) => {
-								const aOrders = roomOrders[a.name]?.filter(order => order.status !== 'delivered') ?? []
-								const bOrders = roomOrders[b.name]?.filter(order => order.status !== 'delivered') ?? []
-								const aEarliest = Math.min(...aOrders.map(order => new Date(order.updatedAt).getTime()))
-								const bEarliest = Math.min(...bOrders.map(order => new Date(order.updatedAt).getTime()))
-								return aEarliest - bEarliest
-							})
-							.map(room => (
+					<>
+						<div className="p-2 flex flex-wrap justify-start">
+							{roomOrders['no-room']?.filter(order => order.status !== 'delivered')?.length > 0 && (
+								// Render a column for orders without a room
 								<RoomCol
-									key={room._id}
-									room={room}
-									orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+									key="no-room"
+									room={{
+										_id: 'no-room',
+										name: 'Ukendt Spisested',
+										description: 'Aktivitet har intet spisested tildelt',
+										createdAt: '',
+										updatedAt: ''
+									}}
+									orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
 									onUpdatedOrders={handleUpdatedOrders}
 								/>
-							))}
-					</div>
-				)
-			}
+							)}
+							{rooms
+								// Filter out rooms without pending orders
+								.filter(
+									room =>
+										roomOrders[room.name]?.filter(order => order.status !== 'delivered').length > 0
+								)
+								.sort((a, b) => {
+									const aOrders = roomOrders[a.name]?.filter(order => order.status !== 'delivered') ?? []
+									const bOrders = roomOrders[b.name]?.filter(order => order.status !== 'delivered') ?? []
+									const aEarliest = Math.min(...aOrders.map(order => new Date(order.updatedAt).getTime()))
+									const bEarliest = Math.min(...bOrders.map(order => new Date(order.updatedAt).getTime()))
+									return aEarliest - bEarliest
+								})
+								.map(room => (
+									<RoomCol
+										key={room._id}
+										room={room}
+										orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
+										onUpdatedOrders={handleUpdatedOrders}
+									/>
+								))}
+						</div>
+						<div className="fixed bottom-4 right-4 z-20 flex">
+							<button
+								type="button"
+								onClick={() => { setIsMuted(!isMuted) }}
+								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+							>
+								<span>{isMuted ? '🔇' : '🔊'}</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => { setShowSoundSettings(!showSoundSettings) }}
+								className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors
+									${showSoundSettings
+						? 'bg-blue-500 text-white hover:bg-blue-600'
+						: 'bg-white text-gray-700 hover:bg-gray-50'
+					}`}
+							>
+								{'Lydindstillinger'}
+							</button>
+						</div>
+					</>
+				)}
+			{showSoundSettings && (
+				<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
+			)}
 		</main>
 	)
 }
