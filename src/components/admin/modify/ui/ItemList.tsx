@@ -14,7 +14,7 @@ const ItemList = ({
 	children: ReactNode[]
 }): ReactElement => {
 	return (
-		<div className='flex flex-col items-center'>
+		<div className="flex flex-col items-center">
 			<button
 				type="button"
 				title="Tilføj"

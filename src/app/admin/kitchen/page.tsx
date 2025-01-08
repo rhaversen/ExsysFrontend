@@ -4,19 +4,15 @@ import RoomCol from '@/components/admin/kitchen/RoomCol'
 import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { LoadingImage } from '@/lib/images'
-import {
-	type ActivityType,
-	type OrderType,
-	type RoomType
-} from '@/types/backendDataTypes'
+import { type ActivityType, type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -109,7 +105,10 @@ export default function Page (): ReactElement {
 				return prevOrders.map(order => {
 					const updatedOrder = updatedOrders.find(uo => uo._id === order._id)
 					if (updatedOrder !== undefined) {
-						return { ...order, status: updatedOrder.status }
+						return {
+							...order,
+							status: updatedOrder.status
+						}
 					}
 					return order
 				})
@@ -122,7 +121,7 @@ export default function Page (): ReactElement {
 	// Fetch data and orders on component mount
 	useEffect(() => {
 		fetchAllData().catch(addError)
-	}, [fetchAllData])
+	}, [addError, fetchAllData])
 
 	// Listen for new orders
 	useEffect(() => {
@@ -157,7 +156,7 @@ export default function Page (): ReactElement {
 	}, 1000 * 60 * 60) // Every hour
 
 	// Generic add handler
-	const CreateAddHandler = <T,>(
+	const CreateAddHandler = <T, > (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (item: T) => void => {
 		return useCallback(
@@ -169,7 +168,7 @@ export default function Page (): ReactElement {
 	}
 
 	// Generic update handler
-	const CreateUpdateHandler = <T extends { _id: string }>(
+	const CreateUpdateHandler = <T extends { _id: string }> (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (item: T) => void => {
 		return useCallback(
@@ -187,7 +186,7 @@ export default function Page (): ReactElement {
 	}
 
 	// Generic delete handler
-	const CreateDeleteHandler = <T extends { _id: string }>(
+	const CreateDeleteHandler = <T extends { _id: string }> (
 		setState: React.Dispatch<React.SetStateAction<T[]>>
 	): (id: string) => void => {
 		return useCallback(

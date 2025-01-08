@@ -23,7 +23,10 @@ export const useSaveFeedback = (): { showSuccess: boolean, showSuccessMessage: (
 		}
 	}, [])
 
-	return { showSuccess, showSuccessMessage }
+	return {
+		showSuccess,
+		showSuccessMessage
+	}
 }
 
 const SaveFeedback = ({ show }: { show: boolean }): ReactElement => {

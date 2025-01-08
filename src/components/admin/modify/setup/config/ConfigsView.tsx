@@ -1,7 +1,7 @@
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import axios from 'axios'
-import { type ConfigsType } from '@/types/backendDataTypes'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type ConfigsType } from '@/types/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import Config from './Config'
 
 const ConfigsView = (): ReactElement => {
@@ -44,7 +44,7 @@ const ConfigsView = (): ReactElement => {
 		<div className="flex justify-center p-4">
 			{configs === null
 				? (
-					<div className='text-black text-xl p-5'>{'Henter...'}</div>
+					<div className="text-black text-xl p-5">{'Henter...'}</div>
 				)
 				: (
 					<div className="w-full max-w-4xl space-y-4">

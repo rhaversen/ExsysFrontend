@@ -1,8 +1,8 @@
-import React, { type ReactElement, useCallback, useState } from 'react'
-import axios from 'axios'
-import { type ConfigsType } from '@/types/backendDataTypes'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type ConfigsType } from '@/types/backendDataTypes'
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useState } from 'react'
 
 const ConfigsView = ({
 	label,
@@ -20,7 +20,10 @@ const ConfigsView = ({
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const [newValue, setNewValue] = useState(value / 1000) // Convert ms to seconds for display
-	const { showSuccess, showSuccessMessage } = useSaveFeedback()
+	const {
+		showSuccess,
+		showSuccessMessage
+	} = useSaveFeedback()
 
 	const patchConfig = useCallback((secondsValue: number): void => {
 		const msValue = secondsValue * 1000 // Convert seconds to ms for backend
@@ -69,7 +72,7 @@ const ConfigsView = ({
 				{newValue !== value / 1000 && ( // Only show cancel if value changed
 					<div className="flex gap-2">
 						<button
-							type='button'
+							type="button"
 							onClick={() => {
 								patchConfig(newValue)
 							}}
@@ -78,7 +81,7 @@ const ConfigsView = ({
 							{'Gem'}
 						</button>
 						<button
-							type='button'
+							type="button"
 							onClick={() => {
 								setNewValue(value / 1000) // Reset to original value in seconds
 							}}
