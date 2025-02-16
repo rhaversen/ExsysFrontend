@@ -211,13 +211,15 @@ const OrderView = ({
 
 	// Reset timer on component mount
 	useEffect(() => {
-		// Only start the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
-		if (orderStatus !== 'awaitingPayment' &&
-				(kiosk.activities.length > 1 ||
-					Object.values(cart.products).some(q => q > 0) ||
-					Object.values(cart.options).some(q => q > 0))) {
+		const isAwaitingPayment = orderStatus === 'awaitingPayment'
+		const hasItems = Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)
+		const hasMultipleActivities = kiosk.activities.length > 1
+
+		if (!isAwaitingPayment && (hasItems || hasMultipleActivities)) {
+			// Only start (reset) the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
 			resetTimer()
-		} else if (orderStatus === 'awaitingPayment') {
+		} else if (isAwaitingPayment) {
+			// If the order is awaiting payment, clear the timer
 			clearTimeout(resetTimerRef.current)
 		}
 	}, [resetTimer, kiosk, cart, orderStatus])
