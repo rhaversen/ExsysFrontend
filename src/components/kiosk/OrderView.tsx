@@ -211,11 +211,16 @@ const OrderView = ({
 
 	// Reset timer on component mount
 	useEffect(() => {
-		// For a single-activity kiosk, only start if cart is not empty
-		if (kiosk.activities.length > 1 || Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)) {
+		// Only start the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
+		if (orderStatus !== 'awaitingPayment' &&
+				(kiosk.activities.length > 1 ||
+					Object.values(cart.products).some(q => q > 0) ||
+					Object.values(cart.options).some(q => q > 0))) {
 			resetTimer()
+		} else if (orderStatus === 'awaitingPayment') {
+			clearTimeout(resetTimerRef.current)
 		}
-	}, [resetTimer, kiosk, cart])
+	}, [resetTimer, kiosk, cart, orderStatus])
 
 	// Add global interaction listeners and cleanup
 	useEffect(() => {
@@ -225,7 +230,7 @@ const OrderView = ({
 		]
 
 		const handleResetTimer = (): void => {
-			if (!showTimeoutWarning) {
+			if (!showTimeoutWarning && orderStatus !== 'awaitingPayment') {
 				resetTimer()
 			}
 		}
@@ -239,7 +244,7 @@ const OrderView = ({
 				document.removeEventListener(event, handleResetTimer)
 			})
 		}
-	}, [resetTimer, showTimeoutWarning])
+	}, [resetTimer, showTimeoutWarning, orderStatus])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
