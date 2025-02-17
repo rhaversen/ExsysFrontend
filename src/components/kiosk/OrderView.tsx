@@ -339,6 +339,7 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
+					clearCart={() => { setCart({ products: {}, options: {} }) }}
 					formIsValid={isFormValid}
 				/>
 			</div>
