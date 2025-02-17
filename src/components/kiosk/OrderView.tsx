@@ -301,23 +301,19 @@ const OrderView = ({
 			{/* Left Column: Header + Selection Window */}
 			<div className="w-full flex flex-col">
 				{/* Header */}
-				<header className="flex flex-row p-2 items-center justify-between shadow-b-md">
-					{/* Left spacer */}
-					<div className="flex-1" />
+				<header className="flex flex-row p-2 items-center justify-evenly shadow-b-md">
 					<h1 className="text-3xl font-bold text-center text-gray-800">
-						{'Bestil Til ' + activity.name}
+						{`Bestil Til ${activity.name}${activity.roomId !== null ? ` i ${activity.roomId.name}` : ''}`}
 					</h1>
-					<div className="flex-1 flex justify-end"> {/* Right container */}
-						{kiosk.activities.length > 1 && (
-							<button
-								onClick={onClose}
-								className="bg-blue-500 rounded-md mx-5 py-2 px-4"
-								type="button"
-							>
-								{'Vælg Anden Aktivitet'}
-							</button>
-						)}
-					</div>
+					{kiosk.activities.length > 1 && (
+						<button
+							onClick={onClose}
+							className="bg-blue-500 rounded-md mx-5 py-2 px-4"
+							type="button"
+						>
+							{'Vælg Anden Aktivitet'}
+						</button>
+					)}
 				</header>
 
 				{/* Selection Window */}
