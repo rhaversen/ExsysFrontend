@@ -3,6 +3,7 @@ import { AdminSounds } from '@/lib/sounds'
 import React, {
 	createContext,
 	type Dispatch,
+	type ReactElement,
 	type ReactNode,
 	type SetStateAction,
 	useContext,
@@ -26,7 +27,7 @@ const SoundContext = createContext<SoundContextType>({
 
 export const useSound = (): SoundContextType => useContext(SoundContext)
 
-export default function SoundProvider ({ children }: { readonly children: ReactNode }): JSX.Element {
+export default function SoundProvider ({ children }: { readonly children: ReactNode }): ReactElement {
 	const [isMuted, setIsMuted] = useState<boolean>(() => {
 		if (typeof window !== 'undefined') {
 			const storedMuted = localStorage.getItem('soundMuted')

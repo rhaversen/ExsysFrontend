@@ -199,7 +199,7 @@ const OrderView = ({
 		}
 	}, [kiosk, onClose])
 
-	const resetTimerRef = useRef<NodeJS.Timeout>()
+	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const resetTimer = useCallback(() => {
 		clearTimeout(resetTimerRef.current)
