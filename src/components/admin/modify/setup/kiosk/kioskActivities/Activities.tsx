@@ -15,7 +15,7 @@ const Activities = ({
 }): ReactElement => {
 	return (
 		<div className="flex flex-row flex-wrap">
-			{selectedActivities.map((activity) => (
+			{selectedActivities.sort((a, b) => a.name.localeCompare(b.name)).map((activity) => (
 				<Activity
 					key={activity._id}
 					activity={activity}

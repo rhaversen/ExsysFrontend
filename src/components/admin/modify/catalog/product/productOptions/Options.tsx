@@ -15,7 +15,7 @@ const Options = ({
 }): ReactElement => {
 	return (
 		<div className="flex flex-row flex-wrap">
-			{selectedOptions.map((option) => (
+			{selectedOptions.sort((a, b) => a.name.localeCompare(b.name)).map((option) => (
 				<Option
 					key={option._id}
 					option={option}
