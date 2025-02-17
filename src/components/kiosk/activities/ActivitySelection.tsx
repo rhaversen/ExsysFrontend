@@ -11,7 +11,10 @@ const ActivitySelection = ({
 }): ReactElement => {
 	return (
 		<main className="flex flex-col justify-center items-center h-full">
-			<h1 className="m-10 p-0 text-center text-gray-800 text-4xl">{'Bestil til aktivitet:'}</h1>
+			<header className="mb-8">
+				<h1 className="m-10 p-0 text-center text-gray-800 text-5xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
+				<p className="m-4 p-0 text-center text-gray-600 text-xl">{'Vælg en aktivitet for at komme i gang'}</p>
+			</header>
 			<div className="flex flex-wrap justify-center items-center p-20">
 				{activities.map((activity) => (
 					<Activity
