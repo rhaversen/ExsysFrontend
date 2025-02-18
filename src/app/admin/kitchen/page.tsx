@@ -10,7 +10,7 @@ import { type ActivityType, type OrderType, type RoomType } from '@/types/backen
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useInterval } from 'react-use'
 import { io, type Socket } from 'socket.io-client'
 
@@ -29,6 +29,14 @@ export default function Page (): ReactElement {
 
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [activities, setActivities] = useState<ActivityType[]>([])
+
+	// Mapping activity id to activity name
+	const activityMap = useMemo(() => {
+		return activities.reduce<Record<string, string>>((acc, act) => {
+			acc[act._id] = act.name
+			return acc
+		}, {})
+	}, [activities])
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -66,10 +74,9 @@ export default function Page (): ReactElement {
 	}, [API_URL, addError])
 
 	const getRoomNameFromOrder = useCallback((order: OrderType): string => {
-		const activity = activities.find(a => a._id === order.activityId)
-		const room = (activity !== undefined) ? rooms.find(r => r._id === activity.roomId?._id) : undefined
+		const room = rooms.find(r => r._id === order.roomId)
 		return room?.name ?? 'no-room'
-	}, [activities, rooms])
+	}, [rooms])
 
 	const groupOrdersByRoomName = useCallback((orders: OrderType[]): Record<string, OrderType[]> => {
 		return orders.reduce<Record<string, OrderType[]>>((acc, order) => {
@@ -82,7 +89,7 @@ export default function Page (): ReactElement {
 		}, {})
 	}, [getRoomNameFromOrder])
 
-	// Process orders whenever raw orders, rooms, or activities change
+	// Process orders whenever raw orders or rooms change
 	useEffect(() => {
 		const groupedOrders = groupOrdersByRoomName(rawOrders)
 		setRoomOrders(groupedOrders)
@@ -239,7 +246,7 @@ export default function Page (): ReactElement {
 								type="button"
 								onClick={() => { setIsMuted(!isMuted) }}
 								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
-								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra' }
 							>
 								<span>{isMuted ? '🔇' : '🔊'}</span>
 							</button>
@@ -273,6 +280,7 @@ export default function Page (): ReactElement {
 									}}
 									orders={roomOrders['no-room']?.filter(order => order.status !== 'delivered') ?? []}
 									onUpdatedOrders={handleUpdatedOrders}
+									activityMap={activityMap}
 								/>
 							)}
 							{rooms
@@ -294,6 +302,7 @@ export default function Page (): ReactElement {
 										room={room}
 										orders={roomOrders[room.name]?.filter(order => order.status !== 'delivered') ?? []}
 										onUpdatedOrders={handleUpdatedOrders}
+										activityMap={activityMap}
 									/>
 								))}
 						</div>
@@ -302,7 +311,7 @@ export default function Page (): ReactElement {
 								type="button"
 								onClick={() => { setIsMuted(!isMuted) }}
 								className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
-								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+								title={isMuted ? 'Slå lyd til' : 'Slå lyd fra' }
 							>
 								<span>{isMuted ? '🔇' : '🔊'}</span>
 							</button>

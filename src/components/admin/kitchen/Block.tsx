@@ -1,9 +1,9 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
-import { type ActivityType, type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
+import { type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 interface PendingUpdate {
 	id: number
@@ -15,29 +15,24 @@ interface LocalOrder extends OrderType {
 	pendingUpdates: PendingUpdate[]
 }
 
-const Block = ({
-	orders,
-	activityId,
-	onUpdatedOrders
-}: {
+interface BlockProps {
 	orders: OrderType[]
-	activityId: string
+	activityName: string
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
-}): ReactElement => {
+}
+
+const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
-	const {
-		isMuted,
-		soundUrl
-	} = useSound()
+	const { isMuted, soundUrl } = useSound()
 
 	const [localOrders, setLocalOrders] = useState<LocalOrder[]>([])
 	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
 	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
-	const [orderStatus, setOrderStatus] = useState<OrderType['status']>('pending')
+	const [blockStatus, setBlockStatus] = useState<OrderType['status']>('pending')
 	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
-	const [activityName, setActivityName] = useState('')
 	const newOrderAlert = useMemo(() => new Audio(soundUrl), [soundUrl])
+	const prevLocalOrdersRef = useRef<LocalOrder[]>([])
 
 	useEffect(() => {
 		setLocalOrders(
@@ -57,48 +52,51 @@ const Block = ({
 		}
 	}
 
-	const getActivityName = useCallback(() => {
-		axios
-			.get(`${API_URL}/v1/activities/${activityId}`, { withCredentials: true })
-			.then(response => {
-				const data = response.data as ActivityType
-				setActivityName(data.name)
-			})
-			.catch((error: any) => {
-				setActivityName('Ukendt Aktivitet')
-				console.error(error)
-			})
-	}, [API_URL, activityId])
-
 	const countOrders = useCallback((orders: LocalOrder[]) => {
 		const counts: Record<string, number> = {}
 		orders.forEach(order => {
 			order.products.forEach(product => {
-				if (counts[product.name] === undefined) {
-					counts[product.name] = 0
-				}
-				counts[product.name] += product.quantity
+				counts[product.name] = (counts[product.name] ?? 0) + product.quantity
 			})
 			order.options.forEach(option => {
-				if (counts[option.name] === undefined) {
-					counts[option.name] = 0
-				}
-				counts[option.name] += option.quantity
+				counts[option.name] = (counts[option.name] ?? 0) + option.quantity
 			})
 		})
 		return counts
 	}, [])
 
-	const determineOrderStatus = useCallback(() => {
-		const statuses = localOrders.map(order => getCurrentStatus(order))
-		if (statuses.includes('pending')) {
-			return 'pending'
+	const computeBlockStatus = useCallback((localOrders: LocalOrder[]) => {
+		let hasPending = false
+		let hasConfirmed = false
+		let hasUndelivered = false
+		localOrders.forEach(order => {
+			const st = getCurrentStatus(order)
+			if (st === 'pending') hasPending = true
+			if (st === 'confirmed') hasConfirmed = true
+			if (st !== 'delivered') hasUndelivered = true
+		})
+		if (!hasUndelivered) return 'delivered'
+		if (!hasPending && (hasConfirmed || !hasUndelivered)) return 'confirmed'
+		return 'pending'
+	}, [])
+
+	useEffect(() => {
+		const newStatus = computeBlockStatus(localOrders)
+
+		// Identify orders that are newly pending (not present before)
+		const newlyPending = localOrders.filter(o => {
+			const now = getCurrentStatus(o) === 'pending'
+			const before = prevLocalOrdersRef.current.some(po => po._id === o._id && getCurrentStatus(po) === 'pending')
+			return now && !before
+		})
+
+		if (blockStatus === 'confirmed' && newStatus === 'pending' && newlyPending.length > 0 && !isMuted) {
+			newOrderAlert.play().catch(console.error)
 		}
-		if (statuses.includes('confirmed')) {
-			return 'confirmed'
-		}
-		return 'delivered'
-	}, [localOrders])
+
+		setBlockStatus(newStatus)
+		prevLocalOrdersRef.current = localOrders
+	}, [localOrders, blockStatus, computeBlockStatus, isMuted, newOrderAlert])
 
 	const patchOrders = useCallback(
 		async (status: PatchOrderType['status']) => {
@@ -108,10 +106,7 @@ const Block = ({
 			setLocalOrders(prevOrders =>
 				prevOrders.map(order => ({
 					...order,
-					pendingUpdates: [...order.pendingUpdates, {
-						id: updateId,
-						status
-					}]
+					pendingUpdates: [...order.pendingUpdates, { id: updateId, status }]
 				}))
 			)
 
@@ -132,7 +127,7 @@ const Block = ({
 						const updatedOrder = response.data.find(o => o._id === order._id)
 						return {
 							...order,
-							baseStatus: (updatedOrder !== undefined) ? updatedOrder.status : order.baseStatus,
+							baseStatus: updatedOrder !== undefined ? updatedOrder.status : order.baseStatus,
 							pendingUpdates
 						}
 					})
@@ -168,23 +163,9 @@ const Block = ({
 		setConfirmedOrders(confirmedOrdersCount)
 	}, [localOrders, countOrders])
 
-	// Determine the order status and play a sound when order status changes from confirmed to pending
-	useEffect(() => {
-		const newStatus = determineOrderStatus()
-		const statusUpdated = orderStatus === 'confirmed' && newStatus === 'pending'
-		if (statusUpdated && !isMuted) {
-			newOrderAlert.play().catch(console.error)
-		}
-		setOrderStatus(newStatus)
-	}, [determineOrderStatus, isMuted, newOrderAlert, orderStatus])
-
-	useEffect(() => {
-		getActivityName()
-	}, [getActivityName])
-
 	return (
 		<div
-			className={`text-gray-800 p-2 m-1 h-full border-2 shadow-xl shadow-slate-400 border-slate-800 rounded-md ${orderStatus === 'pending' ? 'bg-blue-300' : ''}`}>
+			className={`text-gray-800 p-2 m-1 h-full border-2 shadow-xl shadow-slate-400 border-slate-800 rounded-md ${blockStatus === 'pending' ? 'bg-blue-300' : ''}`}>
 			<h3 className="text-center text-xl">{activityName}</h3>
 			{Object.keys({ ...pendingOrders, ...confirmedOrders })
 				.sort()
@@ -203,25 +184,21 @@ const Block = ({
 					)
 				})}
 			<div className="mt-2">
-				{orderStatus === 'pending' && (
+				{blockStatus === 'pending' && (
 					<button
 						type="button"
 						className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
 							handlePatchOrders('confirmed')
-						}}
-					>
+						}}>
 						{'Marker som læst'}
 					</button>
 				)}
-				{orderStatus === 'confirmed' && (
+				{blockStatus === 'confirmed' && (
 					<button
 						type="button"
 						className="rounded bg-orange-500 p-2 hover:bg-orange-600 text-white w-full"
-						onClick={() => {
-							setShowConfirmDelivered(true)
-						}}
-					>
+						onClick={() => { setShowConfirmDelivered(true) }}>
 						{'Marker som leveret'}
 					</button>
 				)}

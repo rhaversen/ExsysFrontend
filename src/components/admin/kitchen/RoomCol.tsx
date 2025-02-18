@@ -4,15 +4,14 @@ import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-const RoomCol = ({
-	room,
-	orders,
-	onUpdatedOrders
-}: {
+interface RoomColProps {
 	room: RoomType
 	orders: OrderType[]
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
-}): ReactElement => {
+	activityMap: Record<string, string>
+}
+
+const RoomCol = ({ room, orders, onUpdatedOrders, activityMap }: RoomColProps): ReactElement => {
 	const {
 		isMuted,
 		soundUrl
@@ -32,7 +31,7 @@ const RoomCol = ({
 			groupedOrders[order.activityId].push(order)
 		})
 		setOrdersByActivity(groupedOrders)
-	}, [orders, setOrdersByActivity])
+	}, [orders])
 
 	useEffect(() => {
 		groupOrdersByActivity()
@@ -46,7 +45,7 @@ const RoomCol = ({
 			newOrderAlert.play().catch(console.error)
 		}
 		prevBlockCountRef.current = currentBlockCount
-	}, [isMuted, newOrderAlert, ordersByActivity, room])
+	}, [isMuted, newOrderAlert, orders, ordersByActivity, room])
 
 	useEffect(() => {
 		const productsCount: Record<string, number> = {}
@@ -81,7 +80,7 @@ const RoomCol = ({
 				{Object.keys(ordersByActivity).map((activityId) => (
 					<Block
 						key={activityId}
-						activityId={activityId}
+						activityName={activityMap[activityId] ?? 'Ukendt Aktivitet'}
 						orders={ordersByActivity[activityId]}
 						onUpdatedOrders={onUpdatedOrders}
 					/>
