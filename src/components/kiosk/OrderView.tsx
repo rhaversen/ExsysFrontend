@@ -26,8 +26,7 @@ const OrderView = ({
 	activity,
 	room,
 	checkoutMethods,
-	onClose,
-	onRoomChange
+	onClose
 }: {
 	kiosk: KioskType
 	products: ProductType[]
@@ -36,7 +35,6 @@ const OrderView = ({
 	room: RoomType
 	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
 	onClose: () => void
-	onRoomChange?: () => void
 }): ReactElement => {
 	const { addError } = useError()
 	const { config } = useConfig()
@@ -304,24 +302,8 @@ const OrderView = ({
 
 	return (
 		<main className="flex flex-row bg-zinc-100 h-full">
-			{/* Left Column: Header + Selection Window */}
+			{/* Left Column: Selection Window */}
 			<div className="w-full flex flex-col">
-				{/* Header */}
-				<header className="flex flex-row p-2 items-center justify-evenly shadow-b-md">
-					<h1 className="text-3xl font-bold text-center text-gray-800">
-						{`Bestil til ${activity.name} i ${room.name}`}
-					</h1>
-					{kiosk.activities.length > 1 && (
-						<button
-							onClick={onClose}
-							className="bg-blue-500 rounded-md mx-5 py-2 px-4"
-							type="button"
-						>
-							{'Vælg Anden Aktivitet'}
-						</button>
-					)}
-				</header>
-
 				{/* Selection Window */}
 				<div className="flex-1 overflow-y-auto">
 					<SelectionWindow

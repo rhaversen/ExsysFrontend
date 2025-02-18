@@ -8,10 +8,12 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
+import ProgressBar from '@/components/kiosk/ProgressBar'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -33,6 +35,10 @@ export default function Page (): ReactElement {
 	const [isActive, setIsActive] = useState(true)
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
+	const [viewState, setViewState] = useState<ViewState>('activity')
+	const [isChangingRoom, setIsChangingRoom] = useState(false)
+	// State to backup the current room when changing rooms
+	const [prevRoom, setPrevRoom] = useState<RoomType | null>(null)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -113,7 +119,12 @@ export default function Page (): ReactElement {
 				// If the activity has only one room, select it
 				if (activity.rooms.length === 1) {
 					const room = roomsData.find(r => r._id === activity.rooms[0]._id)
-					if (room != null) setSelectedRoom(room)
+					if (room != null) {
+						setSelectedRoom(room)
+						setViewState('order')
+					}
+				} else {
+					setViewState('room')
 				}
 			} else {
 				setSelectedActivity(null)
@@ -255,67 +266,148 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = (activity: ActivityType): void => {
 		setSelectedActivity(activity)
-		// If activity has only one room, select it automatically
 		if (activity.rooms.length === 1) {
 			const room = rooms.find(r => r._id === activity.rooms[0]._id)
-			if (room != null) setSelectedRoom(room)
+			if (room != null) {
+				setSelectedRoom(room)
+				setViewState('order')
+			}
 		} else {
-			setSelectedRoom(null)
+			setViewState('room')
 		}
 	}
 
 	const handleBack = (): void => {
-			setSelectedRoom(null)
-			setSelectedActivity(null)
+		if (isChangingRoom) {
+			setSelectedRoom(prevRoom)
+			setIsChangingRoom(false)
+			setViewState('order')
+		} else {
+			switch (viewState) {
+				case 'room':
+					setSelectedActivity(null)
+					setViewState('activity')
+					break
+				case 'order':
+					if (kiosk?.activities.length === 1) {
+						setSelectedRoom(null)
+						setViewState('room')
+					} else {
+						setSelectedActivity(null)
+						setSelectedRoom(null)
+						setViewState('activity')
+					}
+					break
+			}
+		}
 	}
 
-	return (
-		<div className="flex flex-col h-screen">
-			{!isActive && (
+	const handleRoomSelect = (room: RoomType): void => {
+		setSelectedRoom(room)
+		setIsChangingRoom(false)
+		setViewState('order')
+	}
+
+	const canClickActivity = (): boolean => {
+		return viewState === 'room' || viewState === 'order'
+	}
+
+	const canClickRoom = (): boolean => {
+		return (viewState === 'order' || viewState === 'activity') && selectedActivity !== null
+	}
+
+	const handleProgressClick = (clickedView: ViewState): void => {
+		if (clickedView === viewState) return
+
+		if (clickedView === 'activity' && canClickActivity()) {
+			reset()
+		} else if (clickedView === 'room' && canClickRoom()) {
+			if (viewState === 'order') {
+				setPrevRoom(selectedRoom)
+				setIsChangingRoom(true)
+			}
+			setSelectedRoom(null)
+			setViewState('room')
+		}
+	}
+
+	const reset = (): void => {
+		setSelectedActivity(null)
+		setSelectedRoom(null)
+		setPrevRoom(null)
+		setIsChangingRoom(false)
+		setViewState('activity')
+	}
+
+	// Render current view based on viewState
+	const renderCurrentView = (): ReactElement | null => {
+		if (!isActive) {
+			return (
 				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
 					</div>
 				</div>
-			)}
-			<div className="flex-1 overflow-y-auto">
-				{selectedActivity === null && isActive && (
+			)
+		}
+
+		switch (viewState) {
+			case 'activity':
+				return (
 					<ActivitySelection
-						activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
+						activities={activities
+							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
+							.sort((a, b) => a.name.localeCompare(b.name))}
 						onActivitySelect={handleActivitySelect}
 					/>
-				)}
-				{selectedActivity !== null && selectedRoom === null && isActive && (
+				)
+			case 'room':
+				return (
 					<RoomSelection
-						rooms={rooms.filter(room => selectedActivity.rooms.some(r => r._id === room._id))
+						rooms={isChangingRoom
+							? rooms.sort((a, b) => a.name.localeCompare(b.name))
+							: rooms.filter(room => selectedActivity?.rooms.some(r => r._id === room._id))
 								.sort((a, b) => a.name.localeCompare(b.name))}
-						onRoomSelect={(room) => {
-							setSelectedRoom(room)
-						}}
-						onBack={() => {
-							handleBack()
-						}}
-						selectedActivity={selectedActivity.name}
+						onRoomSelect={handleRoomSelect}
+						onBack={handleBack}
+						selectedActivity={selectedActivity?.name ?? ''}
 					/>
-				)}
-				{selectedActivity !== null && selectedRoom !== null && kiosk !== null && isActive && (
-					<OrderView
-						kiosk={kiosk}
-						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
-						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
-						activity={selectedActivity}
-						room={selectedRoom}
-						checkoutMethods={checkoutMethods}
-						onClose={handleBack}
-						onRoomChange={handleRoomChange}
-					/>
-				)}
+				)
+			case 'order':
+				return (kiosk != null) && (selectedActivity != null) && (selectedRoom != null)
+					? (
+						<OrderView
+							kiosk={kiosk}
+							products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+							options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
+							activity={selectedActivity}
+							room={selectedRoom}
+							checkoutMethods={checkoutMethods}
+							onClose={reset}
+						/>
+					)
+					: null
+		}
+	}
+
+	return (
+		<div className="flex flex-col h-screen">
+			<ProgressBar
+				viewState={viewState}
+				canClickActivity={canClickActivity}
+				canClickRoom={canClickRoom}
+				onProgressClick={handleProgressClick}
+				selectedActivity={selectedActivity}
+				selectedRoom={selectedRoom}
+			/>
+
+			<div className="flex-1 overflow-y-auto">
+				{renderCurrentView()}
 			</div>
+
 			<div className="flex-shrink-0">
-				{isActive && (
-					<KioskSessionInfo />
-				)}
+				{isActive && <KioskSessionInfo />}
 			</div>
 		</div>
 	)
