@@ -5,6 +5,7 @@ import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
+	type RoomType,
 	type ActivityType,
 	type KioskType,
 	type OptionType,
@@ -23,15 +24,19 @@ const OrderView = ({
 	products,
 	options,
 	activity,
+	room,
 	checkoutMethods,
-	onClose
+	onClose,
+	onRoomChange
 }: {
 	kiosk: KioskType
 	products: ProductType[]
 	options: OptionType[]
 	activity: ActivityType
+	room: RoomType
 	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
 	onClose: () => void
+	onRoomChange?: () => void
 }): ReactElement => {
 	const { addError } = useError()
 	const { config } = useConfig()
@@ -162,6 +167,7 @@ const OrderView = ({
 		const data: PostOrderType = {
 			kioskId: kiosk._id,
 			activityId: activity._id,
+			roomId: room._id,
 			products: prepareCartItems(cart.products),
 			options: prepareCartItems(cart.options),
 			checkoutMethod
@@ -180,7 +186,7 @@ const OrderView = ({
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [cart, kiosk, activity, API_URL, addError])
+	}, [kiosk, activity, room, cart, API_URL, addError])
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
@@ -303,7 +309,7 @@ const OrderView = ({
 				{/* Header */}
 				<header className="flex flex-row p-2 items-center justify-evenly shadow-b-md">
 					<h1 className="text-3xl font-bold text-center text-gray-800">
-						{`Bestil Til ${activity.name}${activity.roomId !== null ? ` i ${activity.roomId.name}` : ''}`}
+						{`Bestil til ${activity.name} i ${room.name}`}
 					</h1>
 					{kiosk.activities.length > 1 && (
 						<button

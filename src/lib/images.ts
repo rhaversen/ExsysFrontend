@@ -47,6 +47,10 @@ export const KioskImages = {
 	resetCart: {
 		src: '/images/trashcan.svg',
 		alt: 'Nulstil Kurv'
+	},
+	back: {
+		src: '/images/arrow.svg',
+		alt: 'Tilbage'
 	}
 }
 

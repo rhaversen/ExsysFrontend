@@ -3,10 +3,11 @@
 import ActivitySelection from '@/components/kiosk/ActivitySelection'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
+import RoomSelection from '@/components/kiosk/RoomSelection'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
-import { type ActivityType, type KioskType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -30,6 +31,9 @@ export default function Page (): ReactElement {
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [isActive, setIsActive] = useState(true)
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
+
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
 
@@ -77,12 +81,14 @@ export default function Page (): ReactElement {
 				kioskData,
 				productsData,
 				optionsData,
-				activitiesData
-			]: [KioskType, ProductType[], OptionType[], ActivityType[]] = await Promise.all([
+				activitiesData,
+				roomsData
+			]: [KioskType, ProductType[], OptionType[], ActivityType[], RoomType[]] = await Promise.all([
 				fetchData(`${API_URL}/v1/kiosks/me`),
 				fetchData(`${API_URL}/v1/products`),
 				fetchData(`${API_URL}/v1/options`),
-				fetchData(`${API_URL}/v1/activities`)
+				fetchData(`${API_URL}/v1/activities`),
+				fetchData(`${API_URL}/v1/rooms`)
 			])
 
 			const processedProducts = processProductsData(productsData)
@@ -92,6 +98,7 @@ export default function Page (): ReactElement {
 			setProducts(processedProducts)
 			setOptions(optionsData)
 			setActivities(activitiesData)
+			setRooms(roomsData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
@@ -101,7 +108,13 @@ export default function Page (): ReactElement {
 
 			// If only one activity is available, select it
 			if (kioskData.activities.length === 1) {
-				setSelectedActivity(kioskData.activities[0])
+				const activity = kioskData.activities[0]
+				setSelectedActivity(activity)
+				// If the activity has only one room, select it
+				if (activity.rooms.length === 1) {
+					const room = roomsData.find(r => r._id === activity.rooms[0]._id)
+					if (room != null) setSelectedRoom(room)
+				}
 			} else {
 				setSelectedActivity(null)
 			}
@@ -221,6 +234,41 @@ export default function Page (): ReactElement {
 		}
 	)
 
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		room => { setRooms(prev => [...prev, room]) },
+		room => {
+			setRooms(prev => prev.map(r => r._id === room._id ? room : r))
+			if (selectedRoom?._id === room._id) {
+				setSelectedRoom(room)
+			}
+		},
+		id => {
+			setRooms(prev => prev.filter(r => r._id !== id))
+			if (selectedRoom?._id === id) {
+				setSelectedRoom(null)
+			}
+		}
+	)
+
+	const handleActivitySelect = (activity: ActivityType): void => {
+		setSelectedActivity(activity)
+		// If activity has only one room, select it automatically
+		if (activity.rooms.length === 1) {
+			const room = rooms.find(r => r._id === activity.rooms[0]._id)
+			if (room != null) setSelectedRoom(room)
+		} else {
+			setSelectedRoom(null)
+		}
+	}
+
+	const handleBack = (): void => {
+			setSelectedRoom(null)
+			setSelectedActivity(null)
+	}
+
 	return (
 		<div className="flex flex-col h-screen">
 			{!isActive && (
@@ -235,17 +283,32 @@ export default function Page (): ReactElement {
 				{selectedActivity === null && isActive && (
 					<ActivitySelection
 						activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
-						onActivitySelect={setSelectedActivity}
+						onActivitySelect={handleActivitySelect}
 					/>
 				)}
-				{selectedActivity !== null && kiosk !== null && isActive && (
+				{selectedActivity !== null && selectedRoom === null && isActive && (
+					<RoomSelection
+						rooms={rooms.filter(room => selectedActivity.rooms.some(r => r._id === room._id))
+								.sort((a, b) => a.name.localeCompare(b.name))}
+						onRoomSelect={(room) => {
+							setSelectedRoom(room)
+						}}
+						onBack={() => {
+							handleBack()
+						}}
+						selectedActivity={selectedActivity.name}
+					/>
+				)}
+				{selectedActivity !== null && selectedRoom !== null && kiosk !== null && isActive && (
 					<OrderView
 						kiosk={kiosk}
 						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
 						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
 						activity={selectedActivity}
+						room={selectedRoom}
 						checkoutMethods={checkoutMethods}
-						onClose={() => { setSelectedActivity(null) }}
+						onClose={handleBack}
+						onRoomChange={handleRoomChange}
 					/>
 				)}
 			</div>
