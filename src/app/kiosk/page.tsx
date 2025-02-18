@@ -1,6 +1,6 @@
 'use client'
 
-import ActivitySelection from '@/components/kiosk/activities/ActivitySelection'
+import ActivitySelection from '@/components/kiosk/ActivitySelection'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'

@@ -1,4 +1,3 @@
-import Activity from '@/components/kiosk/activities/Activity'
 import { type ActivityType } from '@/types/backendDataTypes'
 import React, { type ReactElement } from 'react'
 
@@ -17,11 +16,18 @@ const ActivitySelection = ({
 			</header>
 			<div className="flex flex-wrap justify-center items-center p-20">
 				{activities.map((activity) => (
-					<Activity
+					<button
 						key={activity._id}
-						activity={activity}
-						onActivitySelect={onActivitySelect}
-					/>
+						type="button"
+						onClick={() => {
+							onActivitySelect(activity)
+						}}
+						className="p-10 m-5 bg-white rounded shadow-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+					>
+						<h2 className="text-3xl font-bold mb-2 text-gray-800">
+							{activity.name}
+						</h2>
+					</button>
 				))}
 				{activities.length === 0 && (
 					<div>
