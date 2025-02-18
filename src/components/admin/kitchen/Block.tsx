@@ -1,19 +1,9 @@
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
-import { type OrderType, type PatchOrderType } from '@/types/backendDataTypes'
+import { type OrderType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-interface PendingUpdate {
-	id: number
-	status: OrderType['status']
-}
-
-interface LocalOrder extends OrderType {
-	baseStatus: OrderType['status']
-	pendingUpdates: PendingUpdate[]
-}
 
 interface BlockProps {
 	orders: OrderType[]
@@ -26,33 +16,37 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 	const { addError } = useError()
 	const { isMuted, soundUrl } = useSound()
 
-	const [localOrders, setLocalOrders] = useState<LocalOrder[]>([])
-	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
-	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
+	const [localOrders, setLocalOrders] = useState<OrderType[]>([])
 	const [blockStatus, setBlockStatus] = useState<OrderType['status']>('pending')
 	const [showConfirmDelivered, setShowConfirmDelivered] = useState(false)
 	const newOrderAlert = useMemo(() => new Audio(soundUrl), [soundUrl])
-	const prevLocalOrdersRef = useRef<LocalOrder[]>([])
+	const prevStatus = useRef(blockStatus)
+
+	const [pendingOrders, setPendingOrders] = useState<Record<string, number>>({})
+	const [confirmedOrders, setConfirmedOrders] = useState<Record<string, number>>({})
 
 	useEffect(() => {
-		setLocalOrders(
-			orders.map(order => ({
-				...order,
-				baseStatus: order.status,
-				pendingUpdates: []
-			}))
-		)
+		setLocalOrders(orders)
 	}, [orders])
 
-	const getCurrentStatus = (order: LocalOrder): OrderType['status'] => {
-		if (order.pendingUpdates.length > 0) {
-			return order.pendingUpdates[order.pendingUpdates.length - 1].status
+	useEffect(() => {
+		const statuses = localOrders.map(o => o.status)
+		if (statuses.every(s => s === 'delivered')) setBlockStatus('delivered')
+		else if (statuses.every(s => s === 'confirmed' || s === 'delivered')) {
+			setBlockStatus('confirmed')
 		} else {
-			return order.baseStatus
+			setBlockStatus('pending')
 		}
-	}
+	}, [localOrders])
 
-	const countOrders = useCallback((orders: LocalOrder[]) => {
+	useEffect(() => {
+		if (!isMuted && prevStatus.current === 'confirmed' && blockStatus === 'pending') {
+			newOrderAlert.play().catch(() => {})
+		}
+		prevStatus.current = blockStatus
+	}, [blockStatus, isMuted, newOrderAlert])
+
+	const countOrders = useCallback((orders: OrderType[]) => {
 		const counts: Record<string, number> = {}
 		orders.forEach(order => {
 			order.products.forEach(product => {
@@ -65,96 +59,21 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 		return counts
 	}, [])
 
-	const computeBlockStatus = useCallback((localOrders: LocalOrder[]) => {
-		let hasPending = false
-		let hasConfirmed = false
-		let hasUndelivered = false
-		localOrders.forEach(order => {
-			const st = getCurrentStatus(order)
-			if (st === 'pending') hasPending = true
-			if (st === 'confirmed') hasConfirmed = true
-			if (st !== 'delivered') hasUndelivered = true
-		})
-		if (!hasUndelivered) return 'delivered'
-		if (!hasPending && (hasConfirmed || !hasUndelivered)) return 'confirmed'
-		return 'pending'
-	}, [])
-
-	useEffect(() => {
-		const newStatus = computeBlockStatus(localOrders)
-
-		// Identify orders that are newly pending (not present before)
-		const newlyPending = localOrders.filter(o => {
-			const now = getCurrentStatus(o) === 'pending'
-			const before = prevLocalOrdersRef.current.some(po => po._id === o._id && getCurrentStatus(po) === 'pending')
-			return now && !before
-		})
-
-		if (blockStatus === 'confirmed' && newStatus === 'pending' && newlyPending.length > 0 && !isMuted) {
-			newOrderAlert.play().catch(console.error)
+	const patchOrders = useCallback(async (status: OrderType['status']) => {
+		try {
+			const response = await axios.patch<OrderType[]>(`${API_URL}/v1/orders`, {
+				orderIds: localOrders.map(o => o._id),
+				status
+			}, { withCredentials: true })
+			onUpdatedOrders(response.data)
+		} catch (err: any) {
+			addError(err)
 		}
-
-		setBlockStatus(newStatus)
-		prevLocalOrdersRef.current = localOrders
-	}, [localOrders, blockStatus, computeBlockStatus, isMuted, newOrderAlert])
-
-	const patchOrders = useCallback(
-		async (status: PatchOrderType['status']) => {
-			const updateId = Date.now()
-
-			// Optimistically update the localOrders
-			setLocalOrders(prevOrders =>
-				prevOrders.map(order => ({
-					...order,
-					pendingUpdates: [...order.pendingUpdates, { id: updateId, status }]
-				}))
-			)
-
-			try {
-				const orderPatch: PatchOrderType = {
-					orderIds: localOrders.map(order => order._id),
-					status
-				}
-
-				const response = await axios.patch<OrderType[]>(`${API_URL}/v1/orders`, orderPatch, {
-					withCredentials: true
-				})
-
-				// On success, remove the pending update and update baseStatus
-				setLocalOrders(prevOrders =>
-					prevOrders.map(order => {
-						const pendingUpdates = order.pendingUpdates.filter(u => u.id !== updateId)
-						const updatedOrder = response.data.find(o => o._id === order._id)
-						return {
-							...order,
-							baseStatus: updatedOrder !== undefined ? updatedOrder.status : order.baseStatus,
-							pendingUpdates
-						}
-					})
-				)
-
-				onUpdatedOrders(response.data)
-			} catch (error: any) {
-				// On failure, remove the pending update
-				setLocalOrders(prevOrders =>
-					prevOrders.map(order => ({
-						...order,
-						pendingUpdates: order.pendingUpdates.filter(u => u.id !== updateId)
-					}))
-				)
-				addError(error)
-			}
-		},
-		[API_URL, localOrders, addError, onUpdatedOrders]
-	)
-
-	const handlePatchOrders = useCallback((orderStatus: PatchOrderType['status']) => {
-		patchOrders(orderStatus).catch(addError)
-	}, [patchOrders, addError])
+	}, [API_URL, localOrders, onUpdatedOrders, addError])
 
 	useEffect(() => {
-		const pending = localOrders.filter(order => getCurrentStatus(order) === 'pending')
-		const confirmed = localOrders.filter(order => getCurrentStatus(order) === 'confirmed')
+		const pending = localOrders.filter(order => order.status === 'pending')
+		const confirmed = localOrders.filter(order => order.status === 'confirmed')
 
 		const pendingOrdersCount = countOrders(pending)
 		const confirmedOrdersCount = countOrders(confirmed)
@@ -189,7 +108,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 						type="button"
 						className="rounded bg-blue-500 p-2 hover:bg-blue-600 text-white w-full"
 						onClick={() => {
-							handlePatchOrders('confirmed')
+							patchOrders('confirmed').catch(addError)
 						}}>
 						{'Marker som læst'}
 					</button>
@@ -235,7 +154,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 								type="button"
 								className="bg-orange-500 hover:bg-orange-600 text-white rounded-md py-2 px-4"
 								onClick={() => {
-									handlePatchOrders('delivered')
+									patchOrders('delivered').catch(addError)
 									setShowConfirmDelivered(false)
 								}}
 							>
