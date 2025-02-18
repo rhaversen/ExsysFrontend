@@ -62,19 +62,19 @@ export interface PatchOptionType {
 // Activity types
 export interface ActivityType {
 	_id: string
-	roomId: RoomType | null
+	rooms: RoomType[]
 	name: string
 	createdAt: string
 	updatedAt: string
 }
 
 export interface PostActivityType {
-	roomId?: RoomType['_id'] | null
+	rooms?: Array<RoomType['_id']>
 	name: string
 }
 
 export interface PatchActivityType {
-	roomId?: RoomType['_id'] | null
+	rooms?: Array<RoomType['_id']>
 	name?: string
 }
 
@@ -103,6 +103,7 @@ export interface OrderType {
 	products: Array<{ _id: ProductType['_id'], name: string, quantity: number }>
 	options: Array<{ _id: OptionType['_id'], name: string, quantity: number }>
 	activityId: ActivityType['_id']
+	roomId: RoomType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
 	createdAt: string
 	updatedAt: string
@@ -112,6 +113,7 @@ export interface PostOrderType {
 	products: Array<{ id: ProductType['_id'], quantity: number }>
 	options?: Array<{ id: OptionType['_id'], quantity: number }>
 	activityId: ActivityType['_id']
+	roomId: RoomType['_id']
 	kioskId: KioskType['_id']
 	checkoutMethod: 'sumUp' | 'later' | 'mobilePay'
 }
