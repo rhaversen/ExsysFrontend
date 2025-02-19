@@ -25,7 +25,7 @@ const ProgressButton = ({
 		disabled={!canClick}
 		type='button'
 	>
-		<div className="text-lg p-2 flex flex-col items-center text-center rounded-lg"
+		<div className="text-lg p-2 flex flex-col items-center justify-start text-center rounded-lg space-y-1"
 		>
 			{selectedName ?? label}
 			{canClick && (
@@ -52,31 +52,54 @@ export default function ProgressBar ({
 	selectedActivity: ActivityType | null
 	selectedRoom: RoomType | null
 }): React.ReactElement {
-	const getProgress = (): number => {
+	const getProgress = (viewState: string): number => {
 		switch (viewState) {
 			case 'activity':
-				return 0
+				return 1 / 6 * 100
 			case 'room':
 				return 50
 			case 'order':
-				return 100
+				return 5 / 6 * 100
 			default:
 				return 0
 		}
 	}
 
-	const skipAnimation = viewState === 'order' && (selectedRoom == null)
+	const isMarkerActive = (markerState: string): boolean => {
+		const states = ['activity', 'room', 'order']
+		const currentIndex = states.indexOf(viewState)
+		const markerIndex = states.indexOf(markerState)
+		return markerIndex <= currentIndex
+	}
 
 	return (
-		<div className="w-full bg-gray-300 relative transition-all duration-300 ease-in-out h-16">
-			{/* Progress bar overlay */}
-			<div
-				className={`absolute h-full bg-blue-200 ${skipAnimation ? '' : 'transition-all duration-300 ease-in-out'}`}
-				style={{ width: `${getProgress()}%` }}
-			/>
+		<div className="w-full flex flex-col space-y-3">
+			{/* Top progress bar container */}
+			<div className="w-full pt-1.5 h-2 rounded-full relative">
+				{/* Progress bar overlay */}
+				<div className="absolute pt-1.5 w-full bg-gray-200 rounded-l-full" />
+				<div className="absolute pt-1.5 h-full left-0 transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 rounded-l-full"
+					style={{
+						width: `${getProgress(viewState)}%`
+					}}
+				/>
 
-			{/* Navigation items */}
-			<div className="flex justify-around h-full relative z-10 gap-10">
+				{/* Progress markers */}
+				<div className="absolute w-full h-full">
+					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+						style={{ left: `${getProgress('activity')}%` }}
+					></div>
+					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+						style={{ left: `${getProgress('room')}%` }}
+					></div>
+					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+						style={{ left: `${getProgress('order')}%` }}
+					></div>
+				</div>
+			</div>
+
+			{/* Navigation buttons */}
+			<div className="flex justify-around items-start h-full">
 				<ProgressButton
 					isActive={viewState === 'activity'}
 					canClick={canClickActivity}
@@ -98,7 +121,6 @@ export default function ProgressBar ({
 					canClick={canClickOrder}
 					canClickMessage="Tryk her for at ændre bestilling"
 					onClick={() => { canClickOrder && onProgressClick('order') }}
-					selectedName={undefined}
 					label="Vælg Bestilling"
 				/>
 			</div>

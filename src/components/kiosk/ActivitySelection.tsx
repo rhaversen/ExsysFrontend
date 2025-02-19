@@ -10,9 +10,9 @@ const ActivitySelection = ({
 }): ReactElement => {
 	return (
 		<main className="flex flex-col justify-center items-center h-full">
-			<header className="mb-8">
-				<h1 className="m-10 p-0 text-center text-gray-800 text-5xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
-				<p className="m-4 p-0 text-center text-gray-600 text-xl">{'Vælg din aktivitet for at komme i gang'}</p>
+			<header className="mb-8 flex flex-col gap-5">
+				<h1 className="text-center text-gray-800 text-5xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
+				<p className="text-center text-gray-600 text-xl">{'Vælg din aktivitet for at komme i gang'}</p>
 			</header>
 			<div className="flex flex-wrap justify-center items-center p-20">
 				{activities.map((activity) => (

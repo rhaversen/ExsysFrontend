@@ -60,10 +60,11 @@ export default function RoomSelection ({
 	return (
 		<main className="flex flex-col h-full">
 			<div className="flex-grow flex items-center">
-				<div className="w-full flex flex-col items-center gap-8">
-					<div className="text-2xl font-bold mb-4 text-gray-800 text-center">
-						{'Vælg dit lokale'}
-					</div>
+				<div className="w-full flex flex-col items-center gap-4">
+					<header className="mb-8 flex flex-col gap-5">
+						<h1 className="text-center text-gray-800 text-5xl font-bold">{'Vælg dit spisested'}</h1>
+						<p className="text-center text-gray-600 text-xl">{'Vælg lokalet hvor bestillingen skal leveres til'}</p>
+					</header>
 					{activityRooms.length > 0 && (
 						<div className="flex flex-wrap justify-center">
 							{activityRooms.map((room) => (
