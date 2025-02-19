@@ -371,6 +371,7 @@ export default function Page (): ReactElement {
 								.sort((a, b) => a.name.localeCompare(b.name))}
 						onRoomSelect={handleRoomSelect}
 						onBack={handleBack}
+						onReset={reset}
 						selectedActivity={selectedActivity?.name ?? ''}
 					/>
 				)

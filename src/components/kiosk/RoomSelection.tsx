@@ -1,16 +1,62 @@
 import { type RoomType } from '@/types/backendDataTypes'
 import { KioskImages } from '@/lib/images'
-import React, { type ReactElement } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
+import TimeoutWarningWindow from './TimeoutWarningWindow'
 import AsyncImage from '@/components/ui/AsyncImage'
+import { useConfig } from '@/contexts/ConfigProvider'
 
-interface Props {
+export default function RoomSelection ({
+	rooms,
+	onRoomSelect,
+	onBack,
+	onReset,
+	selectedActivity
+}: {
 	rooms: RoomType[]
 	onRoomSelect: (room: RoomType) => void
 	onBack: () => void
+	onReset: () => void
 	selectedActivity: string
-}
+}): ReactElement {
+	const { config } = useConfig()
+	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
+	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
+	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 
-export default function RoomSelection ({ rooms, onRoomSelect, onBack, selectedActivity }: Props): ReactElement {
+	const resetTimer = useCallback(() => {
+		clearTimeout(resetTimerRef.current)
+		resetTimerRef.current = setTimeout(() => {
+			setShowTimeoutWarning(true)
+		}, timeoutMs)
+	}, [timeoutMs])
+
+	useEffect(() => {
+		resetTimer()
+
+		return () => {
+			clearTimeout(resetTimerRef.current)
+		}
+	}, [resetTimer])
+
+	useEffect(() => {
+		const events = ['touchstart', 'touchmove']
+		const handleResetTimer = (): void => {
+			if (!showTimeoutWarning) {
+				resetTimer()
+			}
+		}
+
+		events.forEach(event => {
+			document.addEventListener(event, handleResetTimer)
+		})
+
+		return () => {
+			events.forEach(event => {
+				document.removeEventListener(event, handleResetTimer)
+			})
+		}
+	}, [resetTimer, showTimeoutWarning])
+
 	return (
 		<main className="flex flex-col h-full">
 			<div className="w-full px-8 pt-4">
@@ -61,6 +107,17 @@ export default function RoomSelection ({ rooms, onRoomSelect, onBack, selectedAc
 					</div>
 				</div>
 			</div>
+
+			{/* Timeout Warning Modal */}
+			{showTimeoutWarning && (
+				<TimeoutWarningWindow
+					onTimeout={() => { onReset() }}
+					onClose={() => {
+						setShowTimeoutWarning(false)
+						resetTimer()
+					}}
+				/>
+			)}
 		</main>
 	)
 }
