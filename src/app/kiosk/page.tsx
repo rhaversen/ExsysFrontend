@@ -1,9 +1,7 @@
 'use client'
 
-import ActivitySelection from '@/components/kiosk/ActivitySelection'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
-import RoomSelection from '@/components/kiosk/RoomSelection'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, getTimeStringFromOrderwindowTime, isCurrentTimeInOrderWindow, sortProductsByOrderwindow } from '@/lib/timeUtils'
@@ -14,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import ProgressBar from '@/components/kiosk/ProgressBar'
+import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -297,26 +296,26 @@ export default function Page (): ReactElement {
 		switch (viewState) {
 			case 'activity':
 				return (
-					<ActivitySelection
-						activities={activities.sort((a, b) => a.name.localeCompare(b.name))}
-						kioskActivities={activities
+					<DeliveryInfoSelection
+						title="Bestilling af brød, kaffe og the"
+						subtitle="Vælg din aktivitet for at komme i gang"
+						items={activities.sort((a, b) => a.name.localeCompare(b.name))}
+						priorityItems={activities
 							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
-						onActivitySelect={handleActivitySelect}
+						onSelect={handleActivitySelect}
 					/>
 				)
 			case 'room':
 				return (
-					<RoomSelection
-						activityRooms={selectedActivity?.rooms.map(room => rooms.find(r => r._id === room._id) ?? room).sort((a, b) => a.name.localeCompare(b.name)) ?? []}
-						rooms={rooms.sort((a, b) => a.name.localeCompare(b.name))}
-						onRoomSelect={handleRoomSelect}
-						onReset={(): void => {
-							setSelectedActivity(null)
-							setSelectedRoom(null)
-							setViewState('activity')
-						}}
-						selectedActivity={selectedActivity?.name ?? ''}
+					<DeliveryInfoSelection
+						title="Vælg dit spisested"
+						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
+						items={rooms.sort((a, b) => a.name.localeCompare(b.name))}
+						priorityItems={selectedActivity?.rooms
+							.map(room => rooms.find(r => r._id === room._id) ?? room)
+							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
+						onSelect={handleRoomSelect}
 					/>
 				)
 			case 'order':
