@@ -23,10 +23,10 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 
 	return (
 		<main className="flex flex-col min-h-screen bg-zinc-100">
-			<div className="flex flex-col items-center justify-center py-20">
+			<div className="flex flex-col items-center justify-center py-20 pb-5">
 				<header className="mb-8 flex flex-col gap-5 items-center">
-					<h1 className="text-gray-800 text-5xl font-bold">{title}</h1>
-					<p className="text-gray-600 text-xl">{subtitle}</p>
+					<h1 className="text-gray-800 text-6xl font-bold">{title}</h1>
+					<p className="text-gray-600 text-2xl">{subtitle}</p>
 				</header>
 
 				{priorityItems.length > 0 && (
@@ -52,14 +52,14 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 			</div>
 
 			{otherItems.length > 0 && (
-				<div className="flex-1 overflow-y-auto px-4 w-full">
+				<div className="flex-1 overflow-y-auto w-full pb-12">
 					<div className="w-full max-w-4xl mx-auto mb-8">
-						<div className="rounded grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-2 gap-4">
 							{otherItems.map((item, index) => (
 								<div key={item._id}>
 									<button
 										onClick={() => { onSelect(item) }}
-										className="w-full text-left py-3 px-4 bg-white hover:bg-gray-50 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+										className="w-full text-left py-3 px-4 rounded shadow-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 									>
 										<div className="grid grid-cols-2 gap-4">
 											<span className="font-semibold text-lg text-gray-900">{item.name}</span>
