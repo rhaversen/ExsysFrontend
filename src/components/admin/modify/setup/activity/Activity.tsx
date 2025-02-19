@@ -10,8 +10,9 @@ import {
 	type RoomType
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
-import EditableDropdown from '../../ui/EditableDropdown'
+import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
+import ItemsDisplay from '../../ui/ItemsDisplay'
 
 const Activity = ({
 	activity,
@@ -33,6 +34,7 @@ const Activity = ({
 		deleteEntity
 	} = useCUDOperations<PostActivityType, PatchActivityType>('/v1/activities')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+	const [showRooms, setShowRooms] = useState(false)
 
 	return (
 		<div className="p-2 m-2">
@@ -52,46 +54,48 @@ const Activity = ({
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Spisested'}</p>
-					<EditableDropdown
-						options={rooms.map((room) => ({
-							value: room._id,
-							label: room.name
-						}))}
-						initialValue={newActivity.roomId?._id ?? 'null-option'}
-						onChange={(value) => {
-							const room = rooms.find((room) => room._id === value)
-							handleFieldChange('roomId', room ?? null)
+					{activity.rooms.length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Tilknyttede Spisesteder:'}</p>
+					)}
+					{activity.rooms.length === 0 && !isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Ingen Spisesteder Tilknyttet'}</p>
+					)}
+					{activity.rooms.length === 0 && isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Spisesteder'}</p>
+					)}
+					<div className="flex flex-row flex-wrap max-w-52">
+						<ItemsDisplay
+							items={newActivity.rooms}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
+							onShowItems={() => {
+								setShowRooms(true)
+							}}
+						/>
+					</div>
+					<Timestamps
+						createdAt={activity.createdAt}
+						updatedAt={activity.updatedAt}
+					/>
+					<EditingControls
+						isEditing={isEditing}
+						setIsEditing={setIsEditing}
+						handleUndoEdit={() => {
+							resetFormState()
+							setIsEditing(false)
 						}}
-						editable={isEditing}
-						fieldName="roomId"
-						allowNullOption={true}
-						onValidationChange={handleValidationChange}
+						handleCompleteEdit={() => {
+							updateEntity(newActivity._id, {
+								...newActivity,
+								rooms: newActivity.rooms.map(room => room._id)
+							})
+							setIsEditing(false)
+						}}
+						setShowDeleteConfirmation={setShowDeleteConfirmation}
+						formIsValid={formIsValid}
 					/>
 				</div>
-				<Timestamps
-					createdAt={activity.createdAt}
-					updatedAt={activity.updatedAt}
-				/>
-				<EditingControls
-					isEditing={isEditing}
-					setIsEditing={setIsEditing}
-					handleUndoEdit={() => {
-						resetFormState()
-						setIsEditing(false)
-					}}
-					handleCompleteEdit={() => {
-						updateEntity(newActivity._id, {
-							...newActivity,
-							roomId: newActivity.roomId?._id ?? null
-						})
-						setIsEditing(false)
-					}}
-					setShowDeleteConfirmation={setShowDeleteConfirmation}
-					formIsValid={formIsValid}
-				/>
-			</div>
-			{showDeleteConfirmation &&
+				{showDeleteConfirmation &&
 				<ConfirmDeletion
 					itemName={activity.name}
 					onClose={() => {
@@ -102,7 +106,20 @@ const Activity = ({
 						deleteEntity(activity._id, confirm)
 					}}
 				/>
-			}
+				}
+				{showRooms &&
+					<SelectionWindow
+						title={`Tilføj Spisesteder til ${newActivity.name}`}
+						items={rooms}
+						selectedItems={newActivity.rooms}
+						onAddItem={(v) => { handleFieldChange('rooms', [...newActivity.rooms, { ...v, _id: v._id }]) }}
+						onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
+						onClose={() => {
+							setShowRooms(false)
+						}}
+					/>
+				}
+			</div>
 		</div>
 	)
 }

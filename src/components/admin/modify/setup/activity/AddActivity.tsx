@@ -5,7 +5,8 @@ import { type PostActivityType, type RoomType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
-import EditableDropdown from '../../ui/EditableDropdown'
+import SelectionWindow from '../../ui/SelectionWindow'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const AddActivity = ({
 	rooms,
@@ -20,8 +21,9 @@ const AddActivity = ({
 
 	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
-		roomId: ''
+		rooms: []
 	})
+	const [showRooms, setShowRooms] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -55,17 +57,19 @@ const AddActivity = ({
 		})
 	}, [activity])
 
-	const handleRoomIdChange = useCallback((v: string): void => {
-		// convert string to the object
-		const room = rooms.find((room) => room._id === v)
-		if (room === undefined && v !== 'null-option') {
-			return
-		}
+	const handleAddRoom = useCallback((v: RoomType): void => {
 		setActivity({
 			...activity,
-			roomId: ((room?._id) != null) ? room._id : null
+			rooms: [...(activity.rooms ?? []), v._id]
 		})
-	}, [activity, rooms])
+	}, [activity])
+
+	const handleDeleteRoom = useCallback((v: RoomType): void => {
+		setActivity({
+			...activity,
+			rooms: (activity.rooms ?? []).filter((id) => id !== v._id)
+		})
+	}, [activity])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
@@ -76,7 +80,7 @@ const AddActivity = ({
 	}, [postActivity, activity])
 
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal onClose={onClose} canClose={!showRooms}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
@@ -91,21 +95,31 @@ const AddActivity = ({
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<EditableDropdown
-						options={rooms.map((room) => ({
-							value: room._id,
-							label: room.name
-						}))}
-						initialValue={activity.roomId ?? 'null-option'}
-						onChange={handleRoomIdChange}
-						placeholder="Vælg Spisested"
-						allowNullOption={true}
-						fieldName="roomId"
-						onValidationChange={handleValidationChange}
+					{(activity.rooms ?? []).length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Spisesteder:'}</p>
+					)}
+					{(activity.rooms ?? []).length === 0 && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Spisesteder:'}</p>
+					)}
+					<ItemsDisplay
+						items={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+						onDeleteItem={handleDeleteRoom}
+						onShowItems={() => { setShowRooms(true) }}
 					/>
+					{showRooms && (
+						<SelectionWindow
+							title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+							items={rooms}
+							selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+							onAddItem={handleAddRoom}
+							onDeleteItem={handleDeleteRoom}
+							onClose={() => { setShowRooms(false) }}
+						/>
+					)}
 				</div>
 			</div>
 			<CompletePostControls
+				canClose={!showRooms}
 				formIsValid={formIsValid}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}
