@@ -18,14 +18,14 @@ const ProgressButton = ({
 	label: string
 }): React.ReactElement => (
 	<button
-		className={`font-bold transition-colors duration-300 flex-1 flex justify-center items-center
+		className={`font-bold h-14 transition-colors duration-300 flex-1 flex justify-center items-start
                     ${isActive ? 'text-blue-700' : 'text-gray-800'}
                     ${canClick ? 'cursor-pointer' : ''}`}
 		onClick={onClick}
 		disabled={!canClick}
 		type='button'
 	>
-		<div className="text-lg p-2 flex flex-col items-center justify-start text-center rounded-lg space-y-1"
+		<div className="text-lg flex flex-col items-center justify-start text-center rounded-lg"
 		>
 			{selectedName ?? label}
 			{canClick && (
@@ -69,33 +69,33 @@ export default function ProgressBar ({
 		const states = ['activity', 'room', 'order']
 		const currentIndex = states.indexOf(viewState)
 		const markerIndex = states.indexOf(markerState)
-		return markerIndex <= currentIndex
+		return markerIndex < currentIndex
 	}
 
 	return (
-		<div className="w-full flex flex-col space-y-3 bg-zinc-100">
+		<div className="w-full flex flex-col bg-zinc-100 shadow-b-md relative">
 			{/* Top progress bar container */}
-			<div className="w-full pt-1.5 h-2 rounded-full relative">
+			<div className="w-full h-3 mt-2 mb-1 rounded-full">
 				{/* Progress bar overlay */}
-				<div className="absolute pt-1.5 w-full bg-gray-200 rounded-l-full" />
-				<div className="absolute pt-1.5 h-full left-0 transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 rounded-l-full"
+				<div className="h-full transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 rounded-r-full"
 					style={{
 						width: `${getProgress(viewState)}%`
 					}}
 				/>
 
-				{/* Progress markers */}
-				<div className="absolute w-full h-full">
-					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-						style={{ left: `${getProgress('activity')}%` }}
-					></div>
-					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-						style={{ left: `${getProgress('room')}%` }}
-					></div>
-					<div className={`w-4 h-4 rounded-full border-2 absolute top-1/2 -translate-y-1/2 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-						style={{ left: `${getProgress('order')}%` }}
-					></div>
-				</div>
+			</div>
+
+			{/* Progress markers */}
+			<div className="absolute w-full">
+				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+					style={{ left: `${getProgress('activity')}%` }}
+				></div>
+				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+					style={{ left: `${getProgress('room')}%` }}
+				></div>
+				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+					style={{ left: `${getProgress('order')}%` }}
+				></div>
 			</div>
 
 			{/* Navigation buttons */}
