@@ -6,7 +6,7 @@ import OrderView from '@/components/kiosk/OrderView'
 import RoomSelection from '@/components/kiosk/RoomSelection'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { convertOrderWindowFromUTC, getTimeStringFromOrderwindowTime, isCurrentTimeInOrderWindow, sortProductsByOrderwindow } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
@@ -253,7 +253,7 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = (activity: ActivityType): void => {
 		setSelectedActivity(activity)
-			setViewState('room')
+		setViewState('room')
 	}
 
 	const handleRoomSelect = (room: RoomType): void => {
@@ -288,6 +288,7 @@ export default function Page (): ReactElement {
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
+						<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
 					</div>
 				</div>
 			)
