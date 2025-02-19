@@ -5,6 +5,7 @@ import React, {
 	type Dispatch,
 	type ReactNode,
 	type SetStateAction,
+	type ReactElement,
 	useContext,
 	useEffect,
 	useState
@@ -24,7 +25,7 @@ const UserContext = createContext<UserContextType>({
 
 export const useUser = (): UserContextType => useContext(UserContext)
 
-export default function UserProvider ({ children }: { readonly children: ReactNode }): JSX.Element {
+export default function UserProvider ({ children }: { readonly children: ReactNode }): ReactElement {
 	const [currentUser, setCurrentUser] = useState<UserType | null>(() => {
 		if (typeof window !== 'undefined') {
 			const storedUser = localStorage.getItem('currentUser')

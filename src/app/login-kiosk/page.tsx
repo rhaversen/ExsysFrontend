@@ -20,7 +20,7 @@ export default function Page (): ReactElement {
 				user: KioskType
 			}>(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			setCurrentUser(response.data.user)
-			router.push('/kiosk')
+			router.replace('/kiosk')
 		} catch (error: any) {
 			setCurrentUser(null)
 			addError(error)
@@ -29,7 +29,7 @@ export default function Page (): ReactElement {
 
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true }).then(() => {
-			router.push('/kiosk')
+			router.replace('/kiosk')
 		}).catch(() => {
 			// Do nothing
 		})
@@ -74,7 +74,7 @@ export default function Page (): ReactElement {
 				</div>
 			</form>
 			<div className="mt-5">
-				<button type="button" onClick={() => { router.push('/') }}
+				<button type="button" onClick={() => { router.replace('/') }}
 					className="text-sm text-indigo-600 hover:text-indigo-900">
 					{'Tilbage'}
 				</button>

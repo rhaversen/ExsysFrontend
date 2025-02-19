@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 		default: 'Log Ind Kiosk'
 	},
 	alternates: {
-		canonical: 'https://life-stats.net/admin/login-kiosk'
+		canonical: 'https://www.kantine.nyskivehus.dk/login-kiosk'
 	}
 }
 

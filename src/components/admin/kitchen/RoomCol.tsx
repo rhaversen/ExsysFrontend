@@ -1,75 +1,56 @@
 import Block from '@/components/admin/kitchen/Block'
-import { useSound } from '@/contexts/SoundProvider'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { type ReactElement, useMemo, useRef, useEffect } from 'react'
+import { useSound } from '@/contexts/SoundProvider'
 
 const RoomCol = ({
 	room,
 	orders,
-	onUpdatedOrders
+	onUpdatedOrders,
+	activityMap
 }: {
 	room: RoomType
 	orders: OrderType[]
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
+	activityMap: Record<string, string>
 }): ReactElement => {
-	const {
-		isMuted,
-		soundUrl
-	} = useSound()
-	const [ordersByActivity, setOrdersByActivity] = useState<Record<string, OrderType[]>>({})
-	const [totalProducts, setTotalProducts] = useState<Record<string, number>>({})
-	const [totalOptions, setTotalOptions] = useState<Record<string, number>>({})
-	const prevBlockCountRef = useRef(0)
-	const newOrderAlert = useMemo(() => new Audio(soundUrl), [soundUrl])
+	const { isMuted, soundUrl } = useSound()
+	const blockCountRef = useRef(-1)
+	const newBlockAlert = useMemo(() => new Audio(soundUrl), [soundUrl])
 
-	const groupOrdersByActivity = useCallback(() => {
-		const groupedOrders: Record<string, OrderType[]> = {}
-		orders.forEach((order) => {
-			if (groupedOrders[order.activityId] === undefined) {
-				groupedOrders[order.activityId] = []
-			}
-			groupedOrders[order.activityId].push(order)
+	// Group by activity
+	const ordersByActivity = useMemo(() => {
+		const grouped: Record<string, OrderType[]> = {}
+		orders.forEach(o => {
+			const key = o.activityId
+			if (grouped[key] === undefined) grouped[key] = []
+			grouped[key].push(o)
 		})
-		setOrdersByActivity(groupedOrders)
-	}, [orders, setOrdersByActivity])
+		return grouped
+	}, [orders])
 
 	useEffect(() => {
-		groupOrdersByActivity()
-	}, [groupOrdersByActivity])
-
-	// Play a sound when a new block is added
-	useEffect(() => {
-		const currentBlockCount = Object.keys(ordersByActivity).length
-		const increaseBlockCount = currentBlockCount > prevBlockCountRef.current
-		if (increaseBlockCount && !isMuted) {
-			newOrderAlert.play().catch(console.error)
+		const newCount = Object.keys(ordersByActivity).length
+		if (newCount > 0 && !isMuted && newCount > blockCountRef.current) {
+			newBlockAlert.play().catch(() => {})
 		}
-		prevBlockCountRef.current = currentBlockCount
-	}, [isMuted, newOrderAlert, ordersByActivity, room])
+		blockCountRef.current = newCount
+	}, [ordersByActivity, isMuted, newBlockAlert])
 
-	useEffect(() => {
+	// Compute totals
+	const { totalProducts, totalOptions } = useMemo(() => {
 		const productsCount: Record<string, number> = {}
 		const optionsCount: Record<string, number> = {}
-
-		orders.forEach(order => {
-			order.products.forEach(({
-				name,
-				quantity
-			}) => {
+		orders.forEach(({ products, options }) => {
+			products.forEach(({ name, quantity }) => {
 				productsCount[name] = (productsCount[name] ?? 0) + quantity
 			})
-
-			order.options.forEach(({
-				name,
-				quantity
-			}) => {
+			options.forEach(({ name, quantity }) => {
 				optionsCount[name] = (optionsCount[name] ?? 0) + quantity
 			})
 		})
-
-		setTotalProducts(productsCount)
-		setTotalOptions(optionsCount)
+		return { totalProducts: productsCount, totalOptions: optionsCount }
 	}, [orders])
 
 	return (
@@ -78,10 +59,10 @@ const RoomCol = ({
 				{room.name}
 			</h2>
 			<div className="flex flex-wrap justify-center">
-				{Object.keys(ordersByActivity).map((activityId) => (
+				{Object.keys(ordersByActivity).map(activityId => (
 					<Block
 						key={activityId}
-						activityId={activityId}
+						activityName={activityMap[activityId] ?? 'Ukendt Aktivitet'}
 						orders={ordersByActivity[activityId]}
 						onUpdatedOrders={onUpdatedOrders}
 					/>
@@ -91,18 +72,17 @@ const RoomCol = ({
 				<h3 className="text-gray-800 font-bold text-xl text-center">
 					{'Total'}
 				</h3>
-				<div className="flex flex-col items-center">
-					<div className="text-gray-800 text-lg">
-						{Object.entries(totalProducts).map(([name, quantity]) => (
-							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
-						))}
-						{Object.entries(totalOptions).map(([name, quantity]) => (
-							<p key={name}>{quantity}{' '}&times;{' '}{name}</p>
-						))}
-						{Object.entries(totalProducts).length === 0 && Object.entries(totalOptions).length === 0 && (
-							<p>{'Intet'}</p>
-						)}
-					</div>
+				<div className="flex flex-col items-center text-gray-800 text-lg">
+					{Object.entries(totalProducts).map(([name, qty]) => (
+						<p key={name}>{qty} &times; {name}</p>
+					))}
+					{Object.entries(totalOptions).map(([name, qty]) => (
+						<p key={name}>{qty} &times; {name}</p>
+					))}
+					{Object.entries(totalProducts).length === 0 &&
+						Object.entries(totalOptions).length === 0 && (
+						<p>{'Intet'}</p>
+					)}
 				</div>
 			</div>
 		</div>

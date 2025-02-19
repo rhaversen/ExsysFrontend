@@ -32,3 +32,5 @@ export interface UpdatedOrderType {
 // Order Station
 export type OrderStatus = 'success' | 'error' | 'loading' | 'awaitingPayment' | 'paymentFailed'
 export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay'
+
+export type ViewState = 'activity' | 'room' | 'order'

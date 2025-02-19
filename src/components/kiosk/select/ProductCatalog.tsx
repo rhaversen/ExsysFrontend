@@ -61,7 +61,8 @@ const ProductCatalog = ({
 		const el = containerRef.current
 		const events = [
 			'touchstart',
-			'touchmove'
+			'touchmove',
+			'scroll'
 		]
 
 		if (el !== null) {

@@ -1,4 +1,3 @@
-import Options from '@/components/admin/modify/catalog/product/productOptions/Options'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
@@ -16,6 +15,7 @@ import React, { type ReactElement, useState } from 'react'
 import InlineValidation from '../../ui/InlineValidation'
 import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const Product = ({
 	product,
@@ -172,11 +172,11 @@ const Product = ({
 					<p className="italic text-gray-500">{'Tilføj Tilvalg:'}</p>
 				}
 				<div className="flex flex-row flex-wrap max-w-52">
-					<Options
-						selectedOptions={newProduct.options}
+					<ItemsDisplay
+						items={newProduct.options}
 						editable={isEditing}
-						onDeleteOption={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
-						showOptions={() => {
+						onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
+						onShowItems={() => {
 							setShowOptions(true)
 						}}
 					/>
