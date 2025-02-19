@@ -135,11 +135,11 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, updateKioskActiveStatus, addError])
 
-	// Check if the current time has any active order windows every minute
+	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
 			updateKioskActiveStatus(products)
-		}, 60000)
+		}, 1000)
 
 		return () => { clearInterval(interval) }
 	}, [products, updateKioskActiveStatus])
