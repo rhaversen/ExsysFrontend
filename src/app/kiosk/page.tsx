@@ -323,7 +323,8 @@ export default function Page (): ReactElement {
 			case 'activity':
 				return (
 					<ActivitySelection
-						activities={activities
+						activities={activities.sort((a, b) => a.name.localeCompare(b.name))}
+						kioskActivities={activities
 							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onActivitySelect={handleActivitySelect}
