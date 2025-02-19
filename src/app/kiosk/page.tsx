@@ -8,7 +8,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
-import { type ViewState } from '@/types/frontendDataTypes'
+import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
@@ -36,6 +36,10 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('activity')
+	const [cart, setCart] = useState<CartType>({
+		products: {},
+		options: {}
+	})
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -261,6 +265,10 @@ export default function Page (): ReactElement {
 		}
 	)
 
+	const updateCart = useCallback((newCart: CartType) => {
+		setCart(newCart)
+	}, [])
+
 	const handleActivitySelect = (activity: ActivityType): void => {
 		setSelectedActivity(activity)
 		if (activity.rooms.length === 1) {
@@ -289,6 +297,7 @@ export default function Page (): ReactElement {
 		if (clickedView === 'activity' && canClickActivity) {
 			setSelectedActivity(null)
 			setSelectedRoom(null)
+			updateCart({ products: {}, options: {} })
 			setViewState('activity')
 		} else if (clickedView === 'room' && canClickRoom) {
 			setViewState('room')
@@ -344,9 +353,12 @@ export default function Page (): ReactElement {
 							activity={selectedActivity}
 							room={selectedRoom}
 							checkoutMethods={checkoutMethods}
+							cart={cart}
+							updateCart={updateCart}
 							onClose={(): void => {
 								setSelectedActivity(null)
 								setSelectedRoom(null)
+								updateCart({ products: {}, options: {} })
 								setViewState('activity')
 							}}
 						/>

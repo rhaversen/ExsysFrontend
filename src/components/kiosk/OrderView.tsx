@@ -26,6 +26,8 @@ const OrderView = ({
 	activity,
 	room,
 	checkoutMethods,
+	cart,
+	updateCart,
 	onClose
 }: {
 	kiosk: KioskType
@@ -34,6 +36,8 @@ const OrderView = ({
 	activity: ActivityType
 	room: RoomType
 	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
+	cart: CartType
+	updateCart: (cart: CartType) => void
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
@@ -44,10 +48,6 @@ const OrderView = ({
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<OrderStatus>('loading')
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
-	const [cart, setCart] = useState<CartType>({
-		products: {},
-		options: {}
-	})
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
@@ -78,77 +78,62 @@ const OrderView = ({
 
 	// Handler to change cart items using functional updates
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
-		setCart((prevCart) => {
-			const currentQuantity = prevCart[type][_id] ?? 0
-			const newQuantity = currentQuantity + change
+		const currentQuantity = cart[type][_id] ?? 0
+		const newQuantity = currentQuantity + change
 
-			// If the new quantity is less than or equal to zero, remove the item
-			if (newQuantity <= 0) {
-				const {
-					[_id]: _,
-					...updatedItems
-				} = prevCart[type]
-				return {
-					...prevCart,
-					[type]: updatedItems
-				}
-			}
+		// If the new quantity is less than or equal to zero, remove the item
+		if (newQuantity <= 0) {
+			const newCart = { ...cart }
+			const { [_id]: _, ...updatedItems } = newCart[type]
+			newCart[type] = updatedItems
+			updateCart(newCart)
+			return
+		}
 
-			// Otherwise, update the quantity of the item
-			return {
-				...prevCart,
-				[type]: {
-					...prevCart[type],
-					[_id]: newQuantity
-				}
+		// Otherwise, update the quantity of the item
+		updateCart({
+			...cart,
+			[type]: {
+				...cart[type],
+				[_id]: newQuantity
 			}
 		})
-	}, [])
+	}, [cart, updateCart])
 
 	// Synchronize cart with available products and options
 	useEffect(() => {
-		setCart((prevCart) => {
-			const availableProductIds = new Set(products.map(p => p._id))
-			const availableOptionIds = new Set(options.map(o => o._id))
+		const availableProductIds = new Set(products.map(p => p._id))
+		const availableOptionIds = new Set(options.map(o => o._id))
 
-			let updated = false
-			let newProducts = { ...prevCart.products }
-			let newOptions = { ...prevCart.options }
+		let updated = false
+		let newProducts = { ...cart.products }
+		let newOptions = { ...cart.options }
 
-			// Check products
-			Object.keys(newProducts).forEach(id => {
-				if (!availableProductIds.has(id)) {
-					const {
-						[id]: _,
-						...rest
-					} = newProducts
-					newProducts = rest
-					updated = true
-				}
-			})
-
-			// Check options
-			Object.keys(newOptions).forEach(id => {
-				if (!availableOptionIds.has(id)) {
-					const {
-						[id]: _,
-						...rest
-					} = newOptions
-					newOptions = rest
-					updated = true
-				}
-			})
-
-			if (updated) {
-				return {
-					products: newProducts,
-					options: newOptions
-				}
+		// Check products
+		Object.keys(newProducts).forEach(id => {
+			if (!availableProductIds.has(id)) {
+				const { [id]: _, ...rest } = newProducts
+				newProducts = rest
+				updated = true
 			}
-
-			return prevCart
 		})
-	}, [products, options])
+
+		// Check options
+		Object.keys(newOptions).forEach(id => {
+			if (!availableOptionIds.has(id)) {
+				const { [id]: _, ...rest } = newOptions
+				newOptions = rest
+				updated = true
+			}
+		})
+
+		if (updated) {
+			updateCart({
+				products: newProducts,
+				options: newOptions
+			})
+		}
+	}, [products, options, cart, updateCart])
 
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
@@ -193,15 +178,12 @@ const OrderView = ({
 			onClose()
 		} else {
 			window.dispatchEvent(new Event('resetScroll'))
-			setCart({
-				products: {},
-				options: {}
-			})
+			updateCart({ products: {}, options: {} })
 			setIsOrderConfirmationVisible(false)
 			setOrderStatus('loading')
 			setOrder(null)
 		}
-	}, [kiosk, onClose])
+	}, [kiosk, onClose, updateCart])
 
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 
@@ -323,7 +305,7 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
-					clearCart={() => { setCart({ products: {}, options: {} }) }}
+					clearCart={() => { updateCart({ products: {}, options: {} }) }}
 					formIsValid={isFormValid}
 				/>
 			</div>
