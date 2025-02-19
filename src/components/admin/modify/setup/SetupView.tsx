@@ -93,6 +93,7 @@ const SetupView = ({
 							<Room
 								rooms={rooms}
 								room={room}
+								activities={activities}
 							/>
 						</div>
 					))}
