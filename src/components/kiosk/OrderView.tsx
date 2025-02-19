@@ -2,7 +2,6 @@ import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
-import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type RoomType,
@@ -15,9 +14,8 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import TimeoutWarningWindow from './TimeoutWarningWindow'
 
 const OrderView = ({
 	kiosk,
@@ -28,7 +26,8 @@ const OrderView = ({
 	checkoutMethods,
 	cart,
 	updateCart,
-	onClose
+	onClose,
+	clearInactivityTimeout
 }: {
 	kiosk: KioskType
 	products: ProductType[]
@@ -39,9 +38,9 @@ const OrderView = ({
 	cart: CartType
 	updateCart: (cart: CartType) => void
 	onClose: () => void
+	clearInactivityTimeout: () => void
 }): ReactElement => {
 	const { addError } = useError()
-	const { config } = useConfig()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -50,9 +49,6 @@ const OrderView = ({
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
-	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
-
-	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -137,6 +133,7 @@ const OrderView = ({
 
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
+		clearInactivityTimeout()
 		setOrderStatus('loading')
 		setCheckoutMethod(checkoutMethod)
 		setIsOrderConfirmationVisible(true)
@@ -169,56 +166,7 @@ const OrderView = ({
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [kiosk, activity, room, cart, API_URL, addError])
-
-	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
-
-	const resetTimer = useCallback(() => {
-		clearTimeout(resetTimerRef.current)
-		resetTimerRef.current = setTimeout(() => {
-			// Only show warning now
-			setShowTimeoutWarning(true)
-		}, timeoutMs)
-	}, [timeoutMs])
-
-	// Reset timer on component mount
-	useEffect(() => {
-		const isAwaitingPayment = orderStatus === 'awaitingPayment'
-		const hasItems = Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)
-		const hasMultipleActivities = kiosk.activities.length > 1
-
-		if (!isAwaitingPayment && (hasItems || hasMultipleActivities)) {
-			// Only start (reset) the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
-			resetTimer()
-		} else if (isAwaitingPayment) {
-			// If the order is awaiting payment, clear the timer
-			clearTimeout(resetTimerRef.current)
-		}
-	}, [resetTimer, kiosk, cart, orderStatus])
-
-	// Add global interaction listeners and cleanup
-	useEffect(() => {
-		const events = [
-			'touchstart',
-			'touchmove'
-		]
-
-		const handleResetTimer = (): void => {
-			if (!showTimeoutWarning && orderStatus !== 'awaitingPayment') {
-				resetTimer()
-			}
-		}
-
-		events.forEach(event => {
-			document.addEventListener(event, handleResetTimer)
-		})
-
-		return () => {
-			events.forEach(event => {
-				document.removeEventListener(event, handleResetTimer)
-			})
-		}
-	}, [resetTimer, showTimeoutWarning, orderStatus])
+	}, [kiosk, activity, room, cart, API_URL, addError, clearInactivityTimeout])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
@@ -228,7 +176,6 @@ const OrderView = ({
 				paymentStatus: 'successful' | 'failed' | 'pending'
 			}): void => {
 				if (update.orderId === order._id) {
-					resetTimer() // Reset the timer on payment status update
 					switch (update.paymentStatus) {
 						case 'successful':
 							setOrderStatus('success')
@@ -254,7 +201,7 @@ const OrderView = ({
 				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
 			}
 		}
-	}, [socket, order, addError, resetTimer])
+	}, [socket, order, addError])
 
 	useEffect(() => {
 		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
@@ -318,17 +265,6 @@ const OrderView = ({
 						submitOrder(checkoutMethod)
 						setIsOrderConfirmationVisible(true)
 						setIsSelectPaymentWindowVisible(false)
-					}}
-				/>
-			)}
-
-			{/* Timeout Warning Modal */}
-			{showTimeoutWarning && (
-				<TimeoutWarningWindow
-					onTimeout={() => { onClose() }}
-					onClose={() => {
-						setShowTimeoutWarning(false)
-						resetTimer()
 					}}
 				/>
 			)}

@@ -9,15 +9,18 @@ import { type ActivityType, type KioskType, type OptionType, type ProductType, t
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import ProgressBar from '@/components/kiosk/ProgressBar'
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
+import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
+import { useConfig } from '@/contexts/ConfigProvider'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
+	const { config } = useConfig()
 	const { addError } = useError()
 	const router = useRouter()
 
@@ -39,6 +42,11 @@ export default function Page (): ReactElement {
 		products: {},
 		options: {}
 	})
+
+	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
+	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
+	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
+	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -279,6 +287,42 @@ export default function Page (): ReactElement {
 		}
 	}
 
+	const resetTimer = useCallback(() => {
+		clearTimeout(resetTimerRef.current)
+		// Only start timer if not in activity view and no order in progress
+		if (viewState !== 'activity' && !isOrderInProgress) {
+			resetTimerRef.current = setTimeout(() => {
+				setShowTimeoutWarning(true)
+			}, timeoutMs)
+		}
+	}, [timeoutMs, viewState, isOrderInProgress])
+
+	useEffect(() => {
+		resetTimer()
+		return () => {
+			clearTimeout(resetTimerRef.current)
+		}
+	}, [resetTimer])
+
+	useEffect(() => {
+		const events = ['touchstart', 'touchmove', 'click', 'mousemove', 'keydown', 'scroll']
+		const handleResetTimer = (): void => {
+			if (!showTimeoutWarning && viewState !== 'activity') {
+				resetTimer()
+			}
+		}
+
+		events.forEach(event => {
+			document.addEventListener(event, handleResetTimer)
+		})
+
+		return () => {
+			events.forEach(event => {
+				document.removeEventListener(event, handleResetTimer)
+			})
+		}
+	}, [resetTimer, showTimeoutWarning, viewState])
+
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
 		if (!isActive) {
@@ -335,6 +379,11 @@ export default function Page (): ReactElement {
 								setSelectedRoom(null)
 								updateCart({ products: {}, options: {} })
 								setViewState('activity')
+								setIsOrderInProgress(false)
+							}}
+							clearInactivityTimeout={(): void => {
+								clearTimeout(resetTimerRef.current)
+								setIsOrderInProgress(true)
 							}}
 						/>
 					)
@@ -357,6 +406,22 @@ export default function Page (): ReactElement {
 			<div className="flex-1 overflow-y-auto">
 				{renderCurrentView()}
 			</div>
+
+			{showTimeoutWarning && (
+				<TimeoutWarningWindow
+					onTimeout={() => {
+						updateCart({ products: {}, options: {} })
+						setSelectedActivity(null)
+						setSelectedRoom(null)
+						setViewState('activity')
+						setShowTimeoutWarning(false)
+					}}
+					onClose={() => {
+						setShowTimeoutWarning(false)
+						resetTimer()
+					}}
+				/>
+			)}
 
 			<div className="flex-shrink-0">
 				{isActive && <KioskSessionInfo />}
