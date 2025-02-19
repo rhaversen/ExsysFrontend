@@ -215,7 +215,7 @@ export default function Page (): ReactElement {
 			setActivities((prevActivities) =>
 				prevActivities.map((activity) => ({
 					...activity,
-					roomId: activity.roomId?._id === id ? null : activity.roomId
+					rooms: activity.rooms.filter((room) => room._id !== id)
 				}))
 			)
 			setRooms((prevRooms) => prevRooms.filter((room) => room._id !== id))
@@ -228,7 +228,7 @@ export default function Page (): ReactElement {
 			setActivities((prevActivities) =>
 				prevActivities.map((activity) => ({
 					...activity,
-					roomId: activity.roomId?._id === room._id ? room : activity.roomId
+					rooms: activity.rooms.map((r) => (r._id === room._id ? room : r))
 				}))
 			)
 			setRooms((prevRooms) => prevRooms.map((r) => (r._id === room._id ? room : r))

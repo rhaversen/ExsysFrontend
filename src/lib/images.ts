@@ -43,6 +43,14 @@ export const KioskImages = {
 	noUrl: {
 		src: '/images/none.svg',
 		alt: 'Produktbillede'
+	},
+	resetCart: {
+		src: '/images/trashcan.svg',
+		alt: 'Nulstil Kurv'
+	},
+	back: {
+		src: '/images/arrow.svg',
+		alt: 'Tilbage'
 	}
 }
 

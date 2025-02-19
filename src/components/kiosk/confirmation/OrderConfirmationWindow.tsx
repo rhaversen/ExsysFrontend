@@ -39,12 +39,12 @@ const OrderConfirmationWindow = ({
 	}, [])
 
 	useEffect(() => {
-		if (!canClose) return
+		if (!canClose || orderStatus === 'awaitingPayment') return
 		const timeoutId = setTimeout(() => {
 			onClose()
 		}, autocloseMs)
 		return () => { clearTimeout(timeoutId) }
-	}, [autocloseMs, canClose, onClose])
+	}, [autocloseMs, canClose, orderStatus, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
@@ -78,13 +78,13 @@ const OrderConfirmationWindow = ({
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
 		loading: <p>{'Vent venligst'}</p>,
-		awaitingPayment: <p>{'Afventer betaling'}</p>,
+		awaitingPayment: <p>{'Afventer betaling på terminalen til højre'}</p>,
 		success: successMessage,
 		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
 		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
 	}
 
-	const showSubmitButton = orderStatus !== 'loading'
+	const showSubmitButton = orderStatus !== 'loading' && orderStatus !== 'awaitingPayment'
 
 	return (
 		<CloseableModal onClose={onClose} canClose={canClose}>
@@ -118,12 +118,13 @@ const OrderConfirmationWindow = ({
 					/>
 				)}
 			</div>
-
-			<div className="text-center text-sm text-gray-800 mt-4">
-				{'Fortsætter om '}
-				<strong>{remainingSeconds}</strong>
-				{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
-			</div>
+			{orderStatus !== 'awaitingPayment' && (
+				<div className="text-center text-sm text-gray-800 mt-4">
+					{'Fortsætter om '}
+					<strong>{remainingSeconds}</strong>
+					{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
+				</div>
+			)}
 		</CloseableModal>
 	)
 }
