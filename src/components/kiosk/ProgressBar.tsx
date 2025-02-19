@@ -111,10 +111,10 @@ export default function ProgressBar ({
 				<ProgressButton
 					isActive={viewState === 'room'}
 					canClick={canClickRoom}
-					canClickMessage="Tryk her for at ændre lokale"
+					canClickMessage="Tryk her for at ændre spisested"
 					onClick={() => { canClickRoom && onProgressClick('room') }}
 					selectedName={selectedRoom?.name}
-					label="Vælg Lokale"
+					label="Vælg Spisested"
 				/>
 				<ProgressButton
 					isActive={viewState === 'order'}
