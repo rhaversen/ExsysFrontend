@@ -171,20 +171,6 @@ const OrderView = ({
 			})
 	}, [kiosk, activity, room, cart, API_URL, addError])
 
-	// Reset Function to clear cart and states
-	const reset = useCallback((): void => {
-		setShowTimeoutWarning(false)
-		if (kiosk.activities.length > 1) {
-			onClose()
-		} else {
-			window.dispatchEvent(new Event('resetScroll'))
-			updateCart({ products: {}, options: {} })
-			setIsOrderConfirmationVisible(false)
-			setOrderStatus('loading')
-			setOrder(null)
-		}
-	}, [kiosk, onClose, updateCart])
-
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const resetTimer = useCallback(() => {
@@ -305,7 +291,10 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
-					clearCart={() => { updateCart({ products: {}, options: {} }) }}
+					clearCart={() => {
+						updateCart({ products: {}, options: {} })
+						window.dispatchEvent(new Event('resetScroll'))
+					}}
 					formIsValid={isFormValid}
 				/>
 			</div>
@@ -316,7 +305,7 @@ const OrderView = ({
 					price={totalPrice}
 					orderStatus={orderStatus}
 					checkoutMethod={checkoutMethod}
-					onClose={reset}
+					onClose={onClose}
 				/>
 			)}
 
@@ -336,7 +325,7 @@ const OrderView = ({
 			{/* Timeout Warning Modal */}
 			{showTimeoutWarning && (
 				<TimeoutWarningWindow
-					onTimeout={() => { reset() }}
+					onTimeout={() => { onClose() }}
 					onClose={() => {
 						setShowTimeoutWarning(false)
 						resetTimer()
