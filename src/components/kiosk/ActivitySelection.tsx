@@ -9,7 +9,7 @@ const ActivitySelection = ({
 	onActivitySelect: (activity: ActivityType) => void
 }): ReactElement => {
 	return (
-		<main className="flex flex-col justify-center items-center h-full">
+		<main className="flex flex-col justify-center items-center h-full bg-zinc-100">
 			<header className="mb-8 flex flex-col gap-5">
 				<h1 className="text-center text-gray-800 text-5xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
 				<p className="text-center text-gray-600 text-xl">{'Vælg din aktivitet for at komme i gang'}</p>

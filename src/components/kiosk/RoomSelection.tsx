@@ -58,7 +58,7 @@ export default function RoomSelection ({
 	const otherRooms = rooms.filter(room => !activityRooms.some(ar => ar._id === room._id))
 
 	return (
-		<main className="flex flex-col h-full">
+		<main className="flex flex-col h-full bg-zinc-100">
 			<div className="flex-grow flex items-center">
 				<div className="w-full flex flex-col items-center gap-4">
 					<header className="mb-8 flex flex-col gap-5">

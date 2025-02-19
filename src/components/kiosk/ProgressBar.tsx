@@ -73,7 +73,7 @@ export default function ProgressBar ({
 	}
 
 	return (
-		<div className="w-full flex flex-col space-y-3">
+		<div className="w-full flex flex-col space-y-3 bg-zinc-100">
 			{/* Top progress bar container */}
 			<div className="w-full pt-1.5 h-2 rounded-full relative">
 				{/* Progress bar overlay */}
