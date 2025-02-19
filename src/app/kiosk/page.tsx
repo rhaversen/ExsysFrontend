@@ -112,24 +112,6 @@ export default function Page (): ReactElement {
 
 			// Check if the current time has any active order windows
 			updateKioskActiveStatus(processedProducts)
-
-			// If only one activity is available, select it
-			if (kioskData.activities.length === 1) {
-				const activity = kioskData.activities[0]
-				setSelectedActivity(activity)
-				// If the activity has only one room, select it
-				if (activity.rooms.length === 1) {
-					const room = roomsData.find(r => r._id === activity.rooms[0]._id)
-					if (room != null) {
-						setSelectedRoom(room)
-						setViewState('order')
-					}
-				} else {
-					setViewState('room')
-				}
-			} else {
-				setSelectedActivity(null)
-			}
 		} catch (error) {
 			addError(error)
 		}
@@ -271,15 +253,7 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = (activity: ActivityType): void => {
 		setSelectedActivity(activity)
-		if (activity.rooms.length === 1) {
-			const room = rooms.find(r => r._id === activity.rooms[0]._id)
-			if (room != null) {
-				setSelectedRoom(room)
-				setViewState('order')
-			}
-		} else {
 			setViewState('room')
-		}
 	}
 
 	const handleRoomSelect = (room: RoomType): void => {
