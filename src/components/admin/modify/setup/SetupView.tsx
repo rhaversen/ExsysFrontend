@@ -191,6 +191,7 @@ const SetupView = ({
 			{showAddRoom &&
 				<AddRoom
 					rooms={rooms}
+					activities={activities}
 					onClose={() => {
 						setShowAddRoom(false)
 					}}
