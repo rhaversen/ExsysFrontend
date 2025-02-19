@@ -1,4 +1,3 @@
-import Activities from '@/components/admin/modify/setup/kiosk/kioskActivities/Activities'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -8,6 +7,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import CompletePostControls from '../../ui/CompletePostControls'
 import EditableDropdown from '../../ui/EditableDropdown'
 import SelectionWindow from '../../ui/SelectionWindow'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const AddKiosk = ({
 	kiosks,
@@ -176,10 +176,10 @@ const AddKiosk = ({
 					{kiosk.activities.length === 0 &&
 						<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
 					}
-					<Activities
-						selectedActivities={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-						onDeleteActivity={handleDeleteActivity}
-						showActivities={() => {
+					<ItemsDisplay
+						items={activities.filter((activity) => kiosk.activities.includes(activity._id))}
+						onDeleteItem={handleDeleteActivity}
+						onShowItems={() => {
 							setShowActivities(true)
 						}}
 					/>

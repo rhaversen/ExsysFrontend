@@ -1,4 +1,3 @@
-import Options from '@/components/admin/modify/catalog/product/productOptions/Options'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
@@ -10,6 +9,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 import CompletePostControls from '../../ui/CompletePostControls'
 import InlineValidation from '../../ui/InlineValidation'
 import SelectionWindow from '../../ui/SelectionWindow'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const AddProduct = ({
 	options,
@@ -277,10 +277,10 @@ const AddProduct = ({
 				{product.options.length === 0 &&
 					<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
 				}
-				<Options
-					selectedOptions={options.filter((option) => product.options.includes(option._id))}
-					onDeleteOption={handleDeleteOption}
-					showOptions={() => {
+				<ItemsDisplay
+					items={options.filter((option) => product.options.includes(option._id))}
+					onDeleteItem={handleDeleteOption}
+					onShowItems={() => {
 						setShowOptions(true)
 					}}
 				/>

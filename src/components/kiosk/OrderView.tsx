@@ -5,6 +5,7 @@ import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
+	type RoomType,
 	type ActivityType,
 	type KioskType,
 	type OptionType,
@@ -23,6 +24,7 @@ const OrderView = ({
 	products,
 	options,
 	activity,
+	room,
 	checkoutMethods,
 	onClose
 }: {
@@ -30,6 +32,7 @@ const OrderView = ({
 	products: ProductType[]
 	options: OptionType[]
 	activity: ActivityType
+	room: RoomType
 	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
 	onClose: () => void
 }): ReactElement => {
@@ -162,6 +165,7 @@ const OrderView = ({
 		const data: PostOrderType = {
 			kioskId: kiosk._id,
 			activityId: activity._id,
+			roomId: room._id,
 			products: prepareCartItems(cart.products),
 			options: prepareCartItems(cart.options),
 			checkoutMethod
@@ -180,7 +184,7 @@ const OrderView = ({
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [cart, kiosk, activity, API_URL, addError])
+	}, [kiosk, activity, room, cart, API_URL, addError])
 
 	// Reset Function to clear cart and states
 	const reset = useCallback((): void => {
@@ -199,7 +203,7 @@ const OrderView = ({
 		}
 	}, [kiosk, onClose])
 
-	const resetTimerRef = useRef<NodeJS.Timeout>()
+	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 
 	const resetTimer = useCallback(() => {
 		clearTimeout(resetTimerRef.current)
@@ -211,11 +215,18 @@ const OrderView = ({
 
 	// Reset timer on component mount
 	useEffect(() => {
-		// For a single-activity kiosk, only start if cart is not empty
-		if (kiosk.activities.length > 1 || Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)) {
+		const isAwaitingPayment = orderStatus === 'awaitingPayment'
+		const hasItems = Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)
+		const hasMultipleActivities = kiosk.activities.length > 1
+
+		if (!isAwaitingPayment && (hasItems || hasMultipleActivities)) {
+			// Only start (reset) the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
 			resetTimer()
+		} else if (isAwaitingPayment) {
+			// If the order is awaiting payment, clear the timer
+			clearTimeout(resetTimerRef.current)
 		}
-	}, [resetTimer, kiosk, cart])
+	}, [resetTimer, kiosk, cart, orderStatus])
 
 	// Add global interaction listeners and cleanup
 	useEffect(() => {
@@ -225,7 +236,7 @@ const OrderView = ({
 		]
 
 		const handleResetTimer = (): void => {
-			if (!showTimeoutWarning) {
+			if (!showTimeoutWarning && orderStatus !== 'awaitingPayment') {
 				resetTimer()
 			}
 		}
@@ -239,7 +250,7 @@ const OrderView = ({
 				document.removeEventListener(event, handleResetTimer)
 			})
 		}
-	}, [resetTimer, showTimeoutWarning])
+	}, [resetTimer, showTimeoutWarning, orderStatus])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
@@ -291,28 +302,8 @@ const OrderView = ({
 
 	return (
 		<main className="flex flex-row bg-zinc-100 h-full">
-			{/* Left Column: Header + Selection Window */}
+			{/* Left Column: Selection Window */}
 			<div className="w-full flex flex-col">
-				{/* Header */}
-				<header className="flex flex-row p-2 items-center justify-between shadow-b-md">
-					{/* Left spacer */}
-					<div className="flex-1" />
-					<h1 className="text-3xl font-bold text-center text-gray-800">
-						{'Bestil Til ' + activity.name}
-					</h1>
-					<div className="flex-1 flex justify-end"> {/* Right container */}
-						{kiosk.activities.length > 1 && (
-							<button
-								onClick={onClose}
-								className="bg-blue-500 rounded-md mx-5 py-2 px-4"
-								type="button"
-							>
-								{'Vælg Anden Aktivitet'}
-							</button>
-						)}
-					</div>
-				</header>
-
 				{/* Selection Window */}
 				<div className="flex-1 overflow-y-auto">
 					<SelectionWindow
@@ -332,6 +323,7 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
+					clearCart={() => { setCart({ products: {}, options: {} }) }}
 					formIsValid={isFormValid}
 				/>
 			</div>

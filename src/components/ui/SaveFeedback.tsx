@@ -2,7 +2,7 @@ import React, { type ReactElement, useCallback, useEffect, useRef } from 'react'
 
 export const useSaveFeedback = (): { showSuccess: boolean, showSuccessMessage: () => void } => {
 	const [showSuccess, setShowSuccess] = React.useState(false)
-	const timeoutRef = useRef<NodeJS.Timeout>()
+	const timeoutRef = useRef<NodeJS.Timeout>(undefined)
 
 	const showSuccessMessage = useCallback(() => {
 		if (timeoutRef.current != null) {

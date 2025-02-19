@@ -1,16 +1,19 @@
 'use client'
 
-import ActivitySelection from '@/components/kiosk/activities/ActivitySelection'
+import ActivitySelection from '@/components/kiosk/ActivitySelection'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
+import RoomSelection from '@/components/kiosk/RoomSelection'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
-import { type ActivityType, type KioskType, type OptionType, type ProductType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
+import ProgressBar from '@/components/kiosk/ProgressBar'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -30,6 +33,10 @@ export default function Page (): ReactElement {
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [isActive, setIsActive] = useState(true)
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
+	const [viewState, setViewState] = useState<ViewState>('activity')
+
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
 
@@ -77,12 +84,14 @@ export default function Page (): ReactElement {
 				kioskData,
 				productsData,
 				optionsData,
-				activitiesData
-			]: [KioskType, ProductType[], OptionType[], ActivityType[]] = await Promise.all([
+				activitiesData,
+				roomsData
+			]: [KioskType, ProductType[], OptionType[], ActivityType[], RoomType[]] = await Promise.all([
 				fetchData(`${API_URL}/v1/kiosks/me`),
 				fetchData(`${API_URL}/v1/products`),
 				fetchData(`${API_URL}/v1/options`),
-				fetchData(`${API_URL}/v1/activities`)
+				fetchData(`${API_URL}/v1/activities`),
+				fetchData(`${API_URL}/v1/rooms`)
 			])
 
 			const processedProducts = processProductsData(productsData)
@@ -92,6 +101,7 @@ export default function Page (): ReactElement {
 			setProducts(processedProducts)
 			setOptions(optionsData)
 			setActivities(activitiesData)
+			setRooms(roomsData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
@@ -101,7 +111,18 @@ export default function Page (): ReactElement {
 
 			// If only one activity is available, select it
 			if (kioskData.activities.length === 1) {
-				setSelectedActivity(kioskData.activities[0])
+				const activity = kioskData.activities[0]
+				setSelectedActivity(activity)
+				// If the activity has only one room, select it
+				if (activity.rooms.length === 1) {
+					const room = roomsData.find(r => r._id === activity.rooms[0]._id)
+					if (room != null) {
+						setSelectedRoom(room)
+						setViewState('order')
+					}
+				} else {
+					setViewState('room')
+				}
 			} else {
 				setSelectedActivity(null)
 			}
@@ -221,38 +242,137 @@ export default function Page (): ReactElement {
 		}
 	)
 
-	return (
-		<div className="flex flex-col h-screen">
-			{!isActive && (
+	// Rooms
+	useEntitySocketListeners<RoomType>(
+		socket,
+		'room',
+		room => { setRooms(prev => [...prev, room]) },
+		room => {
+			setRooms(prev => prev.map(r => r._id === room._id ? room : r))
+			if (selectedRoom?._id === room._id) {
+				setSelectedRoom(room)
+			}
+		},
+		id => {
+			setRooms(prev => prev.filter(r => r._id !== id))
+			if (selectedRoom?._id === id) {
+				setSelectedRoom(null)
+			}
+		}
+	)
+
+	const handleActivitySelect = (activity: ActivityType): void => {
+		setSelectedActivity(activity)
+		if (activity.rooms.length === 1) {
+			const room = rooms.find(r => r._id === activity.rooms[0]._id)
+			if (room != null) {
+				setSelectedRoom(room)
+				setViewState('order')
+			}
+		} else {
+			setViewState('room')
+		}
+	}
+
+	const handleRoomSelect = (room: RoomType): void => {
+		setSelectedRoom(room)
+		setViewState('order')
+	}
+
+	const canClickActivity = viewState !== 'activity'
+	const canClickRoom = viewState !== 'room' && selectedActivity !== null
+	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
+
+	const handleProgressClick = (clickedView: ViewState): void => {
+		if (clickedView === viewState) return
+
+		if (clickedView === 'activity' && canClickActivity) {
+			setSelectedActivity(null)
+			setSelectedRoom(null)
+			setViewState('activity')
+		} else if (clickedView === 'room' && canClickRoom) {
+			setViewState('room')
+		} else if (clickedView === 'order' && canClickOrder) {
+			setViewState('order')
+		}
+	}
+
+	// Render current view based on viewState
+	const renderCurrentView = (): ReactElement | null => {
+		if (!isActive) {
+			return (
 				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
 					</div>
 				</div>
-			)}
-			<div className="flex-1 overflow-y-auto">
-				{selectedActivity === null && isActive && (
+			)
+		}
+
+		switch (viewState) {
+			case 'activity':
+				return (
 					<ActivitySelection
-						activities={activities.filter(activity => kiosk?.activities.some(a => a._id === activity._id)).sort((a, b) => a.name.localeCompare(b.name))}
-						onActivitySelect={setSelectedActivity}
+						activities={activities
+							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
+							.sort((a, b) => a.name.localeCompare(b.name))}
+						onActivitySelect={handleActivitySelect}
 					/>
-				)}
-				{selectedActivity !== null && kiosk !== null && isActive && (
-					<OrderView
-						kiosk={kiosk}
-						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
-						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
-						activity={selectedActivity}
-						checkoutMethods={checkoutMethods}
-						onClose={() => { setSelectedActivity(null) }}
+				)
+			case 'room':
+				return (
+					<RoomSelection
+						activityRooms={selectedActivity?.rooms.map(room => rooms.find(r => r._id === room._id) ?? room).sort((a, b) => a.name.localeCompare(b.name)) ?? []}
+						rooms={rooms.sort((a, b) => a.name.localeCompare(b.name))}
+						onRoomSelect={handleRoomSelect}
+						onReset={(): void => {
+							setSelectedActivity(null)
+							setSelectedRoom(null)
+							setViewState('activity')
+						}}
+						selectedActivity={selectedActivity?.name ?? ''}
 					/>
-				)}
+				)
+			case 'order':
+				return (kiosk != null) && (selectedActivity != null) && (selectedRoom != null)
+					? (
+						<OrderView
+							kiosk={kiosk}
+							products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+							options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
+							activity={selectedActivity}
+							room={selectedRoom}
+							checkoutMethods={checkoutMethods}
+							onClose={(): void => {
+								setSelectedActivity(null)
+								setSelectedRoom(null)
+								setViewState('activity')
+							}}
+						/>
+					)
+					: null
+		}
+	}
+
+	return (
+		<div className="flex flex-col h-screen">
+			<ProgressBar
+				viewState={viewState}
+				canClickActivity={canClickActivity}
+				canClickRoom={canClickRoom}
+				canClickOrder={canClickOrder}
+				onProgressClick={handleProgressClick}
+				selectedActivity={selectedActivity}
+				selectedRoom={selectedRoom}
+			/>
+
+			<div className="flex-1 overflow-y-auto">
+				{renderCurrentView()}
 			</div>
+
 			<div className="flex-shrink-0">
-				{isActive && (
-					<KioskSessionInfo />
-				)}
+				{isActive && <KioskSessionInfo />}
 			</div>
 		</div>
 	)

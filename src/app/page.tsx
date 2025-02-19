@@ -52,9 +52,9 @@ export default function Page (): ReactElement {
 					className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
 					onClick={() => {
 						if (loginAs === 'Kiosk') {
-							router.push('/kiosk')
+							router.replace('/kiosk')
 						} else {
-							router.push('/login-kiosk')
+							router.replace('/login-kiosk')
 						}
 					}}
 				>

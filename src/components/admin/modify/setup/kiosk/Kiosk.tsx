@@ -1,4 +1,3 @@
-import Activities from '@/components/admin/modify/setup/kiosk/kioskActivities/Activities'
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditingControls from '@/components/admin/modify/ui/EditControls'
@@ -15,6 +14,7 @@ import React, { type ReactElement, useState } from 'react'
 import EditableDropdown from '../../ui/EditableDropdown'
 import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const Kiosk = ({
 	kiosks,
@@ -130,11 +130,11 @@ const Kiosk = ({
 					<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter Til Kiosken:'}</p>
 				}
 				<div className="flex flex-row flex-wrap max-w-52">
-					<Activities
-						selectedActivities={newKiosk.activities}
+					<ItemsDisplay
+						items={newKiosk.activities}
 						editable={isEditing}
-						onDeleteActivity={(v: ActivityType) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity !== v)) }}
-						showActivities={() => {
+						onDeleteItem={(v: ActivityType) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity !== v)) }}
+						onShowItems={() => {
 							setShowActivities(true)
 						}}
 					/>
