@@ -19,7 +19,7 @@ function ItemsDisplay<T extends GenericItem> ({
 	onShowItems: () => void
 }): ReactElement {
 	return (
-		<div className="flex flex-row flex-wrap">
+		<div className="flex flex-row flex-wrap max-w-md">
 			{items.sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
 				<div
 					key={item._id}
