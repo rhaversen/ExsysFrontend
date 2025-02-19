@@ -36,9 +36,6 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('activity')
-	const [isChangingRoom, setIsChangingRoom] = useState(false)
-	// State to backup the current room when changing rooms
-	const [prevRoom, setPrevRoom] = useState<RoomType | null>(null)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -277,66 +274,27 @@ export default function Page (): ReactElement {
 		}
 	}
 
-	const handleBack = (): void => {
-		if (isChangingRoom) {
-			setSelectedRoom(prevRoom)
-			setIsChangingRoom(false)
-			setViewState('order')
-		} else {
-			switch (viewState) {
-				case 'room':
-					setSelectedActivity(null)
-					setViewState('activity')
-					break
-				case 'order':
-					if (kiosk?.activities.length === 1) {
-						setSelectedRoom(null)
-						setViewState('room')
-					} else {
-						setSelectedActivity(null)
-						setSelectedRoom(null)
-						setViewState('activity')
-					}
-					break
-			}
-		}
-	}
-
 	const handleRoomSelect = (room: RoomType): void => {
 		setSelectedRoom(room)
-		setIsChangingRoom(false)
 		setViewState('order')
 	}
 
-	const canClickActivity = (): boolean => {
-		return viewState === 'room' || viewState === 'order'
-	}
-
-	const canClickRoom = (): boolean => {
-		return (viewState === 'order' || viewState === 'activity') && selectedActivity !== null
-	}
+	const canClickActivity = viewState !== 'activity'
+	const canClickRoom = viewState !== 'room' && selectedActivity !== null
+	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
 
 	const handleProgressClick = (clickedView: ViewState): void => {
 		if (clickedView === viewState) return
 
-		if (clickedView === 'activity' && canClickActivity()) {
-			reset()
-		} else if (clickedView === 'room' && canClickRoom()) {
-			if (viewState === 'order') {
-				setPrevRoom(selectedRoom)
-				setIsChangingRoom(true)
-			}
+		if (clickedView === 'activity' && canClickActivity) {
+			setSelectedActivity(null)
 			setSelectedRoom(null)
+			setViewState('activity')
+		} else if (clickedView === 'room' && canClickRoom) {
 			setViewState('room')
+		} else if (clickedView === 'order' && canClickOrder) {
+			setViewState('order')
 		}
-	}
-
-	const reset = (): void => {
-		setSelectedActivity(null)
-		setSelectedRoom(null)
-		setPrevRoom(null)
-		setIsChangingRoom(false)
-		setViewState('activity')
 	}
 
 	// Render current view based on viewState
@@ -365,13 +323,14 @@ export default function Page (): ReactElement {
 			case 'room':
 				return (
 					<RoomSelection
-						rooms={isChangingRoom
-							? rooms.sort((a, b) => a.name.localeCompare(b.name))
-							: rooms.filter(room => selectedActivity?.rooms.some(r => r._id === room._id))
-								.sort((a, b) => a.name.localeCompare(b.name))}
+						activityRooms={selectedActivity?.rooms.map(room => rooms.find(r => r._id === room._id) ?? room).sort((a, b) => a.name.localeCompare(b.name)) ?? []}
+						rooms={rooms.sort((a, b) => a.name.localeCompare(b.name))}
 						onRoomSelect={handleRoomSelect}
-						onBack={handleBack}
-						onReset={reset}
+						onReset={(): void => {
+							setSelectedActivity(null)
+							setSelectedRoom(null)
+							setViewState('activity')
+						}}
 						selectedActivity={selectedActivity?.name ?? ''}
 					/>
 				)
@@ -385,7 +344,11 @@ export default function Page (): ReactElement {
 							activity={selectedActivity}
 							room={selectedRoom}
 							checkoutMethods={checkoutMethods}
-							onClose={reset}
+							onClose={(): void => {
+								setSelectedActivity(null)
+								setSelectedRoom(null)
+								setViewState('activity')
+							}}
 						/>
 					)
 					: null
@@ -398,6 +361,7 @@ export default function Page (): ReactElement {
 				viewState={viewState}
 				canClickActivity={canClickActivity}
 				canClickRoom={canClickRoom}
+				canClickOrder={canClickOrder}
 				onProgressClick={handleProgressClick}
 				selectedActivity={selectedActivity}
 				selectedRoom={selectedRoom}

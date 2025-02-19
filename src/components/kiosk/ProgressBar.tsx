@@ -5,12 +5,14 @@ import React from 'react'
 const ProgressButton = ({
 	isActive,
 	canClick,
+	canClickMessage,
 	onClick,
 	selectedName,
 	label
 }: {
 	isActive: boolean
 	canClick: boolean
+	canClickMessage: string
 	onClick: () => void
 	selectedName?: string
 	label: string
@@ -25,14 +27,9 @@ const ProgressButton = ({
 	>
 		<div className="text-lg p-2 flex flex-col items-center text-center rounded-lg"
 		>
-			<div className='flex items-center justify-center gap-1'>
-				{(selectedName != null) && (
-					<div className="text-sm text-gray-500">{label + ':'}</div>
-				)}
-				{selectedName ?? `Vælg ${label}`}
-			</div>
+			{selectedName ?? label}
 			{canClick && (
-				<div className="text-md text-gray-700">{'Ret valg'}</div>
+				<div className="text-md text-gray-700">{canClickMessage}</div>
 			)}
 		</div>
 	</button>
@@ -42,13 +39,15 @@ export default function ProgressBar ({
 	viewState,
 	canClickActivity,
 	canClickRoom,
+	canClickOrder,
 	onProgressClick,
 	selectedActivity,
 	selectedRoom
 }: {
 	viewState: ViewState
-	canClickActivity: () => boolean
-	canClickRoom: () => boolean
+	canClickActivity: boolean
+	canClickRoom: boolean
+	canClickOrder: boolean
 	onProgressClick: (view: ViewState) => void
 	selectedActivity: ActivityType | null
 	selectedRoom: RoomType | null
@@ -69,7 +68,7 @@ export default function ProgressBar ({
 	const skipAnimation = viewState === 'order' && (selectedRoom == null)
 
 	return (
-		<div className="w-full bg-gray-300 relative transition-all duration-300 ease-in-out h-20">
+		<div className="w-full bg-gray-300 relative transition-all duration-300 ease-in-out h-16">
 			{/* Progress bar overlay */}
 			<div
 				className={`absolute h-full bg-blue-200 ${skipAnimation ? '' : 'transition-all duration-300 ease-in-out'}`}
@@ -80,25 +79,28 @@ export default function ProgressBar ({
 			<div className="flex justify-around h-full relative z-10 gap-10">
 				<ProgressButton
 					isActive={viewState === 'activity'}
-					canClick={canClickActivity()}
-					onClick={() => { canClickActivity() && onProgressClick('activity') }}
+					canClick={canClickActivity}
+					canClickMessage="Tryk her for at ændre aktivitet"
+					onClick={() => { canClickActivity && onProgressClick('activity') }}
 					selectedName={selectedActivity?.name}
-					label="Aktivitet"
+					label="Vælg Aktivitet"
 				/>
 				<ProgressButton
 					isActive={viewState === 'room'}
-					canClick={canClickRoom()}
-					onClick={() => { canClickRoom() && onProgressClick('room') }}
+					canClick={canClickRoom}
+					canClickMessage="Tryk her for at ændre lokale"
+					onClick={() => { canClickRoom && onProgressClick('room') }}
 					selectedName={selectedRoom?.name}
-					label="Rum"
+					label="Vælg Lokale"
 				/>
-				<div className="text-center flex-1 flex items-center justify-center">
-					<div className={`font-bold transition-colors duration-300 text-lg p-2
-							${viewState === 'order' ? 'text-blue-700' : 'text-gray-700'}`}
-					>
-						{'Bestil'}
-					</div>
-				</div>
+				<ProgressButton
+					isActive={viewState === 'order'}
+					canClick={canClickOrder}
+					canClickMessage="Tryk her for at ændre bestilling"
+					onClick={() => { canClickOrder && onProgressClick('order') }}
+					selectedName={undefined}
+					label="Vælg Bestilling"
+				/>
 			</div>
 		</div>
 	)
