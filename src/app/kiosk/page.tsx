@@ -37,7 +37,7 @@ export default function Page (): ReactElement {
 	const [isActive, setIsActive] = useState(true)
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
-	const [viewState, setViewState] = useState<ViewState>('activity')
+	const [viewState, setViewState] = useState<ViewState>('welcome')
 	const [cart, setCart] = useState<CartType>({
 		products: {},
 		options: {}
@@ -260,7 +260,11 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = (activity: ActivityType): void => {
 		setSelectedActivity(activity)
-		setViewState('room')
+		if (selectedRoom !== null) {
+			setViewState('order')
+		} else {
+			setViewState('room')
+		}
 	}
 
 	const handleRoomSelect = (room: RoomType): void => {
@@ -276,9 +280,6 @@ export default function Page (): ReactElement {
 		if (clickedView === viewState) return
 
 		if (clickedView === 'activity' && canClickActivity) {
-			setSelectedActivity(null)
-			setSelectedRoom(null)
-			updateCart({ products: {}, options: {} })
 			setViewState('activity')
 		} else if (clickedView === 'room' && canClickRoom) {
 			setViewState('room')
@@ -290,7 +291,7 @@ export default function Page (): ReactElement {
 	const resetTimer = useCallback(() => {
 		clearTimeout(resetTimerRef.current)
 		// Only start timer if not in activity view and no order in progress
-		if (viewState !== 'activity' && !isOrderInProgress) {
+		if (viewState !== 'welcome' && !isOrderInProgress) {
 			resetTimerRef.current = setTimeout(() => {
 				setShowTimeoutWarning(true)
 			}, timeoutMs)
@@ -307,7 +308,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		const events = ['touchstart', 'touchmove', 'click', 'mousemove', 'keydown', 'scroll']
 		const handleResetTimer = (): void => {
-			if (!showTimeoutWarning && viewState !== 'activity') {
+			if (!showTimeoutWarning && viewState !== 'welcome') {
 				resetTimer()
 			}
 		}
@@ -338,11 +339,27 @@ export default function Page (): ReactElement {
 		}
 
 		switch (viewState) {
+			case 'welcome':
+				return (
+					<div className="flex flex-col items-center justify-center h-full">
+						<header className="mb-8 flex flex-col gap-5 items-center">
+							<h1 className="text-gray-800 text-7xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
+							<p className="text-gray-600 text-3xl">{'Tryk på knappen for at starte din bestilling'}</p>
+						</header>
+
+						<button
+							onClick={() => { setViewState('activity') }}
+							className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
+						>
+							{'Start bestilling\r'}
+						</button>
+					</div>
+				)
 			case 'activity':
 				return (
 					<DeliveryInfoSelection
-						title="Bestilling af brød, kaffe og the"
-						subtitle="Vælg din aktivitet for at komme i gang"
+						title="Vælg din aktivitet"
+						subtitle="Vælg den aktivitet du deltager i"
 						items={activities.sort((a, b) => a.name.localeCompare(b.name))}
 						priorityItems={activities
 							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
@@ -363,31 +380,36 @@ export default function Page (): ReactElement {
 					/>
 				)
 			case 'order':
-				return (kiosk != null) && (selectedActivity != null) && (selectedRoom != null)
-					? (
-						<OrderView
-							kiosk={kiosk}
-							products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
-							options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
-							activity={selectedActivity}
-							room={selectedRoom}
-							checkoutMethods={checkoutMethods}
-							cart={cart}
-							updateCart={updateCart}
-							onClose={(): void => {
-								setSelectedActivity(null)
-								setSelectedRoom(null)
-								updateCart({ products: {}, options: {} })
-								setViewState('activity')
-								setIsOrderInProgress(false)
-							}}
-							clearInactivityTimeout={(): void => {
-								clearTimeout(resetTimerRef.current)
-								setIsOrderInProgress(true)
-							}}
-						/>
-					)
-					: null
+				if (kiosk == null || selectedActivity == null || selectedRoom == null) {
+					setViewState('welcome')
+					return null
+				}
+				return (
+					<OrderView
+						kiosk={kiosk}
+						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
+						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
+						activity={selectedActivity}
+						room={selectedRoom}
+						checkoutMethods={checkoutMethods}
+						cart={cart}
+						updateCart={updateCart}
+						onClose={(): void => {
+							setSelectedActivity(null)
+							setSelectedRoom(null)
+							updateCart({ products: {}, options: {} })
+							setViewState('welcome')
+							setIsOrderInProgress(false)
+						}}
+						clearInactivityTimeout={(): void => {
+							clearTimeout(resetTimerRef.current)
+							setIsOrderInProgress(true)
+						}}
+					/>
+				)
+			default:
+				setViewState('welcome')
+				return null
 		}
 	}
 
@@ -413,7 +435,7 @@ export default function Page (): ReactElement {
 						updateCart({ products: {}, options: {} })
 						setSelectedActivity(null)
 						setSelectedRoom(null)
-						setViewState('activity')
+						setViewState('welcome')
 						setShowTimeoutWarning(false)
 					}}
 					onClose={() => {

@@ -54,6 +54,8 @@ export default function ProgressBar ({
 }): React.ReactElement {
 	const getProgress = (viewState: string): number => {
 		switch (viewState) {
+			case 'welcome':
+				return 100
 			case 'activity':
 				return 1 / 6 * 100
 			case 'room':
@@ -66,6 +68,7 @@ export default function ProgressBar ({
 	}
 
 	const isMarkerActive = (markerState: string): boolean => {
+		if (viewState === 'welcome') return false
 		const states = ['activity', 'room', 'order']
 		const currentIndex = states.indexOf(viewState)
 		const markerIndex = states.indexOf(markerState)
@@ -73,57 +76,60 @@ export default function ProgressBar ({
 	}
 
 	return (
-		<div className="w-full flex flex-col bg-zinc-100 shadow-b-md relative">
+		<div className={`w-full flex flex-col relative ${viewState !== 'welcome' ? 'shadow-b-md bg-zinc-100' : ''}`}>
 			{/* Top progress bar container */}
 			<div className="w-full h-3 mt-2 mb-1 rounded-full">
 				{/* Progress bar overlay */}
-				<div className="h-full transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 rounded-r-full"
+				<div className={`h-full transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 ${getProgress(viewState) !== 100 ? 'rounded-r-full' : ''}`}
 					style={{
 						width: `${getProgress(viewState)}%`
 					}}
 				/>
-
 			</div>
 
-			{/* Progress markers */}
-			<div className="absolute w-full">
-				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-					style={{ left: `${getProgress('activity')}%` }}
-				></div>
-				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-					style={{ left: `${getProgress('room')}%` }}
-				></div>
-				<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-					style={{ left: `${getProgress('order')}%` }}
-				></div>
-			</div>
+			{viewState !== 'welcome' && (
+				<>
+					{/* Progress markers */}
+					<div className="absolute w-full">
+						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+							style={{ left: `${getProgress('activity')}%` }}
+						></div>
+						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+							style={{ left: `${getProgress('room')}%` }}
+						></div>
+						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
+							style={{ left: `${getProgress('order')}%` }}
+						></div>
+					</div>
 
-			{/* Navigation buttons */}
-			<div className="flex justify-around items-start h-full">
-				<ProgressButton
-					isActive={viewState === 'activity'}
-					canClick={canClickActivity}
-					canClickMessage="Tryk her for at ændre aktivitet"
-					onClick={() => { canClickActivity && onProgressClick('activity') }}
-					selectedName={selectedActivity?.name}
-					label="Vælg Aktivitet"
-				/>
-				<ProgressButton
-					isActive={viewState === 'room'}
-					canClick={canClickRoom}
-					canClickMessage="Tryk her for at ændre spisested"
-					onClick={() => { canClickRoom && onProgressClick('room') }}
-					selectedName={selectedRoom?.name}
-					label="Vælg Spisested"
-				/>
-				<ProgressButton
-					isActive={viewState === 'order'}
-					canClick={canClickOrder}
-					canClickMessage="Tryk her for at ændre bestilling"
-					onClick={() => { canClickOrder && onProgressClick('order') }}
-					label="Vælg Bestilling"
-				/>
-			</div>
+					{/* Navigation buttons */}
+					<div className="flex justify-around items-start h-full">
+						<ProgressButton
+							isActive={viewState === 'activity'}
+							canClick={canClickActivity}
+							canClickMessage="Tryk her for at ændre aktivitet"
+							onClick={() => { canClickActivity && onProgressClick('activity') }}
+							selectedName={selectedActivity?.name}
+							label="Aktivitet"
+						/>
+						<ProgressButton
+							isActive={viewState === 'room'}
+							canClick={canClickRoom}
+							canClickMessage="Tryk her for at ændre spisested"
+							onClick={() => { canClickRoom && onProgressClick('room') }}
+							selectedName={selectedRoom?.name}
+							label="Spisested"
+						/>
+						<ProgressButton
+							isActive={viewState === 'order'}
+							canClick={canClickOrder}
+							canClickMessage="Tryk her for at ændre bestilling"
+							onClick={() => { canClickOrder && onProgressClick('order') }}
+							label="Bestilling"
+						/>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }
