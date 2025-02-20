@@ -2,7 +2,6 @@ import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
-import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import {
 	type RoomType,
@@ -15,9 +14,8 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import TimeoutWarningWindow from './TimeoutWarningWindow'
 
 const OrderView = ({
 	kiosk,
@@ -26,7 +24,10 @@ const OrderView = ({
 	activity,
 	room,
 	checkoutMethods,
-	onClose
+	cart,
+	updateCart,
+	onClose,
+	clearInactivityTimeout
 }: {
 	kiosk: KioskType
 	products: ProductType[]
@@ -34,25 +35,20 @@ const OrderView = ({
 	activity: ActivityType
 	room: RoomType
 	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
+	cart: CartType
+	updateCart: (cart: CartType) => void
 	onClose: () => void
+	clearInactivityTimeout: () => void
 }): ReactElement => {
 	const { addError } = useError()
-	const { config } = useConfig()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<OrderStatus>('loading')
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
-	const [cart, setCart] = useState<CartType>({
-		products: {},
-		options: {}
-	})
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
-	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
-
-	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -78,80 +74,66 @@ const OrderView = ({
 
 	// Handler to change cart items using functional updates
 	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
-		setCart((prevCart) => {
-			const currentQuantity = prevCart[type][_id] ?? 0
-			const newQuantity = currentQuantity + change
+		const currentQuantity = cart[type][_id] ?? 0
+		const newQuantity = currentQuantity + change
 
-			// If the new quantity is less than or equal to zero, remove the item
-			if (newQuantity <= 0) {
-				const {
-					[_id]: _,
-					...updatedItems
-				} = prevCart[type]
-				return {
-					...prevCart,
-					[type]: updatedItems
-				}
-			}
+		// If the new quantity is less than or equal to zero, remove the item
+		if (newQuantity <= 0) {
+			const newCart = { ...cart }
+			const { [_id]: _, ...updatedItems } = newCart[type]
+			newCart[type] = updatedItems
+			updateCart(newCart)
+			return
+		}
 
-			// Otherwise, update the quantity of the item
-			return {
-				...prevCart,
-				[type]: {
-					...prevCart[type],
-					[_id]: newQuantity
-				}
+		// Otherwise, update the quantity of the item
+		updateCart({
+			...cart,
+			[type]: {
+				...cart[type],
+				[_id]: newQuantity
 			}
 		})
-	}, [])
+	}, [cart, updateCart])
 
 	// Synchronize cart with available products and options
 	useEffect(() => {
-		setCart((prevCart) => {
-			const availableProductIds = new Set(products.map(p => p._id))
-			const availableOptionIds = new Set(options.map(o => o._id))
+		const availableProductIds = new Set(products.map(p => p._id))
+		const availableOptionIds = new Set(options.map(o => o._id))
 
-			let updated = false
-			let newProducts = { ...prevCart.products }
-			let newOptions = { ...prevCart.options }
+		let updated = false
+		let newProducts = { ...cart.products }
+		let newOptions = { ...cart.options }
 
-			// Check products
-			Object.keys(newProducts).forEach(id => {
-				if (!availableProductIds.has(id)) {
-					const {
-						[id]: _,
-						...rest
-					} = newProducts
-					newProducts = rest
-					updated = true
-				}
-			})
-
-			// Check options
-			Object.keys(newOptions).forEach(id => {
-				if (!availableOptionIds.has(id)) {
-					const {
-						[id]: _,
-						...rest
-					} = newOptions
-					newOptions = rest
-					updated = true
-				}
-			})
-
-			if (updated) {
-				return {
-					products: newProducts,
-					options: newOptions
-				}
+		// Check products
+		Object.keys(newProducts).forEach(id => {
+			if (!availableProductIds.has(id)) {
+				const { [id]: _, ...rest } = newProducts
+				newProducts = rest
+				updated = true
 			}
-
-			return prevCart
 		})
-	}, [products, options])
+
+		// Check options
+		Object.keys(newOptions).forEach(id => {
+			if (!availableOptionIds.has(id)) {
+				const { [id]: _, ...rest } = newOptions
+				newOptions = rest
+				updated = true
+			}
+		})
+
+		if (updated) {
+			updateCart({
+				products: newProducts,
+				options: newOptions
+			})
+		}
+	}, [products, options, cart, updateCart])
 
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
+		clearInactivityTimeout()
 		setOrderStatus('loading')
 		setCheckoutMethod(checkoutMethod)
 		setIsOrderConfirmationVisible(true)
@@ -184,73 +166,7 @@ const OrderView = ({
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [kiosk, activity, room, cart, API_URL, addError])
-
-	// Reset Function to clear cart and states
-	const reset = useCallback((): void => {
-		setShowTimeoutWarning(false)
-		if (kiosk.activities.length > 1) {
-			onClose()
-		} else {
-			window.dispatchEvent(new Event('resetScroll'))
-			setCart({
-				products: {},
-				options: {}
-			})
-			setIsOrderConfirmationVisible(false)
-			setOrderStatus('loading')
-			setOrder(null)
-		}
-	}, [kiosk, onClose])
-
-	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
-
-	const resetTimer = useCallback(() => {
-		clearTimeout(resetTimerRef.current)
-		resetTimerRef.current = setTimeout(() => {
-			// Only show warning now
-			setShowTimeoutWarning(true)
-		}, timeoutMs)
-	}, [timeoutMs])
-
-	// Reset timer on component mount
-	useEffect(() => {
-		const isAwaitingPayment = orderStatus === 'awaitingPayment'
-		const hasItems = Object.values(cart.products).some(q => q > 0) || Object.values(cart.options).some(q => q > 0)
-		const hasMultipleActivities = kiosk.activities.length > 1
-
-		if (!isAwaitingPayment && (hasItems || hasMultipleActivities)) {
-			// Only start (reset) the inactivity timer if orderStatus is not 'awaitingPayment' and there are items in the cart or activities to choose from
-			resetTimer()
-		} else if (isAwaitingPayment) {
-			// If the order is awaiting payment, clear the timer
-			clearTimeout(resetTimerRef.current)
-		}
-	}, [resetTimer, kiosk, cart, orderStatus])
-
-	// Add global interaction listeners and cleanup
-	useEffect(() => {
-		const events = [
-			'touchstart',
-			'touchmove'
-		]
-
-		const handleResetTimer = (): void => {
-			if (!showTimeoutWarning && orderStatus !== 'awaitingPayment') {
-				resetTimer()
-			}
-		}
-
-		events.forEach(event => {
-			document.addEventListener(event, handleResetTimer)
-		})
-
-		return () => {
-			events.forEach(event => {
-				document.removeEventListener(event, handleResetTimer)
-			})
-		}
-	}, [resetTimer, showTimeoutWarning, orderStatus])
+	}, [kiosk, activity, room, cart, API_URL, addError, clearInactivityTimeout])
 
 	useEffect(() => {
 		if (socket !== null && order !== null) {
@@ -260,7 +176,6 @@ const OrderView = ({
 				paymentStatus: 'successful' | 'failed' | 'pending'
 			}): void => {
 				if (update.orderId === order._id) {
-					resetTimer() // Reset the timer on payment status update
 					switch (update.paymentStatus) {
 						case 'successful':
 							setOrderStatus('success')
@@ -286,7 +201,7 @@ const OrderView = ({
 				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
 			}
 		}
-	}, [socket, order, addError, resetTimer])
+	}, [socket, order, addError])
 
 	useEffect(() => {
 		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
@@ -323,7 +238,10 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
-					clearCart={() => { setCart({ products: {}, options: {} }) }}
+					clearCart={() => {
+						updateCart({ products: {}, options: {} })
+						window.dispatchEvent(new Event('resetScroll'))
+					}}
 					formIsValid={isFormValid}
 				/>
 			</div>
@@ -334,7 +252,7 @@ const OrderView = ({
 					price={totalPrice}
 					orderStatus={orderStatus}
 					checkoutMethod={checkoutMethod}
-					onClose={reset}
+					onClose={onClose}
 				/>
 			)}
 
@@ -347,17 +265,6 @@ const OrderView = ({
 						submitOrder(checkoutMethod)
 						setIsOrderConfirmationVisible(true)
 						setIsSelectPaymentWindowVisible(false)
-					}}
-				/>
-			)}
-
-			{/* Timeout Warning Modal */}
-			{showTimeoutWarning && (
-				<TimeoutWarningWindow
-					onTimeout={() => { reset() }}
-					onClose={() => {
-						setShowTimeoutWarning(false)
-						resetTimer()
 					}}
 				/>
 			)}
