@@ -1,4 +1,4 @@
-import { type OrderWindow } from '@/types/backendDataTypes'
+import { type ProductType, type OrderWindow, type Time } from '@/types/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const {
@@ -150,4 +150,20 @@ export function formatDuration (ms: number): string {
 	if (minutes > 0) parts.push(`${minutes} minut${minutes !== 1 ? 'ter' : ''}`)
 
 	return parts.join(', ') ?? 'Mindre end et minut'
+}
+
+export function sortProductsByOrderwindow (products: ProductType[]): ProductType[] {
+	return products.sort((a, b) => {
+		const aOrderWindow = a.orderWindow
+		const bOrderWindow = b.orderWindow
+
+		const aFrom = aOrderWindow.from.hour * 60 + aOrderWindow.from.minute
+		const bFrom = bOrderWindow.from.hour * 60 + bOrderWindow.from.minute
+
+		return aFrom - bFrom
+	})
+}
+
+export function getTimeStringFromOrderwindowTime (orderWindowTime: Time): string {
+	return `${orderWindowTime.hour.toString().padStart(2, '0')}:${orderWindowTime.minute.toString().padStart(2, '0')}`
 }

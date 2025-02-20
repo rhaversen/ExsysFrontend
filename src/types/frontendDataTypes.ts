@@ -33,4 +33,4 @@ export interface UpdatedOrderType {
 export type OrderStatus = 'success' | 'error' | 'loading' | 'awaitingPayment' | 'paymentFailed'
 export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay'
 
-export type ViewState = 'activity' | 'room' | 'order'
+export type ViewState = 'welcome' | 'activity' | 'room' | 'order'
