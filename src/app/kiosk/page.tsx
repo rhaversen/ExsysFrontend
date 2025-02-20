@@ -428,6 +428,12 @@ export default function Page (): ReactElement {
 				canClickRoom={canClickRoom}
 				canClickOrder={canClickOrder}
 				onProgressClick={handleProgressClick}
+				onReset={() => {
+					setSelectedActivity(null)
+					setSelectedRoom(null)
+					updateCart({ products: {}, options: {} })
+					setViewState('activity')
+				}}
 				selectedActivity={selectedActivity}
 				selectedRoom={selectedRoom}
 			/>

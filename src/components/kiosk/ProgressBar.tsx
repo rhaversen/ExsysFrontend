@@ -45,6 +45,7 @@ export default function ProgressBar ({
 	canClickRoom,
 	canClickOrder,
 	onProgressClick,
+	onReset,
 	selectedActivity,
 	selectedRoom
 }: {
@@ -53,6 +54,7 @@ export default function ProgressBar ({
 	canClickRoom: boolean
 	canClickOrder: boolean
 	onProgressClick: (view: ViewState) => void
+	onReset: () => void
 	selectedActivity: ActivityType | null
 	selectedRoom: RoomType | null
 }): React.ReactElement {
@@ -130,7 +132,7 @@ export default function ProgressBar ({
 						/>
 						<div className="absolute right-4 h-full flex items-center">
 							<button
-								onClick={() => { onProgressClick('welcome') }}
+								onClick={() => { onReset() }}
 								className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
 									transition-all duration-300 ease-in-out shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform -translate-y-[4px] text-gray-800 bg-white`}
