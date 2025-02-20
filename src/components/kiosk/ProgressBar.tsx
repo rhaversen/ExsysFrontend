@@ -57,11 +57,11 @@ export default function ProgressBar ({
 			case 'welcome':
 				return 100
 			case 'activity':
-				return 1 / 6 * 100
+				return 3 / 10 * 100
 			case 'room':
-				return 50
+				return 5 / 10 * 100
 			case 'order':
-				return 5 / 6 * 100
+				return 7 / 10 * 100
 			default:
 				return 0
 		}
@@ -103,7 +103,7 @@ export default function ProgressBar ({
 					</div>
 
 					{/* Navigation buttons */}
-					<div className="flex justify-around items-start h-full">
+					<div className="flex justify-center items-start h-full px-[20%]">
 						<ProgressButton
 							isActive={viewState === 'activity'}
 							canClick={canClickActivity}
