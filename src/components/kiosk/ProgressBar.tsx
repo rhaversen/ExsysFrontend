@@ -5,32 +5,36 @@ import React from 'react'
 const ProgressButton = ({
 	isActive,
 	canClick,
-	canClickMessage,
 	onClick,
 	selectedName,
 	label
 }: {
 	isActive: boolean
 	canClick: boolean
-	canClickMessage: string
 	onClick: () => void
 	selectedName?: string
 	label: string
 }): React.ReactElement => (
 	<button
-		className={`font-bold h-14 transition-colors duration-300 flex-1 flex justify-center items-start
-                    ${isActive ? 'text-blue-700' : 'text-gray-800'}
-                    ${canClick ? 'cursor-pointer' : ''}`}
+		className={`font-bold h-14 rounded-xl flex-1 flex justify-center items-center m-2
+                    transition-all duration-300 ease-in-out shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
+					transform
+                    ${isActive
+		? 'text-blue-700 bg-white'
+		: canClick
+			? 'text-gray-800 bg-white'
+			: 'text-gray-400 bg-gray-100'
+	}
+                    ${canClick && !isActive
+		? '-translate-y-[4px]'
+		: 'shadow-none'}`}
+
 		onClick={onClick}
 		disabled={!canClick}
 		type='button'
 	>
-		<div className="text-lg flex flex-col items-center justify-start text-center rounded-lg"
-		>
+		<div className="text-xl flex flex-col items-center justify-center text-center p-3">
 			{selectedName ?? label}
-			{canClick && (
-				<div className="text-md text-gray-700">{canClickMessage}</div>
-			)}
 		</div>
 	</button>
 )
@@ -103,11 +107,10 @@ export default function ProgressBar ({
 					</div>
 
 					{/* Navigation buttons */}
-					<div className="flex justify-center items-start h-full px-[20%]">
+					<div className="flex justify-center items-center h-full px-[20%]">
 						<ProgressButton
 							isActive={viewState === 'activity'}
 							canClick={canClickActivity}
-							canClickMessage="Tryk her for at ændre aktivitet"
 							onClick={() => { canClickActivity && onProgressClick('activity') }}
 							selectedName={selectedActivity?.name}
 							label="Aktivitet"
@@ -115,7 +118,6 @@ export default function ProgressBar ({
 						<ProgressButton
 							isActive={viewState === 'room'}
 							canClick={canClickRoom}
-							canClickMessage="Tryk her for at ændre spisested"
 							onClick={() => { canClickRoom && onProgressClick('room') }}
 							selectedName={selectedRoom?.name}
 							label="Spisested"
@@ -123,7 +125,6 @@ export default function ProgressBar ({
 						<ProgressButton
 							isActive={viewState === 'order'}
 							canClick={canClickOrder}
-							canClickMessage="Tryk her for at ændre bestilling"
 							onClick={() => { canClickOrder && onProgressClick('order') }}
 							label="Bestilling"
 						/>
