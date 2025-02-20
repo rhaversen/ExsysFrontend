@@ -338,7 +338,7 @@ export default function Page (): ReactElement {
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
 						{products.length > 0 && (
-						<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
+							<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
 						)}
 					</div>
 				</div>
@@ -453,7 +453,7 @@ export default function Page (): ReactElement {
 			)}
 
 			<div className="flex-shrink-0">
-				{isActive && <KioskSessionInfo />}
+				<KioskSessionInfo />
 			</div>
 		</div>
 	)
