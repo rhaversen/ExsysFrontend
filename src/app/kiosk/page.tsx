@@ -285,6 +285,11 @@ export default function Page (): ReactElement {
 			setViewState('room')
 		} else if (clickedView === 'order' && canClickOrder) {
 			setViewState('order')
+		} else if (clickedView === 'welcome') {
+			setViewState('welcome')
+			setSelectedActivity(null)
+			setSelectedRoom(null)
+			updateCart({ products: {}, options: {} })
 		}
 	}
 
