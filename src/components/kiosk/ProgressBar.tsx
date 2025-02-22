@@ -1,6 +1,8 @@
 import { type ActivityType, type RoomType } from '@/types/backendDataTypes'
 import { type ViewState } from '@/types/frontendDataTypes'
 import React from 'react'
+import { KioskImages } from '@/lib/images'
+import AsyncImage from '../ui/AsyncImage'
 
 const ProgressButton = ({
 	isActive,
@@ -153,14 +155,22 @@ export default function ProgressBar ({
 						{/* 'Hjem' on the right */}
 						<div className="absolute right-4 h-full flex items-center">
 							<button
+								title="Gå til forside"
 								onClick={() => { onProgressClick('welcome') }}
-								className="font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
+								className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform text-gray-800 bg-white"
 							>
-								<div className="text-md flex flex-col items-center justify-center text-center">
-									{'Hjem\r'}
-								</div>
+								<AsyncImage
+									src={KioskImages.home.src}
+									alt={KioskImages.home.alt}
+									className="w-6 h-6"
+									width={24}
+									height={24}
+									quality={75}
+									priority={false}
+									draggable={false}
+								/>
 							</button>
 						</div>
 					</div>
