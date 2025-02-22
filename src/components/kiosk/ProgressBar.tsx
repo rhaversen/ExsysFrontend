@@ -19,7 +19,7 @@ const ProgressButton = ({
 }): React.ReactElement => (
 	<button
 		className={`font-bold h-14 rounded-xl flex-1 flex justify-center items-center m-2
-                    transition-all duration-300 ease-in shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
+                    transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 					transform
                     ${isActive
 		? 'text-blue-700 bg-white'
@@ -124,7 +124,7 @@ export default function ProgressBar ({
 								}}
 								className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
-									transform ${resetPressed ? 'ease-out translate-y-0 shadow-none' : 'ease-in -translate-y-[4px]'}
+									transform ${resetPressed ? 'translate-y-0 shadow-none' : '-translate-y-[4px]'}
 									text-gray-800 bg-white`}
 							>
 								<div className="text-md flex flex-col items-center justify-center text-center">
