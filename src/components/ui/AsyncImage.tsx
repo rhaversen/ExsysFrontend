@@ -1,6 +1,6 @@
 import { LoadingImage } from '@/lib/images'
 import Image from 'next/image'
-import React, { type ReactElement, useState, useEffect } from 'react'
+import React, { type ReactElement, useState, useEffect, useRef } from 'react'
 
 const AsyncImage = ({
 	className,
@@ -23,22 +23,39 @@ const AsyncImage = ({
 }): ReactElement => {
 	const [imageLoaded, setImageLoaded] = useState(false)
 	const [loadingLoaded, setLoadingLoaded] = useState(false)
-	const [skipAnimation, setSkipAnimation] = useState(false)
+	const [skipAnimation, setSkipAnimation] = useState(true)
+	const mounted = useRef(true)
+	const [showLoading, setShowLoading] = useState(false)
 
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			if (!imageLoaded) {
+		const img = new window.Image()
+		img.src = src
+
+		if (img.complete) {
+			setImageLoaded(true)
+		} else {
+			setShowLoading(true)
+			img.onload = () => {
+				if (mounted.current) {
+					setImageLoaded(true)
+				}
+			}
+		}
+
+		setTimeout(() => {
+			if (mounted.current) {
 				setSkipAnimation(false)
 			}
-		}, 50)
+		}, 200)
 
-		setSkipAnimation(true)
-		return () => { clearTimeout(timer) }
-	}, [])
+		return () => {
+			mounted.current = false
+		}
+	}, [src])
 
 	return (
 		<div className={className}>
-			{!imageLoaded && (
+			{!imageLoaded && showLoading && (
 				<Image
 					width={width}
 					height={height}
