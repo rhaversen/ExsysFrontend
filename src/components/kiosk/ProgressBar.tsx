@@ -17,7 +17,7 @@ const ProgressButton = ({
 }): React.ReactElement => (
 	<button
 		className={`font-bold h-14 rounded-xl flex-1 flex justify-center items-center m-2
-                    transition-all duration-300 ease-in-out shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
+                    transition-all duration-300 ease-in shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 					transform
                     ${isActive
 		? 'text-blue-700 bg-white'
@@ -58,6 +58,8 @@ export default function ProgressBar ({
 	selectedActivity: ActivityType | null
 	selectedRoom: RoomType | null
 }): React.ReactElement {
+	const [resetPressed, setResetPressed] = React.useState(false)
+
 	const getProgress = (viewState: string): number => {
 		switch (viewState) {
 			case 'welcome':
@@ -132,10 +134,15 @@ export default function ProgressBar ({
 						/>
 						<div className="absolute right-4 h-full flex items-center">
 							<button
-								onClick={() => { onReset() }}
+								onClick={() => {
+									setResetPressed(true)
+									onReset()
+									setTimeout(() => { setResetPressed(false) }, 300)
+								}}
 								className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
-									transition-all duration-300 ease-in-out shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
-									transform -translate-y-[4px] text-gray-800 bg-white`}
+									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
+									transform ${resetPressed ? 'ease-out translate-y-0 shadow-none' : 'ease-in -translate-y-[4px]'}
+									text-gray-800 bg-white`}
 							>
 								<div className="text-md flex flex-col items-center justify-center text-center">
 									{'Start Forfra\r'}
