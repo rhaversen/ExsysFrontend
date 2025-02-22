@@ -30,18 +30,18 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 				</header>
 
 				{priorityItems.length > 0 && (
-					<div className="flex flex-wrap justify-center mb-8">
+					<div className="flex flex-wrap justify-center gap-4 mb-8 px-4">
 						{priorityItems.map((item) => (
 							<button
 								key={item._id}
 								onClick={() => { onSelect(item) }}
-								className="p-10 m-5 bg-white rounded shadow-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+								className="w-[400px] p-6 bg-white rounded-lg shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 							>
-								<h2 className="text-3xl font-bold mb-2 text-gray-800">
+								<h2 className="text-2xl font-bold mb-2 text-gray-800">
 									{item.name}
 								</h2>
 								{(item.description != null) && (
-									<p className="text-gray-600 text-xl">
+									<p className="text-xl text-gray-600">
 										{item.description}
 									</p>
 								)}
@@ -52,28 +52,26 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 			</div>
 
 			{otherItems.length > 0 && (
-				<div className="flex-1 overflow-y-auto w-full pb-12">
-					<div className="w-full max-w-4xl mx-auto mb-8">
-						<div className="grid grid-cols-2 gap-4">
-							{otherItems.map((item, index) => (
-								<div key={item._id}>
-									<button
-										onClick={() => { onSelect(item) }}
-										className="w-full text-left py-3 px-4 rounded shadow-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-									>
-										<div className="grid grid-cols-2 gap-4">
-											<span className="font-semibold text-lg text-gray-900">{item.name}</span>
-											{(item.description != null) && (
-												<span className="text-gray-700">
-													{item.description}
-												</span>
-											)}
-										</div>
-									</button>
-									{index < otherItems.length - 1 && (
-										<div className="border-b border-gray-200" />
-									)}
-								</div>
+				<div className="flex-1 overflow-y-auto w-full pb-12 px-4">
+					<div className="max-w-5xl mx-auto">
+						<div className="flex flex-wrap justify-center gap-3">
+							{otherItems.map((item) => (
+								<button
+									key={item._id}
+									onClick={() => { onSelect(item) }}
+									className="w-[300px] p-4 bg-white rounded-lg shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+								>
+									<div className="flex flex-col">
+										<span className="font-semibold text-lg text-gray-900">
+											{item.name}
+										</span>
+										{(item.description != null) && (
+											<span className="text-base text-gray-700">
+												{item.description}
+											</span>
+										)}
+									</div>
+								</button>
 							))}
 						</div>
 					</div>
