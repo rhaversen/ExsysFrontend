@@ -76,13 +76,9 @@ export default function Page (): ReactElement {
 	}, [])
 
 	// Function to check if the current time has any active order windows
-	const updateKioskClosedStatus = useCallback((products: ProductType[] | ProductType) => {
-		let shouldBeClosed = false
-		if (!Array.isArray(products)) {
-			shouldBeClosed = isCurrentTimeInOrderWindow(products.orderWindow)
-		} else if (products.length > 0) {
-			shouldBeClosed = products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
-		}
+	const updateKioskClosedStatus = useCallback((products: ProductType[]) => {
+		const shouldBeClosed = !products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
+
 		setisClosed(shouldBeClosed)
 	}, [])
 
