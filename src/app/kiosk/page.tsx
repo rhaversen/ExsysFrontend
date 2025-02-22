@@ -34,7 +34,7 @@ export default function Page (): ReactElement {
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
-	const [isActive, setIsActive] = useState(true)
+	const [isClosed, setisClosed] = useState(true)
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('welcome')
@@ -76,14 +76,10 @@ export default function Page (): ReactElement {
 	}, [])
 
 	// Function to check if the current time has any active order windows
-	const updateKioskActiveStatus = useCallback((products: ProductType[] | ProductType) => {
-		let shouldBeActive = false
-		if (!Array.isArray(products)) {
-			shouldBeActive = isCurrentTimeInOrderWindow(products.orderWindow)
-		} else if (products.length > 0) {
-			shouldBeActive = products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
-		}
-		setIsActive(shouldBeActive)
+	const updateKioskClosedStatus = useCallback((products: ProductType[]) => {
+		const shouldBeClosed = !products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
+
+		setisClosed(shouldBeClosed)
 	}, [])
 
 	// Load all data
@@ -118,25 +114,25 @@ export default function Page (): ReactElement {
 			updateCheckoutMethods(kioskData)
 
 			// Check if the current time has any active order windows
-			updateKioskActiveStatus(processedProducts)
+			updateKioskClosedStatus(processedProducts)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, updateKioskActiveStatus, addError])
+	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, updateKioskClosedStatus, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			updateKioskActiveStatus(products)
+			updateKioskClosedStatus(products)
 		}, 1000)
 
 		return () => { clearInterval(interval) }
-	}, [products, updateKioskActiveStatus])
+	}, [products, updateKioskClosedStatus])
 
-	// Initialize on mount and when active status changes
+	// Initialize on mount and when Closed status changes
 	useEffect(() => {
 		initialSetup().catch(addError)
-	}, [isActive, initialSetup, addError])
+	}, [isClosed, initialSetup, addError])
 
 	// Initialize WebSocket connection
 	useEffect(() => {
@@ -154,23 +150,25 @@ export default function Page (): ReactElement {
 		socket,
 		'product',
 		item => {
-			setProducts(prev => [...prev, processProductData(item)])
-			if (!isActive) {
-				updateKioskActiveStatus(item)
-			}
+			setProducts(prev => {
+				const updated = processProductData(item)
+				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
+				updateKioskClosedStatus(newProducts)
+				return newProducts
+			})
 		},
 		item => {
 			setProducts(prev => {
 				const updated = processProductData(item)
 				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				updateKioskActiveStatus(newProducts)
+				updateKioskClosedStatus(newProducts)
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				updateKioskActiveStatus(products)
+				updateKioskClosedStatus(products)
 				return products
 			})
 		}
@@ -331,13 +329,15 @@ export default function Page (): ReactElement {
 
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
-		if (!isActive) {
+		if (isClosed) {
 			return (
 				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
-						<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
+						{products.length > 0 && (
+							<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
+						)}
 					</div>
 				</div>
 			)
@@ -426,6 +426,12 @@ export default function Page (): ReactElement {
 				canClickRoom={canClickRoom}
 				canClickOrder={canClickOrder}
 				onProgressClick={handleProgressClick}
+				onReset={() => {
+					setSelectedActivity(null)
+					setSelectedRoom(null)
+					updateCart({ products: {}, options: {} })
+					setViewState('activity')
+				}}
 				selectedActivity={selectedActivity}
 				selectedRoom={selectedRoom}
 			/>
@@ -451,7 +457,7 @@ export default function Page (): ReactElement {
 			)}
 
 			<div className="flex-shrink-0">
-				{isActive && <KioskSessionInfo />}
+				<KioskSessionInfo />
 			</div>
 		</div>
 	)

@@ -51,6 +51,10 @@ export const KioskImages = {
 	back: {
 		src: '/images/arrow.svg',
 		alt: 'Tilbage'
+	},
+	home: {
+		src: '/images/house.svg',
+		alt: 'Hjem'
 	}
 }
 
