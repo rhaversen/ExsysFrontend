@@ -79,7 +79,7 @@ const SetupView = ({
 			}
 			{selectedView === 'Spisesteder' &&
 				<ItemList
-					headerText="Spisesteder er knyttet til en eller flere aktiviteter og bestemmer, hvor bestillingerne for en given aktivitet skal leveres. Ordrer grupperes efter spisested for at gøre det lettere for køkkenpersonalet."
+					headerText="Spisesteder er lokationer en bestilling kan leveres til. Et spisested der er knyttet til en eller flere aktiviteter, vil blive vist som foreslåede spisesteder for den valgte aktivitet. En bruger kan altid vælge mellem alle spisesteder der er oprettet."
 					buttonText="Nyt Spisested"
 					onAdd={() => {
 						setShowAddRoom(true)
@@ -101,7 +101,7 @@ const SetupView = ({
 			}
 			{selectedView === 'Aktiviteter' &&
 				<ItemList
-					headerText="Aktiviteter er knyttet til en eller flere kiosker og vælges af brugeren som det første på de tilhørende kiosker. Når en bruger har valgt en aktivitet og afgivet en bestilling, leveres bestillingen til det spisested, der er tilknyttet aktiviteten."
+					headerText="Aktiviteter er grupper der spiser i et eller flere spisesteder, og tillader at grupper har seperate bestillinger selv i det samme lokale. Aktiviteter er tilknyttet en eller flere kiosker, hvor aktiviteten vil blive vist som foreslået. Hvis aktiviteten ikke har nogle spisesteder, vil ingen blive vist som et forslået valg. En bruger kan altid vælge mellem alle aktiviteter der er oprettet."
 					buttonText="Ny Aktivitet"
 					onAdd={() => {
 						setShowAddActivity(true)
@@ -124,7 +124,7 @@ const SetupView = ({
 			}
 			{selectedView === 'Kiosker' &&
 				<ItemList
-					headerText="Kiosker er systemets repræsentation af de fysiske enheder, som brugerne bestiller fra. De fungerer som login til en fysisk enhed. SumUp-læsere og aktiviteter kan knyttes til en kiosk. Kioskens tag er printet på den fysiske enhed."
+					headerText="Kiosker er systemets repræsentation af de fysiske enheder, som brugerne bestiller fra. De fungerer som login til en fysisk enhed. En kiosk kan have en eller flere aktiviteter tilknyttet, hvilket vil vise dem som foreslåede valg for denne kiosk. SumUp-læsere og aktiviteter kan knyttes til en kiosk. Kioskens tag er printet på vægbeslaget."
 					buttonText="Ny Kiosk"
 					onAdd={() => {
 						setShowAddKiosk(true)
@@ -147,7 +147,7 @@ const SetupView = ({
 			}
 			{selectedView === 'Admins' &&
 				<ItemList
-					headerText="Admins er brugere med adgang til at ændre systemets konfigurationer. De kan oprette og redigere alle indstillinger, inklusive andre admins. Dit kodeord kan ikke gendannes og holdes derfor skjult for andre admins."
+					headerText="Admins er brugere med adgang til at ændre systemets konfigurationer. De kan oprette og redigere alle indstillinger, inklusive andre admins brugernavn og kodeord. Dit kodeord kan ikke gendannes og holdes derfor også skjult for andre admins."
 					buttonText="Ny Admin"
 					onAdd={() => {
 						setShowAddAdmin(true)
@@ -168,7 +168,7 @@ const SetupView = ({
 			}
 			{selectedView === 'Kortlæsere' &&
 				<ItemList
-					headerText="Kortlæsere er systemets repræsentation af de fysiske SumUp-kortlæsere. De kan knyttes til en kiosk, hvilket muliggør kortbetaling på denne kiosk. Kortlæserens tag er printet på den fysiske enhed. Ved opsætning vælges API på SumUp-enheden, og den parringskode, der vises på skærmen, indtastes som en ny kortlæser i systemet. Ved fjernelse af en kortlæser skal den fjernes både på SumUp-enheden og i systemet."
+					headerText="Kortlæsere er systemets repræsentation af de fysiske SumUp-kortlæsere. De kan knyttes til en kiosk, hvilket muliggør kortbetaling på denne kiosk. Kortlæserens tag er printet på den fysiske enhed. Ved opsætning vælges API på SumUp-enheden, og den parringskode, der vises på SumUp skærmen, indtastes som en ny kortlæser her på siden. Ved fjernelse af en kortlæser skal den fjernes både på SumUp-enheden og i systemet."
 					buttonText="Ny Kortlæser"
 					onAdd={() => {
 						setShowAddReader(true)
