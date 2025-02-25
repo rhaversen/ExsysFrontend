@@ -72,13 +72,23 @@ const CartWindow = ({
 							priority={false}
 							draggable={false}
 						/>
-						{'Tøm kurv'}
+						{'Slet Bestilling'}
 					</button>
-					<SubmitButton
-						text={`Betal ${price} kr`}
-						disabled={!formIsValid}
-						onClick={onSubmit}
-					/>
+					<div className="flex justify-center p-5">
+						<button
+							type="submit"
+							className={`font-bold text-xl py-6 px-12 rounded-xl text-white 
+								shadow-[0_0_15px_rgba(0,0,0,0.2)] transform transition-all duration-150
+								relative overflow-hidden
+								${!formIsValid
+			? 'bg-gray-400 cursor-not-allowed'
+			: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-102 hover:shadow-[0_0_25px_rgba(0,0,0,0.3)] active:scale-98 cursor-pointer before:absolute before:inset-0 before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full before:animate-shimmer'}`}
+							onClick={onSubmit}
+							disabled={!formIsValid}
+						>
+							{`Tryk her for at betale ${price} kr`}
+						</button>
+					</div>
 				</div>
 			}
 		</div>
