@@ -67,15 +67,6 @@ const SetupView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{isEnabled && selectedView !== 'Konfiguration' && (
-				<SortingControl
-					options={sortingOptions}
-					currentField={sortField}
-					currentDirection={sortDirection}
-					onSortFieldChange={setSortField}
-					onSortDirectionChange={setSortDirection}
-				/>
-			)}
 			<div className="flex gap-4 p-4">
 				{selectedView !== null && selectedView !== 'Konfiguration' && (
 					<div className="flex flex-col gap-4">
@@ -112,6 +103,15 @@ const SetupView = ({
 							/>
 							<span className="p-2 mx-5 font-bold">{`Tilføj ${selectedView}`}</span>
 						</button>
+						{isEnabled && (
+							<SortingControl
+								options={sortingOptions}
+								currentField={sortField}
+								currentDirection={sortDirection}
+								onSortFieldChange={setSortField}
+								onSortDirectionChange={setSortDirection}
+							/>
+						)}
 						<ResourceInfo viewName={selectedView} />
 					</div>
 				)}

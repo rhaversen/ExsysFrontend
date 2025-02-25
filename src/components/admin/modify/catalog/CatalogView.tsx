@@ -44,16 +44,7 @@ const CatalogView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{isEnabled && (
-				<SortingControl
-					options={sortingOptions}
-					currentField={sortField}
-					currentDirection={sortDirection}
-					onSortFieldChange={setSortField}
-					onSortDirectionChange={setSortDirection}
-				/>
-			)}
-			<div className="flex gap-4 p-4 pt-14">
+			<div className="flex gap-4 p-4">
 				{selectedView !== null && (
 					<div className="flex flex-col gap-4">
 						<button
@@ -80,6 +71,15 @@ const CatalogView = ({
 							/>
 							<span className="p-2 mx-5 font-bold">{`Tilføj ${selectedView}`}</span>
 						</button>
+						{isEnabled && (
+							<SortingControl
+								options={sortingOptions}
+								currentField={sortField}
+								currentDirection={sortDirection}
+								onSortFieldChange={setSortField}
+								onSortDirectionChange={setSortDirection}
+							/>
+						)}
 						<ResourceInfo viewName={selectedView} />
 					</div>
 				)}

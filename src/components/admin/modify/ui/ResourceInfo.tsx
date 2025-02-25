@@ -57,7 +57,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 	if ((details?.length) === 0) return null
 
 	return (
-		<div className="w-80 h-fit p-4 bg-gray-100 rounded sticky top-4">
+		<div className="w-80 h-fit p-4 bg-gray-100 rounded">
 			<h3 className="mb-2 font-bold text-gray-700">{`Info om ${viewName}`}</h3>
 			<ul className="list-disc list-inside text-gray-600">
 				{details.map((point, index) => (
