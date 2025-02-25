@@ -32,15 +32,8 @@ const TimeoutWarningWindow = ({
 	}, [onTimeout])
 
 	return (
-		<CloseableModal onClose={() => { onClose() }}>
-			{/* We trea the entire modal as a button, since any interaction should qualify as a "keep alive" */}
-			<button
-				className="p-10 flex flex-col items-center gap-10 text-black"
-				type="button"
-				onClick={() => {
-					onClose() // reset main timer
-				}}
-			>
+		<CloseableModal onClose={onClose}>
+			<div className="p-10 flex flex-col items-center gap-10 text-black">
 				<h2 className="text-xl font-bold">
 					{'Er du der stadig?'}
 				</h2>
@@ -49,10 +42,23 @@ const TimeoutWarningWindow = ({
 					<strong>{remainingSeconds}</strong>
 					{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
 				</p>
-				<div className="bg-blue-500 text-white text-lg px-10 py-7 rounded-md">
-					{'Fortsæt bestilling'}
+				<div className="flex flex-col gap-4 w-full">
+					<button
+						className="bg-blue-500 text-white text-lg px-10 py-7 rounded-md w-full"
+						type="button"
+						onClick={onClose}
+					>
+						{'Fortsæt bestilling'}
+					</button>
+					<button
+						className="bg-gray-300 text-gray-700 text-lg px-10 py-7 rounded-md w-full"
+						type="button"
+						onClick={onTimeout}
+					>
+						{'Start forfra'}
+					</button>
 				</div>
-			</button>
+			</div>
 		</CloseableModal>
 	)
 }
