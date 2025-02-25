@@ -3,7 +3,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type OptionType, type PostProductType } from '@/types/backendDataTypes'
+import { type ProductType, type OptionType, type PostProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
@@ -13,8 +13,10 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const AddProduct = ({
 	options,
+	products,
 	onClose
 }: {
+	products: ProductType[]
 	options: OptionType[]
 	onClose: () => void
 }): ReactElement => {
@@ -182,6 +184,10 @@ const AddProduct = ({
 							minSize={5}
 							required={true}
 							maxLength={15}
+							validations={[{
+								validate: (v: string) => !products.some((a) => a.name === v),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
 						/>

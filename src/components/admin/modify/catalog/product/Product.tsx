@@ -19,9 +19,11 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const Product = ({
 	product,
+	products,
 	options
 }: {
 	product: ProductType
+	products: ProductType[]
 	options: OptionType[]
 }): ReactElement => {
 	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
@@ -59,6 +61,10 @@ const Product = ({
 							required={true}
 							maxLength={15}
 							editable={isEditing}
+							validations={[{
+								validate: (v: string) => !products.some((a) => a.name === v && a._id !== product._id),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>

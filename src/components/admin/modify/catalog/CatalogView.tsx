@@ -70,6 +70,7 @@ const CatalogView = ({
 							<Product
 								options={options}
 								product={product}
+								products={products}
 							/>
 						</div>
 					))}
@@ -90,6 +91,7 @@ const CatalogView = ({
 						>
 							<Option
 								option={option}
+								options={options}
 							/>
 						</div>
 					))}
@@ -98,6 +100,7 @@ const CatalogView = ({
 			{showAddProduct &&
 				<AddProduct
 					options={options}
+					products={products}
 					onClose={() => {
 						setShowAddProduct(false)
 					}}
@@ -105,6 +108,7 @@ const CatalogView = ({
 			}
 			{showAddOption &&
 				<AddOption
+					options={options}
 					onClose={() => {
 						setShowAddOption(false)
 					}}

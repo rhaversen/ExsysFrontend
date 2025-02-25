@@ -119,6 +119,10 @@ const AddKiosk = ({
 							placeholder="Navn"
 							minSize={10}
 							required={true}
+							validations={[{
+								validate: (v: string) => !kiosks.some((k) => k.name === v),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={handleNameChange}
 							maxLength={50}
 							onValidationChange={handleValidationChange}

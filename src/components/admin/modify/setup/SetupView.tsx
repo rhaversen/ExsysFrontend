@@ -116,6 +116,7 @@ const SetupView = ({
 								activity={activity}
 								kiosks={kiosks}
 								rooms={rooms}
+								activities={activities}
 							/>
 						</div>
 					))}
@@ -202,9 +203,10 @@ const SetupView = ({
 				<AddActivity
 					rooms={rooms}
 					kiosks={kiosks}
+					activities={activities}
 					onClose={() => {
 						setShowAddActivity(false)
-					}}
+					} }
 				/>
 			}
 			{showAddKiosk &&

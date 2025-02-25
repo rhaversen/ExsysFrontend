@@ -18,10 +18,12 @@ import ItemsDisplay from '../../ui/ItemsDisplay'
 
 const Activity = ({
 	activity,
+	activities,
 	rooms,
 	kiosks
 }: {
 	activity: ActivityType
+	activities: ActivityType[]
 	rooms: RoomType[]
 	kiosks: KioskType[]
 }): ReactElement => {
@@ -98,6 +100,10 @@ const Activity = ({
 							required={true}
 							maxLength={50}
 							editable={isEditing}
+							validations={[{
+								validate: (v: string) => !activities.some((a) => a.name === v && a._id !== activity._id),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
