@@ -1,6 +1,5 @@
 import OrderSummary from '@/components/kiosk/cart/OrderSummary'
 import AsyncImage from '@/components/ui/AsyncImage'
-import SubmitButton from '@/components/ui/SubmitButton'
 import { KioskImages } from '@/lib/images'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
