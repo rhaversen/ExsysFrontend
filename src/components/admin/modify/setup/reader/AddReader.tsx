@@ -96,7 +96,7 @@ const Reader = ({
 							maxLength={5}
 							validations={[{
 								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
-								message: 'Kortlæser tag er allerede i brug'
+								message: 'Kortlæser 3 er allerede i brug'
 							}]}
 							type="number"
 							onValidationChange={handleValidationChange}

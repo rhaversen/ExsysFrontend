@@ -65,10 +65,10 @@ const sortConfig = {
 		label: 'Kiosk Navn'
 	}, {
 		prop: 'kioskTag',
-		label: 'Kiosk Tag'
+		label: 'Kiosk #'
 	}, {
 		prop: 'readerId.readerTag',
-		label: 'Kortlæser Tag'
+		label: 'Kortlæser #'
 	}, {
 		prop: 'activities.length',
 		label: 'Antal Aktiviteter'
@@ -81,7 +81,7 @@ const sortConfig = {
 	}],
 	Kortlæsere: [{
 		prop: 'readerTag',
-		label: 'Kortlæser Tag'
+		label: 'Kortlæser #'
 	}, {
 		prop: 'createdAt',
 		label: 'Oprettet'

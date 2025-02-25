@@ -65,12 +65,12 @@ const Kiosk = ({
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<p className="italic text-gray-500">{'Kiosk Tag - Brugernavn til kiosk login'}</p>
+					<p className="italic text-gray-500">{'Kiosk # - Brugernavn til kiosk login'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName="kioskTag"
 							initialText={kiosk.kioskTag}
-							placeholder="Kiosk tag"
+							placeholder="Kiosk #"
 							minSize={10}
 							required={true}
 							editable={isEditing}
@@ -80,7 +80,7 @@ const Kiosk = ({
 							type="number"
 							validations={[{
 								validate: (v: string) => !kiosks.some((k) => k.kioskTag === v && k._id !== newKiosk._id),
-								message: 'Kiosk tag er allerede i brug'
+								message: 'Kiosk # er allerede i brug'
 							}]}
 							onValidationChange={handleValidationChange}
 						/>
@@ -103,7 +103,7 @@ const Kiosk = ({
 							</div>
 						</div>
 					}
-					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
+					<p className="italic text-gray-500">{'Kortlæser #'}</p>
 					<EditableDropdown
 						options={
 							readers.filter((reader) =>

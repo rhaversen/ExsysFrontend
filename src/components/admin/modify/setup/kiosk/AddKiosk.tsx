@@ -150,7 +150,7 @@ const AddKiosk = ({
 							maxLength={5}
 							validations={[{
 								validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
-								message: 'Kortlæser tag er allerede i brug'
+								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
 							onValidationChange={handleValidationChange}
