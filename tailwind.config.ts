@@ -44,6 +44,15 @@ const config: Config = {
 				'all-xl': '0 0 25px -5px rgba(0, 0, 0, 0.1), 0 0 10px -5px rgba(0, 0, 0, 0.04)',
 				'all-2xl': '0 0 50px -12px rgba(0, 0, 0, 0.25)',
 				'all-3xl': '0 0 60px -15px rgba(0, 0, 0, 0.3)'
+			},
+			keyframes: {
+				shimmer: {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(100%)' }
+				}
+			},
+			animation: {
+				shimmer: 'shimmer 2.5s ease-in-out infinite'
 			}
 		}
 	},

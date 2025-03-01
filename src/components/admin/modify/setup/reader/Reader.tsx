@@ -32,19 +32,19 @@ const Reader = ({
 		<div className="p-2 m-2">
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
-					<p className="italic text-gray-500">{'Kortlæser Tag'}</p>
+					<p className="italic text-gray-500">{'Kortlæser #'}</p>
 					<div className="font-bold pb-2 text-gray-800">
 						<EditableField
 							fieldName="readerTag"
 							initialText={reader.readerTag}
-							placeholder="Kortlæser Tag"
+							placeholder="Kortlæser #"
 							minSize={10}
 							required={true}
 							minLength={5}
 							maxLength={5}
 							validations={[{
 								validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
-								message: 'Kortlæser tag er allerede i brug'
+								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
 							editable={isEditing}

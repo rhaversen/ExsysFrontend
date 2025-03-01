@@ -11,11 +11,13 @@ import AddReader from '@/components/admin/modify/setup/reader/AddReader'
 import Reader from '@/components/admin/modify/setup/reader/Reader'
 import AddRoom from '@/components/admin/modify/setup/room/AddRoom'
 import Room from '@/components/admin/modify/setup/room/Room'
-import ItemList from '@/components/admin/modify/ui/ItemList'
 import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
+import ResourceInfo from '@/components/admin/modify/ui/ResourceInfo'
 import useSorting from '@/hooks/useSorting'
 import type sortConfig from '@/lib/SortConfig'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 import {
 	type ActivityType,
 	type AdminType,
@@ -65,131 +67,125 @@ const SetupView = ({
 				selectedView={selectedView}
 				setSelectedView={setSelectedView}
 			/>
-			{isEnabled && selectedView !== 'Konfiguration' && (
-				<SortingControl
-					options={sortingOptions}
-					currentField={sortField}
-					currentDirection={sortDirection}
-					onSortFieldChange={setSortField}
-					onSortDirectionChange={setSortDirection}
-				/>
-			)}
-			{selectedView === null &&
-				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
-			}
-			{selectedView === 'Spisesteder' &&
-				<ItemList
-					headerText="Spisesteder er knyttet til en eller flere aktiviteter og bestemmer, hvor bestillingerne for en given aktivitet skal leveres. Ordrer grupperes efter spisested for at gøre det lettere for køkkenpersonalet."
-					buttonText="Nyt Spisested"
-					onAdd={() => {
-						setShowAddRoom(true)
-					}}
-				>
-					{sortByField(rooms).map((room) => (
-						<div
-							className="min-w-64"
-							key={room._id}
+			<div className="flex gap-4 p-4">
+				{selectedView !== null && selectedView !== 'Konfiguration' && (
+					<div className="flex flex-col gap-4">
+						<button
+							type="button"
+							title="Tilføj"
+							className="flex w-80 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded items-center justify-center"
+							onClick={() => {
+								switch (selectedView) {
+									case 'Spisesteder':
+										setShowAddRoom(true)
+										break
+									case 'Aktiviteter':
+										setShowAddActivity(true)
+										break
+									case 'Kiosker':
+										setShowAddKiosk(true)
+										break
+									case 'Admins':
+										setShowAddAdmin(true)
+										break
+									case 'Kortlæsere':
+										setShowAddReader(true)
+										break
+								}
+							}}
 						>
-							<Room
-								rooms={rooms}
-								room={room}
-								activities={activities}
+							<Image
+								className="h-7 w-7"
+								src={AdminImages.add.src}
+								alt={AdminImages.add.alt}
+								width={10}
+								height={10}
 							/>
-						</div>
-					))}
-				</ItemList>
-			}
-			{selectedView === 'Aktiviteter' &&
-				<ItemList
-					headerText="Aktiviteter er knyttet til en eller flere kiosker og vælges af brugeren som det første på de tilhørende kiosker. Når en bruger har valgt en aktivitet og afgivet en bestilling, leveres bestillingen til det spisested, der er tilknyttet aktiviteten."
-					buttonText="Ny Aktivitet"
-					onAdd={() => {
-						setShowAddActivity(true)
-					}}
-				>
-					{sortByField(activities).map((activity) => (
-						<div
-							className="min-w-64"
-							key={activity._id}
-						>
-							<Activity
-								activity={activity}
-								kiosks={kiosks}
-								rooms={rooms}
+							<span className="p-2 mx-5 font-bold">{`Tilføj ${selectedView}`}</span>
+						</button>
+						{isEnabled && (
+							<SortingControl
+								options={sortingOptions}
+								currentField={sortField}
+								currentDirection={sortDirection}
+								onSortFieldChange={setSortField}
+								onSortDirectionChange={setSortDirection}
 							/>
+						)}
+						<ResourceInfo viewName={selectedView} />
+					</div>
+				)}
+				<div className="flex-1">
+					{selectedView === null && (
+						<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
+					)}
+					{selectedView === 'Spisesteder' && (
+						<div className="flex flex-wrap justify-evenly gap-4">
+							{sortByField(rooms).map((room) => (
+								<div className="min-w-64" key={room._id}>
+									<Room rooms={rooms} room={room} activities={activities} />
+								</div>
+							))}
 						</div>
-					))}
-				</ItemList>
-			}
-			{selectedView === 'Kiosker' &&
-				<ItemList
-					headerText="Kiosker er systemets repræsentation af de fysiske enheder, som brugerne bestiller fra. De fungerer som login til en fysisk enhed. SumUp-læsere og aktiviteter kan knyttes til en kiosk. Kioskens tag er printet på den fysiske enhed."
-					buttonText="Ny Kiosk"
-					onAdd={() => {
-						setShowAddKiosk(true)
-					}}
-				>
-					{sortByField(kiosks).map((kiosk) => (
-						<div
-							className="min-w-64"
-							key={kiosk._id}
-						>
-							<Kiosk
-								kiosks={kiosks}
-								kiosk={kiosk}
-								activities={activities}
-								readers={readers}
-							/>
+					)}
+					{selectedView === 'Aktiviteter' && (
+						<div className="flex flex-wrap justify-evenly gap-4">
+							{sortByField(activities).map((activity) => (
+								<div className="min-w-64" key={activity._id}>
+									<Activity
+										activity={activity}
+										kiosks={kiosks}
+										rooms={rooms}
+										activities={activities}
+									/>
+								</div>
+							))}
 						</div>
-					))}
-				</ItemList>
-			}
-			{selectedView === 'Admins' &&
-				<ItemList
-					headerText="Admins er brugere med adgang til at ændre systemets konfigurationer. De kan oprette og redigere alle indstillinger, inklusive andre admins. Dit kodeord kan ikke gendannes og holdes derfor skjult for andre admins."
-					buttonText="Ny Admin"
-					onAdd={() => {
-						setShowAddAdmin(true)
-					}}
-				>
-					{sortByField(admins).map((admin) => (
-						<div
-							className="min-w-64"
-							key={admin._id}
-						>
-							<Admin
-								admins={admins}
-								admin={admin}
-							/>
+					)}
+					{selectedView === 'Kiosker' && (
+						<div className="flex flex-wrap justify-evenly gap-4">
+							{sortByField(kiosks).map((kiosk) => (
+								<div className="min-w-64" key={kiosk._id}>
+									<Kiosk
+										kiosks={kiosks}
+										kiosk={kiosk}
+										activities={activities}
+										readers={readers}
+									/>
+								</div>
+							))}
 						</div>
-					))}
-				</ItemList>
-			}
-			{selectedView === 'Kortlæsere' &&
-				<ItemList
-					headerText="Kortlæsere er systemets repræsentation af de fysiske SumUp-kortlæsere. De kan knyttes til en kiosk, hvilket muliggør kortbetaling på denne kiosk. Kortlæserens tag er printet på den fysiske enhed. Ved opsætning vælges API på SumUp-enheden, og den parringskode, der vises på skærmen, indtastes som en ny kortlæser i systemet. Ved fjernelse af en kortlæser skal den fjernes både på SumUp-enheden og i systemet."
-					buttonText="Ny Kortlæser"
-					onAdd={() => {
-						setShowAddReader(true)
-					}}
-				>
-					{sortByField(readers).map((reader) => (
-						<div
-							className="min-w-64"
-							key={reader._id}
-						>
-							<Reader
-								readers={readers}
-								reader={reader}
-							/>
+					)}
+					{selectedView === 'Admins' && (
+						<div className="flex flex-wrap justify-evenly gap-4">
+							{sortByField(admins).map((admin) => (
+								<div className="min-w-64" key={admin._id}>
+									<Admin
+										admins={admins}
+										admin={admin}
+									/>
+								</div>
+							))}
 						</div>
-					))}
-				</ItemList>
-			}
-			{selectedView === 'Konfiguration' &&
-				<ConfigsView />
-			}
-			{showAddRoom &&
+					)}
+					{selectedView === 'Kortlæsere' && (
+						<div className="flex flex-wrap justify-evenly gap-4">
+							{sortByField(readers).map((reader) => (
+								<div className="min-w-64" key={reader._id}>
+									<Reader
+										readers={readers}
+										reader={reader}
+									/>
+								</div>
+							))}
+						</div>
+					)}
+					{selectedView === 'Konfiguration' && (
+						<ConfigsView />
+					)}
+				</div>
+			</div>
+			{showAddRoom && (
 				<AddRoom
 					rooms={rooms}
 					activities={activities}
@@ -197,17 +193,18 @@ const SetupView = ({
 						setShowAddRoom(false)
 					}}
 				/>
-			}
-			{showAddActivity &&
+			)}
+			{showAddActivity && (
 				<AddActivity
 					rooms={rooms}
 					kiosks={kiosks}
+					activities={activities}
 					onClose={() => {
 						setShowAddActivity(false)
 					}}
 				/>
-			}
-			{showAddKiosk &&
+			)}
+			{showAddKiosk && (
 				<AddKiosk
 					kiosks={kiosks}
 					activities={activities}
@@ -216,23 +213,23 @@ const SetupView = ({
 						setShowAddKiosk(false)
 					}}
 				/>
-			}
-			{showAddAdmin &&
+			)}
+			{showAddAdmin && (
 				<AddAdmin
 					admins={admins}
 					onClose={() => {
 						setShowAddAdmin(false)
 					}}
 				/>
-			}
-			{showAddReader &&
+			)}
+			{showAddReader && (
 				<AddReader
 					readers={readers}
 					onClose={() => {
 						setShowAddReader(false)
 					}}
 				/>
-			}
+			)}
 		</div>
 	)
 }

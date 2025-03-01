@@ -16,7 +16,7 @@ const KioskSessionInfo = (): ReactElement | null => {
 		return null
 	}
 
-	const kioskTag = (currentUser as KioskType)?.kioskTag ?? 'Mangler Tag'
+	const kioskTag = (currentUser as KioskType)?.kioskTag ?? 'Mangler #'
 	const kioskName = (currentUser as KioskType)?.name ?? 'Mangler Navn'
 	return (
 		<div className="h-5 w-full bg-black flex flex-row items-center">

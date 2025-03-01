@@ -2,14 +2,16 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostOptionType } from '@/types/backendDataTypes'
+import { type OptionType, type PostOptionType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
 
 const Option = ({
+	options,
 	onClose
 }: {
+	options: OptionType[]
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -90,6 +92,10 @@ const Option = ({
 							required={true}
 							minSize={5}
 							maxLength={50}
+							validations={[{
+								validate: (v: string) => !options.some((a) => a.name === v),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={handleNameChange}
 							onValidationChange={handleValidationChange}
 						/>
