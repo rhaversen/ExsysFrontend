@@ -33,32 +33,27 @@ const SortingControl = ({
 	}, [])
 
 	return (
-		<div className="absolute right-10 p-2 text-black" ref={dropdownRef}>
+		<div className="relative w-80 text-black" ref={dropdownRef}>
 			<button
 				onClick={() => { setDropdownOpen(!dropdownOpen) }}
-				className="bg-white px-4 py-2 rounded-md focus:outline-none flex items-center relative"
+				className="w-full bg-white px-4 py-2 rounded-md focus:outline-none flex items-center justify-between"
 				type="button"
 			>
 				{'Sorter efter'}
-				<span className="ml-1">
-					{dropdownOpen
-						? (
-							<FaChevronUp className="w-4 h-4" />
-						)
-						: (
-							<FaChevronDown className="w-4 h-4" />
-						)}
+				<span>
+					{dropdownOpen ? <FaChevronUp className="w-4 h-4" /> : <FaChevronDown className="w-4 h-4" />}
 				</span>
 			</button>
 			<div
-				className={`absolute left-1/2 -translate-x-1/2 bg-white p-4 rounded-md shadow-lg mt-2 transform transition-all duration-200 ${dropdownOpen
-					? 'opacity-100 scale-100'
-					: 'opacity-0 scale-95 pointer-events-none'
+				className={`absolute w-full bg-white p-4 rounded-md shadow-lg mt-2 transform transition-all duration-200 ${
+					dropdownOpen
+						? 'opacity-100 scale-100'
+						: 'opacity-0 scale-95 pointer-events-none'
 				}`}
 			>
 				<div className="flex flex-col gap-2">
 					<select
-						className="rounded-md text-center px-4 py-1.5 border bg-white cursor-pointer"
+						className="w-full rounded-md text-center px-4 py-1.5 border bg-white cursor-pointer"
 						onChange={(e) => { onSortFieldChange(e.target.value) }}
 						title="Sorteringsfelt"
 						value={currentField}
@@ -68,7 +63,7 @@ const SortingControl = ({
 						))}
 					</select>
 					<select
-						className="rounded-md text-center px-4 py-1.5 border bg-white cursor-pointer"
+						className="w-full rounded-md text-center px-4 py-1.5 border bg-white cursor-pointer"
 						onChange={(e) => { onSortDirectionChange(e.target.value as 'asc' | 'desc') }}
 						title="Sorteringsretning"
 						value={currentDirection}

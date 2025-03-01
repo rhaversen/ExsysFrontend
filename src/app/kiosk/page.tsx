@@ -392,8 +392,8 @@ export default function Page (): ReactElement {
 				return (
 					<OrderView
 						kiosk={kiosk}
-						products={products.toSorted((a, b) => a.name.localeCompare(b.name))}
-						options={options.toSorted((a, b) => a.name.localeCompare(b.name))}
+						products={products.sort((a, b) => a.name.localeCompare(b.name))}
+						options={options.sort((a, b) => a.name.localeCompare(b.name))}
 						activity={selectedActivity}
 						room={selectedRoom}
 						checkoutMethods={checkoutMethods}

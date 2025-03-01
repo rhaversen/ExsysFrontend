@@ -9,9 +9,11 @@ import React, { type ReactElement, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
 
 const Option = ({
-	option
+	option,
+	options
 }: {
 	option: OptionType
+	options: OptionType[]
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const {
@@ -40,6 +42,10 @@ const Option = ({
 							required={true}
 							maxLength={20}
 							editable={isEditing}
+							validations={[{
+								validate: (v: string) => !options.some((a) => a.name === v && a._id !== option._id),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
 							onValidationChange={handleValidationChange}
 						/>
