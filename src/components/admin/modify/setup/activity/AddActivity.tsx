@@ -1,7 +1,7 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostActivityType, type RoomType, type KioskType } from '@/types/backendDataTypes'
+import { type RoomType, type KioskType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
@@ -10,10 +10,12 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 
 const AddActivity = ({
 	rooms,
+	activities,
 	kiosks,
 	onClose
 }: {
 	rooms: RoomType[]
+	activities: ActivityType[]
 	kiosks: KioskType[]
 	onClose: () => void
 }): ReactElement => {
@@ -111,6 +113,10 @@ const AddActivity = ({
 							placeholder="Navn"
 							minSize={10}
 							required={true}
+							validations={[{
+								validate: (v: string) => !activities.some((a) => a.name === v),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={handleNameChange}
 							maxLength={50}
 							onValidationChange={handleValidationChange}

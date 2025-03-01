@@ -119,6 +119,10 @@ const AddKiosk = ({
 							placeholder="Navn"
 							minSize={10}
 							required={true}
+							validations={[{
+								validate: (v: string) => !kiosks.some((k) => k.name === v),
+								message: 'Navn er allerede i brug'
+							}]}
 							onChange={handleNameChange}
 							maxLength={50}
 							onValidationChange={handleValidationChange}
@@ -146,7 +150,7 @@ const AddKiosk = ({
 							maxLength={5}
 							validations={[{
 								validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
-								message: 'Kortlæser tag er allerede i brug'
+								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
 							onValidationChange={handleValidationChange}
