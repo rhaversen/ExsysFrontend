@@ -30,15 +30,12 @@ const Product = ({
 				disabled={disabled}
 			>
 				<div className="flex flex-row items-center justify-center">
-					<h3 className={`font-bold text-lg pr-2 ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
+					<h3 className={`font-bold text-2xl pr-2 ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
 						{product.name}
 					</h3>
-					<p className={`italic text-lg ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
+					<p className={`italic text-2xl ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
 						{product.price === 0 ? 'Gratis' : `${product.price} kr`}
 					</p>
-				</div>
-				<div className={`${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
-					{product.orderWindow.from.hour.toString().padStart(2, '0')}{':'}{product.orderWindow.from.minute.toString().padStart(2, '0')} {' — '} {product.orderWindow.to.hour.toString().padStart(2, '0')}{':'}{product.orderWindow.to.minute.toString().padStart(2, '0')}
 				</div>
 				<AsyncImage
 					className="w-60 h-60 mx-auto"
