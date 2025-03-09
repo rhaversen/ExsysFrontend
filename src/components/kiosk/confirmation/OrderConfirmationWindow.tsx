@@ -22,7 +22,7 @@ const OrderConfirmationWindow = ({
 	const autocloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
 	const [remainingSeconds, setRemainingSeconds] = useState(autocloseMs / 1000)
-	const canClose = ['success', 'error', 'failed'].includes(orderStatus)
+	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
 
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -51,7 +51,7 @@ const OrderConfirmationWindow = ({
 		success: 'Tak For Din Bestilling',
 		error: 'Der Skete En Fejl',
 		loading: 'Sender Bestilling...',
-		failed: 'Betaling Ikke Gennemført'
+		paymentFailed: 'Betaling Ikke Gennemført'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
@@ -59,7 +59,7 @@ const OrderConfirmationWindow = ({
 		success: KioskImages.orderConfirmed,
 		error: KioskImages.error,
 		awaitingPayment: KioskImages.awaitingPayment,
-		failed: KioskImages.paymentFailed
+		paymentFailed: KioskImages.paymentFailed
 	}
 
 	const imageProps = images[orderStatus]
