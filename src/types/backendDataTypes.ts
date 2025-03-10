@@ -206,6 +206,7 @@ export interface ConfigsType {
 		kioskInactivityTimeoutMs: number
 		kioskInactivityTimeoutWarningMs: number
 		kioskOrderConfirmationTimeoutMs: number
+		kioskIsOpen: boolean
 	}
 	createdAt: Date
 	updatedAt: Date
