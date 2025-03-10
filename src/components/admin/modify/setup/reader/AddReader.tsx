@@ -1,16 +1,19 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostReaderType, type ReaderType } from '@/types/backendDataTypes'
+import { type PostReaderType, type ReaderType, type KioskType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
+import EditableDropdown from '../../ui/EditableDropdown'
 
 const Reader = ({
 	readers,
+	kiosks,
 	onClose
 }: {
 	readers: ReaderType[]
+	kiosks: KioskType[]
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -21,6 +24,7 @@ const Reader = ({
 		pairingCode: '',
 		readerTag: undefined
 	})
+	const [selectedKioskId, setSelectedKioskId] = useState<string | null | undefined>(undefined)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -41,11 +45,27 @@ const Reader = ({
 
 	const postReader = useCallback((): void => {
 		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
+			const newReaderId = response.data._id
+
+			// If a kiosk was selected, update it to point to this reader
+			if (selectedKioskId != null) {
+				const kioskToUpdate = kiosks.find(k => k._id === selectedKioskId)
+				if (kioskToUpdate != null) {
+					axios.patch(
+						API_URL + `/v1/kiosks/${selectedKioskId}`,
+						{ ...kioskToUpdate, readerId: newReaderId },
+						{ withCredentials: true }
+					).catch(error => {
+						addError(error)
+					})
+				}
+			}
+
 			onClose()
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onClose, addError, reader])
+	}, [API_URL, onClose, addError, reader, selectedKioskId, kiosks])
 
 	const handlePairingCodeChange = useCallback((v: string): void => {
 		setReader({
@@ -60,6 +80,10 @@ const Reader = ({
 			readerTag: (v === '') ? undefined : v
 		})
 	}, [reader])
+
+	const handleKioskChange = useCallback((v: string): void => {
+		setSelectedKioskId(v === 'null-option' ? undefined : v)
+	}, [])
 
 	const handleCancelPost = useCallback((): void => {
 		onClose()
@@ -96,12 +120,30 @@ const Reader = ({
 							maxLength={5}
 							validations={[{
 								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
-								message: 'Kortlæser 3 er allerede i brug'
+								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
+
+					<p className="italic text-gray-500">{'Tilknyt til Kiosk'}</p>
+					<EditableDropdown
+						options={
+							kiosks.filter(kiosk =>
+								// Filter out kiosks that already have a reader assigned
+								(kiosk.readerId?._id) == null
+							).map(kiosk => ({
+								value: kiosk._id,
+								label: kiosk.name
+							}))
+						}
+						onChange={handleKioskChange}
+						fieldName="kioskId"
+						placeholder="Vælg Kiosk"
+						allowNullOption={true}
+						onValidationChange={handleValidationChange}
+					/>
 				</div>
 			</div>
 			<CompletePostControls

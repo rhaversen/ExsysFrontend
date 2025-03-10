@@ -173,6 +173,7 @@ const SetupView = ({
 							{sortByField(readers).map((reader) => (
 								<div className="min-w-64" key={reader._id}>
 									<Reader
+										kiosks={kiosks}
 										readers={readers}
 										reader={reader}
 									/>
@@ -224,6 +225,7 @@ const SetupView = ({
 			)}
 			{showAddReader && (
 				<AddReader
+					kiosks={kiosks}
 					readers={readers}
 					onClose={() => {
 						setShowAddReader(false)
