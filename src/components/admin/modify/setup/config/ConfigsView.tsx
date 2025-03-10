@@ -25,6 +25,8 @@ const ConfigsView = (): ReactElement => {
 		})
 	}, [addError, fetchConfigs])
 
+	const shownConfigs = ['kioskInactivityTimeoutMs', 'kioskInactivityTimeoutWarningMs', 'kioskOrderConfirmationTimeoutMs'] as const
+
 	const text = {
 		kioskInactivityTimeoutMs: {
 			readableLabel: 'Kiosk Inaktivitet Timeout',
@@ -48,11 +50,11 @@ const ConfigsView = (): ReactElement => {
 				)
 				: (
 					<div className="w-full max-w-4xl space-y-4">
-						{(Object.entries(configs) as Array<[keyof ConfigsType['configs'], number]>).map(([label, value]) => (
+						{shownConfigs.map((label) => (
 							<Config
 								key={label}
 								label={label}
-								value={value}
+								value={configs[label]}
 								readableLabel={text[label].readableLabel}
 								description={text[label].description}
 								onSave={(label, value) => {
