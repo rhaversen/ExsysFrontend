@@ -34,7 +34,7 @@ export default function Page (): ReactElement {
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
-	const [isClosed, setisClosed] = useState(true)
+	const [hasAvailableProducts, setisClosed] = useState(true)
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('welcome')
@@ -47,6 +47,8 @@ export default function Page (): ReactElement {
 	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
+
+	const kioskIsOpen = config?.configs.kioskIsOpen ?? false
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -132,7 +134,7 @@ export default function Page (): ReactElement {
 	// Initialize on mount and when Closed status changes
 	useEffect(() => {
 		initialSetup().catch(addError)
-	}, [isClosed, initialSetup, addError])
+	}, [hasAvailableProducts, initialSetup, addError])
 
 	// Initialize WebSocket connection
 	useEffect(() => {
@@ -329,13 +331,13 @@ export default function Page (): ReactElement {
 
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
-		if (isClosed) {
+		if (hasAvailableProducts || !kioskIsOpen) {
 			return (
 				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
 					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
-						{products.length > 0 && (
+						{products.length > 0 && kioskIsOpen && !hasAvailableProducts && (
 							<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
 						)}
 					</div>
