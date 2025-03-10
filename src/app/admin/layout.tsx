@@ -1,5 +1,6 @@
 import Header from '@/components/admin/ui/header/Header'
 import AdminAuthProvider from '@/contexts/AdminAuthProvider'
+import ConfigProvider from '@/contexts/ConfigProvider'
 import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -19,8 +20,10 @@ export default function AdminLayout ({
 }>): React.JSX.Element {
 	return (
 		<AdminAuthProvider>
-			<Header />
-			{children}
+			<ConfigProvider>
+				<Header />
+				{children}
+			</ConfigProvider>
 		</AdminAuthProvider>
 	)
 }
