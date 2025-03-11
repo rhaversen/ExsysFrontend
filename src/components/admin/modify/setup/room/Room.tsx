@@ -4,10 +4,11 @@ import EditingControls from '@/components/admin/modify/ui/EditControls'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type PatchRoomType, type PostRoomType, type RoomType, type ActivityType, type PatchActivityType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 import Timestamps from '../../ui/Timestamps'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '../../ui/ItemsDisplay'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Room = ({
 	rooms,
@@ -22,6 +23,7 @@ const Room = ({
 	const [linkedActivities, setLinkedActivities] = useState(
 		activities.filter(a => a.rooms.some(r => r._id === room._id))
 	)
+	const { addError } = useError()
 	const {
 		formState: newRoom,
 		handleFieldChange,
@@ -35,7 +37,7 @@ const Room = ({
 	} = useCUDOperations<PostRoomType, PatchRoomType>('/v1/rooms')
 
 	const {
-		updateEntity: updateActivity
+		updateEntityAsync: updateActivityAsync
 	} = useCUDOperations<ActivityType, PatchActivityType>('/v1/activities')
 
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -44,6 +46,10 @@ const Room = ({
 	const handleActivityChange = (newActivities: ActivityType[]): void => {
 		setLinkedActivities(newActivities)
 	}
+
+	useEffect(() => {
+		setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+	}, [activities, room])
 
 	const handleCompleteEdit = (): void => {
 		// Update room first
@@ -54,22 +60,26 @@ const Room = ({
 		const addedActivities = linkedActivities.filter(a => !currentActivities.some(ca => ca._id === a._id))
 		const removedActivities = currentActivities.filter(ca => !linkedActivities.some(a => a._id === ca._id))
 
-		// Update activities that need changes
-		for (const activity of addedActivities) {
-			updateActivity(activity._id, {
-				...activity,
-				rooms: [...activity.rooms.map(r => r._id), room._id]
-			})
-		}
-
-		for (const activity of removedActivities) {
-			updateActivity(activity._id, {
-				...activity,
-				rooms: activity.rooms.filter(r => r._id !== room._id).map(r => r._id)
-			})
-		}
-
-		setIsEditing(false)
+		Promise.all([
+			...addedActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					...activity,
+					rooms: [...activity.rooms.map(r => r._id), room._id]
+				})
+			}
+			),
+			...removedActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					...activity,
+					rooms: activity.rooms.filter(r => r._id !== room._id).map(r => r._id)
+				})
+			}
+			)
+		]).then(() => {
+			setIsEditing(false)
+		}).catch((error) => {
+			addError(error as Error)
+		})
 	}
 
 	return (

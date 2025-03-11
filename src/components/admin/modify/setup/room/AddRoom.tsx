@@ -1,12 +1,12 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostRoomType, type RoomType, type ActivityType } from '@/types/backendDataTypes'
-import axios from 'axios'
+import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const Room = ({
 	rooms,
@@ -17,8 +17,9 @@ const Room = ({
 	activities: ActivityType[]
 	onClose: () => void
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
+	const { createEntityAsync: createRoomAsync } = useCUDOperations<PostRoomType, any, RoomType>('/v1/rooms')
+	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<PostActivityType, any, ActivityType>('/v1/activities')
 
 	const [room, setRoom] = useState<PostRoomType>({
 		name: '',
@@ -44,22 +45,23 @@ const Room = ({
 		})
 	}, [])
 
-	const postRoom = useCallback((room: PostRoomType): void => {
-		axios.post(API_URL + '/v1/rooms', room, { withCredentials: true })
-			.then(async (response) => {
-				const roomId = response.data._id
-				// Update each selected activity to include the new room
-				for (const activity of selectedActivities) {
-					await axios.patch(API_URL + `/v1/activities/${activity._id}`, {
+	const postRoom = useCallback(async (room: PostRoomType): Promise<void> => {
+		try {
+			const createdRoom = await createRoomAsync(room)
+
+			await Promise.all(
+				selectedActivities.map(async activity =>
+					await updateActivityAsync(activity._id, {
 						...activity,
-						rooms: [...activity.rooms.map(r => r._id), roomId]
-					}, { withCredentials: true })
-				}
-				onClose()
-			}).catch((error) => {
-				addError(error)
-			})
-	}, [API_URL, onClose, addError, selectedActivities])
+						rooms: [...activity.rooms.map(r => r._id), createdRoom._id]
+					})
+				)
+			)
+		} catch (error) {
+			addError(error as Error)
+		}
+		onClose()
+	}, [createRoomAsync, selectedActivities, updateActivityAsync, addError, onClose])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setRoom(prev => ({
@@ -88,8 +90,10 @@ const Room = ({
 	}, [onClose])
 
 	const handleCompletePost = useCallback((): void => {
-		postRoom(room)
-	}, [postRoom, room])
+		postRoom(room).catch((error) => {
+			addError(error as Error)
+		})
+	}, [addError, postRoom, room])
 
 	return (
 		<CloseableModal onClose={onClose} canClose={!showActivities}>

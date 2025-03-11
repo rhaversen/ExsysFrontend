@@ -32,7 +32,7 @@ const PageLink = ({
 	}, [pathname])
 
 	return (
-		<div className={`flex ${className} h-full p-2`}>
+		<div className={`flex ${className} p-2`}>
 			<button
 				type="button"
 				onClick={handleClick}

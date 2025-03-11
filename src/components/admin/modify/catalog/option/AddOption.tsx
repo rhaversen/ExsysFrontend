@@ -2,16 +2,20 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type PostOptionType } from '@/types/backendDataTypes'
+import { type OptionType, type PostOptionType, type ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Option = ({
 	options,
+	products,
 	onClose
 }: {
 	options: OptionType[]
+	products: ProductType[]
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -23,6 +27,8 @@ const Option = ({
 		price: 0,
 		imageURL: ''
 	})
+	const [selectedProducts, setSelectedProducts] = useState<ProductType[]>([])
+	const [showProducts, setShowProducts] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -43,11 +49,21 @@ const Option = ({
 
 	const postOption = useCallback((option: PostOptionType): void => {
 		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
-			onClose()
+			const optionId = response.data._id
+			// Update each selected product to include the new option
+			Promise.all(selectedProducts.map(async product => {
+				const updatedOptions = [...product.options.map(o => o._id), optionId]
+				await axios.patch(API_URL + `/v1/products/${product._id}`, {
+					...product,
+					options: updatedOptions
+				}, { withCredentials: true })
+			}))
+				.then(() => { onClose() })
+				.catch(error => { addError(error) })
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onClose, addError])
+	}, [API_URL, onClose, addError, selectedProducts])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setOption({
@@ -71,6 +87,14 @@ const Option = ({
 		})
 	}, [option])
 
+	const handleAddProduct = useCallback((product: ProductType): void => {
+		setSelectedProducts(prev => [...prev, product])
+	}, [])
+
+	const handleDeleteProduct = useCallback((product: ProductType): void => {
+		setSelectedProducts(prev => prev.filter(p => p._id !== product._id))
+	}, [])
+
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
@@ -80,7 +104,7 @@ const Option = ({
 	}, [option, postOption])
 
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal onClose={onClose} canClose={!showProducts}>
 			<div className="flex flex-col items-center justify-center">
 				<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Tilvalg'}</p>
 				<p className="italic text-gray-500">{'Navn og Pris:'}</p>
@@ -121,12 +145,34 @@ const Option = ({
 					URL={option.imageURL}
 					onChange={handleImageChange}
 				/>
+				{selectedProducts.length > 0 && (
+					<p className="italic text-gray-500 pt-2">{'Produkter:'}</p>
+				)}
+				{selectedProducts.length === 0 && (
+					<p className="italic text-gray-500 pt-2">{'Tilføj Produkter:'}</p>
+				)}
+				<ItemsDisplay
+					items={selectedProducts}
+					onDeleteItem={handleDeleteProduct}
+					onShowItems={() => { setShowProducts(true) }}
+				/>
 			</div>
 			<CompletePostControls
 				formIsValid={formIsValid}
+				canClose={!showProducts}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}
 			/>
+			{showProducts && (
+				<SelectionWindow
+					title={`Tilføj Produkter til ${option.name === '' ? 'Nyt Tilvalg' : option.name}`}
+					items={products}
+					selectedItems={selectedProducts}
+					onAddItem={handleAddProduct}
+					onDeleteItem={handleDeleteProduct}
+					onClose={() => { setShowProducts(false) }}
+				/>
+			)}
 		</CloseableModal>
 	)
 }
