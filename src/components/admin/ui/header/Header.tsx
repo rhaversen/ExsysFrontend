@@ -59,9 +59,9 @@ const Header = (): ReactElement | null => {
 	return (
 		<>
 			<header
-				className={`w-full h-10 bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
+				className={`w-full h-16 items-center bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
 			>
-				<div className="flex items-center justify-between px-5">
+				<div className="flex items-center justify-between text-lg align-middle max-w-6xl mx-auto h-full px-4">
 					{/* Left side: Home button */}
 					<div className="flex items-center">
 						<Link href="/admin" className="text-white font-bold">
@@ -111,7 +111,7 @@ const Header = (): ReactElement | null => {
 				</div>
 			</header>
 			{/* Add padding to the top of the page content */}
-			<div className="mt-10"></div>
+			<div className="mt-16"></div>
 		</>
 	)
 }
