@@ -105,6 +105,7 @@ const CatalogView = ({
 							{sortByField(options).map((option) => (
 								<div className="min-w-64 h-full" key={option._id}>
 									<Option
+										products={products}
 										option={option}
 										options={options}
 									/>
@@ -125,6 +126,7 @@ const CatalogView = ({
 			}
 			{showAddOption &&
 				<AddOption
+					products={products}
 					options={options}
 					onClose={() => {
 						setShowAddOption(false)
