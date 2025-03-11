@@ -7,7 +7,7 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { GiCookingPot } from 'react-icons/gi'
-import { FaEdit, FaChartBar, FaStore, FaStoreSlash } from 'react-icons/fa'
+import { FaEdit, FaChartBar, FaStore, FaStoreSlash, FaSyncAlt } from 'react-icons/fa'
 import CloseableModal from '@/components/ui/CloseableModal'
 
 export default function Page (): ReactElement | null {
@@ -19,6 +19,7 @@ export default function Page (): ReactElement | null {
 	const [hasMounted, setHasMounted] = useState(false)
 	const [showKioskModal, setShowKioskModal] = useState(false)
 	const [kioskAction, setKioskAction] = useState<'open' | 'close'>('open')
+	const [showRefreshModal, setShowRefreshModal] = useState(false)
 
 	const kioskIsOpen = config?.configs.kioskIsOpen ?? true
 
@@ -78,6 +79,17 @@ export default function Page (): ReactElement | null {
 		}
 	}
 
+	const handleForceRefresh = async (): Promise<void> => {
+		try {
+			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
+				withCredentials: true
+			})
+			setShowRefreshModal(false)
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
 	const openKioskConfirmation = (): void => {
 		setKioskAction(kioskIsOpen ? 'close' : 'open')
 		setShowKioskModal(true)
@@ -110,12 +122,33 @@ export default function Page (): ReactElement | null {
 					</div>
 				</div>
 
+				{/* Kiosk Refresh Status */}
+				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+					<FaSyncAlt className="text-blue-500 text-2xl" />
+					<div className="flex flex-col flex-grow px-4">
+						<span className="text-lg text-gray-800">
+							{'Genindlæs kiosker'}
+						</span>
+						<div className="text-sm text-gray-600">
+							{'Tvinger alle kiosker til at genindlæse deres interface'}
+						</div>
+					</div>
+					<button
+						type="button"
+						onClick={() => { setShowRefreshModal(true) }}
+						className="px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md"
+					>
+						{'Genindlæs'}
+					</button>
+				</div>
+
+				{/* Kiosk Open/Close Status */}
 				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
 					{kioskIsOpen
 						? <FaStore className="text-green-500 text-2xl" />
 						: <FaStoreSlash className="text-red-500 text-2xl" />
 					}
-					<div className="flex flex-col items-start">
+					<div className="flex flex-col flex-grow px-4">
 						<span className="text-lg text-gray-800">
 							{'Kioskerne er '}
 							{kioskIsOpen
@@ -167,7 +200,58 @@ export default function Page (): ReactElement | null {
 				</div>
 			</div>
 
-			{/* Confirmation Modal */}
+			{showRefreshModal && (
+				<CloseableModal
+					canClose={true}
+					canComplete={true}
+					onClose={() => { setShowRefreshModal(false) }}
+					onComplete={() => { void handleForceRefresh() }}
+				>
+					<div className="text-center flex flex-col gap-4">
+						<FaSyncAlt className="text-blue-500 text-4xl mx-auto" />
+						<h2 className="text-2xl font-bold text-gray-800">
+							{'Genindlæs alle kiosker?'}
+						</h2>
+						<div className="text-left">
+							<p className="text-gray-700 text-lg font-medium">
+								{'Dette vil tvinge alle kiosker til at genindlæse deres interface.'}
+							</p>
+							<p className="text-gray-600">
+								{'Brug denne funktion hvis kioskerne opfører sig unormalt eller viser forældet information.'}
+							</p>
+							<p className="text-gray-600">
+								{'Iganværende bestillinger vil blive nulstillet, men færdige bestillinger vil ikke blive påvirket.'}
+							</p>
+							<p className="text-gray-600">
+								{'Brug kun denne funktion hvis det er nødvendigt, eller uden for åbningstiderne, da det kan forstyrre kundernes bestillinger.'}
+							</p>
+							<p className="text-gray-600">
+								{'Kioskerne vil automatisk genindlæse sig selv hver midnat.'}
+							</p>
+						</div>
+						<div className="flex gap-4 justify-center pt-2">
+							<button
+								type="button"
+								onClick={() => { setShowRefreshModal(false) }}
+								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition"
+							>
+								{'Annuller'}
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									void handleForceRefresh()
+									setShowRefreshModal(false)
+								}}
+								className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition"
+							>
+								{'Genindlæs'}
+							</button>
+						</div>
+					</div>
+				</CloseableModal>
+			)}
+
 			{showKioskModal && (
 				<CloseableModal
 					canClose={true}
