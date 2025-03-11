@@ -188,17 +188,17 @@ export default function Page (): ReactElement | null {
 								? (
 									<>
 										<p className="text-gray-700 text-lg font-medium">
-											{'Kioskerne åbnes for nye bestillinger.'}
+											{'Kioskerne vil igen automatisk åbne og lukke efter køkkenets åbningstider.'}
 										</p>
 										<p className="text-gray-600">
-											{'Kioskerne lukker automatisk uden for køkkenets åbningstid.'}
+											{'Køkkenets åbningstider bestemmes automatisk efter produkternes bestillingsvinduer.'}
 										</p>
 									</>
 								)
 								: (
 									<>
 										<p className="text-gray-700 text-lg font-medium">
-											{'Kioskerne lukkes for nye bestillinger.'}
+											{'Kioskerne lukkes for nye bestillinger, indtil de åbnes igen manuelt.'}
 										</p>
 										<p className="text-gray-600">
 											{'Kioskerne forbliver logget ind og funktionelle, så de nemt kan åbnes igen.'}
@@ -207,7 +207,7 @@ export default function Page (): ReactElement | null {
 											{'Luk kun kioskerne ved særlige situationer, f.eks. ved tekniske problemer eller hvis køkkenet må lukke akut.'}
 										</p>
 										<p className="text-gray-600">
-											{'Ved normal drift lukker kioskerne automatisk uden for køkkenets åbningstid.'}
+											{'Ved normal drift vil kioskerne automatisk åbne og lukke efter køkkenets åbningstider.'}
 										</p>
 									</>
 								)}
