@@ -45,6 +45,10 @@ const Room = ({
 		setLinkedActivities(newActivities)
 	}
 
+	useEffect(() => {
+		setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+	}, [activities, room])
+
 	const handleCompleteEdit = (): void => {
 		// Update room first
 		updateRoom(newRoom._id, newRoom)

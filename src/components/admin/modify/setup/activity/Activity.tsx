@@ -11,7 +11,7 @@ import {
 	type KioskType,
 	type PatchKioskType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useEffect, useState } from 'react'
 import SelectionWindow from '../../ui/SelectionWindow'
 import Timestamps from '../../ui/Timestamps'
 import ItemsDisplay from '../../ui/ItemsDisplay'
@@ -52,6 +52,10 @@ const Activity = ({
 	const handleKioskChange = (newKiosks: KioskType[]): void => {
 		setLinkedKiosks(newKiosks)
 	}
+
+	useEffect(() => {
+		setLinkedKiosks(kiosks.filter(k => k.activities.some(a => a._id === activity._id)))
+	}, [kiosks, activity])
 
 	const handleCompleteEdit = (): void => {
 		// Update activity first
