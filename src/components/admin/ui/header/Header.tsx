@@ -16,7 +16,7 @@ const Header = (): ReactElement | null => {
 	const [isScrolled, setIsScrolled] = useState(false)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 	const pathname = usePathname()
-	const [selectedLink, setSelectedLink] = useState<string>(pathname)
+	const [selectedLink, setSelectedLink] = useState<string>(pathname ?? '')
 
 	const routeTitles = {
 		'/admin/kitchen': 'Køkken',
@@ -28,7 +28,7 @@ const Header = (): ReactElement | null => {
 		setIsClient(true)
 
 		// Update selectedLink when the pathname changes
-		setSelectedLink(pathname)
+		setSelectedLink(pathname ?? '')
 
 		const handleScroll = (): void => {
 			setIsScrolled(window.scrollY > 0)
