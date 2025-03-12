@@ -42,6 +42,7 @@ const Kiosk = ({
 	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 
 	return (
 		<div className="p-2 m-2">
@@ -145,6 +146,30 @@ const Kiosk = ({
 						}}
 					/>
 				</div>
+
+				{newKiosk.disabledActivities?.length > 0 &&
+					<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
+				}
+				{((newKiosk.disabledActivities.length === 0) || newKiosk.disabledActivities.length === 0) && !isEditing &&
+					<p className="italic text-gray-500 pt-2">{'Ingen Deaktiverede Aktiviteter'}</p>
+				}
+				{((newKiosk.disabledActivities.length === 0) || newKiosk.disabledActivities.length === 0) && isEditing &&
+					<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
+				}
+				<div className="flex flex-row flex-wrap max-w-52">
+					<ItemsDisplay
+						items={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
+						editable={isEditing}
+						onDeleteItem={(v: ActivityType) => {
+							handleFieldChange('disabledActivities',
+								(newKiosk.disabledActivities.length > 0 ? newKiosk.disabledActivities : []).filter(id => id !== v._id))
+						}}
+						onShowItems={() => {
+							setShowDisabledActivities(true)
+						}}
+					/>
+				</div>
+
 				<Timestamps
 					createdAt={kiosk.createdAt}
 					updatedAt={kiosk.updatedAt}
@@ -162,14 +187,15 @@ const Kiosk = ({
 							...newKiosk,
 							readerId: newKiosk.readerId?._id ?? null,
 							password: newPassword.length > 0 ? newPassword : undefined,
-							activities: newKiosk.activities.map(activity => activity._id)
+							activities: newKiosk.activities.map(activity => activity._id),
+							disabledActivities: newKiosk.disabledActivities
 						})
 						setNewPassword('')
 						setIsEditing(false)
 					}}
 					setShowDeleteConfirmation={setShowDeleteConfirmation}
 					formIsValid={formIsValid}
-					canClose={!showActivities}
+					canClose={!showActivities && !showDisabledActivities}
 				/>
 				{showDeleteConfirmation &&
 					<ConfirmDeletion
@@ -197,6 +223,23 @@ const Kiosk = ({
 						onDeleteItem={(v) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity._id !== v._id)) }}
 						onClose={() => {
 							setShowActivities(false)
+						}}
+					/>
+				}
+				{showDisabledActivities &&
+					<SelectionWindow
+						title={`Tilføj deaktiverede aktiviteter til ${newKiosk.name}`}
+						items={activities}
+						selectedItems={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
+						onAddItem={(v) => {
+							handleFieldChange('disabledActivities', [...newKiosk.disabledActivities, v._id])
+						}}
+						onDeleteItem={(v) => {
+							handleFieldChange('disabledActivities',
+								newKiosk.disabledActivities.filter(id => id !== v._id))
+						}}
+						onClose={() => {
+							setShowDisabledActivities(false)
 						}}
 					/>
 				}

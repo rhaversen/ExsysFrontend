@@ -352,6 +352,7 @@ export default function Page (): ReactElement {
 			}
 			{selectedView === 'Rediger Opsætning' &&
 				<SetupView
+					products={products}
 					activities={activities}
 					admins={admins}
 					kiosks={kiosks}

@@ -29,9 +29,11 @@ const AddKiosk = ({
 		name: '',
 		kioskTag: undefined,
 		password: '',
-		activities: []
+		activities: [],
+		disabledActivities: []
 	})
 	const [showActivities, setShowActivities] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -93,6 +95,20 @@ const AddKiosk = ({
 		})
 	}, [kiosk])
 
+	const handleAddDisabledActivity = useCallback((v: ActivityType): void => {
+		setKiosk({
+			...kiosk,
+			disabledActivities: [...kiosk.disabledActivities, v._id]
+		})
+	}, [kiosk])
+
+	const handleDeleteDisabledActivity = useCallback((v: ActivityType): void => {
+		setKiosk({
+			...kiosk,
+			disabledActivities: kiosk.disabledActivities.filter((activity) => activity !== v._id)
+		})
+	}, [kiosk])
+
 	const handleReaderIdChange = useCallback((v: string): void => {
 		setKiosk({
 			...kiosk,
@@ -109,7 +125,7 @@ const AddKiosk = ({
 	}, [postKiosk, kiosk])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showActivities}>
+		<CloseableModal onClose={onClose} canClose={!showActivities && !showDisabledActivities}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kiosk'}</p>
@@ -187,6 +203,21 @@ const AddKiosk = ({
 							setShowActivities(true)
 						}}
 					/>
+
+					{kiosk.disabledActivities.length > 0 &&
+						<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
+					}
+					{kiosk.disabledActivities.length === 0 &&
+						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
+					}
+					<ItemsDisplay
+						items={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
+						onDeleteItem={handleDeleteDisabledActivity}
+						onShowItems={() => {
+							setShowDisabledActivities(true)
+						}}
+					/>
+
 					{showActivities &&
 						<SelectionWindow
 							title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
@@ -199,10 +230,23 @@ const AddKiosk = ({
 							}}
 						/>
 					}
+
+					{showDisabledActivities &&
+						<SelectionWindow
+							title={`Tilføj deaktiverede aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+							items={activities}
+							selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
+							onAddItem={handleAddDisabledActivity}
+							onDeleteItem={handleDeleteDisabledActivity}
+							onClose={() => {
+								setShowDisabledActivities(false)
+							}}
+						/>
+					}
 				</div>
 			</div>
 			<CompletePostControls
-				canClose={!showActivities}
+				canClose={!showActivities && !showDisabledActivities}
 				formIsValid={formIsValid}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}
