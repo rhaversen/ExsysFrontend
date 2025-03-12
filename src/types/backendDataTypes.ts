@@ -64,6 +64,7 @@ export interface ActivityType {
 	_id: string
 	rooms: RoomType[]
 	disabledProducts: Array<ProductType['_id']>
+	disabledRooms: Array<RoomType['_id']>
 	name: string
 	createdAt: string
 	updatedAt: string
@@ -72,12 +73,14 @@ export interface ActivityType {
 export interface PostActivityType {
 	rooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
+	disabledRooms?: Array<RoomType['_id']>
 	name: string
 }
 
 export interface PatchActivityType {
 	rooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
+	disabledRooms?: Array<RoomType['_id']>
 	name?: string
 }
 
@@ -169,6 +172,7 @@ export interface KioskType {
 	kioskTag: string
 	readerId: ReaderType | null
 	activities: ActivityType[]
+	disabledActivities: ActivityType['_id']
 	createdAt: string
 	updatedAt: string
 }
@@ -179,6 +183,7 @@ export interface PostKioskType {
 	password: string
 	readerId?: ReaderType['_id']
 	activities: Array<ActivityType['_id']>
+	disabledActivities: Array<ActivityType['_id']>
 }
 
 export interface PatchKioskType {
@@ -187,6 +192,7 @@ export interface PatchKioskType {
 	password?: string
 	readerId?: ReaderType['_id'] | null
 	activities?: Array<ActivityType['_id']>
+	disabledActivities?: Array<ActivityType['_id']>
 }
 
 // Session types
