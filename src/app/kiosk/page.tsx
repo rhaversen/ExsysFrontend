@@ -197,6 +197,11 @@ export default function Page (): ReactElement {
 				setSelectedActivity(null)
 			}
 
+			// Update selectedActivity if it's the same activity that was updated
+			if (selectedActivity?._id === activity._id) {
+				setSelectedActivity(activity)
+			}
+
 			// Update the activity in the activities list
 			setActivities(prev => prev.map(a => (a._id === activity._id ? activity : a)))
 		},
