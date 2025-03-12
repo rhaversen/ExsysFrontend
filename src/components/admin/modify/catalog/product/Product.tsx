@@ -168,6 +168,19 @@ const Product = ({
 					editable={isEditing}
 					onChange={(value) => { handleFieldChange('imageURL', value) }}
 				/>
+				<div className="flex flex-row items-center gap-4 justify-center pb-2">
+					<div className="flex flex-row items-center gap-2">
+						<input
+							title='Aktiv'
+							type="checkbox"
+							checked={newProduct.isActive}
+							onChange={(e) => { handleFieldChange('isActive', e.target.checked) }}
+							disabled={!isEditing}
+							className="w-4 h-4"
+						/>
+						<label className="text-gray-800">{'Aktiv'}</label>
+					</div>
+				</div>
 				{product.options.length > 0 &&
 					<p className="italic text-gray-500">{'Tilvalg:'}</p>
 				}
