@@ -27,6 +27,7 @@ const AddProduct = ({
 	const [product, setProduct] = useState<PostProductType>({
 		name: '',
 		price: 0,
+		isActive: true,
 		orderWindow: {
 			from: {
 				hour: 0,
@@ -171,6 +172,13 @@ const AddProduct = ({
 		postProduct(product)
 	}, [product, postProduct])
 
+	const handleIsActiveChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+		setProduct({
+			...product,
+			isActive: e.target.checked
+		})
+	}, [product])
+
 	return (
 		<CloseableModal onClose={onClose} canClose={!showOptions}>
 			<div className="flex flex-col items-center justify-center">
@@ -277,6 +285,18 @@ const AddProduct = ({
 					URL={product.imageURL}
 					onChange={handleImageChange}
 				/>
+				<div className="flex flex-row items-center gap-4 justify-center pb-2">
+					<div className="flex flex-row items-center gap-2">
+						<input
+							title='Aktiv'
+							type="checkbox"
+							checked={product.isActive}
+							onChange={handleIsActiveChange}
+							className="w-4 h-4"
+						/>
+						<label className="text-gray-800">{'Aktiv'}</label>
+					</div>
+				</div>
 				{product.options.length > 0 &&
 					<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
 				}

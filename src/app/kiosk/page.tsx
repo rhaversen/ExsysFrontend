@@ -400,6 +400,7 @@ export default function Page (): ReactElement {
 						products={
 							products
 								.filter(product => !selectedActivity.disabledProducts.includes(product._id))
+								.filter(product => product.isActive)
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						options={options.sort((a, b) => a.name.localeCompare(b.name))}
