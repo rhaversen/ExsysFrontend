@@ -63,6 +63,7 @@ export interface PatchOptionType {
 export interface ActivityType {
 	_id: string
 	rooms: RoomType[]
+	disabledProducts: Array<ProductType['_id']>
 	name: string
 	createdAt: string
 	updatedAt: string
@@ -70,11 +71,13 @@ export interface ActivityType {
 
 export interface PostActivityType {
 	rooms?: Array<RoomType['_id']>
+	disabledProducts?: Array<ProductType['_id']>
 	name: string
 }
 
 export interface PatchActivityType {
 	rooms?: Array<RoomType['_id']>
+	disabledProducts?: Array<ProductType['_id']>
 	name?: string
 }
 
