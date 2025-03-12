@@ -78,7 +78,7 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 				</div>
 			)}
 
-			{items.length === 0 && (
+			{items.length === 0 && priorityItems.length === 0 && (
 				<div>
 					<p className="text-center text-gray-800 text-2xl">{'Der er ikke fundet nogle muligheder'}</p>
 					<p className="text-center text-gray-800 text-2xl">{'Kontakt venligst personalet'}</p>
