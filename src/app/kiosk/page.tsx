@@ -353,7 +353,7 @@ export default function Page (): ReactElement {
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Vælg den aktivitet du deltager i"
-						items={activities.sort((a, b) => a.name.localeCompare(b.name))}
+						items={activities.filter(activity => !(kiosk?.disabledActivities?.includes(activity._id) ?? false)).sort((a, b) => a.name.localeCompare(b.name))}
 						priorityItems={activities
 							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
@@ -361,11 +361,15 @@ export default function Page (): ReactElement {
 					/>
 				)
 			case 'room':
+				if (selectedActivity == null) {
+					setViewState('activity')
+					return null
+				}
 				return (
 					<DeliveryInfoSelection
 						title="Vælg dit spisested"
 						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
-						items={rooms.sort((a, b) => a.name.localeCompare(b.name))}
+						items={rooms.filter(room => !selectedActivity.disabledRooms.includes(room._id)).sort((a, b) => a.name.localeCompare(b.name))}
 						priorityItems={selectedActivity?.rooms
 							.map(room => rooms.find(r => r._id === room._id) ?? room)
 							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
@@ -380,7 +384,7 @@ export default function Page (): ReactElement {
 				return (
 					<OrderView
 						kiosk={kiosk}
-						products={products.sort((a, b) => a.name.localeCompare(b.name))}
+						products={products.filter(product => !selectedActivity.disabledProducts.includes(product._id)).sort((a, b) => a.name.localeCompare(b.name))}
 						options={options.sort((a, b) => a.name.localeCompare(b.name))}
 						activity={selectedActivity}
 						room={selectedRoom}
