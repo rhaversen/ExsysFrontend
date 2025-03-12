@@ -9,7 +9,8 @@ import {
 	type PostActivityType,
 	type RoomType,
 	type KioskType,
-	type PatchKioskType
+	type PatchKioskType,
+	type ProductType
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useEffect, useState } from 'react'
 import SelectionWindow from '../../ui/SelectionWindow'
@@ -20,12 +21,14 @@ const Activity = ({
 	activity,
 	activities,
 	rooms,
-	kiosks
+	kiosks,
+	products
 }: {
 	activity: ActivityType
 	activities: ActivityType[]
 	rooms: RoomType[]
 	kiosks: KioskType[]
+	products: ProductType[]
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [linkedKiosks, setLinkedKiosks] = useState(
@@ -48,6 +51,8 @@ const Activity = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showRooms, setShowRooms] = useState(false)
 	const [showKiosks, setShowKiosks] = useState(false)
+	const [showDisabledRooms, setShowDisabledRooms] = useState(false)
+	const [showDisabledProducts, setShowDisabledProducts] = useState(false)
 
 	const handleKioskChange = (newKiosks: KioskType[]): void => {
 		setLinkedKiosks(newKiosks)
@@ -61,7 +66,9 @@ const Activity = ({
 		// Update activity first
 		const activityUpdate: PatchActivityType = {
 			name: newActivity.name,
-			rooms: newActivity.rooms.map(room => room._id)
+			rooms: newActivity.rooms.map(room => room._id),
+			disabledRooms: newActivity.disabledRooms,
+			disabledProducts: newActivity.disabledProducts
 		}
 		updateActivity(newActivity._id, activityUpdate)
 
@@ -132,6 +139,46 @@ const Activity = ({
 						/>
 					</div>
 
+					{newActivity.disabledRooms.length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Deaktiverede Spisesteder:'}</p>
+					)}
+					{newActivity.disabledRooms.length === 0 && !isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Ingen Deaktiverede Spisesteder'}</p>
+					)}
+					{newActivity.disabledRooms.length === 0 && isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Spisesteder'}</p>
+					)}
+					<div className="flex flex-row flex-wrap max-w-52">
+						<ItemsDisplay
+							items={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
+							onShowItems={() => {
+								setShowDisabledRooms(true)
+							}}
+						/>
+					</div>
+
+					{newActivity.disabledProducts.length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Deaktiverede Produkter:'}</p>
+					)}
+					{newActivity.disabledProducts.length === 0 && !isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Ingen Deaktiverede Produkter'}</p>
+					)}
+					{newActivity.disabledProducts.length === 0 && isEditing && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Produkter'}</p>
+					)}
+					<div className="flex flex-row flex-wrap max-w-52">
+						<ItemsDisplay
+							items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
+							onShowItems={() => {
+								setShowDisabledProducts(true)
+							}}
+						/>
+					</div>
+
 					{linkedKiosks.length > 0 && (
 						<p className="italic text-gray-500 pt-2">{'Tilknyttede Kiosker:'}</p>
 					)}
@@ -190,6 +237,30 @@ const Activity = ({
 						onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
 						onClose={() => {
 							setShowRooms(false)
+						}}
+					/>
+				}
+				{showDisabledRooms &&
+					<SelectionWindow
+						title={`Tilføj Deaktiverede Spisesteder til ${newActivity.name}`}
+						items={rooms}
+						selectedItems={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
+						onAddItem={(v) => { handleFieldChange('disabledRooms', [...newActivity.disabledRooms, v._id]) }}
+						onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
+						onClose={() => {
+							setShowDisabledRooms(false)
+						}}
+					/>
+				}
+				{showDisabledProducts &&
+					<SelectionWindow
+						title={`Tilføj Deaktiverede Produkter til ${newActivity.name}`}
+						items={products}
+						selectedItems={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
+						onAddItem={(v) => { handleFieldChange('disabledProducts', [...newActivity.disabledProducts, v._id]) }}
+						onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
+						onClose={() => {
+							setShowDisabledProducts(false)
 						}}
 					/>
 				}

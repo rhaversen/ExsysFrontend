@@ -45,7 +45,7 @@ const SelectionWindow = <T extends Item> ({
 						className="flex items-center p-1 mb-2 text-gray-800"
 					>
 						<input
-							title="Add Option"
+							title="Tilføj"
 							type="checkbox"
 							className="cursor-pointer w-5 h-5"
 							checked={selectedItems.map((i) => i._id).includes(item._id)}

@@ -197,6 +197,11 @@ export default function Page (): ReactElement {
 				setSelectedActivity(null)
 			}
 
+			// Update selectedActivity if it's the same activity that was updated
+			if (selectedActivity?._id === activity._id) {
+				setSelectedActivity(activity)
+			}
+
 			// Update the activity in the activities list
 			setActivities(prev => prev.map(a => (a._id === activity._id ? activity : a)))
 		},
@@ -331,20 +336,6 @@ export default function Page (): ReactElement {
 
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
-		if (hasAvailableProducts || !kioskIsOpen) {
-			return (
-				<div className="fixed inset-0 flex items-center justify-center bg-black z-10">
-					<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
-						<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
-						<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
-						{products.length > 0 && kioskIsOpen && !hasAvailableProducts && (
-							<p className="text-center">{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}</p>
-						)}
-					</div>
-				</div>
-			)
-		}
-
 		switch (viewState) {
 			case 'welcome':
 				return (
@@ -367,7 +358,7 @@ export default function Page (): ReactElement {
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Vælg den aktivitet du deltager i"
-						items={activities.sort((a, b) => a.name.localeCompare(b.name))}
+						items={activities.filter(activity => !(kiosk?.disabledActivities?.includes(activity._id) ?? false)).sort((a, b) => a.name.localeCompare(b.name))}
 						priorityItems={activities
 							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
@@ -375,11 +366,15 @@ export default function Page (): ReactElement {
 					/>
 				)
 			case 'room':
+				if (selectedActivity == null) {
+					setViewState('activity')
+					return null
+				}
 				return (
 					<DeliveryInfoSelection
 						title="Vælg dit spisested"
 						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
-						items={rooms.sort((a, b) => a.name.localeCompare(b.name))}
+						items={rooms.filter(room => !selectedActivity.disabledRooms.includes(room._id)).sort((a, b) => a.name.localeCompare(b.name))}
 						priorityItems={selectedActivity?.rooms
 							.map(room => rooms.find(r => r._id === room._id) ?? room)
 							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
@@ -394,7 +389,7 @@ export default function Page (): ReactElement {
 				return (
 					<OrderView
 						kiosk={kiosk}
-						products={products.sort((a, b) => a.name.localeCompare(b.name))}
+						products={products.filter(product => !selectedActivity.disabledProducts.includes(product._id)).sort((a, b) => a.name.localeCompare(b.name))}
 						options={options.sort((a, b) => a.name.localeCompare(b.name))}
 						activity={selectedActivity}
 						room={selectedRoom}
@@ -418,6 +413,30 @@ export default function Page (): ReactElement {
 				setViewState('welcome')
 				return null
 		}
+	}
+
+	if (hasAvailableProducts || !kioskIsOpen) {
+		return (
+			<div className="flex flex-col h-screen">
+				<div className="flex-1">
+					<div className="fixed inset-0 flex items-center justify-center bg-black">
+						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
+							<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
+							<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
+							{products.length > 0 && kioskIsOpen && !hasAvailableProducts && (
+								<p className="text-center">
+									{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}
+								</p>
+							)}
+						</div>
+					</div>
+				</div>
+				<div className="flex-shrink-0 z-10 text-gray-400/75">
+					<KioskSessionInfo />
+				</div>
+			</div>
+
+		)
 	}
 
 	return (

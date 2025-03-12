@@ -20,8 +20,9 @@ const KioskSessionInfo = (): ReactElement | null => {
 	const kioskName = (currentUser as KioskType)?.name ?? 'Mangler Navn'
 	return (
 		<div className="h-5 w-full bg-black flex flex-row items-center">
-			<div className="text-xs text-white px-1">
-				{kioskName} <span className="font-bold px-2">{`#${kioskTag}`}</span>
+			<div className="text-xs font-bold px-1 flex gap-6 tracking-wide">
+				<div>{kioskName}</div>
+				<div>{`#${kioskTag}`}</div>
 			</div>
 		</div>
 	)
