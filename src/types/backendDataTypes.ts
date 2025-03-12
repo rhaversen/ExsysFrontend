@@ -172,7 +172,7 @@ export interface KioskType {
 	kioskTag: string
 	readerId: ReaderType | null
 	activities: ActivityType[]
-	disabledActivities: ActivityType['_id']
+	disabledActivities: Array<ActivityType['_id']>
 	createdAt: string
 	updatedAt: string
 }
