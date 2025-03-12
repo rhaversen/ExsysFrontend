@@ -217,16 +217,13 @@ export default function Page (): ReactElement | null {
 								{'Dette vil tvinge alle kiosker til at genindlæse deres interface.'}
 							</p>
 							<p className="text-gray-600">
-								{'Brug denne funktion hvis kioskerne opfører sig unormalt eller viser forældet information.'}
+								{'Genindlæsningen sker øjeblikkeligt og kan ikke fortrydes.'}
 							</p>
 							<p className="text-gray-600">
 								{'Iganværende bestillinger vil blive nulstillet, men færdige bestillinger vil ikke blive påvirket.'}
 							</p>
 							<p className="text-gray-600">
-								{'Brug kun denne funktion hvis det er nødvendigt, eller uden for åbningstiderne, da det kan forstyrre kundernes bestillinger.'}
-							</p>
-							<p className="text-gray-600">
-								{'Kioskerne vil automatisk genindlæse sig selv hver midnat.'}
+								{'Brug kun denne funktion hvis det er nødvendigt, eller uden for åbningstiderne.'}
 							</p>
 						</div>
 						<div className="flex gap-4 justify-center pt-2">
@@ -291,7 +288,10 @@ export default function Page (): ReactElement | null {
 											{'Luk kun kioskerne ved særlige situationer, f.eks. ved tekniske problemer eller hvis køkkenet må lukke akut.'}
 										</p>
 										<p className="text-gray-600">
-											{'Ved normal drift vil kioskerne automatisk åbne og lukke efter køkkenets åbningstider.'}
+											{'Ved normal drift vil kioskerne automatisk åbne og lukke ifølge køkkenets åbningstider.'}
+										</p>
+										<p className="text-gray-600">
+											{'Køkkenets åbningstider bestemmes automatisk efter produkternes bestillingsvinduer.'}
 										</p>
 									</>
 								)}

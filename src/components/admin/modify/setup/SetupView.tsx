@@ -19,6 +19,7 @@ import type sortConfig from '@/lib/SortConfig'
 import { AdminImages } from '@/lib/images'
 import Image from 'next/image'
 import {
+	type ProductType,
 	type ActivityType,
 	type AdminType,
 	type KioskType,
@@ -32,13 +33,15 @@ const SetupView = ({
 	rooms,
 	kiosks,
 	readers,
-	admins
+	admins,
+	products
 }: {
 	activities: ActivityType[]
 	rooms: RoomType[]
 	kiosks: KioskType[]
 	readers: ReaderType[]
 	admins: AdminType[]
+	products: ProductType[]
 }): ReactElement => {
 	const views = ['Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins', 'Konfiguration']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
@@ -133,6 +136,7 @@ const SetupView = ({
 							{sortByField(activities).map((activity) => (
 								<div className="min-w-64" key={activity._id}>
 									<Activity
+										products={products}
 										activity={activity}
 										kiosks={kiosks}
 										rooms={rooms}
@@ -197,6 +201,7 @@ const SetupView = ({
 			)}
 			{showAddActivity && (
 				<AddActivity
+					products={products}
 					rooms={rooms}
 					kiosks={kiosks}
 					activities={activities}
