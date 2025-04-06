@@ -3,21 +3,6 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import EditingControls from './EditControls'
 import Timestamps from './Timestamps'
 
-interface EntityCardProps {
-	children: ReactNode
-	isActive?: boolean
-	onToggleActivity?: () => void
-	isEditing: boolean
-	setIsEditing: (value: boolean) => void
-	onHandleUndoEdit: () => void
-	onHandleCompleteEdit: () => void
-	setShowDeleteConfirmation: (value: boolean) => void
-	formIsValid: boolean
-	canClose: boolean
-	createdAt: string
-	updatedAt: string
-}
-
 const EntityCard = ({
 	children,
 	isActive,
@@ -28,10 +13,23 @@ const EntityCard = ({
 	onHandleCompleteEdit,
 	setShowDeleteConfirmation,
 	formIsValid,
-	canClose,
+	canClose = true,
 	createdAt,
 	updatedAt
-}: EntityCardProps): ReactElement => {
+}: {
+	children: ReactNode
+	isActive?: boolean
+	onToggleActivity?: () => void
+	isEditing: boolean
+	setIsEditing: (value: boolean) => void
+	onHandleUndoEdit: () => void
+	onHandleCompleteEdit: () => void
+	setShowDeleteConfirmation: (value: boolean) => void
+	formIsValid: boolean
+	canClose?: boolean
+	createdAt: string
+	updatedAt: string
+}): ReactElement => {
 	const [isHovered, setIsHovered] = useState(false)
 
 	return (
