@@ -169,11 +169,8 @@ const Kiosk = ({
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
-							{newKiosk.activities.length === 0 && !isEditing && (
-								<div className="text-gray-500 text-sm">{'Ingen Aktiviteter'}</div>
-							)}
-							{newKiosk.activities.length === 0 && isEditing && (
-								<div className="text-gray-500 text-sm">{'Tilføj Aktiviteter'}</div>
+							{newKiosk.activities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
 								items={newKiosk.activities}
@@ -188,12 +185,9 @@ const Kiosk = ({
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
-							{((newKiosk.disabledActivities.length === 0) || newKiosk.disabledActivities.length === 0) && !isEditing &&
-							<div className="text-gray-500 text-sm">{'Ingen Deaktiverede Aktiviteter'}</div>
-							}
-							{((newKiosk.disabledActivities.length === 0) || newKiosk.disabledActivities.length === 0) && isEditing &&
-							<div className="text-gray-500 text-sm">{'Tilføj Deaktiverede Aktiviteter'}</div>
-							}
+							{newKiosk.disabledActivities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
 							<ItemsDisplay
 								items={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
 								editable={isEditing}

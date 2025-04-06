@@ -141,7 +141,7 @@ const Activity = ({
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{newActivity.rooms.length === 0 && (
-								<div className="text-gray-500 text-sm">{isEditing ? 'Tilføj Spisesteder' : 'Ingen'}</div>
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
 								items={newActivity.rooms}
@@ -157,7 +157,7 @@ const Activity = ({
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{newActivity.disabledRooms.length === 0 && (
-								<div className="text-gray-500 text-sm">{isEditing ? 'Tilføj Deaktiverede' : 'Ingen'}</div>
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
 								items={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
@@ -173,7 +173,7 @@ const Activity = ({
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{newActivity.disabledProducts.length === 0 && (
-								<div className="text-gray-500 text-sm">{isEditing ? 'Tilføj Deaktiverede' : 'Ingen'}</div>
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
 								items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
@@ -189,7 +189,7 @@ const Activity = ({
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{linkedKiosks.length === 0 && (
-								<div className="text-gray-500 text-sm">{isEditing ? 'Tilføj Kiosker' : 'Ingen'}</div>
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
 								items={linkedKiosks}
