@@ -105,52 +105,52 @@ const AdminView = ({
 		switch (selectedView) {
 			case 'Spisesteder':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(rooms).map((room) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={room._id}>
-								<Room rooms={rooms} room={room} activities={activities} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(rooms).map((room) => (
+								<Room key={room._id} rooms={rooms} room={room} activities={activities} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Aktiviteter':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(activities).map((activity) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={activity._id}>
-								<Activity products={products} activity={activity} kiosks={kiosks} rooms={rooms} activities={activities} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(activities).map((activity) => (
+								<Activity key={activity._id} products={products} activity={activity} kiosks={kiosks} rooms={rooms} activities={activities} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Kiosker':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(kiosks).map((kiosk) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={kiosk._id}>
-								<Kiosk kiosks={kiosks} kiosk={kiosk} activities={activities} readers={readers} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(kiosks).map((kiosk) => (
+								<Kiosk key={kiosk._id} kiosks={kiosks} kiosk={kiosk} activities={activities} readers={readers} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Admins':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(admins).map((admin) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={admin._id}>
-								<Admin admins={admins} admin={admin} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(admins).map((admin) => (
+								<Admin key={admin._id} admins={admins} admin={admin} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Kortlæsere':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(readers).map((reader) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={reader._id}>
-								<Reader kiosks={kiosks} readers={readers} reader={reader} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(readers).map((reader) => (
+								<Reader key={reader._id} kiosks={kiosks} readers={readers} reader={reader} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Produkter':
@@ -165,12 +165,12 @@ const AdminView = ({
 				)
 			case 'Tilvalg':
 				return (
-					<div className="flex flex-wrap justify-start gap-2">
-						{sortByField(options).map((option) => (
-							<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1" key={option._id}>
-								<Option products={products} option={option} options={options} />
-							</div>
-						))}
+					<div className="w-full">
+						<div className="space-y-1">
+							{sortByField(options).map((option) => (
+								<Option key={option._id} products={products} option={option} options={options} />
+							))}
+						</div>
 					</div>
 				)
 			case 'Konfiguration':
