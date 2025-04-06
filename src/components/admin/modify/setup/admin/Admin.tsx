@@ -92,6 +92,14 @@ const Admin = ({
 						</div>
 					</div>
 				)}
+				{!isEditing && (
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kodeord'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							{'******'}
+						</div>
+					</div>
+				)}
 			</EntityCard>
 
 			{showDeleteConfirmation && (
