@@ -41,14 +41,14 @@ const EditingControls = ({
 
 	if (isEditing) {
 		return (
-			<div className="flex flex-row gap-5">
+			<div className="flex flex-row gap-1">
 				<button
 					onClick={() => {
 						setShowDeleteConfirmation(true)
 					}}
 					type="button"
 					title="Slet"
-					className="w-5 h-5 mx-2.5 place-self-center hover:bounceOrig"
+					className="w-4 h-4 mx-1 place-self-center hover:bounceOrig"
 				>
 					<span className="sr-only">{'Delete'}</span>
 					<Image
@@ -63,7 +63,7 @@ const EditingControls = ({
 					onClick={handleUndoEdit}
 					type="button"
 					title="Fortryd ændringer"
-					className="w-10 h-10 place-self-center transition-transform duration-300 transform hover:-rotate-180"
+					className="w-6 h-6 place-self-center transition-transform duration-300 transform hover:-rotate-180"
 				>
 					<span className="sr-only">{'Undo changes'}</span>
 					<Image
@@ -74,7 +74,7 @@ const EditingControls = ({
 						alt={AdminImages.undo.alt}
 					/>
 				</button>
-				<div className="w-10 h-10 relative">
+				<div className="w-6 h-6 relative">
 					{!formIsValid && (
 						<Image
 							width={40}
@@ -89,7 +89,7 @@ const EditingControls = ({
 						type="button"
 						title="Gem ændringer"
 						disabled={!formIsValid}
-						className={`w-full h-full place-self-center transition-transform duration-300 transform ${formIsValid ? 'hover:rotate-12 hover:scale-125' : 'scale-90'}`}
+						className="w-full h-full place-self-center transition-transform duration-300 transform hover:rotate-12 hover:scale-125"
 					>
 						<span className="sr-only">{'Complete changes'}</span>
 						<Image
@@ -111,12 +111,12 @@ const EditingControls = ({
 				}}
 				type="button"
 				title="Rediger"
-				className="w-1/2 h-10 border-2 border-blue-500 rounded-full m-5"
+				className="py-1 px-6 rounded-full border border-blue-500"
 			>
 				<Image
 					width={40}
 					height={40}
-					className="w-full h-full place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
+					className="w-6 h-6 place-self-center transition-transform duration-300 transform hover:-translate-y-0.5 hover:-rotate-45"
 					src={AdminImages.edit.src}
 					alt={AdminImages.edit.alt}
 				/>

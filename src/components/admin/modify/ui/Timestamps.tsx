@@ -39,31 +39,31 @@ const Timestamps = ({
 	const updated = isUpdatedToday ? formatTime(updatedDate) : formatDate(updatedDate)
 
 	return (
-		<div className="flex flex-col items-center">
-			<div className="text-sm text-gray-600 flex flex-row items-center"
+		<div className="flex items-start gap-3">
+			<div className="text-xs text-gray-500 flex items-center"
 				title="Oprettet"
 			>
 				<Image
-					className="h-7 w-7 p-1.5 mx-1"
+					className="h-4 w-4"
 					src={AdminImages.created.src}
 					alt={AdminImages.created.alt}
 					width={10}
 					height={10}
 				/>
-				{created}
+				<span>{created}</span>
 			</div>
 			{createdAt !== updatedAt && (
-				<div className="text-sm text-gray-600 flex flex-row items-center"
+				<div className="text-xs text-gray-500 flex items-center"
 					title="Opdateret"
 				>
 					<Image
-						className="h-7 w-7 p-1 mx-1"
+						className="h-4 w-4"
 						src={AdminImages.updated.src}
 						alt={AdminImages.updated.alt}
 						width={10}
 						height={10}
 					/>
-					{updated}
+					<span>{updated}</span>
 				</div>
 			)}
 		</div>
