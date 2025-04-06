@@ -57,14 +57,33 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 	if ((details?.length) === 0) return null
 
 	return (
-		<div>
+		<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
 			<h3 className="mb-2 font-bold text-gray-700">{`Info om ${viewName}`}</h3>
-			<div className="flex flex-col sm:flex-row sm:gap-2 rounded bg-white sm:bg-transparent sm:rounded-none text-gray-700">
-				{details.map((point, index) => (
-					<div key={index} className="sm:bg-white rounded px-2 py-1">
-						{point}
-					</div>
-				))}
+			<div
+				className="flex flex-col sm:flex-row sm:gap-0 rounded sm:bg-transparent sm:rounded-none text-gray-700"
+			>
+				{details.map((point, index) => {
+					const isFirst = index === 0
+					const isLast = index === details.length - 1
+					const firstStyle = 'sm:pr-4'
+					const middleStyle = 'sm:border-l sm:border-gray-300 sm:px-4'
+					const lastStyle = 'sm:border-l sm:border-gray-300 sm:pl-4'
+
+					const pointStyle = isFirst
+						? firstStyle
+						: isLast
+							? lastStyle
+							: middleStyle
+
+					return (
+						<div
+							key={index}
+							className={pointStyle}
+						>
+							{point}
+						</div>
+					)
+				})}
 			</div>
 		</div>
 	)
