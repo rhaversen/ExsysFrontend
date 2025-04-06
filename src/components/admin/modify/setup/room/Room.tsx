@@ -1,14 +1,13 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import EditingControls from '@/components/admin/modify/ui/EditControls'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type PatchRoomType, type PostRoomType, type RoomType, type ActivityType, type PatchActivityType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useEffect, useState } from 'react'
-import Timestamps from '../../ui/Timestamps'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '../../ui/ItemsDisplay'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import EntityCard from '../../ui/EntityCard'
 
 const Room = ({
 	rooms,
@@ -66,15 +65,13 @@ const Room = ({
 					...activity,
 					rooms: [...activity.rooms.map(r => r._id), room._id]
 				})
-			}
-			),
+			}),
 			...removedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
 					rooms: activity.rooms.filter(r => r._id !== room._id).map(r => r._id)
 				})
-			}
-			)
+			})
 		]).then(() => {
 			setIsEditing(false)
 		}).catch((error) => {
@@ -83,104 +80,107 @@ const Room = ({
 	}
 
 	return (
-		<div className="p-2 m-2">
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="italic text-gray-500">{'Navn'}</p>
-					<div className="font-bold pb-2 text-gray-800">
-						<EditableField
-							fieldName="name"
-							initialText={room.name}
-							placeholder="Navn"
-							minSize={10}
-							required={true}
-							maxLength={20}
-							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
-								message: 'Navn er allerede i brug'
-							}]}
-							editable={isEditing}
-							onChange={(value) => { handleFieldChange('name', value) }}
-							onValidationChange={handleValidationChange}
-						/>
+		<>
+			<EntityCard
+				isEditing={isEditing}
+				setIsEditing={setIsEditing}
+				onHandleUndoEdit={() => {
+					resetFormState()
+					setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+					setIsEditing(false)
+				}}
+				onHandleCompleteEdit={handleCompleteEdit}
+				setShowDeleteConfirmation={setShowDeleteConfirmation}
+				formIsValid={formIsValid}
+				canClose={!showActivities}
+				createdAt={room.createdAt}
+				updatedAt={room.updatedAt}
+			>
+				<div className="flex flex-wrap p-3 gap-1">
+					{/* Name */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="name"
+								initialText={room.name}
+								placeholder="Navn"
+								minSize={10}
+								required={true}
+								maxLength={20}
+								validations={[{
+									validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
+									message: 'Navn er allerede i brug'
+								}]}
+								editable={isEditing}
+								onChange={(value) => { handleFieldChange('name', value) }}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
 					</div>
-					<p className="italic text-gray-500">{'Beskrivelse'}</p>
-					<div className="text-gray-800">
-						<EditableField
-							fieldName="description"
-							initialText={room.description}
-							placeholder="Beskrivelse"
-							italic={true}
-							minSize={10}
-							required={true}
-							maxLength={20}
-							editable={isEditing}
-							onChange={(value) => { handleFieldChange('description', value) }}
-							onValidationChange={handleValidationChange}
-						/>
+
+					{/* Description */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Beskrivelse'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="description"
+								initialText={room.description}
+								placeholder="Beskrivelse"
+								italic={true}
+								minSize={10}
+								required={true}
+								maxLength={20}
+								editable={isEditing}
+								onChange={(value) => { handleFieldChange('description', value) }}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
 					</div>
-					{linkedActivities.length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilknyttede Aktiviteter:'}</p>
-					)}
-					{linkedActivities.length === 0 && !isEditing && (
-						<p className="italic text-gray-500 pt-2">{'Ingen Aktiviteter Tilknyttet'}</p>
-					)}
-					{linkedActivities.length === 0 && isEditing && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter'}</p>
-					)}
-					<div className="flex flex-row flex-wrap max-w-52">
-						<ItemsDisplay
-							items={linkedActivities}
-							editable={isEditing}
-							onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
-							onShowItems={() => {
-								setShowActivities(true)
-							}}
-						/>
+
+					{/* Activities */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{linkedActivities.length === 0 && !isEditing && (
+								<div className="text-gray-500 text-sm">{'Ingen Aktiviteter'}</div>
+							)}
+							{linkedActivities.length === 0 && isEditing && (
+								<div className="text-gray-500 text-sm">{'Tilføj Aktiviteter'}</div>
+							)}
+							<ItemsDisplay
+								items={linkedActivities}
+								editable={isEditing}
+								onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
+								onShowItems={() => { setShowActivities(true) }}
+							/>
+						</div>
 					</div>
 				</div>
-				<Timestamps
-					createdAt={room.createdAt}
-					updatedAt={room.updatedAt}
-				/>
-				<EditingControls
-					isEditing={isEditing}
-					setIsEditing={setIsEditing}
-					handleUndoEdit={() => {
-						resetFormState()
-						setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
-						setIsEditing(false)
-					}}
-					handleCompleteEdit={handleCompleteEdit}
-					setShowDeleteConfirmation={setShowDeleteConfirmation}
-					formIsValid={formIsValid}
-				/>
-			</div>
-			{showDeleteConfirmation &&
+			</EntityCard>
+
+			{showDeleteConfirmation && (
 				<ConfirmDeletion
 					itemName={room.name}
-					onClose={() => {
-						setShowDeleteConfirmation(false)
-					}}
+					onClose={() => { setShowDeleteConfirmation(false) }}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
 						deleteEntity(room._id, confirm)
 					}}
 				/>
-			}
-			{showActivities &&
+			)}
+
+			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj Aktiviteter til ${newRoom.name}`}
+					title={`Tilføj aktiviteter til ${newRoom.name}`}
 					items={activities}
 					selectedItems={linkedActivities}
 					onAddItem={(v) => { handleActivityChange([...linkedActivities, v]) }}
 					onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
-					onClose={() => {
-						setShowActivities(false)
-					}}
+					onClose={() => { setShowActivities(false) }}
 				/>
-			}
-		</div>
+			)}
+		</>
 	)
 }
 
