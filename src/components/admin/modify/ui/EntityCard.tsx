@@ -35,7 +35,7 @@ const EntityCard = ({
 	const [isHovered, setIsHovered] = useState(false)
 
 	return (
-		<div className="border rounded-lg bg-white hover:bg-gray-50 w-full mb-2 shadow-sm relative">
+		<div className="border rounded-lg bg-white hover:bg-gray-50 w-full shadow-sm relative">
 			<div className="flex justify-between items-center p-1">
 				<div className="flex items-center gap-3">
 					{isActive !== undefined && (onToggleActivity != null) && (
