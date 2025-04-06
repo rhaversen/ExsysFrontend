@@ -33,29 +33,27 @@ import {
 } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
 
-export type ViewType = 'Aktiviteter' | 'Spisesteder' | 'Kiosker' | 'Kortlæsere' | 'Admins' | 'Konfiguration' | 'Produkter' | 'Tilvalg'
-
-interface AdminViewProps {
-	views: ViewType[]
-	activities?: ActivityType[]
-	rooms?: RoomType[]
-	kiosks?: KioskType[]
-	readers?: ReaderType[]
-	admins?: AdminType[]
-	products?: ProductType[]
-	options?: OptionType[]
-}
+type ViewType = 'Aktiviteter' | 'Spisesteder' | 'Kiosker' | 'Kortlæsere' | 'Admins' | 'Konfiguration' | 'Produkter' | 'Tilvalg'
 
 const AdminView = ({
 	views,
-	activities = [],
-	rooms = [],
-	kiosks = [],
-	readers = [],
-	admins = [],
-	products = [],
-	options = []
-}: AdminViewProps): ReactElement => {
+	activities,
+	rooms,
+	kiosks,
+	readers,
+	admins,
+	products,
+	options
+}: {
+	views: ViewType[]
+	activities: ActivityType[]
+	rooms: RoomType[]
+	kiosks: KioskType[]
+	readers: ReaderType[]
+	admins: AdminType[]
+	products: ProductType[]
+	options: OptionType[]
+}): ReactElement => {
 	const [selectedView, setSelectedView] = useState<ViewType | null>(null)
 	const [showAddRoom, setShowAddRoom] = useState(false)
 	const [showAddActivity, setShowAddActivity] = useState(false)
