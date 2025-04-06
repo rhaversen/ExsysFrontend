@@ -1,7 +1,7 @@
 import React, { type ReactElement, type ReactNode, useState } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
-import EditingControls from '../../ui/EditControls'
-import Timestamps from '../../ui/Timestamps'
+import EditingControls from './EditControls'
+import Timestamps from './Timestamps'
 
 interface EntityCardProps {
 	children: ReactNode
