@@ -113,91 +113,89 @@ const Activity = ({
 				createdAt={activity.createdAt}
 				updatedAt={activity.updatedAt}
 			>
-				<div className="flex flex-wrap p-3 gap-1">
-					{/* 1. Navn */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="name"
-								initialText={activity.name}
-								placeholder="Navn"
-								minSize={10}
-								required={true}
-								maxLength={50}
-								editable={isEditing}
-								validations={[{
-									validate: (v: string) => !activities.some((a) => a.name === v && a._id !== activity._id),
-									message: 'Navn er allerede i brug'
-								}]}
-								onChange={(value) => { handleFieldChange('name', value) }}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+				{/* 1. Navn */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							fieldName="name"
+							initialText={activity.name}
+							placeholder="Navn"
+							minSize={10}
+							required={true}
+							maxLength={50}
+							editable={isEditing}
+							validations={[{
+								validate: (v: string) => !activities.some((a) => a.name === v && a._id !== activity._id),
+								message: 'Navn er allerede i brug'
+							}]}
+							onChange={(value) => { handleFieldChange('name', value) }}
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
+				</div>
 
-					{/* 2. Spisesteder */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{newActivity.rooms.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={newActivity.rooms}
-								editable={isEditing}
-								onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
-								onShowItems={() => { setShowRooms(true) }}
-							/>
-						</div>
+				{/* 2. Spisesteder */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{newActivity.rooms.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={newActivity.rooms}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
+							onShowItems={() => { setShowRooms(true) }}
+						/>
 					</div>
+				</div>
 
-					{/* 3. Deaktiverede Spisesteder */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{newActivity.disabledRooms.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
-								editable={isEditing}
-								onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
-								onShowItems={() => { setShowDisabledRooms(true) }}
-							/>
-						</div>
+				{/* 3. Deaktiverede Spisesteder */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{newActivity.disabledRooms.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
+							onShowItems={() => { setShowDisabledRooms(true) }}
+						/>
 					</div>
+				</div>
 
-					{/* 4. Deaktiverede Produkter */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{newActivity.disabledProducts.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
-								editable={isEditing}
-								onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
-								onShowItems={() => { setShowDisabledProducts(true) }}
-							/>
-						</div>
+				{/* 4. Deaktiverede Produkter */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{newActivity.disabledProducts.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
+							onShowItems={() => { setShowDisabledProducts(true) }}
+						/>
 					</div>
+				</div>
 
-					{/* 5. Kiosker */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{linkedKiosks.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={linkedKiosks}
-								editable={isEditing}
-								onDeleteItem={(v) => { handleKioskChange(linkedKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
-								onShowItems={() => { setShowKiosks(true) }}
-							/>
-						</div>
+				{/* 5. Kiosker */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{linkedKiosks.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={linkedKiosks}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleKioskChange(linkedKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
+							onShowItems={() => { setShowKiosks(true) }}
+						/>
 					</div>
 				</div>
 			</EntityCard>

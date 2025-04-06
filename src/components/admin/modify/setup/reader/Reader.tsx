@@ -90,55 +90,53 @@ const Reader = ({
 				createdAt={reader.createdAt}
 				updatedAt={reader.updatedAt}
 			>
-				<div className="flex flex-wrap p-3 gap-1">
-					{/* Reader Tag */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser #'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="readerTag"
-								initialText={reader.readerTag}
-								placeholder="Kortlæser #"
-								minSize={10}
-								required={true}
-								minLength={5}
-								maxLength={5}
-								validations={[{
-									validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
-									message: 'Kortlæser # er allerede i brug'
-								}]}
-								type="number"
-								editable={isEditing}
-								onChange={(value) => { handleFieldChange('readerTag', value) }}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+				{/* Reader Tag */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser #'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							fieldName="readerTag"
+							initialText={reader.readerTag}
+							placeholder="Kortlæser #"
+							minSize={10}
+							required={true}
+							minLength={5}
+							maxLength={5}
+							validations={[{
+								validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
+								message: 'Kortlæser # er allerede i brug'
+							}]}
+							type="number"
+							editable={isEditing}
+							onChange={(value) => { handleFieldChange('readerTag', value) }}
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
+				</div>
 
-					{/* Assigned Kiosk */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kiosk'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableDropdown
-								options={Array.isArray(kiosks)
-									? kiosks.filter((kiosk) =>
-										((kiosk.readerId?._id) == null) ||
+				{/* Assigned Kiosk */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kiosk'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableDropdown
+							options={Array.isArray(kiosks)
+								? kiosks.filter((kiosk) =>
+									((kiosk.readerId?._id) == null) ||
 										kiosk.readerId?._id === reader._id ||
 										kiosk.readerId?._id === newReader._id
-									).map((kiosk) => ({
-										value: kiosk._id,
-										label: kiosk.name
-									}))
-									: []
-								}
-								initialValue={assignedKiosk?._id ?? 'null-option'}
-								onChange={handleKioskChange}
-								editable={isEditing}
-								fieldName="assignedKiosk"
-								allowNullOption={true}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+								).map((kiosk) => ({
+									value: kiosk._id,
+									label: kiosk.name
+								}))
+								: []
+							}
+							initialValue={assignedKiosk?._id ?? 'null-option'}
+							onChange={handleKioskChange}
+							editable={isEditing}
+							fieldName="assignedKiosk"
+							allowNullOption={true}
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
 				</div>
 			</EntityCard>

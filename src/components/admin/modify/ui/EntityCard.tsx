@@ -272,7 +272,9 @@ const EntityCard = ({
 					canClose={canClose}
 				/>
 			</div>
-			{children}
+			<div className="flex flex-wrap">
+				{children}
+			</div>
 		</div>
 	)
 }

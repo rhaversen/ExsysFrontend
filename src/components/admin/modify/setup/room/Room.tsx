@@ -96,62 +96,60 @@ const Room = ({
 				createdAt={room.createdAt}
 				updatedAt={room.updatedAt}
 			>
-				<div className="flex flex-wrap p-3 gap-1">
-					{/* Name */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="name"
-								initialText={room.name}
-								placeholder="Navn"
-								minSize={10}
-								required={true}
-								maxLength={20}
-								validations={[{
-									validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
-									message: 'Navn er allerede i brug'
-								}]}
-								editable={isEditing}
-								onChange={(value) => { handleFieldChange('name', value) }}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+				{/* Name */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							fieldName="name"
+							initialText={room.name}
+							placeholder="Navn"
+							minSize={10}
+							required={true}
+							maxLength={20}
+							validations={[{
+								validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
+								message: 'Navn er allerede i brug'
+							}]}
+							editable={isEditing}
+							onChange={(value) => { handleFieldChange('name', value) }}
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
+				</div>
 
-					{/* Description */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Beskrivelse'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="description"
-								initialText={room.description}
-								placeholder="Beskrivelse"
-								italic={true}
-								minSize={10}
-								required={true}
-								maxLength={20}
-								editable={isEditing}
-								onChange={(value) => { handleFieldChange('description', value) }}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
+				{/* Description */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Beskrivelse'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							fieldName="description"
+							initialText={room.description}
+							placeholder="Beskrivelse"
+							italic={true}
+							minSize={10}
+							required={true}
+							maxLength={20}
+							editable={isEditing}
+							onChange={(value) => { handleFieldChange('description', value) }}
+							onValidationChange={handleValidationChange}
+						/>
 					</div>
+				</div>
 
-					{/* Activities */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{linkedActivities.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={linkedActivities}
-								editable={isEditing}
-								onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
-								onShowItems={() => { setShowActivities(true) }}
-							/>
-						</div>
+				{/* Activities */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{linkedActivities.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={linkedActivities}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
+							onShowItems={() => { setShowActivities(true) }}
+						/>
 					</div>
 				</div>
 			</EntityCard>

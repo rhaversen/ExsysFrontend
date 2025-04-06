@@ -51,49 +51,47 @@ const Admin = ({
 				createdAt={admin.createdAt}
 				updatedAt={admin.updatedAt}
 			>
-				<div className="flex flex-wrap p-3 gap-1">
-					{/* Username */}
+				{/* Username */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Brugernavn'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							fieldName="name"
+							initialText={admin.name}
+							placeholder="Navn"
+							minSize={10}
+							required={true}
+							maxLength={50}
+							validations={[{
+								validate: (v: string) => !admins.some((a) => a.name === v && a._id !== newAdmin._id),
+								message: 'Navn er allerede i brug'
+							}]}
+							editable={isEditing}
+							onChange={(value) => { handleFieldChange('name', value) }}
+							onValidationChange={handleValidationChange}
+						/>
+					</div>
+				</div>
+
+				{/* Password */}
+				{isEditing && (
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Brugernavn'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Nyt Kodeord'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableField
-								fieldName="name"
-								initialText={admin.name}
-								placeholder="Navn"
+								fieldName="password"
+								initialText={newPassword}
+								placeholder="Nyt Kodeord"
 								minSize={10}
-								required={true}
-								maxLength={50}
-								validations={[{
-									validate: (v: string) => !admins.some((a) => a.name === v && a._id !== newAdmin._id),
-									message: 'Navn er allerede i brug'
-								}]}
+								minLength={4}
+								maxLength={100}
 								editable={isEditing}
-								onChange={(value) => { handleFieldChange('name', value) }}
+								onChange={setNewPassword}
 								onValidationChange={handleValidationChange}
 							/>
 						</div>
 					</div>
-
-					{/* Password */}
-					{isEditing && (
-						<div className="flex flex-col items-center p-1 flex-1">
-							<div className="text-xs font-medium text-gray-500 mb-1">{'Nyt Kodeord'}</div>
-							<div className="text-gray-800 flex items-center justify-center text-sm">
-								<EditableField
-									fieldName="password"
-									initialText={newPassword}
-									placeholder="Nyt Kodeord"
-									minSize={10}
-									minLength={4}
-									maxLength={100}
-									editable={isEditing}
-									onChange={setNewPassword}
-									onValidationChange={handleValidationChange}
-								/>
-							</div>
-						</div>
-					)}
-				</div>
+				)}
 			</EntityCard>
 
 			{showDeleteConfirmation && (
