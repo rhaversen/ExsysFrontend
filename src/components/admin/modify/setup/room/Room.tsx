@@ -160,9 +160,9 @@ const Room = ({
 					</div>
 				</div>
 
-				{/* Activities */}
+				{/* Fremhævende Activities */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{linkedActivities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -206,7 +206,7 @@ const Room = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj aktiviteter til ${newRoom.name}`}
+					title={`Tilføj Fremhævende Aktiviteter til ${newRoom.name}`}
 					items={activities}
 					selectedItems={linkedActivities}
 					onAddItem={(v) => { handleActivityChange([...linkedActivities, v]) }}
@@ -217,7 +217,7 @@ const Room = ({
 
 			{showDisabledActivities && (
 				<SelectionWindow
-					title={`Tilføj deaktiverede aktiviteter til ${newRoom.name}`}
+					title={`Tilføj Deaktiverede Aktiviteter til ${newRoom.name}`}
 					items={activities}
 					selectedItems={disabledActivities}
 					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}

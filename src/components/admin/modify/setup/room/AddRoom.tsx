@@ -165,9 +165,9 @@ const AddRoom = ({
 						</div>
 					</div>
 
-					{/* 3. Aktiviteter */}
+					{/* 3. Fremhævende Aktiviteter */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{selectedActivities.length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -223,7 +223,7 @@ const AddRoom = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
+					title={`Tilføj Fremhævende Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
 					items={activities}
 					selectedItems={selectedActivities}
 					onAddItem={handleAddActivity}

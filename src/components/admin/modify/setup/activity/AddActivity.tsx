@@ -203,9 +203,9 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 2. Spisesteder */}
+					{/* 2. Fremhævede Spisesteder */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{(activity.rooms ?? []).length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -251,9 +251,9 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 5. Kiosker */}
+					{/* 5. Fremhævende Kiosker */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Kiosker'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{selectedKiosks.length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -309,7 +309,7 @@ const AddActivity = ({
 
 			{showRooms && (
 				<SelectionWindow
-					title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					title={`Tilføj Fremhævede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
 					items={rooms}
 					selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
 					onAddItem={handleAddRoom}
@@ -342,7 +342,7 @@ const AddActivity = ({
 
 			{showKiosks && (
 				<SelectionWindow
-					title={`Tilføj Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					title={`Tilføj Fremhævende Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
 					items={kiosks}
 					selectedItems={selectedKiosks}
 					onAddItem={handleAddKiosk}
