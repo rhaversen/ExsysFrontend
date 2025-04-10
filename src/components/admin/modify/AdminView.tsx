@@ -148,7 +148,7 @@ const AdminView = ({
 						<div className="flex flex-wrap justify-between items-center">
 							<button
 								type="button"
-								title={showAddForm ? `Skjul ${selectedView}` : 'Tilføj'}
+								title={showAddForm ? 'Skjul ny' : 'Tilføj ny'}
 								className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-md"
 								onClick={toggleAdd}
 							>
@@ -156,7 +156,7 @@ const AdminView = ({
 									? <FaMinus className="h-4 w-4" />
 									: <FaPlus className="h-4 w-4" />
 								}
-								<span className="ml-2">{showAddForm ? 'Skjul' : 'Tilføj'}</span>
+								<span className="ml-2">{showAddForm ? 'Skjul ny' : 'Tilføj ny'}</span>
 							</button>
 							{isEnabled && (
 								<SortingControl
