@@ -76,17 +76,19 @@ const AddActivity = ({
 				const activityId = response._id
 				try {
 					// Update each selected kiosk to include the new activity
-					await Promise.all(selectedKiosks.map(kiosk =>
-						updateKioskAsync(kiosk._id, {
+					await Promise.all(selectedKiosks.map(async kiosk => {
+						await updateKioskAsync(kiosk._id, {
 							activities: [...kiosk.activities.map(a => a._id), activityId]
 						})
+					}
 					))
 
 					// Update each disabled kiosk to include the activity in disabledActivities
-					await Promise.all(disabledKiosks.map(kiosk =>
-						updateKioskAsync(kiosk._id, {
+					await Promise.all(disabledKiosks.map(async kiosk => {
+						await updateKioskAsync(kiosk._id, {
 							disabledActivities: [...kiosk.disabledActivities, activityId]
 						})
+					}
 					))
 
 					onClose()
