@@ -71,11 +71,6 @@ const AdminView = ({
 		setShowAddForm(false)
 	}, [selectedView])
 
-	// Reset internal selectedView when parent's views prop changes
-	useEffect(() => {
-		setSelectedView(null)
-	}, [views])
-
 	const toggleAdd = (): void => {
 		setShowAddForm(!showAddForm)
 	}
