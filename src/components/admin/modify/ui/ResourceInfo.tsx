@@ -41,7 +41,7 @@ const info: Record<string, string[]> = {
 	Produkter: [
 		'Primære bestillingsmuligheder, der vises efter valg af aktivitet og spisested.',
 		'Kan have tilvalg knyttet til sig, som vises når produktet vælges.',
-		'Bestillingsvinduet styrer, hvornår produkter er til salg. Kiosken går i dvale, når ingen produkter er tilgængelige.',		''
+		'Bestillingsvinduet styrer, hvornår produkter er til salg. Kiosken går i dvale, når ingen produkter er tilgængelige.'
 	],
 	Tilvalg: [
 		'Sekundære bestillingsmuligheder, der vises efter produktvalg.',
@@ -116,7 +116,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 						const isLast = index === details.length - 1
 						const firstStyle = 'sm:pr-4'
 						const middleStyle = 'pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l sm:border-gray-300 sm:px-4'
-						const lastStyle = 'pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-gray-300 sm:pl-4'
+						const lastStyle = 'pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l sm:border-gray-300 sm:pl-4'
 
 						const pointStyle = isFirst
 							? firstStyle
@@ -137,19 +137,17 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 			)}
 
 			{/* Props and messages section */}
-			{props.length > 0 && (
-				<div className="flex flex-col justify-evenly gap-0 sm:flex-row sm:gap-1 text-gray-700">
-					{props.map((prop, index) => (
-						<div
-							key={index}
-							className="flex flex-col p-2"
-						>
-							<span className="font-semibold text-gray-800">{prop.name}</span>
-							<span>{prop.message}</span>
-						</div>
-					))}
-				</div>
-			)}
+			<div className="flex flex-col justify-evenly gap-0 sm:flex-row sm:flex-wrap sm:gap-1 text-gray-700">
+				{props.map((prop, index) => (
+					<div
+						key={index}
+						className="flex flex-col p-2 flex-1"
+					>
+						<span className="font-semibold text-gray-800">{prop.name}</span>
+						<span className="whitespace-normal">{prop.message}</span>
+					</div>
+				))}
+			</div>
 		</div>
 	)
 }
