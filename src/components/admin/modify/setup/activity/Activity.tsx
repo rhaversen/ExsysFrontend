@@ -165,7 +165,7 @@ const Activity = ({
 
 				{/* 2. Spisesteder */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{newActivity.rooms.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -211,9 +211,9 @@ const Activity = ({
 					</div>
 				</div>
 
-				{/* 5. Kiosker */}
+				{/* 5. Fremhævende Kiosker */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Kiosker'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{linkedKiosks.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -259,7 +259,7 @@ const Activity = ({
 			}
 			{showRooms &&
 				<SelectionWindow
-					title={`Tilføj Spisesteder til ${newActivity.name}`}
+					title={`Tilføj Fremhævede Spisesteder til ${newActivity.name}`}
 					items={rooms}
 					selectedItems={newActivity.rooms}
 					onAddItem={(v) => { handleFieldChange('rooms', [...newActivity.rooms, { ...v, _id: v._id }]) }}
@@ -295,7 +295,7 @@ const Activity = ({
 			}
 			{showKiosks &&
 				<SelectionWindow
-					title={`Tilføj Kiosker til ${newActivity.name}`}
+					title={`Tilføj Fremhævende Kiosker til ${newActivity.name}`}
 					items={kiosks}
 					selectedItems={linkedKiosks}
 					onAddItem={(v) => { handleKioskChange([...linkedKiosks, v]) }}

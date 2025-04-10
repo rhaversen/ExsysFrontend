@@ -11,9 +11,9 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 	isEnabled: boolean
 } {
 	// Default field is first field of first category in sortConfig
-	const defaultField = sortConfig[Object.keys(sortConfig)[0] as keyof typeof sortConfig][0].prop
-	const [sortField, setSortField] = useState(defaultField)
-	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+	// const defaultField = sortConfig[Object.keys(sortConfig)[0] as keyof typeof sortConfig][0].prop
+	const [sortField, setSortField] = useState('updatedAt')
+	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
 	// If no type provided, return inactive sorting state
 	if (type === null) {
