@@ -1,13 +1,13 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
 import EditableDropdown from '../../ui/EditableDropdown'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
 const AddKiosk = ({
 	kiosks,
@@ -116,142 +116,188 @@ const AddKiosk = ({
 		})
 	}, [kiosk])
 
-	const handleCancelPost = useCallback((): void => {
+	const handleCancel = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
-	const handleCompletePost = useCallback((): void => {
+	const handleAdd = useCallback((): void => {
+		if (!formIsValid) return
 		postKiosk(kiosk)
-	}, [postKiosk, kiosk])
+	}, [postKiosk, kiosk, formIsValid])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showActivities && !showDisabledActivities}>
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kiosk'}</p>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName="name"
-							placeholder="Navn"
-							minSize={10}
-							required={true}
-							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.name === v),
-								message: 'Navn er allerede i brug'
-							}]}
-							onChange={handleNameChange}
-							maxLength={50}
-							onValidationChange={handleValidationChange}
-						/>
+		<>
+			<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+				<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+					<span className="font-medium text-blue-700">{'Ny Kiosk'}</span>
+				</div>
+				<div className="flex flex-wrap">
+					{/* 1. Navn */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="name"
+								placeholder="Navn"
+								minSize={10}
+								required={true}
+								validations={[{
+									validate: (v: string) => !kiosks.some((k) => k.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
+								onChange={handleNameChange}
+								maxLength={50}
+								onValidationChange={handleValidationChange}
+								editable={true}
+								initialText=""
+							/>
+						</div>
 					</div>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName="password"
-							placeholder="Password"
-							minSize={10}
-							required={true}
-							onChange={handlePasswordChange}
-							minLength={4}
-							maxLength={100}
-							onValidationChange={handleValidationChange}
-						/>
+
+					{/* 2. Password */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Password'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="password"
+								placeholder="Password"
+								minSize={10}
+								required={true}
+								onChange={handlePasswordChange}
+								minLength={4}
+								maxLength={100}
+								onValidationChange={handleValidationChange}
+								editable={true}
+								initialText=""
+							/>
+						</div>
 					</div>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName="tag"
-							placeholder="Tag (Automatisk)"
-							minSize={15}
-							onChange={handleKioskTagChange}
-							minLength={5}
-							maxLength={5}
-							validations={[{
-								validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
-								message: 'Kortlæser # er allerede i brug'
-							}]}
-							type="number"
-							onValidationChange={handleValidationChange}
-						/>
+
+					{/* 3. Kiosk Tag */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Tag'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="tag"
+								placeholder="Tag (Automatisk)"
+								minSize={15}
+								onChange={handleKioskTagChange}
+								minLength={5}
+								maxLength={5}
+								validations={[{
+									validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
+									message: 'Kiosk # er allerede i brug'
+								}]}
+								type="number"
+								onValidationChange={handleValidationChange}
+								editable={true}
+								initialText=""
+							/>
+						</div>
 					</div>
-					<p className="italic text-gray-500">{'Kortlæser'}</p>
-					<EditableDropdown
-						options={
-							readers.filter((reader) =>
-								// Include reader if NOT assigned to any kiosk
-								!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id)
-							).map((reader) => ({
-								value: reader._id,
-								label: reader.readerTag
-							}))
-						}
-						initialValue={kiosk.readerId ?? 'null-option'}
-						onChange={handleReaderIdChange}
-						fieldName="readerId"
-						placeholder="Vælg Kortlæser"
-						allowNullOption={true}
-						onValidationChange={handleValidationChange}
-					/>
-					{kiosk.activities.length > 0 &&
-						<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
-					}
-					{kiosk.activities.length === 0 &&
-						<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
-					}
-					<ItemsDisplay
-						items={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-						onDeleteItem={handleDeleteActivity}
-						onShowItems={() => {
-							setShowActivities(true)
-						}}
-					/>
 
-					{kiosk.disabledActivities.length > 0 &&
-						<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
-					}
-					{kiosk.disabledActivities.length === 0 &&
-						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
-					}
-					<ItemsDisplay
-						items={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
-						onDeleteItem={handleDeleteDisabledActivity}
-						onShowItems={() => {
-							setShowDisabledActivities(true)
-						}}
-					/>
+					{/* 4. Kortlæser */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableDropdown
+								options={
+									readers.filter((reader) =>
+										// Include reader if NOT assigned to any kiosk
+										!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id)
+									).map((reader) => ({
+										value: reader._id,
+										label: reader.readerTag
+									}))
+								}
+								initialValue={kiosk.readerId ?? 'null-option'}
+								onChange={handleReaderIdChange}
+								fieldName="readerId"
+								placeholder="Vælg Kortlæser"
+								allowNullOption={true}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
+					</div>
 
-					{showActivities &&
-						<SelectionWindow
-							title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-							items={activities}
-							selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
-							onAddItem={handleAddActivity}
-							onDeleteItem={handleDeleteActivity}
-							onClose={() => {
-								setShowActivities(false)
-							}}
-						/>
-					}
+					{/* 5. Aktiviteter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{kiosk.activities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={activities.filter((activity) => kiosk.activities.includes(activity._id))}
+								editable={true}
+								onDeleteItem={handleDeleteActivity}
+								onShowItems={() => { setShowActivities(true) }}
+							/>
+						</div>
+					</div>
 
-					{showDisabledActivities &&
-						<SelectionWindow
-							title={`Tilføj deaktiverede aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-							items={activities}
-							selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
-							onAddItem={handleAddDisabledActivity}
-							onDeleteItem={handleDeleteDisabledActivity}
-							onClose={() => {
-								setShowDisabledActivities(false)
-							}}
-						/>
-					}
+					{/* 6. Deaktiverede Aktiviteter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{kiosk.disabledActivities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledActivity}
+								onShowItems={() => { setShowDisabledActivities(true) }}
+							/>
+						</div>
+					</div>
+				</div>
+				<div className="flex justify-end p-2 gap-2">
+					<button
+						onClick={handleCancel}
+						className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+						type="button"
+					>
+						{'Annuller\r'}
+					</button>
+					<button
+						onClick={handleAdd}
+						disabled={!formIsValid}
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${
+							formIsValid
+								? 'bg-blue-600 hover:bg-blue-700 text-white'
+								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						}`}
+						type="button"
+					>
+						<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+						{'Opret\r'}
+					</button>
 				</div>
 			</div>
-			<CompletePostControls
-				canClose={!showActivities && !showDisabledActivities}
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
-		</CloseableModal>
+
+			{showActivities && (
+				<SelectionWindow
+					title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities}
+					selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
+					onAddItem={handleAddActivity}
+					onDeleteItem={handleDeleteActivity}
+					onClose={() => { setShowActivities(false) }}
+				/>
+			)}
+
+			{showDisabledActivities && (
+				<SelectionWindow
+					title={`Tilføj deaktiverede aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities}
+					selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
+					onAddItem={handleAddDisabledActivity}
+					onDeleteItem={handleDeleteDisabledActivity}
+					onClose={() => { setShowDisabledActivities(false) }}
+				/>
+			)}
+		</>
 	)
 }
 

@@ -1,13 +1,12 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type RoomType, type KioskType, type ActivityType, type PostActivityType, type ProductType, type PatchKioskType } from '@/types/backendDataTypes'
-import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import useCUDOperations from '@/hooks/useCUDOperations'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
 const AddActivity = ({
 	rooms,
@@ -59,9 +58,22 @@ const AddActivity = ({
 	}, [])
 
 	const postActivity = useCallback((activity: PostActivityType): void => {
-		axios.post(API_URL + '/v1/activities', activity, { withCredentials: true })
+		fetch(`${API_URL}/v1/activities`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify(activity)
+		})
+			.then(async response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`)
+				}
+				return await response.json()
+			})
 			.then(async (response) => {
-				const activityId = response.data._id
+				const activityId = response._id
 				try {
 					// Update each selected kiosk to include the new activity
 					for (const kiosk of selectedKiosks) {
@@ -151,157 +163,203 @@ const AddActivity = ({
 		setDisabledKiosks(prev => prev.filter(k => k._id !== kiosk._id))
 	}, [])
 
-	const handleCancelPost = useCallback((): void => {
+	const handleCancel = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
-	const handleCompletePost = useCallback((): void => {
+	const handleAdd = useCallback((): void => {
+		if (!formIsValid) return
 		postActivity(activity)
-	}, [postActivity, activity])
+	}, [activity, postActivity, formIsValid])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts && !showDisabledKiosks}>
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName="name"
-							placeholder="Navn"
-							minSize={10}
-							required={true}
-							validations={[{
-								validate: (v: string) => !activities.some((a) => a.name === v),
-								message: 'Navn er allerede i brug'
-							}]}
-							onChange={handleNameChange}
-							maxLength={50}
-							onValidationChange={handleValidationChange}
-						/>
+		<>
+			<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+				<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+					<span className="font-medium text-blue-700">{'Ny Aktivitet'}</span>
+				</div>
+				<div className="flex flex-wrap">
+					{/* 1. Navn */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="name"
+								placeholder="Navn"
+								minSize={10}
+								required={true}
+								validations={[{
+									validate: (v: string) => !activities.some((a) => a.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
+								onChange={handleNameChange}
+								maxLength={50}
+								onValidationChange={handleValidationChange}
+								editable={true}
+								initialText=""
+							/>
+						</div>
 					</div>
-					{(activity.rooms ?? []).length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Spisesteder:'}</p>
-					)}
-					{(activity.rooms ?? []).length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Spisesteder:'}</p>
-					)}
-					<ItemsDisplay
-						items={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
-						onDeleteItem={handleDeleteRoom}
-						onShowItems={() => { setShowRooms(true) }}
-					/>
 
-					{(activity.disabledRooms ?? []).length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Deaktiverede Spisesteder:'}</p>
-					)}
-					{(activity.disabledRooms ?? []).length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Spisesteder:'}</p>
-					)}
-					<ItemsDisplay
-						items={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
-						onDeleteItem={handleDeleteDisabledRoom}
-						onShowItems={() => { setShowDisabledRooms(true) }}
-					/>
+					{/* 2. Spisesteder */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{(activity.rooms ?? []).length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+								editable={true}
+								onDeleteItem={handleDeleteRoom}
+								onShowItems={() => { setShowRooms(true) }}
+							/>
+						</div>
+					</div>
 
-					{(activity.disabledProducts ?? []).length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Deaktiverede Produkter:'}</p>
-					)}
-					{(activity.disabledProducts ?? []).length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Produkter:'}</p>
-					)}
-					<ItemsDisplay
-						items={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
-						onDeleteItem={handleDeleteDisabledProduct}
-						onShowItems={() => { setShowDisabledProducts(true) }}
-					/>
+					{/* 3. Deaktiverede Spisesteder */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{(activity.disabledRooms ?? []).length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledRoom}
+								onShowItems={() => { setShowDisabledRooms(true) }}
+							/>
+						</div>
+					</div>
 
-					{selectedKiosks.length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Kiosker:'}</p>
-					)}
-					{selectedKiosks.length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Kiosker:'}</p>
-					)}
-					<ItemsDisplay
-						items={selectedKiosks}
-						onDeleteItem={handleDeleteKiosk}
-						onShowItems={() => { setShowKiosks(true) }}
-					/>
+					{/* 4. Deaktiverede produkter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{(activity.disabledProducts ?? []).length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledProduct}
+								onShowItems={() => { setShowDisabledProducts(true) }}
+							/>
+						</div>
+					</div>
 
-					{disabledKiosks.length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Deaktiverede Kiosker:'}</p>
-					)}
-					{disabledKiosks.length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Kiosker:'}</p>
-					)}
-					<ItemsDisplay
-						items={disabledKiosks}
-						onDeleteItem={handleDeleteDisabledKiosk}
-						onShowItems={() => { setShowDisabledKiosks(true) }}
-					/>
+					{/* 5. Kiosker */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{selectedKiosks.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={selectedKiosks}
+								editable={true}
+								onDeleteItem={handleDeleteKiosk}
+								onShowItems={() => { setShowKiosks(true) }}
+							/>
+						</div>
+					</div>
 
-					{showRooms && (
-						<SelectionWindow
-							title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-							items={rooms}
-							selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
-							onAddItem={handleAddRoom}
-							onDeleteItem={handleDeleteRoom}
-							onClose={() => { setShowRooms(false) }}
-						/>
-					)}
-
-					{showDisabledRooms && (
-						<SelectionWindow
-							title={`Tilføj Deaktiverede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-							items={rooms}
-							selectedItems={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
-							onAddItem={handleAddDisabledRoom}
-							onDeleteItem={handleDeleteDisabledRoom}
-							onClose={() => { setShowDisabledRooms(false) }}
-						/>
-					)}
-
-					{showDisabledProducts && (
-						<SelectionWindow
-							title={`Tilføj Deaktiverede Produkter til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-							items={products}
-							selectedItems={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
-							onAddItem={handleAddDisabledProduct}
-							onDeleteItem={handleDeleteDisabledProduct}
-							onClose={() => { setShowDisabledProducts(false) }}
-						/>
-					)}
-
-					{showKiosks && (
-						<SelectionWindow
-							title={`Tilføj Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-							items={kiosks}
-							selectedItems={selectedKiosks}
-							onAddItem={handleAddKiosk}
-							onDeleteItem={handleDeleteKiosk}
-							onClose={() => { setShowKiosks(false) }}
-						/>
-					)}
-
-					{showDisabledKiosks && (
-						<SelectionWindow
-							title={`Tilføj Deaktiverede Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-							items={kiosks}
-							selectedItems={disabledKiosks}
-							onAddItem={handleAddDisabledKiosk}
-							onDeleteItem={handleDeleteDisabledKiosk}
-							onClose={() => { setShowDisabledKiosks(false) }}
-						/>
-					)}
+					{/* 6. Deaktiverede Kiosker */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Kiosker'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{disabledKiosks.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={disabledKiosks}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledKiosk}
+								onShowItems={() => { setShowDisabledKiosks(true) }}
+							/>
+						</div>
+					</div>
+				</div>
+				<div className="flex justify-end p-2 gap-2">
+					<button
+						onClick={handleCancel}
+						className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+						type="button"
+					>
+						{'Annuller\r'}
+					</button>
+					<button
+						onClick={handleAdd}
+						disabled={!formIsValid}
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${
+							formIsValid
+								? 'bg-blue-600 hover:bg-blue-700 text-white'
+								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						}`}
+						type="button"
+					>
+						<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+						{'Opret\r'}
+					</button>
 				</div>
 			</div>
-			<CompletePostControls
-				canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts && !showDisabledKiosks}
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
-		</CloseableModal>
+
+			{showRooms && (
+				<SelectionWindow
+					title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={rooms}
+					selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+					onAddItem={handleAddRoom}
+					onDeleteItem={handleDeleteRoom}
+					onClose={() => { setShowRooms(false) }}
+				/>
+			)}
+
+			{showDisabledRooms && (
+				<SelectionWindow
+					title={`Tilføj Deaktiverede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={rooms}
+					selectedItems={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
+					onAddItem={handleAddDisabledRoom}
+					onDeleteItem={handleDeleteDisabledRoom}
+					onClose={() => { setShowDisabledRooms(false) }}
+				/>
+			)}
+
+			{showDisabledProducts && (
+				<SelectionWindow
+					title={`Tilføj Deaktiverede Produkter til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={products}
+					selectedItems={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
+					onAddItem={handleAddDisabledProduct}
+					onDeleteItem={handleDeleteDisabledProduct}
+					onClose={() => { setShowDisabledProducts(false) }}
+				/>
+			)}
+
+			{showKiosks && (
+				<SelectionWindow
+					title={`Tilføj Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={kiosks}
+					selectedItems={selectedKiosks}
+					onAddItem={handleAddKiosk}
+					onDeleteItem={handleDeleteKiosk}
+					onClose={() => { setShowKiosks(false) }}
+				/>
+			)}
+
+			{showDisabledKiosks && (
+				<SelectionWindow
+					title={`Tilføj Deaktiverede Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={kiosks}
+					selectedItems={disabledKiosks}
+					onAddItem={handleAddDisabledKiosk}
+					onDeleteItem={handleDeleteDisabledKiosk}
+					onClose={() => { setShowDisabledKiosks(false) }}
+				/>
+			)}
+		</>
 	)
 }
 

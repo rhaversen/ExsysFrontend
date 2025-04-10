@@ -20,8 +20,7 @@ import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import ResourceInfo from '@/components/admin/modify/ui/ResourceInfo'
 import useSorting from '@/hooks/useSorting'
 import type sortConfig from '@/lib/SortConfig'
-import { AdminImages } from '@/lib/images'
-import Image from 'next/image'
+import { FaPlus, FaMinus } from 'react-icons/fa'
 import {
 	type ProductType,
 	type ActivityType,
@@ -31,7 +30,7 @@ import {
 	type RoomType,
 	type OptionType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useState, useEffect } from 'react'
 
 type ViewType = 'Aktiviteter' | 'Spisesteder' | 'Kiosker' | 'Kortlæsere' | 'Admins' | 'Konfiguration' | 'Produkter' | 'Tilvalg'
 
@@ -55,13 +54,7 @@ const AdminView = ({
 	options: OptionType[]
 }): ReactElement => {
 	const [selectedView, setSelectedView] = useState<ViewType | null>(null)
-	const [showAddRoom, setShowAddRoom] = useState(false)
-	const [showAddActivity, setShowAddActivity] = useState(false)
-	const [showAddKiosk, setShowAddKiosk] = useState(false)
-	const [showAddAdmin, setShowAddAdmin] = useState(false)
-	const [showAddReader, setShowAddReader] = useState(false)
-	const [showAddOption, setShowAddOption] = useState(false)
-	const [showAddProduct, setShowAddProduct] = useState(false)
+	const [showAddForm, setShowAddForm] = useState(false)
 
 	const {
 		setSortField,
@@ -73,61 +66,65 @@ const AdminView = ({
 		isEnabled
 	} = useSorting(selectedView as keyof typeof sortConfig)
 
-	const handleAdd = (): void => {
-		switch (selectedView) {
-			case 'Spisesteder':
-				setShowAddRoom(true)
-				break
-			case 'Aktiviteter':
-				setShowAddActivity(true)
-				break
-			case 'Kiosker':
-				setShowAddKiosk(true)
-				break
-			case 'Admins':
-				setShowAddAdmin(true)
-				break
-			case 'Kortlæsere':
-				setShowAddReader(true)
-				break
-			case 'Produkter':
-				setShowAddProduct(true)
-				break
-			case 'Tilvalg':
-				setShowAddOption(true)
-				break
-		}
+	// Add useEffect to hide forms when view changes
+	useEffect(() => {
+		setShowAddForm(false)
+	}, [selectedView])
+
+	const toggleAdd = (): void => {
+		setShowAddForm(!showAddForm)
 	}
 
 	const renderContent = (): ReactElement => {
 		switch (selectedView) {
 			case 'Spisesteder':
 				return (
-					<div className="space-y-1">{sortByField(rooms).map((room) => <Room key={room._id} rooms={rooms} room={room} activities={activities} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddRoom rooms={rooms} activities={activities} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(rooms).map((room) => <Room key={room._id} rooms={rooms} room={room} activities={activities} />)}
+					</div>
 				)
 			case 'Aktiviteter':
 				return (
-					<div className="space-y-1">{sortByField(activities).map((activity) => <Activity key={activity._id} products={products} activity={activity} kiosks={kiosks} rooms={rooms} activities={activities} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddActivity products={products} rooms={rooms} kiosks={kiosks} activities={activities} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(activities).map((activity) => <Activity key={activity._id} products={products} activity={activity} kiosks={kiosks} rooms={rooms} activities={activities} />)}
+					</div>
 				)
 			case 'Kiosker':
 				return (
-					<div className="space-y-1">{sortByField(kiosks).map((kiosk) => <Kiosk key={kiosk._id} kiosks={kiosks} kiosk={kiosk} activities={activities} readers={readers} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddKiosk kiosks={kiosks} activities={activities} readers={readers} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(kiosks).map((kiosk) => <Kiosk key={kiosk._id} kiosks={kiosks} kiosk={kiosk} activities={activities} readers={readers} />)}
+					</div>
 				)
 			case 'Admins':
 				return (
-					<div className="space-y-1">{sortByField(admins).map((admin) => <Admin key={admin._id} admins={admins} admin={admin} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddAdmin admins={admins} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(admins).map((admin) => <Admin key={admin._id} admins={admins} admin={admin} />)}
+					</div>
 				)
 			case 'Kortlæsere':
 				return (
-					<div className="space-y-1">{sortByField(readers).map((reader) => <Reader key={reader._id} kiosks={kiosks} readers={readers} reader={reader} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddReader kiosks={kiosks} readers={readers} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(readers).map((reader) => <Reader key={reader._id} kiosks={kiosks} readers={readers} reader={reader} />)}
+					</div>
 				)
 			case 'Produkter':
 				return (
-					<div className="space-y-1">{sortByField(products).map((product: ProductType) => <Product key={product._id} product={product} products={products} options={options} activities={activities} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddProduct products={products} options={options} activities={activities} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(products).map((product: ProductType) => <Product key={product._id} product={product} products={products} options={options} activities={activities} />)}
+					</div>
 				)
 			case 'Tilvalg':
 				return (
-					<div className="space-y-1">{sortByField(options).map((option) => <Option key={option._id} products={products} option={option} options={options} />)}</div>
+					<div className="space-y-1">
+						{showAddForm && <AddOption products={products} options={options} onClose={() => { setShowAddForm(false) }} />}
+						{sortByField(options).map((option) => <Option key={option._id} products={products} option={option} options={options} />)}
+					</div>
 				)
 			case 'Konfiguration':
 				return <ConfigsView />
@@ -150,12 +147,15 @@ const AdminView = ({
 						<div className="flex flex-wrap justify-between items-center gap-2">
 							<button
 								type="button"
-								title="Tilføj"
+								title={showAddForm ? `Skjul ${selectedView}` : 'Tilføj'}
 								className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-md"
-								onClick={handleAdd}
+								onClick={toggleAdd}
 							>
-								<Image className="h-4 w-4" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
-								<span className="ml-2">{`Tilføj ${selectedView}`}</span>
+								{showAddForm
+									? <FaMinus className="h-4 w-4" />
+									: <FaPlus className="h-4 w-4" />
+								}
+								<span className="ml-2">{showAddForm ? `Skjul ${selectedView}` : `Tilføj ${selectedView}`}</span>
 							</button>
 							{isEnabled && (
 								<SortingControl
@@ -172,13 +172,6 @@ const AdminView = ({
 				)}
 				{renderContent()}
 			</div>
-			{showAddRoom && <AddRoom rooms={rooms} activities={activities} onClose={() => { setShowAddRoom(false) }} />}
-			{showAddActivity && <AddActivity products={products} rooms={rooms} kiosks={kiosks} activities={activities} onClose={() => { setShowAddActivity(false) }} />}
-			{showAddKiosk && <AddKiosk kiosks={kiosks} activities={activities} readers={readers} onClose={() => { setShowAddKiosk(false) }} />}
-			{showAddAdmin && <AddAdmin admins={admins} onClose={() => { setShowAddAdmin(false) }} />}
-			{showAddReader && <AddReader kiosks={kiosks} readers={readers} onClose={() => { setShowAddReader(false) }} />}
-			{showAddProduct && <AddProduct options={options} products={products} onClose={() => { setShowAddProduct(false) } } activities={activities} />}
-			{showAddOption && <AddOption products={products} options={options} onClose={() => { setShowAddOption(false) }} />}
 		</div>
 	)
 }

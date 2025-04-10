@@ -1,14 +1,14 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
-import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import SelectionWindow from '../../ui/SelectionWindow'
 import useCUDOperations from '@/hooks/useCUDOperations'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
-const Room = ({
+const AddRoom = ({
 	rooms,
 	activities,
 	onClose
@@ -106,79 +106,121 @@ const Room = ({
 		setDisabledActivities(prev => prev.filter(a => a._id !== activity._id))
 	}, [])
 
-	const handleCancelPost = useCallback((): void => {
+	const handleCancel = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
-	const handleCompletePost = useCallback((): void => {
+	const handleAdd = useCallback((): void => {
+		if (!formIsValid) return
 		postRoom(room).catch((error) => {
 			addError(error as Error)
 		})
-	}, [addError, postRoom, room])
+	}, [addError, postRoom, room, formIsValid])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showActivities && !showDisabledActivities}>
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Spisested'}</p>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							fieldName="name"
-							placeholder="Navn"
-							minSize={10}
-							required={true}
-							onChange={handleNameChange}
-							maxLength={50}
-							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name === v),
-								message: 'Navn er allerede i brug'
-							}]}
-							onValidationChange={handleValidationChange}
-						/>
+		<>
+			<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+				<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+					<span className="font-medium text-blue-700">{'Nyt Spisested'}</span>
+				</div>
+				<div className="flex flex-wrap">
+					{/* 1. Navn */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+						<div className="font-bold text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="name"
+								initialText=""
+								placeholder="Navn"
+								minSize={10}
+								required={true}
+								onChange={handleNameChange}
+								maxLength={50}
+								validations={[{
+									validate: (v: string) => !rooms.some((room) => room.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
+								editable={true}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
 					</div>
-					<div className="text-gray-800">
-						<EditableField
-							fieldName="description"
-							placeholder="Beskrivelse"
-							italic={true}
-							minSize={10}
-							required={true}
-							onChange={handleDescriptionChange}
-							maxLength={50}
-							onValidationChange={handleValidationChange}
-						/>
-					</div>
-					{selectedActivities.length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Aktiviteter:'}</p>
-					)}
-					{selectedActivities.length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Aktiviteter:'}</p>
-					)}
-					<ItemsDisplay
-						items={selectedActivities}
-						onDeleteItem={handleDeleteActivity}
-						onShowItems={() => { setShowActivities(true) }}
-					/>
 
-					{disabledActivities.length > 0 && (
-						<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
-					)}
-					{disabledActivities.length === 0 && (
-						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
-					)}
-					<ItemsDisplay
-						items={disabledActivities}
-						onDeleteItem={handleDeleteDisabledActivity}
-						onShowItems={() => { setShowDisabledActivities(true) }}
-					/>
+					{/* 2. Beskrivelse */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Beskrivelse'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="description"
+								initialText=""
+								placeholder="Beskrivelse"
+								italic={true}
+								minSize={10}
+								required={true}
+								onChange={handleDescriptionChange}
+								maxLength={50}
+								editable={true}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
+					</div>
+
+					{/* 3. Aktiviteter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{selectedActivities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={selectedActivities}
+								editable={true}
+								onDeleteItem={handleDeleteActivity}
+								onShowItems={() => { setShowActivities(true) }}
+							/>
+						</div>
+					</div>
+
+					{/* 4. Deaktiverede aktiviteter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{disabledActivities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={disabledActivities}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledActivity}
+								onShowItems={() => { setShowDisabledActivities(true) }}
+							/>
+						</div>
+					</div>
+				</div>
+				<div className="flex justify-end p-2 gap-2">
+					<button
+						onClick={handleCancel}
+						className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+						type="button"
+					>
+						{'Annuller\r'}
+					</button>
+					<button
+						onClick={handleAdd}
+						disabled={!formIsValid}
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${
+							formIsValid
+								? 'bg-blue-600 hover:bg-blue-700 text-white'
+								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						}`}
+						type="button"
+					>
+						<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+						{'Opret\r'}
+					</button>
 				</div>
 			</div>
-			<CompletePostControls
-				canClose={!showActivities && !showDisabledActivities}
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
+
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
@@ -200,8 +242,8 @@ const Room = ({
 					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
-		</CloseableModal>
+		</>
 	)
 }
 
-export default Room
+export default AddRoom
