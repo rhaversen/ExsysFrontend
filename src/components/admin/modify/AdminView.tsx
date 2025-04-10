@@ -143,8 +143,9 @@ const AdminView = ({
 			/>
 			<div className="w-full px-4 py-2">
 				{selectedView !== null && selectedView !== 'Konfiguration' && (
-					<div className="mb-4 space-y-4">
-						<div className="flex flex-wrap justify-between items-center gap-2">
+					<div className="mb-2 space-y-1">
+						<ResourceInfo viewName={selectedView} />
+						<div className="flex flex-wrap justify-between items-center">
 							<button
 								type="button"
 								title={showAddForm ? `Skjul ${selectedView}` : 'Tilføj'}
@@ -155,7 +156,7 @@ const AdminView = ({
 									? <FaMinus className="h-4 w-4" />
 									: <FaPlus className="h-4 w-4" />
 								}
-								<span className="ml-2">{showAddForm ? `Skjul ${selectedView}` : `Tilføj ${selectedView}`}</span>
+								<span className="ml-2">{showAddForm ? 'Skjul' : 'Tilføj'}</span>
 							</button>
 							{isEnabled && (
 								<SortingControl
@@ -167,7 +168,6 @@ const AdminView = ({
 								/>
 							)}
 						</div>
-						<ResourceInfo viewName={selectedView} />
 					</div>
 				)}
 				{renderContent()}
