@@ -98,13 +98,13 @@ const AddAdmin = ({
 					</div>
 				</div>
 
-				{/* 2. Kodeord */}
+				{/* 2. Adgangskode */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kodeord'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="password"
-							placeholder="Kodeord"
+							placeholder="Adgangskode"
 							minSize={10}
 							required={true}
 							onChange={handlePasswordChange}

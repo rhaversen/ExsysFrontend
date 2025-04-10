@@ -103,7 +103,22 @@ const AddProduct = ({
 					<span className="font-medium text-blue-700">{'Nyt produkt'}</span>
 				</div>
 				<div className="flex flex-wrap">
-					{/* 1. Billede */}
+					{/* 1. Aktiv */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiv'}</div>
+						<div className="flex items-center justify-center">
+							<input
+								title="Aktiv"
+								type="checkbox"
+								checked={newProduct.isActive}
+								onChange={(e) => { handleFieldChange('isActive', e.target.checked) }}
+								className="w-4 h-4"
+							/>
+							<label className="pl-1 text-gray-800">{'Aktiv'}</label>
+						</div>
+					</div>
+
+					{/* 2. Billede */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Billede'}</div>
 						<div className="flex items-center justify-center">
@@ -116,7 +131,7 @@ const AddProduct = ({
 						</div>
 					</div>
 
-					{/* 2. Navn */}
+					{/* 3. Navn */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
@@ -138,7 +153,7 @@ const AddProduct = ({
 						</div>
 					</div>
 
-					{/* 3. Pris */}
+					{/* 4. Pris */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Pris'}</div>
 						<div className="flex items-center justify-center text-gray-800 text-sm">
@@ -154,21 +169,6 @@ const AddProduct = ({
 								onValidationChange={handleValidationChange}
 							/>
 							<div className="pl-1">{'kr'}</div>
-						</div>
-					</div>
-
-					{/* 4. Aktiv */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiv'}</div>
-						<div className="flex items-center justify-center">
-							<input
-								title="Aktiv"
-								type="checkbox"
-								checked={newProduct.isActive}
-								onChange={(e) => { handleFieldChange('isActive', e.target.checked) }}
-								className="w-4 h-4"
-							/>
-							<label className="pl-1 text-gray-800">{'Aktiv'}</label>
 						</div>
 					</div>
 

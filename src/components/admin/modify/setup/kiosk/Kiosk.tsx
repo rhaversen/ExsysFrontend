@@ -72,7 +72,7 @@ const Kiosk = ({
 			>
 				{/* Kiosk Name */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kioskens Navn'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="name"
@@ -94,7 +94,7 @@ const Kiosk = ({
 
 				{/* Kiosk Tag */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosk # - Brugernavn til kiosk login'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosk #'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="kioskTag"
@@ -119,12 +119,12 @@ const Kiosk = ({
 				{/* Password */}
 				{isEditing && (
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Nyt Kodeord'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Ny Adgangskode'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableField
 								fieldName="password"
 								initialText={newPassword}
-								placeholder="Nyt Kodeord"
+								placeholder="Ny Adgangskode"
 								minSize={10}
 								minLength={4}
 								maxLength={100}
@@ -132,6 +132,14 @@ const Kiosk = ({
 								onChange={setNewPassword}
 								onValidationChange={handleValidationChange}
 							/>
+						</div>
+					</div>
+				)}
+				{!isEditing && (
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							{'******'}
 						</div>
 					</div>
 				)}

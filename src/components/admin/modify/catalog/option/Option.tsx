@@ -151,9 +151,9 @@ const Option = ({
 					</div>
 				</div>
 
-				{/* 4. Tilknyttede Produkter */}
+				{/* 4. Produkter */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttede Produkter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Produkter'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{linkedProducts.length === 0 && (
 							<div className="text-gray-500 text-sm">{isEditing ? 'Tilføj Produkter' : 'Ingen'}</div>
