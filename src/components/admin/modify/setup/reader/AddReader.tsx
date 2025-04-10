@@ -100,26 +100,7 @@ const AddReader = ({
 				<span className="font-medium text-blue-700">{'Ny Kortlæser'}</span>
 			</div>
 			<div className="flex flex-wrap">
-				{/* 1. Parring Kode */}
-				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Parring Kode'}</div>
-					<div className="text-gray-800 flex items-center justify-center text-sm">
-						<EditableField
-							upperCase={true}
-							fieldName="pairingCode"
-							placeholder="Parring Kode"
-							minSize={10}
-							required={true}
-							onChange={handlePairingCodeChange}
-							maxLength={10}
-							onValidationChange={handleValidationChange}
-							editable={true}
-							initialText=""
-						/>
-					</div>
-				</div>
-
-				{/* 2. Tag */}
+				{/* 1. Tag */}
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Tag'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
@@ -135,6 +116,25 @@ const AddReader = ({
 								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
+							onValidationChange={handleValidationChange}
+							editable={true}
+							initialText=""
+						/>
+					</div>
+				</div>
+
+				{/* 2. Parring Kode */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Parring Kode'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							upperCase={true}
+							fieldName="pairingCode"
+							placeholder="Parring Kode"
+							minSize={10}
+							required={true}
+							onChange={handlePairingCodeChange}
+							maxLength={10}
 							onValidationChange={handleValidationChange}
 							editable={true}
 							initialText=""
@@ -177,10 +177,9 @@ const AddReader = ({
 				<button
 					onClick={handleAdd}
 					disabled={!formIsValid}
-					className={`px-3 py-1 text-sm rounded-full flex items-center ${
-						formIsValid
-							? 'bg-blue-600 hover:bg-blue-700 text-white'
-							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+					className={`px-3 py-1 text-sm rounded-full flex items-center ${formIsValid
+						? 'bg-blue-600 hover:bg-blue-700 text-white'
+						: 'bg-gray-200 text-gray-400 cursor-not-allowed'
 					}`}
 					type="button"
 				>

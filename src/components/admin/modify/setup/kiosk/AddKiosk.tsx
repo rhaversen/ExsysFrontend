@@ -154,28 +154,9 @@ const AddKiosk = ({
 						</div>
 					</div>
 
-					{/* 2. Password */}
+					{/* 2. Kiosk Tag */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Password'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="password"
-								placeholder="Password"
-								minSize={10}
-								required={true}
-								onChange={handlePasswordChange}
-								minLength={4}
-								maxLength={100}
-								onValidationChange={handleValidationChange}
-								editable={true}
-								initialText=""
-							/>
-						</div>
-					</div>
-
-					{/* 3. Kiosk Tag */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Tag'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosk #'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableField
 								fieldName="tag"
@@ -196,9 +177,28 @@ const AddKiosk = ({
 						</div>
 					</div>
 
+					{/* 3. Password */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="password"
+								placeholder="Adgangskode"
+								minSize={10}
+								required={true}
+								onChange={handlePasswordChange}
+								minLength={4}
+								maxLength={100}
+								onValidationChange={handleValidationChange}
+								editable={true}
+								initialText=""
+							/>
+						</div>
+					</div>
+
 					{/* 4. Kortlæser */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser #'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableDropdown
 								options={
@@ -263,10 +263,9 @@ const AddKiosk = ({
 					<button
 						onClick={handleAdd}
 						disabled={!formIsValid}
-						className={`px-3 py-1 text-sm rounded-full flex items-center ${
-							formIsValid
-								? 'bg-blue-600 hover:bg-blue-700 text-white'
-								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${formIsValid
+							? 'bg-blue-600 hover:bg-blue-700 text-white'
+							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
 						}`}
 						type="button"
 					>
