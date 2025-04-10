@@ -1,8 +1,7 @@
 'use client'
 
-import CatalogView from '@/components/admin/modify/catalog/CatalogView'
+import AdminView from '@/components/admin/modify/AdminView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
-import SetupView from '@/components/admin/modify/setup/SetupView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
@@ -344,20 +343,16 @@ export default function Page (): ReactElement {
 			{selectedView === null &&
 				<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">{'Vælg en kategori'}</p>
 			}
-			{selectedView === 'Rediger Katalog' &&
-				<CatalogView
+			{(selectedView === 'Rediger Katalog' || selectedView === 'Rediger Opsætning') &&
+				<AdminView
+					products={products}
 					options={options}
-					products={products}
-				/>
-			}
-			{selectedView === 'Rediger Opsætning' &&
-				<SetupView
-					products={products}
 					activities={activities}
 					admins={admins}
 					kiosks={kiosks}
 					readers={readers}
 					rooms={rooms}
+					views={selectedView === 'Rediger Katalog' ? ['Produkter', 'Tilvalg'] : ['Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins', 'Konfiguration']}
 				/>
 			}
 			{selectedView === 'Login Sessioner' &&

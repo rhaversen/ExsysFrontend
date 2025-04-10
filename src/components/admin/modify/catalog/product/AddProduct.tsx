@@ -1,32 +1,37 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import useFormState from '@/hooks/useFormState'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type ProductType, type OptionType, type PostProductType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
-import InlineValidation from '../../ui/InlineValidation'
+import { type PatchProductType, type ActivityType, type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
+import React, { type ReactElement, useState } from 'react'
+import ItemsDisplay from '../../ui/ItemsDisplay'
 import SelectionWindow from '../../ui/SelectionWindow'
-import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import InlineValidation from '../../ui/InlineValidation'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
 const AddProduct = ({
-	options,
 	products,
+	options,
+	activities,
 	onClose
 }: {
 	products: ProductType[]
 	options: OptionType[]
+	activities: ActivityType[]
 	onClose: () => void
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 	const { addError } = useError()
+	const [showOptions, setShowOptions] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
+	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>([])
 
-	const [product, setProduct] = useState<PostProductType>({
+	const initialProduct: PostProductType = {
 		name: '',
 		price: 0,
+		isActive: true,
 		orderWindow: {
 			from: {
 				hour: 0,
@@ -38,278 +43,293 @@ const AddProduct = ({
 			}
 		},
 		options: []
-	})
-	const [showOptions, setShowOptions] = useState(false)
-	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
-	const [formIsValid, setFormIsValid] = useState(false)
+	}
 
-	// Update formIsValid when fieldValidations change
-	useEffect(() => {
-		const formIsValid = Object.values(fieldValidations).every((v) => v)
-		setFormIsValid(formIsValid)
-	}, [fieldValidations])
+	const {
+		formState: newProduct,
+		handleFieldChange,
+		handleValidationChange,
+		resetFormState,
+		formIsValid
+	} = useFormState(initialProduct, true)
 
-	const handleValidationChange = useCallback((fieldName: string, v: boolean): void => {
-		setFieldValidations((prev) => {
-			return {
-				...prev,
-				[fieldName]: v
-			}
-		})
-	}, [])
-
-	const postProduct = useCallback((product: PostProductType): void => {
-		// Convert order window to UTC with convertOrderWindowToUTC
-		const productUTC = {
+	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
+		return {
 			...product,
-			orderWindow: convertOrderWindowToUTC(product.orderWindow)
+			orderWindow: (product.orderWindow !== undefined) ? convertOrderWindowToUTC(product.orderWindow) : undefined
 		}
-		axios.post(API_URL + '/v1/products', productUTC, { withCredentials: true }).then((response) => {
-			onClose()
-		}).catch((error) => {
+	}
+
+	const { createEntityAsync: createProductAsync 	} = useCUDOperations<PostProductType, PatchProductType, ProductType>('/v1/products', preprocessOrderWindow)
+	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<ActivityType, any>('/v1/activities')
+
+	const handleCancel = (): void => {
+		resetFormState()
+		setDisabledActivities([])
+		onClose() // Close the modal when canceling
+	}
+
+	const handleAdd = (): void => {
+		if (!formIsValid) return
+
+		// First create the product
+		createProductAsync({
+			...newProduct,
+			options: newProduct.options
+		}).then(response => {
+			const productId = response._id
+
+			// Then update activities with disabled products if any
+			Promise.all(disabledActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					disabledProducts: [...activity.disabledProducts, productId]
+				})
+			})).then(() => {
+				resetFormState()
+				setDisabledActivities([])
+				onClose()
+			}).catch(error => {
+				addError(error)
+			})
+		}).catch(error => {
 			addError(error)
 		})
-	}, [API_URL, onClose, addError])
-
-	const handleNameChange = useCallback((v: string): void => {
-		setProduct({
-			...product,
-			name: v
-		})
-	}, [product])
-
-	const handlePriceChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9.]/g, '')
-		setProduct({
-			...product,
-			price: Number(v)
-		})
-	}, [product])
-
-	const handleImageChange = useCallback((v: string): void => {
-		setProduct({
-			...product,
-			imageURL: v
-		})
-	}, [product])
-
-	const handleOrderWindowFromMinuteChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setProduct({
-			...product,
-			orderWindow: {
-				...product.orderWindow,
-				from: {
-					...product.orderWindow.from,
-					minute: Number(v)
-				}
-			}
-		})
-	}, [product])
-
-	const handleOrderWindowFromHourChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setProduct({
-			...product,
-			orderWindow: {
-				...product.orderWindow,
-				from: {
-					...product.orderWindow.from,
-					hour: Number(v)
-				}
-			}
-		})
-	}, [product])
-
-	const handleOrderWindowToMinuteChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setProduct({
-			...product,
-			orderWindow: {
-				...product.orderWindow,
-				to: {
-					...product.orderWindow.to,
-					minute: Number(v)
-				}
-			}
-		})
-	}, [product])
-
-	const handleOrderWindowToHourChange = useCallback((v: string): void => {
-		v = v.replace(/[^0-9]/g, '')
-		setProduct({
-			...product,
-			orderWindow: {
-				...product.orderWindow,
-				to: {
-					...product.orderWindow.to,
-					hour: Number(v)
-				}
-			}
-		})
-	}, [product])
-
-	const handleAddOption = useCallback((v: OptionType): void => {
-		setProduct({
-			...product,
-			options: [...product.options, v._id]
-		})
-	}, [product])
-
-	const handleDeleteOption = useCallback((v: OptionType): void => {
-		setProduct({
-			...product,
-			options: product.options.filter((option) => option !== v._id)
-		})
-	}, [product])
-
-	const handleCancelPost = useCallback((): void => {
-		onClose()
-	}, [onClose])
-
-	const handleCompletePost = useCallback((): void => {
-		postProduct(product)
-	}, [product, postProduct])
+	}
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showOptions}>
-			<div className="flex flex-col items-center justify-center">
-				<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
-				<p className="italic text-gray-500">{'Navn og Pris:'}</p>
-				<div className="flex flex-row items-center gap-2 justify-center">
-					<div className="font-bold text-gray-800">
-						<EditableField
-							fieldName="name"
-							placeholder="Navn"
-							minSize={5}
-							required={true}
-							maxLength={15}
-							validations={[{
-								validate: (v: string) => !products.some((a) => a.name === v),
-								message: 'Navn er allerede i brug'
-							}]}
-							onChange={handleNameChange}
-							onValidationChange={handleValidationChange}
-						/>
+		<>
+			<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+				<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+					<span className="font-medium text-blue-700">{'Nyt produkt'}</span>
+				</div>
+				<div className="flex flex-wrap">
+					{/* 1. Aktiv */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiv'}</div>
+						<div className="flex items-center justify-center">
+							<input
+								title="Aktiv"
+								type="checkbox"
+								checked={newProduct.isActive}
+								onChange={(e) => { handleFieldChange('isActive', e.target.checked) }}
+								className="w-4 h-4"
+							/>
+							<label className="pl-1 text-gray-800">{'Aktiv'}</label>
+						</div>
 					</div>
-					<div className="flex flex-row italic items-center text-gray-800">
-						<EditableField
-							fieldName="price"
-							placeholder="Pris"
-							italic={true}
-							required={true}
-							minSize={2}
-							type="number"
-							onChange={handlePriceChange}
-							onValidationChange={handleValidationChange}
-						/>
-						<div className="pl-1">
-							{' kr'}
+
+					{/* 2. Billede */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Billede'}</div>
+						<div className="flex items-center justify-center">
+							<EditableImage
+								URL={newProduct.imageURL}
+								editable={true}
+								onChange={(value) => { handleFieldChange('imageURL', value) }}
+								className='w-12 h-12 object-contain'
+							/>
+						</div>
+					</div>
+
+					{/* 3. Navn */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="name"
+								initialText=""
+								placeholder="Navn"
+								minSize={5}
+								required={true}
+								maxLength={15}
+								editable={true}
+								validations={[{
+									validate: (v: string) => !products.some((a) => a.name === v),
+									message: 'Navn er allerede i brug'
+								}]}
+								onChange={(value) => { handleFieldChange('name', value) }}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
+					</div>
+
+					{/* 4. Pris */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Pris'}</div>
+						<div className="flex items-center justify-center text-gray-800 text-sm">
+							<EditableField
+								fieldName="price"
+								initialText="0"
+								placeholder="Pris"
+								minSize={1}
+								required={true}
+								type="number"
+								editable={true}
+								onChange={(value) => { handleFieldChange('price', value) }}
+								onValidationChange={handleValidationChange}
+							/>
+							<div className="pl-1">{'kr'}</div>
+						</div>
+					</div>
+
+					{/* 5. Bestillingsvindue */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Bestillingsvindue'}</div>
+						<div className="flex flex-col items-center justify-center text-sm">
+							<div className="flex items-center justify-center text-gray-800">
+								<span className="text-xs pr-1">{'Fra'}</span>
+								<EditableField
+									fieldName="fromHour"
+									initialText="00"
+									placeholder="Time"
+									required={true}
+									type="number"
+									maxValue={23}
+									maxLength={2}
+									editable={true}
+									onChange={(value) => { handleFieldChange('orderWindow.from.hour', value) }}
+									onValidationChange={handleValidationChange}
+								/>
+								{':\r'}
+								<EditableField
+									fieldName="fromMinute"
+									initialText="00"
+									placeholder="Minut"
+									required={true}
+									type="number"
+									maxValue={59}
+									maxLength={2}
+									editable={true}
+									onChange={(value) => { handleFieldChange('orderWindow.from.minute', value) }}
+									onValidationChange={handleValidationChange}
+								/>
+							</div>
+							<div className="flex items-center justify-center text-gray-800">
+								<span className="text-xs pr-1">{'Til'}</span>
+								<EditableField
+									fieldName="toHour"
+									initialText="00"
+									placeholder="Time"
+									required={true}
+									type="number"
+									maxValue={23}
+									maxLength={2}
+									editable={true}
+									onChange={(value) => { handleFieldChange('orderWindow.to.hour', value) }}
+									onValidationChange={handleValidationChange}
+								/>
+								{':\r'}
+								<EditableField
+									fieldName="toMinute"
+									initialText="00"
+									placeholder="Minut"
+									required={true}
+									type="number"
+									maxValue={59}
+									maxLength={2}
+									editable={true}
+									onChange={(value) => { handleFieldChange('orderWindow.to.minute', value) }}
+									onValidationChange={handleValidationChange}
+								/>
+							</div>
+							<InlineValidation
+								fieldName="orderWindow"
+								validations={[{
+									validate: () => {
+										const fromHour = Number(newProduct.orderWindow.from.hour)
+										const fromMinute = Number(newProduct.orderWindow.from.minute)
+										const toHour = Number(newProduct.orderWindow.to.hour)
+										const toMinute = Number(newProduct.orderWindow.to.minute)
+										if (isNaN(fromHour) || isNaN(fromMinute) || isNaN(toHour) || isNaN(toMinute)) {
+											return false
+										}
+										return fromHour !== toHour || fromMinute !== toMinute
+									},
+									message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
+								}]}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
+					</div>
+
+					{/* 6. Tilvalg */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Tilvalg'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{newProduct.options.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={options.filter(o => newProduct.options.includes(o._id))}
+								editable={true}
+								onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option !== v._id)) }}
+								onShowItems={() => { setShowOptions(true) }}
+							/>
+						</div>
+					</div>
+
+					{/* 7. Deaktiverede Aktiviteter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{disabledActivities.length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={disabledActivities}
+								editable={true}
+								onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+								onShowItems={() => { setShowDisabledActivities(true) }}
+							/>
 						</div>
 					</div>
 				</div>
-				<p className="italic text-gray-500 pt-2">{'Bestillingsvindue:'}</p>
-				<div className="flex flex-row text-gray-800">
-					<EditableField
-						fieldName="fromHour"
-						initialText={product.orderWindow.from.hour.toString()}
-						placeholder="Time"
-						required={true}
-						type="number"
-						maxValue={23}
-						maxLength={2}
-						onChange={handleOrderWindowFromHourChange}
-						onValidationChange={handleValidationChange}
-					/>
-					<div className="font-bold text-xl px-1">{':'}</div>
-					<EditableField
-						fieldName="fromMinute"
-						initialText={product.orderWindow.from.minute.toString()}
-						placeholder="Minut"
-						required={true}
-						type="number"
-						maxValue={59}
-						maxLength={2}
-						onChange={handleOrderWindowFromMinuteChange}
-						onValidationChange={handleValidationChange}
-					/>
-					<div className="text-xl px-1">{'—'}</div>
-					<EditableField
-						fieldName="toHour"
-						initialText={product.orderWindow.to.hour.toString()}
-						placeholder="Time"
-						required={true}
-						type="number"
-						maxValue={23}
-						maxLength={2}
-						onChange={handleOrderWindowToHourChange}
-						onValidationChange={handleValidationChange}
-					/>
-					<div className="font-bold text-xl px-1">{':'}</div>
-					<EditableField
-						fieldName="toMinute"
-						initialText={product.orderWindow.to.minute.toString()}
-						placeholder="Minut"
-						required={true}
-						type="number"
-						maxValue={59}
-						maxLength={2}
-						onChange={handleOrderWindowToMinuteChange}
-						onValidationChange={handleValidationChange}
-					/>
+				<div className="flex justify-end p-2 gap-2">
+					<button
+						onClick={handleCancel}
+						className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+						type="button"
+					>
+						{'Annuller\r'}
+					</button>
+					<button
+						onClick={handleAdd}
+						disabled={!formIsValid}
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${
+							formIsValid
+								? 'bg-blue-600 hover:bg-blue-700 text-white'
+								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						}`}
+						type="button"
+					>
+						<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+						{'Opret\r'}
+					</button>
 				</div>
-				<InlineValidation
-					fieldName="orderWindow"
-					validations={[
-						{
-							validate: () => {
-								const from = product.orderWindow.from
-								const to = product.orderWindow.to
-								return from.hour !== to.hour || from.minute !== to.minute
-							},
-							message: 'Bestillingsvinduet kan ikke starte samme tid som det slutter'
-						}
-					]}
-					onValidationChange={handleValidationChange}
-				/>
-				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
-				<EditableImage
-					URL={product.imageURL}
-					onChange={handleImageChange}
-				/>
-				{product.options.length > 0 &&
-					<p className="italic text-gray-500 pt-2">{'Tilvalg:'}</p>
-				}
-				{product.options.length === 0 &&
-					<p className="italic text-gray-500 pt-2">{'Tilføj Tilvalg:'}</p>
-				}
-				<ItemsDisplay
-					items={options.filter((option) => product.options.includes(option._id))}
-					onDeleteItem={handleDeleteOption}
-					onShowItems={() => {
-						setShowOptions(true)
-					}}
-				/>
-				{showOptions &&
-					<SelectionWindow
-						title={`Tilføj tilvalg til ${product.name === '' ? 'Nyt Produkt' : product.name}`}
-						items={options}
-						selectedItems={options.filter((option) => product.options.includes(option._id))}
-						onAddItem={handleAddOption}
-						onDeleteItem={handleDeleteOption}
-						onClose={() => {
-							setShowOptions(false)
-						}}
-					/>
-				}
 			</div>
-			<CompletePostControls
-				canClose={!showOptions}
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
-		</CloseableModal>
+
+			{showOptions && (
+				<SelectionWindow
+					title={`Tilføj tilvalg til ${(newProduct.name.length > 0) || 'Nyt produkt'}`}
+					items={options}
+					selectedItems={options.filter(option => newProduct.options.includes(option._id))}
+					onAddItem={(v) => { handleFieldChange('options', [...newProduct.options, v._id]) }}
+					onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((optionId) => optionId !== v._id)) }}
+					onClose={() => { setShowOptions(false) }}
+				/>
+			)}
+
+			{showDisabledActivities && (
+				<SelectionWindow
+					title={`Tilføj deaktiverede aktiviteter til ${(newProduct.name.length > 0) || 'Nyt produkt'}`}
+					items={activities}
+					selectedItems={disabledActivities}
+					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}
+					onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+					onClose={() => { setShowDisabledActivities(false) }}
+				/>
+			)}
+		</>
 	)
 }
 

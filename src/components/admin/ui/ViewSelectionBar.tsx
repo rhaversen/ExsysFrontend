@@ -1,15 +1,15 @@
 import React, { type ReactElement } from 'react'
 
-const ViewSelectionBar = ({
+const ViewSelectionBar = <T extends string>({
 	subLevel,
 	views,
 	selectedView,
 	setSelectedView
 }: {
 	subLevel: number
-	views: string[]
-	selectedView: string | null
-	setSelectedView: (view: string) => void
+	views: T[]
+	selectedView: T | null
+	setSelectedView: (view: T) => void
 }): ReactElement => {
 	// Define container styles for each sublevel
 	const containerStyles: Record<number, string> = {
