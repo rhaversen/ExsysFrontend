@@ -1,12 +1,12 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type AdminType, type PostAdminType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
-const Admin = ({
+const AddAdmin = ({
 	admins,
 	onClose
 }: {
@@ -61,20 +61,25 @@ const Admin = ({
 		})
 	}, [admin])
 
-	const handleCancelPost = useCallback((): void => {
+	const handleCancel = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
-	const handleCompletePost = useCallback((): void => {
+	const handleAdd = useCallback((): void => {
+		if (!formIsValid) return
 		postAdmin(admin)
-	}, [postAdmin, admin])
+	}, [postAdmin, admin, formIsValid])
 
 	return (
-		<CloseableModal onClose={onClose}>
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Admin'}</p>
-					<div className="font-bold p-2 text-gray-800">
+		<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+			<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+				<span className="font-medium text-blue-700">{'Ny Admin'}</span>
+			</div>
+			<div className="flex flex-wrap">
+				{/* 1. Navn */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Navn'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="name"
 							placeholder="Navn"
@@ -86,30 +91,56 @@ const Admin = ({
 								validate: (v: string) => !admins.some((a) => a.name === v),
 								message: 'Navn er allerede i brug'
 							}]}
+							editable={true}
+							initialText=""
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					<div className="font-bold p-2 text-gray-800">
+				</div>
+
+				{/* 2. Adgangskode */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="password"
-							placeholder="Kodeord"
+							placeholder="Adgangskode"
 							minSize={10}
 							required={true}
 							onChange={handlePasswordChange}
 							maxLength={100}
 							minLength={4}
+							editable={true}
+							initialText=""
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
 				</div>
 			</div>
-			<CompletePostControls
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
-		</CloseableModal>
+			<div className="flex justify-end p-2 gap-2">
+				<button
+					onClick={handleCancel}
+					className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+					type="button"
+				>
+					{'Annuller\r'}
+				</button>
+				<button
+					onClick={handleAdd}
+					disabled={!formIsValid}
+					className={`px-3 py-1 text-sm rounded-full flex items-center ${
+						formIsValid
+							? 'bg-blue-600 hover:bg-blue-700 text-white'
+							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+					}`}
+					type="button"
+				>
+					<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+					{'Opret\r'}
+				</button>
+			</div>
+		</div>
 	)
 }
 
-export default Admin
+export default AddAdmin

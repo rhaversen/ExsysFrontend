@@ -1,13 +1,13 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type PostReaderType, type ReaderType, type KioskType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
-import CompletePostControls from '../../ui/CompletePostControls'
 import EditableDropdown from '../../ui/EditableDropdown'
+import { AdminImages } from '@/lib/images'
+import Image from 'next/image'
 
-const Reader = ({
+const AddReader = ({
 	readers,
 	kiosks,
 	onClose
@@ -85,32 +85,25 @@ const Reader = ({
 		setSelectedKioskId(v === 'null-option' ? undefined : v)
 	}, [])
 
-	const handleCancelPost = useCallback((): void => {
+	const handleCancel = useCallback((): void => {
 		onClose()
 	}, [onClose])
 
-	const handleCompletePost = useCallback((): void => {
+	const handleAdd = useCallback((): void => {
+		if (!formIsValid) return
 		postReader()
-	}, [postReader])
+	}, [postReader, formIsValid])
 
 	return (
-		<CloseableModal onClose={onClose}>
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Kortlæser'}</p>
-					<div className="font-bold p-2 text-gray-800">
-						<EditableField
-							upperCase={true}
-							fieldName="pairingCode"
-							placeholder="Parring Kode"
-							minSize={10}
-							required={true}
-							onChange={handlePairingCodeChange}
-							maxLength={10}
-							onValidationChange={handleValidationChange}
-						/>
-					</div>
-					<div className="font-bold p-2 text-gray-800">
+		<div className="border rounded-lg bg-white w-full shadow-sm mb-1 border-blue-300 border-dashed">
+			<div className="flex justify-center rounded-t-lg items-center px-1 py-1 bg-blue-50 border-b border-blue-200">
+				<span className="font-medium text-blue-700">{'Ny Kortlæser'}</span>
+			</div>
+			<div className="flex flex-wrap">
+				{/* 1. Tag */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tag'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="tag"
 							placeholder="Tag (Automatisk)"
@@ -124,35 +117,78 @@ const Reader = ({
 							}]}
 							type="number"
 							onValidationChange={handleValidationChange}
+							editable={true}
+							initialText=""
 						/>
 					</div>
+				</div>
 
-					<p className="italic text-gray-500">{'Tilknyt til Kiosk'}</p>
-					<EditableDropdown
-						options={
-							kiosks.filter(kiosk =>
-								// Filter out kiosks that already have a reader assigned
-								(kiosk.readerId?._id) == null
-							).map(kiosk => ({
-								value: kiosk._id,
-								label: kiosk.name
-							}))
-						}
-						onChange={handleKioskChange}
-						fieldName="kioskId"
-						placeholder="Vælg Kiosk"
-						allowNullOption={true}
-						onValidationChange={handleValidationChange}
-					/>
+				{/* 2. Parring Kode */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Parring Kode'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableField
+							upperCase={true}
+							fieldName="pairingCode"
+							placeholder="Parring Kode"
+							minSize={10}
+							required={true}
+							onChange={handlePairingCodeChange}
+							maxLength={10}
+							onValidationChange={handleValidationChange}
+							editable={true}
+							initialText=""
+						/>
+					</div>
+				</div>
+
+				{/* 3. Kiosk */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyt til Kiosk'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
+						<EditableDropdown
+							options={
+								kiosks.filter(kiosk =>
+									// Filter out kiosks that already have a reader assigned
+									(kiosk.readerId?._id) == null
+								).map(kiosk => ({
+									value: kiosk._id,
+									label: kiosk.name
+								}))
+							}
+							onChange={handleKioskChange}
+							fieldName="kioskId"
+							placeholder="Vælg Kiosk"
+							allowNullOption={true}
+							onValidationChange={handleValidationChange}
+							initialValue="null-option"
+						/>
+					</div>
 				</div>
 			</div>
-			<CompletePostControls
-				formIsValid={formIsValid}
-				handleCancelPost={handleCancelPost}
-				handleCompletePost={handleCompletePost}
-			/>
-		</CloseableModal>
+			<div className="flex justify-end p-2 gap-2">
+				<button
+					onClick={handleCancel}
+					className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
+					type="button"
+				>
+					{'Annuller\r'}
+				</button>
+				<button
+					onClick={handleAdd}
+					disabled={!formIsValid}
+					className={`px-3 py-1 text-sm rounded-full flex items-center ${formIsValid
+						? 'bg-blue-600 hover:bg-blue-700 text-white'
+						: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+					}`}
+					type="button"
+				>
+					<Image className="h-4 w-4 mr-1" src={AdminImages.add.src} alt={AdminImages.add.alt} width={16} height={16} />
+					{'Opret\r'}
+				</button>
+			</div>
+		</div>
 	)
 }
 
-export default Reader
+export default AddReader

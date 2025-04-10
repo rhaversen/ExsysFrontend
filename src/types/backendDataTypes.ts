@@ -16,6 +16,7 @@ export interface ProductType {
 	price: number
 	orderWindow: OrderWindow
 	options: OptionType[]
+	isActive: boolean
 	imageURL?: string
 	createdAt: string
 	updatedAt: string
@@ -27,6 +28,7 @@ export interface PostProductType {
 	orderWindow: OrderWindow
 	options: Array<OptionType['_id']>
 	imageURL?: string
+	isActive: boolean
 }
 
 export interface PatchProductType {
@@ -35,6 +37,7 @@ export interface PatchProductType {
 	orderWindow?: OrderWindow
 	options?: Array<OptionType['_id']>
 	imageURL?: string
+	isActive?: boolean
 }
 
 // Option types
