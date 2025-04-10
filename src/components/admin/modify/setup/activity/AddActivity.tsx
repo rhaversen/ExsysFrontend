@@ -1,12 +1,13 @@
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type RoomType, type KioskType, type ActivityType, type PostActivityType, type ProductType } from '@/types/backendDataTypes'
+import { type RoomType, type KioskType, type ActivityType, type PostActivityType, type ProductType, type PatchKioskType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import useCUDOperations from '@/hooks/useCUDOperations'
 
 const AddActivity = ({
 	rooms,
@@ -24,6 +25,7 @@ const AddActivity = ({
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const { addError } = useError()
+	const { updateEntityAsync: updateKioskAsync } = useCUDOperations<KioskType, PatchKioskType>('/v1/kiosks')
 
 	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
@@ -32,8 +34,10 @@ const AddActivity = ({
 		disabledProducts: []
 	})
 	const [selectedKiosks, setSelectedKiosks] = useState<KioskType[]>([])
+	const [disabledKiosks, setDisabledKiosks] = useState<KioskType[]>([])
 	const [showRooms, setShowRooms] = useState(false)
 	const [showKiosks, setShowKiosks] = useState(false)
+	const [showDisabledKiosks, setShowDisabledKiosks] = useState(false)
 	const [showDisabledRooms, setShowDisabledRooms] = useState(false)
 	const [showDisabledProducts, setShowDisabledProducts] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
@@ -58,18 +62,29 @@ const AddActivity = ({
 		axios.post(API_URL + '/v1/activities', activity, { withCredentials: true })
 			.then(async (response) => {
 				const activityId = response.data._id
-				// Update each selected kiosk to include the new activity
-				for (const kiosk of selectedKiosks) {
-					await axios.patch(API_URL + `/v1/kiosks/${kiosk._id}`, {
-						...kiosk,
-						activities: [...kiosk.activities.map(a => a._id), activityId]
-					}, { withCredentials: true })
+				try {
+					// Update each selected kiosk to include the new activity
+					for (const kiosk of selectedKiosks) {
+						await updateKioskAsync(kiosk._id, {
+							activities: [...kiosk.activities.map(a => a._id), activityId]
+						})
+					}
+
+					// Update each disabled kiosk to include the activity in disabledActivities
+					for (const kiosk of disabledKiosks) {
+						await updateKioskAsync(kiosk._id, {
+							disabledActivities: [...kiosk.disabledActivities, activityId]
+						})
+					}
+
+					onClose()
+				} catch (error) {
+					addError(error as Error)
 				}
-				onClose()
 			}).catch((error) => {
 				addError(error)
 			})
-	}, [API_URL, onClose, addError, selectedKiosks])
+	}, [API_URL, onClose, addError, selectedKiosks, disabledKiosks, updateKioskAsync])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setActivity({
@@ -128,6 +143,14 @@ const AddActivity = ({
 		setSelectedKiosks(prev => prev.filter(k => k._id !== kiosk._id))
 	}, [])
 
+	const handleAddDisabledKiosk = useCallback((kiosk: KioskType): void => {
+		setDisabledKiosks(prev => [...prev, kiosk])
+	}, [])
+
+	const handleDeleteDisabledKiosk = useCallback((kiosk: KioskType): void => {
+		setDisabledKiosks(prev => prev.filter(k => k._id !== kiosk._id))
+	}, [])
+
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
@@ -137,7 +160,7 @@ const AddActivity = ({
 	}, [postActivity, activity])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts}>
+		<CloseableModal onClose={onClose} canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts && !showDisabledKiosks}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Ny Aktivitet'}</p>
@@ -204,6 +227,18 @@ const AddActivity = ({
 						onShowItems={() => { setShowKiosks(true) }}
 					/>
 
+					{disabledKiosks.length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Deaktiverede Kiosker:'}</p>
+					)}
+					{disabledKiosks.length === 0 && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Kiosker:'}</p>
+					)}
+					<ItemsDisplay
+						items={disabledKiosks}
+						onDeleteItem={handleDeleteDisabledKiosk}
+						onShowItems={() => { setShowDisabledKiosks(true) }}
+					/>
+
 					{showRooms && (
 						<SelectionWindow
 							title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
@@ -247,10 +282,21 @@ const AddActivity = ({
 							onClose={() => { setShowKiosks(false) }}
 						/>
 					)}
+
+					{showDisabledKiosks && (
+						<SelectionWindow
+							title={`Tilføj Deaktiverede Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+							items={kiosks}
+							selectedItems={disabledKiosks}
+							onAddItem={handleAddDisabledKiosk}
+							onDeleteItem={handleDeleteDisabledKiosk}
+							onClose={() => { setShowDisabledKiosks(false) }}
+						/>
+					)}
 				</div>
 			</div>
 			<CompletePostControls
-				canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts}
+				canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts && !showDisabledKiosks}
 				formIsValid={formIsValid}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}

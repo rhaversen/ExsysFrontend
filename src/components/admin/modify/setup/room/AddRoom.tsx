@@ -26,7 +26,9 @@ const Room = ({
 		description: ''
 	})
 	const [selectedActivities, setSelectedActivities] = useState<ActivityType[]>([])
+	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>([])
 	const [showActivities, setShowActivities] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -49,6 +51,7 @@ const Room = ({
 		try {
 			const createdRoom = await createRoomAsync(room)
 
+			// Update activities that link to this room
 			await Promise.all(
 				selectedActivities.map(async activity =>
 					await updateActivityAsync(activity._id, {
@@ -57,11 +60,21 @@ const Room = ({
 					})
 				)
 			)
+
+			// Update activities that have this room disabled
+			await Promise.all(
+				disabledActivities.map(async activity =>
+					await updateActivityAsync(activity._id, {
+						...activity,
+						disabledRooms: [...activity.disabledRooms, createdRoom._id]
+					})
+				)
+			)
 		} catch (error) {
 			addError(error as Error)
 		}
 		onClose()
-	}, [createRoomAsync, selectedActivities, updateActivityAsync, addError, onClose])
+	}, [createRoomAsync, selectedActivities, disabledActivities, updateActivityAsync, addError, onClose])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setRoom(prev => ({
@@ -85,6 +98,14 @@ const Room = ({
 		setSelectedActivities(prev => prev.filter(a => a._id !== activity._id))
 	}, [])
 
+	const handleAddDisabledActivity = useCallback((activity: ActivityType): void => {
+		setDisabledActivities(prev => [...prev, activity])
+	}, [])
+
+	const handleDeleteDisabledActivity = useCallback((activity: ActivityType): void => {
+		setDisabledActivities(prev => prev.filter(a => a._id !== activity._id))
+	}, [])
+
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
@@ -96,7 +117,7 @@ const Room = ({
 	}, [addError, postRoom, room])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showActivities}>
+		<CloseableModal onClose={onClose} canClose={!showActivities && !showDisabledActivities}>
 			<div className="flex flex-col items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
 					<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Spisested'}</p>
@@ -138,10 +159,22 @@ const Room = ({
 						onDeleteItem={handleDeleteActivity}
 						onShowItems={() => { setShowActivities(true) }}
 					/>
+
+					{disabledActivities.length > 0 && (
+						<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
+					)}
+					{disabledActivities.length === 0 && (
+						<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
+					)}
+					<ItemsDisplay
+						items={disabledActivities}
+						onDeleteItem={handleDeleteDisabledActivity}
+						onShowItems={() => { setShowDisabledActivities(true) }}
+					/>
 				</div>
 			</div>
 			<CompletePostControls
-				canClose={!showActivities}
+				canClose={!showActivities && !showDisabledActivities}
 				formIsValid={formIsValid}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}
@@ -154,6 +187,17 @@ const Room = ({
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
 					onClose={() => { setShowActivities(false) }}
+				/>
+			)}
+
+			{showDisabledActivities && (
+				<SelectionWindow
+					title={`Tilføj Deaktiverede Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
+					items={activities}
+					selectedItems={disabledActivities}
+					onAddItem={handleAddDisabledActivity}
+					onDeleteItem={handleDeleteDisabledActivity}
+					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</CloseableModal>

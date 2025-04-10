@@ -177,7 +177,7 @@ const AdminView = ({
 			{showAddKiosk && <AddKiosk kiosks={kiosks} activities={activities} readers={readers} onClose={() => { setShowAddKiosk(false) }} />}
 			{showAddAdmin && <AddAdmin admins={admins} onClose={() => { setShowAddAdmin(false) }} />}
 			{showAddReader && <AddReader kiosks={kiosks} readers={readers} onClose={() => { setShowAddReader(false) }} />}
-			{showAddProduct && <AddProduct options={options} products={products} onClose={() => { setShowAddProduct(false) }} />}
+			{showAddProduct && <AddProduct options={options} products={products} onClose={() => { setShowAddProduct(false) } } activities={activities} />}
 			{showAddOption && <AddOption products={products} options={options} onClose={() => { setShowAddOption(false) }} />}
 		</div>
 	)

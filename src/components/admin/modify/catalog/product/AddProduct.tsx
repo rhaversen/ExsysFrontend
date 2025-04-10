@@ -3,7 +3,7 @@ import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertOrderWindowToUTC } from '@/lib/timeUtils'
-import { type ProductType, type OptionType, type PostProductType } from '@/types/backendDataTypes'
+import { type ProductType, type OptionType, type PostProductType, type ActivityType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import CompletePostControls from '../../ui/CompletePostControls'
@@ -14,10 +14,12 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 const AddProduct = ({
 	options,
 	products,
+	activities,
 	onClose
 }: {
 	products: ProductType[]
 	options: OptionType[]
+	activities: ActivityType[]
 	onClose: () => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -41,6 +43,8 @@ const AddProduct = ({
 		options: []
 	})
 	const [showOptions, setShowOptions] = useState(false)
+	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>([])
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -66,11 +70,20 @@ const AddProduct = ({
 			orderWindow: convertOrderWindowToUTC(product.orderWindow)
 		}
 		axios.post(API_URL + '/v1/products', productUTC, { withCredentials: true }).then((response) => {
-			onClose()
+			const productId = response.data._id
+
+			// Update activities with disabled products
+			Promise.all(disabledActivities.map(async activity => {
+				await axios.patch(API_URL + `/v1/activities/${activity._id}`, {
+					disabledProducts: [...activity.disabledProducts, productId]
+				}, { withCredentials: true })
+			}))
+				.then(() => { onClose() })
+				.catch(error => { addError(error) })
 		}).catch((error) => {
 			addError(error)
 		})
-	}, [API_URL, onClose, addError])
+	}, [API_URL, onClose, addError, disabledActivities])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setProduct({
@@ -164,6 +177,14 @@ const AddProduct = ({
 		})
 	}, [product])
 
+	const handleAddDisabledActivity = useCallback((v: ActivityType): void => {
+		setDisabledActivities([...disabledActivities, v])
+	}, [disabledActivities])
+
+	const handleDeleteDisabledActivity = useCallback((v: ActivityType): void => {
+		setDisabledActivities(disabledActivities.filter(a => a._id !== v._id))
+	}, [disabledActivities])
+
 	const handleCancelPost = useCallback((): void => {
 		onClose()
 	}, [onClose])
@@ -180,7 +201,7 @@ const AddProduct = ({
 	}, [product])
 
 	return (
-		<CloseableModal onClose={onClose} canClose={!showOptions}>
+		<CloseableModal onClose={onClose} canClose={!showOptions && !showDisabledActivities}>
 			<div className="flex flex-col items-center justify-center">
 				<p className="text-gray-800 font-bold text-xl pb-5">{'Nyt Produkt'}</p>
 				<p className="italic text-gray-500">{'Navn og Pris:'}</p>
@@ -280,7 +301,7 @@ const AddProduct = ({
 					]}
 					onValidationChange={handleValidationChange}
 				/>
-				<p className="italic text-gray-500 pt-2">{'Billede:'}</p>
+				<p className="italic text-gray-500 pt=2">{'Billede:'}</p>
 				<EditableImage
 					URL={product.imageURL}
 					onChange={handleImageChange}
@@ -310,6 +331,21 @@ const AddProduct = ({
 						setShowOptions(true)
 					}}
 				/>
+
+				{disabledActivities.length > 0 &&
+					<p className="italic text-gray-500 pt-2">{'Deaktiverede Aktiviteter:'}</p>
+				}
+				{disabledActivities.length === 0 &&
+					<p className="italic text-gray-500 pt-2">{'Tilføj Deaktiverede Aktiviteter:'}</p>
+				}
+				<ItemsDisplay
+					items={disabledActivities}
+					onDeleteItem={handleDeleteDisabledActivity}
+					onShowItems={() => {
+						setShowDisabledActivities(true)
+					}}
+				/>
+
 				{showOptions &&
 					<SelectionWindow
 						title={`Tilføj tilvalg til ${product.name === '' ? 'Nyt Produkt' : product.name}`}
@@ -322,9 +358,22 @@ const AddProduct = ({
 						}}
 					/>
 				}
+
+				{showDisabledActivities &&
+					<SelectionWindow
+						title={`Tilføj deaktiverede aktiviteter til ${product.name === '' ? 'Nyt Produkt' : product.name}`}
+						items={activities}
+						selectedItems={disabledActivities}
+						onAddItem={handleAddDisabledActivity}
+						onDeleteItem={handleDeleteDisabledActivity}
+						onClose={() => {
+							setShowDisabledActivities(false)
+						}}
+					/>
+				}
 			</div>
 			<CompletePostControls
-				canClose={!showOptions}
+				canClose={!showOptions && !showDisabledActivities}
 				formIsValid={formIsValid}
 				handleCancelPost={handleCancelPost}
 				handleCompletePost={handleCompletePost}
