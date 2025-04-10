@@ -6,10 +6,12 @@ import React, { type ReactElement, useState } from 'react'
 const EditableImage = ({
 	URL,
 	editable = true,
+	className = '',
 	onChange
 }: {
 	URL: string | undefined
 	editable?: boolean
+	className?: string
 	onChange: (v: string) => void
 }): ReactElement => {
 	const [showImageList, setShowImageList] = useState(false)
@@ -31,7 +33,7 @@ const EditableImage = ({
 					{'Edit Image'}
 				</span>
 				<AsyncImage
-					className="w-48 h-48"
+					className={className ?? 'w-48 h-48'}
 					width={90}
 					height={90}
 					quality={50}

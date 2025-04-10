@@ -1,11 +1,10 @@
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import EditingControls from '@/components/admin/modify/ui/EditControls'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type AdminType, type PatchAdminType, type PostAdminType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useState } from 'react'
-import Timestamps from '../../ui/Timestamps'
+import EntityCard from '../../ui/EntityCard'
 
 const Admin = ({
 	admins,
@@ -30,11 +29,32 @@ const Admin = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
 	return (
-		<div className="p-2 m-2">
-			<div className="flex flex-col items-center justify-center">
-				<div className="flex flex-col items-center justify-center">
-					<p className="italic text-gray-500">{'Brugernavn'}</p>
-					<div className="font-bold pb-2 text-gray-800">
+		<>
+			<EntityCard
+				isEditing={isEditing}
+				setIsEditing={setIsEditing}
+				onHandleUndoEdit={() => {
+					setNewPassword('')
+					resetFormState()
+					setIsEditing(false)
+				}}
+				onHandleCompleteEdit={() => {
+					updateEntity(newAdmin._id, {
+						name: newAdmin.name,
+						password: newPassword.length > 0 ? newPassword : undefined
+					})
+					setNewPassword('')
+					setIsEditing(false)
+				}}
+				setShowDeleteConfirmation={setShowDeleteConfirmation}
+				formIsValid={formIsValid}
+				createdAt={admin.createdAt}
+				updatedAt={admin.updatedAt}
+			>
+				{/* Username */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Brugernavn'}</div>
+					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="name"
 							initialText={admin.name}
@@ -51,62 +71,48 @@ const Admin = ({
 							onValidationChange={handleValidationChange}
 						/>
 					</div>
-					{isEditing &&
-						<div className="text-center">
-							<p className="italic text-gray-500">{'Nyt Kodeord'}</p>
-							<div className="font-bold pb-2 text-gray-800">
-								<EditableField
-									fieldName="password"
-									initialText={newPassword}
-									placeholder="Nyt Kodeord"
-									minSize={10}
-									minLength={4}
-									maxLength={100}
-									editable={isEditing}
-									onChange={setNewPassword}
-									onValidationChange={handleValidationChange}
-								/>
-							</div>
-						</div>
-					}
 				</div>
-				<Timestamps
-					createdAt={admin.createdAt}
-					updatedAt={admin.updatedAt}
-				/>
-				<EditingControls
-					isEditing={isEditing}
-					setIsEditing={setIsEditing}
-					handleUndoEdit={() => {
-						setNewPassword('')
-						resetFormState()
-						setIsEditing(false)
-					}}
-					handleCompleteEdit={() => {
-						updateEntity(newAdmin._id, {
-							name: newAdmin.name,
-							password: newPassword.length > 0 ? newPassword : undefined
-						})
-						setNewPassword('')
-						setIsEditing(false)
-					}}
-					setShowDeleteConfirmation={setShowDeleteConfirmation}
-					formIsValid={formIsValid}
-				/>
-			</div>
-			{showDeleteConfirmation &&
+
+				{/* Password */}
+				{isEditing && (
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Ny Adgangskode'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							<EditableField
+								fieldName="password"
+								initialText={newPassword}
+								placeholder="Ny Adgangskode"
+								minSize={10}
+								minLength={4}
+								maxLength={100}
+								editable={isEditing}
+								onChange={setNewPassword}
+								onValidationChange={handleValidationChange}
+							/>
+						</div>
+					</div>
+				)}
+				{!isEditing && (
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
+						<div className="text-gray-800 flex items-center justify-center text-sm">
+							{'******'}
+						</div>
+					</div>
+				)}
+			</EntityCard>
+
+			{showDeleteConfirmation && (
 				<ConfirmDeletion
 					itemName={admin.name}
-					onClose={() => {
-						setShowDeleteConfirmation(false)
-					}}
+					onClose={() => { setShowDeleteConfirmation(false) }}
 					onSubmit={(confirm: boolean) => {
 						setShowDeleteConfirmation(false)
 						deleteEntity(admin._id, confirm)
 					}}
 				/>
-			}
-		</div>
+			)}
+		</>
 	)
 }
 
