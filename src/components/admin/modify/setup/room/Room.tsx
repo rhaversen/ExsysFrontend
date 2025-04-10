@@ -22,6 +22,9 @@ const Room = ({
 	const [linkedActivities, setLinkedActivities] = useState(
 		activities.filter(a => a.rooms.some(r => r._id === room._id))
 	)
+	const [disabledActivities, setDisabledActivities] = useState(
+		activities.filter(a => a.disabledRooms.includes(room._id))
+	)
 	const { addError } = useError()
 	const {
 		formState: newRoom,
@@ -41,6 +44,7 @@ const Room = ({
 
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 
 	const handleActivityChange = (newActivities: ActivityType[]): void => {
 		setLinkedActivities(newActivities)
@@ -48,18 +52,25 @@ const Room = ({
 
 	useEffect(() => {
 		setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+		setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
 	}, [activities, room])
 
 	const handleCompleteEdit = (): void => {
 		// Update room first
 		updateRoom(newRoom._id, newRoom)
 
-		// Get activities that need updating
+		// Get activities that need updating for linked activities
 		const currentActivities = activities.filter(a => a.rooms.some(r => r._id === room._id))
 		const addedActivities = linkedActivities.filter(a => !currentActivities.some(ca => ca._id === a._id))
 		const removedActivities = currentActivities.filter(ca => !linkedActivities.some(a => a._id === ca._id))
 
+		// Get activities that need updating for disabled activities
+		const currentDisabledActivities = activities.filter(a => a.disabledRooms.includes(room._id))
+		const addedDisabledActivities = disabledActivities.filter(a => !currentDisabledActivities.some(ca => ca._id === a._id))
+		const removedDisabledActivities = currentDisabledActivities.filter(ca => !disabledActivities.some(a => a._id === ca._id))
+
 		Promise.all([
+			// Handle linking/unlinking activities
 			...addedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
@@ -70,6 +81,17 @@ const Room = ({
 				await updateActivityAsync(activity._id, {
 					...activity,
 					rooms: activity.rooms.filter(r => r._id !== room._id).map(r => r._id)
+				})
+			}),
+			// Handle disabling/enabling rooms in activities
+			...addedDisabledActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					disabledRooms: [...activity.disabledRooms, room._id]
+				})
+			}),
+			...removedDisabledActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					disabledRooms: activity.disabledRooms.filter(id => id !== room._id)
 				})
 			})
 		]).then(() => {
@@ -87,12 +109,13 @@ const Room = ({
 				onHandleUndoEdit={() => {
 					resetFormState()
 					setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+					setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
 					setIsEditing(false)
 				}}
 				onHandleCompleteEdit={handleCompleteEdit}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
 				formIsValid={formIsValid}
-				canClose={!showActivities}
+				canClose={!showActivities && !showDisabledActivities}
 				createdAt={room.createdAt}
 				updatedAt={room.updatedAt}
 			>
@@ -152,6 +175,22 @@ const Room = ({
 						/>
 					</div>
 				</div>
+
+				{/* Disabled Activities */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{disabledActivities.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={disabledActivities}
+							editable={isEditing}
+							onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+							onShowItems={() => { setShowDisabledActivities(true) }}
+						/>
+					</div>
+				</div>
 			</EntityCard>
 
 			{showDeleteConfirmation && (
@@ -173,6 +212,17 @@ const Room = ({
 					onAddItem={(v) => { handleActivityChange([...linkedActivities, v]) }}
 					onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
 					onClose={() => { setShowActivities(false) }}
+				/>
+			)}
+
+			{showDisabledActivities && (
+				<SelectionWindow
+					title={`Tilføj deaktiverede aktiviteter til ${newRoom.name}`}
+					items={activities}
+					selectedItems={disabledActivities}
+					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}
+					onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>

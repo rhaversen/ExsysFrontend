@@ -123,7 +123,7 @@ const AdminView = ({
 				)
 			case 'Produkter':
 				return (
-					<div className="space-y-1">{sortByField(products).map((product: ProductType) => <Product key={product._id} product={product} products={products} options={options} />)}</div>
+					<div className="space-y-1">{sortByField(products).map((product: ProductType) => <Product key={product._id} product={product} products={products} options={options} activities={activities} />)}</div>
 				)
 			case 'Tilvalg':
 				return (

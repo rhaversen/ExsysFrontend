@@ -33,6 +33,9 @@ const Activity = ({
 	const [linkedKiosks, setLinkedKiosks] = useState(
 		kiosks.filter(k => k.activities.some(a => a._id === activity._id))
 	)
+	const [disabledKiosks, setDisabledKiosks] = useState(
+		kiosks.filter(k => k.disabledActivities.includes(activity._id))
+	)
 	const {
 		formState: newActivity,
 		handleFieldChange,
@@ -50,6 +53,7 @@ const Activity = ({
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showRooms, setShowRooms] = useState(false)
 	const [showKiosks, setShowKiosks] = useState(false)
+	const [showDisabledKiosks, setShowDisabledKiosks] = useState(false)
 	const [showDisabledRooms, setShowDisabledRooms] = useState(false)
 	const [showDisabledProducts, setShowDisabledProducts] = useState(false)
 
@@ -59,6 +63,7 @@ const Activity = ({
 
 	useEffect(() => {
 		setLinkedKiosks(kiosks.filter(k => k.activities.some(a => a._id === activity._id)))
+		setDisabledKiosks(kiosks.filter(k => k.disabledActivities.includes(activity._id)))
 	}, [kiosks, activity])
 
 	const handleCompleteEdit = (): void => {
@@ -71,12 +76,17 @@ const Activity = ({
 		}
 		updateActivity(newActivity._id, activityUpdate)
 
-		// Get kiosks that need updating
+		// Get kiosks that need updating for linked kiosks
 		const currentKiosks = kiosks.filter(k => k.activities.some(a => a._id === activity._id))
 		const addedKiosks = linkedKiosks.filter(k => !currentKiosks.some(ck => ck._id === k._id))
 		const removedKiosks = currentKiosks.filter(ck => !linkedKiosks.some(k => k._id === ck._id))
 
-		// Update kiosks that need changes
+		// Get kiosks that need updating for disabled kiosks
+		const currentDisabledKiosks = kiosks.filter(k => k.disabledActivities.includes(activity._id))
+		const addedDisabledKiosks = disabledKiosks.filter(k => !currentDisabledKiosks.some(ck => ck._id === k._id))
+		const removedDisabledKiosks = currentDisabledKiosks.filter(ck => !disabledKiosks.some(k => k._id === ck._id))
+
+		// Update kiosks that need changes for linking
 		for (const kiosk of addedKiosks) {
 			const kioskUpdate: PatchKioskType = {
 				name: kiosk.name,
@@ -93,6 +103,23 @@ const Activity = ({
 			updateKiosk(kiosk._id, kioskUpdate)
 		}
 
+		// Update kiosks that need changes for disabling
+		for (const kiosk of addedDisabledKiosks) {
+			const kioskUpdate: PatchKioskType = {
+				name: kiosk.name,
+				disabledActivities: [...kiosk.disabledActivities, activity._id]
+			}
+			updateKiosk(kiosk._id, kioskUpdate)
+		}
+
+		for (const kiosk of removedDisabledKiosks) {
+			const kioskUpdate: PatchKioskType = {
+				name: kiosk.name,
+				disabledActivities: kiosk.disabledActivities.filter(id => id !== activity._id)
+			}
+			updateKiosk(kiosk._id, kioskUpdate)
+		}
+
 		setIsEditing(false)
 	}
 
@@ -104,12 +131,13 @@ const Activity = ({
 				onHandleUndoEdit={() => {
 					resetFormState()
 					setLinkedKiosks(kiosks.filter(k => k.activities.some(a => a._id === activity._id)))
+					setDisabledKiosks(kiosks.filter(k => k.disabledActivities.includes(activity._id)))
 					setIsEditing(false)
 				}}
 				onHandleCompleteEdit={handleCompleteEdit}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
 				formIsValid={formIsValid}
-				canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts}
+				canClose={!showRooms && !showKiosks && !showDisabledRooms && !showDisabledProducts && !showDisabledKiosks}
 				createdAt={activity.createdAt}
 				updatedAt={activity.updatedAt}
 			>
@@ -198,6 +226,22 @@ const Activity = ({
 						/>
 					</div>
 				</div>
+
+				{/* 6. Deaktiverede Kiosker */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Kiosker'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{disabledKiosks.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={disabledKiosks}
+							editable={isEditing}
+							onDeleteItem={(v) => { setDisabledKiosks(disabledKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
+							onShowItems={() => { setShowDisabledKiosks(true) }}
+						/>
+					</div>
+				</div>
 			</EntityCard>
 
 			{/* Selection Windows and Confirmation Dialog */}
@@ -258,6 +302,18 @@ const Activity = ({
 					onDeleteItem={(v) => { handleKioskChange(linkedKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
 					onClose={() => {
 						setShowKiosks(false)
+					}}
+				/>
+			}
+			{showDisabledKiosks &&
+				<SelectionWindow
+					title={`Tilføj Deaktiverede Kiosker til ${newActivity.name}`}
+					items={kiosks}
+					selectedItems={disabledKiosks}
+					onAddItem={(v) => { setDisabledKiosks([...disabledKiosks, v]) }}
+					onDeleteItem={(v) => { setDisabledKiosks(disabledKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
+					onClose={() => {
+						setShowDisabledKiosks(false)
 					}}
 				/>
 			}

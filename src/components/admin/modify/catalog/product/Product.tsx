@@ -8,23 +8,30 @@ import {
 	type OptionType,
 	type PatchProductType,
 	type PostProductType,
-	type ProductType
+	type ProductType,
+	type ActivityType,
+	type PatchActivityType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+import React, { type ReactElement, useState, useEffect } from 'react'
 import InlineValidation from '../../ui/InlineValidation'
 import SelectionWindow from '../../ui/SelectionWindow'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import EntityCard from '../../ui/EntityCard'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const Product = ({
 	product,
 	products,
-	options
+	options,
+	activities
 }: {
 	product: ProductType
 	products: ProductType[]
 	options: OptionType[]
+	activities: ActivityType[]
 }): ReactElement => {
+	const { addError } = useError()
+
 	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
 		return {
 			...product,
@@ -33,6 +40,9 @@ const Product = ({
 	}
 
 	const [isEditing, setIsEditing] = useState(false)
+	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>(
+		activities.filter(a => a.disabledProducts.includes(product._id))
+	)
 	const {
 		formState: newProduct,
 		handleFieldChange,
@@ -44,8 +54,17 @@ const Product = ({
 		updateEntity,
 		deleteEntity
 	} = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
+	const {
+		updateEntityAsync: updateActivityAsync
+	} = useCUDOperations<ActivityType, PatchActivityType>('/v1/activities')
+
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showOptions, setShowOptions] = useState(false)
+	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
+
+	useEffect(() => {
+		setDisabledActivities(activities.filter(a => a.disabledProducts.includes(product._id)))
+	}, [activities, product._id])
 
 	const toggleActivity = (): void => {
 		updateEntity(product._id, {
@@ -53,6 +72,36 @@ const Product = ({
 		} satisfies PatchProductType)
 		// Update local state
 		handleFieldChange('isActive', !newProduct.isActive)
+	}
+
+	const handleCompleteEdit = (): void => {
+		// Update product first
+		updateEntity(product._id, {
+			...newProduct,
+			options: newProduct.options.map(option => option._id)
+		})
+
+		// Update disabled activities
+		const currentDisabledActivities = activities.filter(a => a.disabledProducts.includes(product._id))
+		const addedDisabledActivities = disabledActivities.filter(a => !currentDisabledActivities.some(ca => ca._id === a._id))
+		const removedDisabledActivities = currentDisabledActivities.filter(ca => !disabledActivities.some(a => a._id === ca._id))
+
+		Promise.all([
+			...addedDisabledActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					disabledProducts: [...activity.disabledProducts, product._id]
+				})
+			}),
+			...removedDisabledActivities.map(async activity => {
+				await updateActivityAsync(activity._id, {
+					disabledProducts: activity.disabledProducts.filter(id => id !== product._id)
+				})
+			})
+		]).then(() => {
+			setIsEditing(false)
+		}).catch((error) => {
+			addError(error)
+		})
 	}
 
 	return (
@@ -64,18 +113,13 @@ const Product = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
+					setDisabledActivities(activities.filter(a => a.disabledProducts.includes(product._id)))
 					setIsEditing(false)
 				}}
-				onHandleCompleteEdit={() => {
-					updateEntity(product._id, {
-						...newProduct,
-						options: newProduct.options.map(option => option._id)
-					})
-					setIsEditing(false)
-				}}
+				onHandleCompleteEdit={handleCompleteEdit}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
 				formIsValid={formIsValid}
-				canClose={!showOptions}
+				canClose={!showOptions && !showDisabledActivities}
 				createdAt={product.createdAt}
 				updatedAt={product.updatedAt}
 			>
@@ -228,6 +272,22 @@ const Product = ({
 						/>
 					</div>
 				</div>
+
+				{/* 6. Deaktiverede Aktiviteter */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{disabledActivities.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={disabledActivities}
+							editable={isEditing}
+							onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+							onShowItems={() => { setShowDisabledActivities(true) }}
+						/>
+					</div>
+				</div>
 			</EntityCard>
 			{showDeleteConfirmation && (
 				<ConfirmDeletion
@@ -252,6 +312,16 @@ const Product = ({
 					}}
 					onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
 					onClose={() => { setShowOptions(false) }}
+				/>
+			)}
+			{showDisabledActivities && (
+				<SelectionWindow
+					title={`Tilføj deaktiverede aktiviteter til ${newProduct.name}`}
+					items={activities}
+					selectedItems={disabledActivities}
+					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}
+					onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
+					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>
