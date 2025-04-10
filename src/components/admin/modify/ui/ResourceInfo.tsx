@@ -77,7 +77,7 @@ const propInfo: Record<string, PropDefinition[]> = {
 	Spisesteder: [
 		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken' },
 		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken' },
-		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået' },
+		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået' },
 		{ name: 'Deaktiverede aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
 	],
 	Kiosker: [
