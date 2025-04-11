@@ -112,9 +112,8 @@ const AddProduct = ({
 								type="checkbox"
 								checked={newProduct.isActive}
 								onChange={(e) => { handleFieldChange('isActive', e.target.checked) }}
-								className="w-4 h-4"
+								className="w-6 h-6"
 							/>
-							<label className="pl-1 text-gray-800">{'Aktiv'}</label>
 						</div>
 					</div>
 
