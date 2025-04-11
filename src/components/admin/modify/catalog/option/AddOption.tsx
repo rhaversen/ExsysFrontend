@@ -154,7 +154,6 @@ const AddOption = ({
 								fieldName="price"
 								initialText="0"
 								placeholder="Pris"
-								italic={true}
 								required={true}
 								minSize={2}
 								type="number"

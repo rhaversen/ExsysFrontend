@@ -149,7 +149,6 @@ const Room = ({
 							fieldName="description"
 							initialText={room.description}
 							placeholder="Beskrivelse"
-							italic={true}
 							minSize={10}
 							required={true}
 							maxLength={20}

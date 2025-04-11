@@ -154,7 +154,6 @@ const AddRoom = ({
 								fieldName="description"
 								initialText=""
 								placeholder="Beskrivelse"
-								italic={true}
 								minSize={10}
 								required={true}
 								onChange={handleDescriptionChange}

@@ -52,7 +52,7 @@ const Dropdown = ({
 	}, [editable, initialValue])
 
 	return (
-		<div className="font-bold pb-2 text-gray-800 flex flex-row items-center">
+		<div className="pb-2 flex flex-row items-center">
 			{editable
 				? (
 					<select
