@@ -142,7 +142,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 				{props.map((prop, index) => (
 					<div
 						key={index}
-						className="flex flex-col p-2 flex-1"
+						className="flex flex-col items-center text-center p-2 flex-1"
 					>
 						<span className="font-semibold text-gray-800">{prop.name}</span>
 						<span className="whitespace-normal">{prop.message}</span>
