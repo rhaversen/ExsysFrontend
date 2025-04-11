@@ -98,19 +98,33 @@ export function timeSince (dateString: string): string {
 	const seconds = Math.max(Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000), 0)
 
 	let interval = Math.floor(seconds / 31536000)
-	if (interval >= 1) return `${interval} år siden`
+	if (interval >= 1) {
+		const months = Math.floor((seconds % 31536000) / 2592000)
+		return `${interval} år${months > 0 ? ` og ${months} måned${months !== 1 ? 'er' : ''}` : ''} siden`
+	}
 
 	interval = Math.floor(seconds / 2592000)
-	if (interval >= 1) return `${interval} måned${interval !== 1 ? 'er' : ''} siden`
+	if (interval >= 1) {
+		const days = Math.floor((seconds % 2592000) / 86400)
+		return `${interval} måned${interval !== 1 ? 'er' : ''}${days > 0 ? ` og ${days} dag${days !== 1 ? 'e' : ''}` : ''} siden`
+	}
 
 	interval = Math.floor(seconds / 86400)
-	if (interval >= 1) return `${interval} dag${interval !== 1 ? 'e' : ''} siden`
+	if (interval >= 1) {
+		const hours = Math.floor((seconds % 86400) / 3600)
+		return `${interval} dag${interval !== 1 ? 'e' : ''}${hours > 0 ? ` og ${hours} time${hours !== 1 ? 'r' : ''}` : ''} siden`
+	}
 
 	interval = Math.floor(seconds / 3600)
-	if (interval >= 1) return `${interval} time${interval !== 1 ? 'r' : ''} siden`
+	if (interval >= 1) {
+		const minutes = Math.floor((seconds % 3600) / 60)
+		return `${interval} time${interval !== 1 ? 'r' : ''}${minutes > 0 ? ` og ${minutes} minut${minutes !== 1 ? 'ter' : ''}` : ''} siden`
+	}
 
 	interval = Math.floor(seconds / 60)
-	if (interval >= 1) return `${interval} minut${interval !== 1 ? 'ter' : ''} siden`
+	if (interval >= 1) {
+		return `${interval} minut${interval !== 1 ? 'ter' : ''} siden`
+	}
 
 	return `${seconds} sekund${seconds !== 1 ? 'er' : ''} siden`
 }
@@ -121,19 +135,33 @@ export function timeUntil (dateString: string | number): string {
 	if (seconds <= 0) return 'Udløbet'
 
 	let interval = Math.floor(seconds / 31536000)
-	if (interval >= 1) return `om ${interval} år`
+	if (interval >= 1) {
+		const months = Math.floor((seconds % 31536000) / 2592000)
+		return `om ${interval} år${months > 0 ? ` og ${months} måned${months !== 1 ? 'er' : ''}` : ''}`
+	}
 
 	interval = Math.floor(seconds / 2592000)
-	if (interval >= 1) return `om ${interval} måned${interval !== 1 ? 'er' : ''}`
+	if (interval >= 1) {
+		const days = Math.floor((seconds % 2592000) / 86400)
+		return `om ${interval} måned${interval !== 1 ? 'er' : ''}${days > 0 ? ` og ${days} dag${days !== 1 ? 'e' : ''}` : ''}`
+	}
 
 	interval = Math.floor(seconds / 86400)
-	if (interval >= 1) return `om ${interval} dag${interval !== 1 ? 'e' : ''}`
+	if (interval >= 1) {
+		const hours = Math.floor((seconds % 86400) / 3600)
+		return `om ${interval} dag${interval !== 1 ? 'e' : ''}${hours > 0 ? ` og ${hours} time${hours !== 1 ? 'r' : ''}` : ''}`
+	}
 
 	interval = Math.floor(seconds / 3600)
-	if (interval >= 1) return `om ${interval} time${interval !== 1 ? 'r' : ''}`
+	if (interval >= 1) {
+		const minutes = Math.floor((seconds % 3600) / 60)
+		return `om ${interval} time${interval !== 1 ? 'r' : ''}${minutes > 0 ? ` og ${minutes} minut${minutes !== 1 ? 'ter' : ''}` : ''}`
+	}
 
 	interval = Math.floor(seconds / 60)
-	if (interval >= 1) return `om ${interval} minut${interval !== 1 ? 'ter' : ''}`
+	if (interval >= 1) {
+		return `om ${interval} minut${interval !== 1 ? 'ter' : ''}`
+	}
 
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
