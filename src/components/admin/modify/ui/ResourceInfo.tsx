@@ -68,9 +68,9 @@ const propInfo: Record<string, PropDefinition[]> = {
 	],
 	Aktiviteter: [
 		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken' },
-		{ name: 'Deaktiverede produkter', message: 'Produkter som ikke kan vælges for aktiviteten' },
+		{ name: 'Deaktiverede Produkter', message: 'Produkter som ikke kan vælges for aktiviteten' },
 		{ name: 'Fremhævede Spisesteder', message: 'Spisesteder som vises som foreslået' },
-		{ name: 'Deaktiverede spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten' },
+		{ name: 'Deaktiverede Spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten' },
 		{ name: 'Fremhævende Kiosker', message: 'Kiosker som vil vise aktiviteten som foreslået' },
 		{ name: 'Deaktiverede Kiosker', message: 'Kiosker hvor aktiviteten ikke kan vælges' }
 	],
@@ -78,7 +78,7 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken' },
 		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken' },
 		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået' },
-		{ name: 'Deaktiverede aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
 	],
 	Kiosker: [
 		{ name: 'Navn', message: 'Kioskens visningsnavn for intern identifikation' },
@@ -86,7 +86,7 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Adgangskode', message: 'Adgangskode til kiosk login' },
 		{ name: 'Kortlæser #', message: 'Kioskens tilknyttede kortlæser' },
 		{ name: 'Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
-		{ name: 'Deaktiverede aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
 	],
 	Kortlæsere: [
 		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation' },
