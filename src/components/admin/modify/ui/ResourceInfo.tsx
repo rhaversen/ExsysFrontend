@@ -34,9 +34,9 @@ const info: Record<string, string[]> = {
 	Kortlæsere: [
 		'Repræsenterer systemets SumUp-kortlæsere, hvortil kortbetalinger tilsendes.',
 		'Kan knyttes til en kiosk for at muliggøre kortbetaling.',
-		'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes i systemet. Hvis enheden har et nummer trykt på den, indtastes det også i systemet. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter trykkes på den fysiske enhed for nem identifikation.',
+		'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes i systemet. Hvis enheden har et nummer trykt på den, indtastes det også i systemet. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.',
 		'Ved fjernelse af en enhed skal kortlæseren slettes i systemet, og derefter frakoples API\'en på SumUp-enheden',
-		'Kortlæserens nummer (#) er trykt på den fysiske enhed.'
+		'Kortlæserens nummer (#) er printet på den fysiske enhed.'
 	],
 	Produkter: [
 		'Primære bestillingsmuligheder, der vises efter valg af aktivitet og spisested.',
@@ -68,9 +68,9 @@ const propInfo: Record<string, PropDefinition[]> = {
 	],
 	Aktiviteter: [
 		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken' },
+		{ name: 'Deaktiverede Produkter', message: 'Produkter som ikke kan vælges for aktiviteten' },
 		{ name: 'Fremhævede Spisesteder', message: 'Spisesteder som vises som foreslået' },
-		{ name: 'Deaktiverede spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten' },
-		{ name: 'Deaktiverede produkter', message: 'Produkter som ikke kan vælges for aktiviteten' },
+		{ name: 'Deaktiverede Spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten' },
 		{ name: 'Fremhævende Kiosker', message: 'Kiosker som vil vise aktiviteten som foreslået' },
 		{ name: 'Deaktiverede Kiosker', message: 'Kiosker hvor aktiviteten ikke kan vælges' }
 	],
@@ -78,19 +78,20 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken' },
 		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken' },
 		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået' },
-		{ name: 'Deaktiverede aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
 	],
 	Kiosker: [
 		{ name: 'Navn', message: 'Kioskens visningsnavn for intern identifikation' },
 		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login' },
 		{ name: 'Adgangskode', message: 'Adgangskode til kiosk login' },
-		{ name: 'Kortlæser #', message: 'Kioskens tilknyttede kortlæser' },
-		{ name: 'Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
-		{ name: 'Deaktiverede aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
+		{ name: 'Tilknyttet Kortlæser', message: 'Kioskens tilknyttede kortlæser' },
+		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
 	],
 	Kortlæsere: [
 		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation' },
-		{ name: 'Kiosk', message: 'Kioskens tilknyttede kortlæser' }
+		{ name: 'Parring Kode', message: 'Indtastet parring kode fra SumUp-enheden' },
+		{ name: 'Tilknyttet Kiosk', message: 'Kortlæserens tilknyttede kiosk' }
 	],
 	Admins: [
 		{ name: 'Brugernavn', message: 'Brugernavnet til admin login' },
@@ -141,7 +142,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 				{props.map((prop, index) => (
 					<div
 						key={index}
-						className="flex flex-col p-2 flex-1"
+						className="flex flex-col items-center text-center p-2 flex-1"
 					>
 						<span className="font-semibold text-gray-800">{prop.name}</span>
 						<span className="whitespace-normal">{prop.message}</span>
