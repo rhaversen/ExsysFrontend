@@ -203,7 +203,23 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 2. Fremhævede Spisesteder */}
+					{/* 2. Deaktiverede produkter */}
+					<div className="flex flex-col items-center p-1 flex-1">
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
+						<div className="flex flex-col items-center justify-center">
+							{(activity.disabledProducts ?? []).length === 0 && (
+								<div className="text-gray-500 text-sm">{'Ingen'}</div>
+							)}
+							<ItemsDisplay
+								items={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
+								editable={true}
+								onDeleteItem={handleDeleteDisabledProduct}
+								onShowItems={() => { setShowDisabledProducts(true) }}
+							/>
+						</div>
+					</div>
+
+					{/* 3. Fremhævede Spisesteder */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
@@ -219,7 +235,7 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 3. Deaktiverede Spisesteder */}
+					{/* 4. Deaktiverede Spisesteder */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
@@ -231,22 +247,6 @@ const AddActivity = ({
 								editable={true}
 								onDeleteItem={handleDeleteDisabledRoom}
 								onShowItems={() => { setShowDisabledRooms(true) }}
-							/>
-						</div>
-					</div>
-
-					{/* 4. Deaktiverede produkter */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{(activity.disabledProducts ?? []).length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={products.filter((p) => (activity.disabledProducts ?? []).includes(p._id))}
-								editable={true}
-								onDeleteItem={handleDeleteDisabledProduct}
-								onShowItems={() => { setShowDisabledProducts(true) }}
 							/>
 						</div>
 					</div>
