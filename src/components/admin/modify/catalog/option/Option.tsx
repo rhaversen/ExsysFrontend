@@ -123,7 +123,7 @@ const Option = ({
 							maxLength={20}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !options.some((a) => a.name === v && a._id !== option._id),
+								validate: (v: string) => !options.some((a) => a.name.trim() === v.trim() && a._id !== option._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}

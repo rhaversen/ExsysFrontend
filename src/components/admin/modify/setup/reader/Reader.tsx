@@ -103,7 +103,7 @@ const Reader = ({
 							minLength={5}
 							maxLength={5}
 							validations={[{
-								validate: (v: string) => !readers.some((k) => k.readerTag === v && k._id !== newReader._id),
+								validate: (v: string) => !readers.some((k) => k.readerTag.trim() === v.trim() && k._id !== newReader._id),
 								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
@@ -114,9 +114,17 @@ const Reader = ({
 					</div>
 				</div>
 
+				{/* Pairing Code */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Parring Kode'}</div>
+					<div className="bg-gray-200 text-gray-500 text-center border border-gray-300 rounded px-2 py-1 flex items-center justify-center text-sm">
+						{'Opbrugt ved parring'}
+					</div>
+				</div>
+
 				{/* Assigned Kiosk */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosk'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kiosk'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
 							options={Array.isArray(kiosks)
