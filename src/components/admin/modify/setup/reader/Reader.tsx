@@ -114,6 +114,14 @@ const Reader = ({
 					</div>
 				</div>
 
+				{/* Pairing Code */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Parring Kode'}</div>
+					<div className="bg-gray-200 text-gray-500 text-center border border-gray-300 rounded px-2 py-1 flex items-center justify-center text-sm">
+						{'Opbrugt ved parring'}
+					</div>
+				</div>
+
 				{/* Assigned Kiosk */}
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kiosk'}</div>
