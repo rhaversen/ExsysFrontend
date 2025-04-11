@@ -1,7 +1,7 @@
 'use client'
 
 import { parseUserAgent } from '@/lib/ParsingUtils'
-import { formatDuration, timeSince, timeUntil } from '@/lib/timeUtils'
+import { timeSince, timeUntil } from '@/lib/timeUtils'
 import { type SessionType } from '@/types/backendDataTypes'
 import { type ReactElement, useEffect, useState } from 'react'
 
@@ -14,16 +14,12 @@ const SessionItem = ({
 	currentSessionId: string | null
 	onDelete: (sessionId: string) => void
 }): ReactElement => {
-	const [sessionDurationFormatted, setSessionDurationFormatted] = useState<string>('')
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
 	const [loginTimeAgo, setLoginTimeAgo] = useState<string>('')
 	const [sessionExpiresIn, setSessionExpiresIn] = useState<string | null>('')
 
 	useEffect(() => {
 		const updateTimes = (): void => {
-			const sessionDurationMs =
-				new Date(session.lastActivity).getTime() - new Date(session.loginTime).getTime()
-			setSessionDurationFormatted(formatDuration(sessionDurationMs))
 			setLastActivityAgo(timeSince(session.lastActivity))
 			setLoginTimeAgo(timeSince(session.loginTime))
 			setSessionExpiresIn(session.stayLoggedIn ? timeUntil(session.sessionExpires ?? '') : null)
@@ -89,9 +85,6 @@ const SessionItem = ({
 					</p>
 					<p>
 						<strong>{'Sidste Aktivitet:'}</strong> {lastActivityAgo}
-					</p>
-					<p>
-						<strong>{'Session Længde:'}</strong> {sessionDurationFormatted}
 					</p>
 					<p>
 						<strong>{'Session Udløber:'}</strong> {sessionExpiresIn ?? 'Ved Lukning'}

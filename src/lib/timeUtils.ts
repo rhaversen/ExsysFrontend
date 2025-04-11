@@ -166,20 +166,6 @@ export function timeUntil (dateString: string | number): string {
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
 
-export function formatDuration (ms: number): string {
-	const totalSeconds = Math.floor(ms / 1000)
-	const days = Math.floor(totalSeconds / 86400)
-	const hours = Math.floor((totalSeconds % 86400) / 3600)
-	const minutes = Math.floor((totalSeconds % 3600) / 60)
-
-	const parts = []
-	if (days > 0) parts.push(`${days} dag${days !== 1 ? 'e' : ''}`)
-	if (hours > 0) parts.push(`${hours} time${hours !== 1 ? 'r' : ''}`)
-	if (minutes > 0) parts.push(`${minutes} minut${minutes !== 1 ? 'ter' : ''}`)
-
-	return parts.join(', ') ?? 'Mindre end et minut'
-}
-
 export function sortProductsByOrderwindow (products: ProductType[]): ProductType[] {
 	return products.sort((a, b) => {
 		const aOrderWindow = a.orderWindow
