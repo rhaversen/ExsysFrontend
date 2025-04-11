@@ -172,9 +172,9 @@ const Kiosk = ({
 					</div>
 				</div>
 
-				{/* Activities */}
+				{/* Fremhævede Activities */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{newKiosk.activities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>

@@ -85,7 +85,7 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login' },
 		{ name: 'Adgangskode', message: 'Adgangskode til kiosk login' },
 		{ name: 'Kortlæser #', message: 'Kioskens tilknyttede kortlæser' },
-		{ name: 'Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
+		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
 		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
 	],
 	Kortlæsere: [
