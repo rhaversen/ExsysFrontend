@@ -112,7 +112,7 @@ const AddReader = ({
 							minLength={5}
 							maxLength={5}
 							validations={[{
-								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
+								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag.trim() === v.trim()),
 								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"

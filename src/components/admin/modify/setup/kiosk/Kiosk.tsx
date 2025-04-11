@@ -83,7 +83,7 @@ const Kiosk = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.name === v && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim() && k._id !== newKiosk._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
@@ -108,7 +108,7 @@ const Kiosk = ({
 							maxLength={5}
 							type="number"
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.kioskTag === v && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.kioskTag.trim() === v.trim() && k._id !== newKiosk._id),
 								message: 'Kiosk # er allerede i brug'
 							}]}
 							onValidationChange={handleValidationChange}

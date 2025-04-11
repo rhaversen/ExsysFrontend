@@ -154,7 +154,7 @@ const Activity = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !activities.some((a) => a.name === v && a._id !== activity._id),
+								validate: (v: string) => !activities.some((a) => a.name.trim() === v.trim() && a._id !== activity._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}

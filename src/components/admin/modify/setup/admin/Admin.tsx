@@ -63,7 +63,7 @@ const Admin = ({
 							required={true}
 							maxLength={50}
 							validations={[{
-								validate: (v: string) => !admins.some((a) => a.name === v && a._id !== newAdmin._id),
+								validate: (v: string) => !admins.some((a) => a.name.trim() === v.trim() && a._id !== newAdmin._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}

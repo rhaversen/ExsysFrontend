@@ -142,7 +142,7 @@ const AddKiosk = ({
 								minSize={10}
 								required={true}
 								validations={[{
-									validate: (v: string) => !kiosks.some((k) => k.name === v),
+									validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim()),
 									message: 'Navn er allerede i brug'
 								}]}
 								onChange={handleNameChange}
@@ -166,7 +166,7 @@ const AddKiosk = ({
 								minLength={5}
 								maxLength={5}
 								validations={[{
-									validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag === v),
+									validate: (v: string) => v === '' || !kiosks.some((k) => k.kioskTag.trim() === v.trim()),
 									message: 'Kiosk # er allerede i brug'
 								}]}
 								type="number"
