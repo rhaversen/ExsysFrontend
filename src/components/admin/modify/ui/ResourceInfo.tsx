@@ -90,7 +90,7 @@ const propInfo: Record<string, PropDefinition[]> = {
 	],
 	Kortlæsere: [
 		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation' },
-		{ name: 'Kiosk', message: 'Kioskens tilknyttede kortlæser' }
+		{ name: 'Tilknyttet Kiosk', message: 'Kortlæserens tilknyttede kiosk' }
 	],
 	Admins: [
 		{ name: 'Brugernavn', message: 'Brugernavnet til admin login' },
