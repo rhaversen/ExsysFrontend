@@ -83,7 +83,7 @@ const Kiosk = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.name === v && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim() && k._id !== newKiosk._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
@@ -108,7 +108,7 @@ const Kiosk = ({
 							maxLength={5}
 							type="number"
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.kioskTag === v && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.kioskTag.trim() === v.trim() && k._id !== newKiosk._id),
 								message: 'Kiosk # er allerede i brug'
 							}]}
 							onValidationChange={handleValidationChange}
@@ -146,7 +146,7 @@ const Kiosk = ({
 
 				{/* Reader */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser #'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kortlæser'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
 							options={
@@ -172,9 +172,9 @@ const Kiosk = ({
 					</div>
 				</div>
 
-				{/* Activities */}
+				{/* Fremhævede Activities */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{newKiosk.activities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>

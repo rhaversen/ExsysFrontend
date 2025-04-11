@@ -136,7 +136,7 @@ const AddOption = ({
 								minSize={5}
 								maxLength={50}
 								validations={[{
-									validate: (v: string) => !options.some((a) => a.name === v),
+									validate: (v: string) => !options.some((a) => a.name.trim() === v.trim()),
 									message: 'Navn er allerede i brug'
 								}]}
 								editable={true}
@@ -154,7 +154,6 @@ const AddOption = ({
 								fieldName="price"
 								initialText="0"
 								placeholder="Pris"
-								italic={true}
 								required={true}
 								minSize={2}
 								type="number"

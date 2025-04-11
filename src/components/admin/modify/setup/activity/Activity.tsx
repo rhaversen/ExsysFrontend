@@ -154,7 +154,7 @@ const Activity = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !activities.some((a) => a.name === v && a._id !== activity._id),
+								validate: (v: string) => !activities.some((a) => a.name.trim() === v.trim() && a._id !== activity._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
@@ -163,7 +163,23 @@ const Activity = ({
 					</div>
 				</div>
 
-				{/* 2. Spisesteder */}
+				{/* 2. Deaktiverede Produkter */}
+				<div className="flex flex-col items-center p-1 flex-1">
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
+					<div className="flex flex-col items-center justify-center">
+						{newActivity.disabledProducts.length === 0 && (
+							<div className="text-gray-500 text-sm">{'Ingen'}</div>
+						)}
+						<ItemsDisplay
+							items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
+							editable={isEditing}
+							onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
+							onShowItems={() => { setShowDisabledProducts(true) }}
+						/>
+					</div>
+				</div>
+
+				{/* 3. Spisesteder */}
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 					<div className="flex flex-col items-center justify-center">
@@ -179,7 +195,7 @@ const Activity = ({
 					</div>
 				</div>
 
-				{/* 3. Deaktiverede Spisesteder */}
+				{/* 4. Deaktiverede Spisesteder */}
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
 					<div className="flex flex-col items-center justify-center">
@@ -191,22 +207,6 @@ const Activity = ({
 							editable={isEditing}
 							onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
 							onShowItems={() => { setShowDisabledRooms(true) }}
-						/>
-					</div>
-				</div>
-
-				{/* 4. Deaktiverede Produkter */}
-				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Produkter'}</div>
-					<div className="flex flex-col items-center justify-center">
-						{newActivity.disabledProducts.length === 0 && (
-							<div className="text-gray-500 text-sm">{'Ingen'}</div>
-						)}
-						<ItemsDisplay
-							items={products.filter((p) => newActivity.disabledProducts.includes(p._id))}
-							editable={isEditing}
-							onDeleteItem={(v) => { handleFieldChange('disabledProducts', newActivity.disabledProducts.filter((product) => product !== v._id)) }}
-							onShowItems={() => { setShowDisabledProducts(true) }}
 						/>
 					</div>
 				</div>

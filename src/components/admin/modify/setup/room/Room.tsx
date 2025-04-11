@@ -131,7 +131,7 @@ const Room = ({
 							required={true}
 							maxLength={20}
 							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name === v && room._id !== newRoom._id),
+								validate: (v: string) => !rooms.some((room) => room.name.trim() === v.trim() && room._id !== newRoom._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}
@@ -149,7 +149,6 @@ const Room = ({
 							fieldName="description"
 							initialText={room.description}
 							placeholder="Beskrivelse"
-							italic={true}
 							minSize={10}
 							required={true}
 							maxLength={20}

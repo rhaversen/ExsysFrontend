@@ -352,7 +352,7 @@ export default function Page (): ReactElement {
 					kiosks={kiosks}
 					readers={readers}
 					rooms={rooms}
-					views={selectedView === 'Rediger Katalog' ? ['Produkter', 'Tilvalg'] : ['Aktiviteter', 'Spisesteder', 'Kiosker', 'Kortlæsere', 'Admins', 'Konfiguration']}
+					views={selectedView === 'Rediger Katalog' ? ['Produkter', 'Tilvalg'] : ['Kiosker', 'Aktiviteter', 'Spisesteder', 'Kortlæsere', 'Admins', 'Konfiguration']}
 				/>
 			}
 			{selectedView === 'Login Sessioner' &&

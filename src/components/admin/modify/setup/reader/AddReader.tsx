@@ -102,17 +102,17 @@ const AddReader = ({
 			<div className="flex flex-wrap">
 				{/* 1. Tag */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Tag'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Kortlæser #'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableField
 							fieldName="tag"
-							placeholder="Tag (Automatisk)"
+							placeholder="Kortlæser #"
 							minSize={15}
 							onChange={handleReaderTagChange}
 							minLength={5}
 							maxLength={5}
 							validations={[{
-								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag === v),
+								validate: (v: string) => v === '' || !readers.some((k) => k.readerTag.trim() === v.trim()),
 								message: 'Kortlæser # er allerede i brug'
 							}]}
 							type="number"
@@ -144,7 +144,7 @@ const AddReader = ({
 
 				{/* 3. Kiosk */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyt til Kiosk'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kiosk'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
 							options={
