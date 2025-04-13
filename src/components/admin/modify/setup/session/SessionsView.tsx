@@ -5,7 +5,9 @@ import { type AdminType, type KioskType, type SessionType } from '@/types/backen
 import axios from 'axios'
 import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import SessionItem from './SessionItem'
-import SessionGroup from './SessionGroup' // Import the new component
+import SessionGroup from './SessionGroup'
+import { FaExclamationTriangle } from 'react-icons/fa'
+import { timeSince } from '@/lib/timeUtils'
 
 interface ViewMode {
 	type: 'admin' | 'kiosk'
@@ -175,6 +177,42 @@ const SessionsView = ({
 		return ''
 	}, [viewMode, currentUserId, userMaps])
 
+	// Check if the current view shows a kiosk with multiple sessions
+	const showKioskMultipleSessionsWarning = useMemo(() => {
+		const { type, userId, showAll } = viewMode
+		return type === 'kiosk' && !showAll && userId !== null &&
+			(groupedSessions.kioskGroups[userId]?.length ?? 0) > 1
+	}, [viewMode, groupedSessions])
+
+	// Sort sessions by lastActivity to suggest which one to keep
+	const sortedKioskSessions = useMemo(() => {
+		if (!showKioskMultipleSessionsWarning || viewMode.userId === null) return []
+
+		return [...(groupedSessions.kioskGroups[viewMode.userId] ?? [])]
+			.sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime())
+	}, [showKioskMultipleSessionsWarning, viewMode.userId, groupedSessions])
+
+	// Find kiosks with multiple sessions for the "All Kiosks" view warning
+	const kiosksWithMultipleSessions = useMemo(() => {
+		const result: Array<{
+			userId: string
+			name: string
+			sessionCount: number
+		}> = []
+
+		Object.entries(groupedSessions.kioskGroups).forEach(([userId, sessions]) => {
+			if (sessions.length > 1) {
+				result.push({
+					userId,
+					name: userMaps.kioskMap[userId]?.name ?? 'Ukendt kiosk',
+					sessionCount: sessions.length
+				})
+			}
+		})
+
+		return result.sort((a, b) => b.sessionCount - a.sessionCount)
+	}, [groupedSessions.kioskGroups, userMaps.kioskMap])
+
 	return (
 		<div className="flex">
 			{/* Sidebar */}
@@ -216,6 +254,62 @@ const SessionsView = ({
 							<h2 className="text-2xl font-bold text-gray-800 mb-4">
 								{headerTitle}
 							</h2>
+
+							{/* Warning for All Kiosks View */}
+							{viewMode.type === 'kiosk' && viewMode.showAll && kiosksWithMultipleSessions.length > 0 && (
+								<div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-5">
+									<div className="flex items-start mb-3">
+										<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 flex-shrink-0" size={18} />
+										<div>
+											<h3 className="text-amber-800 font-medium">
+												{`Advarsel: ${kiosksWithMultipleSessions.length} kiosk${kiosksWithMultipleSessions.length > 1 ? 'er' : ''} har flere aktive sessioner`}
+											</h3>
+											<p className="text-amber-700 text-sm">
+												{'Flere aktive sessioner på samme kiosk kan skabe problemer. Undersøg disse kiosker.'}
+											</p>
+										</div>
+									</div>
+
+									<div className="flex flex-wrap gap-2 mt-1">
+										{kiosksWithMultipleSessions.map(kiosk => (
+											<button
+												key={kiosk.userId}
+												onClick={() => { handleSelect('kiosk', kiosk.userId, false) }}
+												className="bg-white border border-amber-300 text-amber-800 rounded px-3 py-1 text-sm hover:bg-amber-100 flex items-center gap-1.5 transition-colors"
+											>
+												<FaExclamationTriangle size={12} />
+												<span>{kiosk.name}</span>
+												<span className="bg-amber-200 text-amber-800 rounded-full w-5 h-5 inline-flex items-center justify-center text-xs">
+													{kiosk.sessionCount}
+												</span>
+											</button>
+										))}
+									</div>
+								</div>
+							)}
+
+							{/* Warning message for kiosks with multiple sessions */}
+							{showKioskMultipleSessionsWarning && (
+								<div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-5 flex items-start">
+									<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 flex-shrink-0" size={18} />
+									<div>
+										<h3 className="text-amber-800 font-medium mb-1">{'Advarsel: Flere aktive sessioner på samme kiosk'}</h3>
+										<p className="text-amber-700 text-sm">
+											{'Det er problematisk at have flere aktive sessioner på samme kiosk, da det kan skabe \r'}
+											{'forvirring og tekniske problemer. Du bør overveje at logge ud af de ældste sessioner og \r'}
+											{'kun beholde den mest aktive session.\r'}
+										</p>
+										{sortedKioskSessions.length > 0 && (
+											<p className="text-amber-700 text-sm mt-2 font-medium">
+												{'Tip: Behold sessionen med seneste aktivitet ('}{' '}
+												{timeSince(sortedKioskSessions[0].lastActivity)} {') og log ud af \r'}
+												{'de øvrige sessioner.\r'}
+											</p>
+										)}
+									</div>
+								</div>
+							)}
+
 							<div className="grid gap-4">
 								{sessionsToDisplay.map(session => (
 									<SessionItem

@@ -1,5 +1,6 @@
 import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
 import { type ReactElement } from 'react'
+import { FaExclamationTriangle } from 'react-icons/fa'
 
 interface ViewMode {
 	type: 'admin' | 'kiosk'
@@ -60,6 +61,7 @@ const SessionGroup = ({
 					const sessionCount = sessionGroups[userId]?.length ?? 0
 					const isUserSelected = viewMode.type === type && viewMode.userId === userId && !viewMode.showAll
 					const isCurrentUser = type === 'admin' && userId === currentUserId
+					const hasMultipleSessions = type === 'kiosk' && sessionCount > 1
 
 					return (
 						<button
@@ -85,6 +87,11 @@ const SessionGroup = ({
 										}`}
 									>
 										{'Dig\r'}
+									</span>
+								)}
+								{hasMultipleSessions && (
+									<span className="ml-2 text-amber-600" title="Flere sessioner på samme kiosk">
+										<FaExclamationTriangle size={14} />
 									</span>
 								)}
 							</div>
