@@ -9,10 +9,12 @@ import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa
 const SessionItem = ({
 	session,
 	currentSessionId,
+	currentSessionIp,
 	onDelete
 }: {
 	session: SessionType
 	currentSessionId: string | null
+	currentSessionIp: string | null
 	onDelete: (sessionId: string) => void
 }): ReactElement => {
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
@@ -44,6 +46,7 @@ const SessionItem = ({
 	} = parseUserAgent(session.userAgent)
 
 	const isCurrentSession = currentSessionId === session._id
+	const isSameIpAsCurrent = currentSessionIp === session.ipAddress
 
 	// Get appropriate device icon
 	const DeviceIcon = (): ReactElement => {
@@ -92,7 +95,17 @@ const SessionItem = ({
 			<div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm text-gray-600">
 				{/* IP Address */}
 				<span className="text-gray-600 font-medium">{'IP:'}</span>
-				<span className="text-gray-800">{session.ipAddress}</span>
+				<span className="text-gray-800 flex items-center">
+					{session.ipAddress}
+					{isSameIpAsCurrent && ( // Display indicator if IPs match
+						<span
+							className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded font-medium"
+							title="Samme IP som din nuværende session"
+						>
+							{'Nuværende IP'}
+						</span>
+					)}
+				</span>
 
 				{/* Login Time */}
 				<span className="text-gray-600 font-medium">{'Logget Ind:'}</span>

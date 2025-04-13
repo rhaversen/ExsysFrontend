@@ -28,6 +28,7 @@ const SessionsView = ({
 	// Core state
 	const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+	const [currentSessionIp, setCurrentSessionIp] = useState<string | null>(null)
 	const [viewMode, setViewMode] = useState<ViewMode>({
 		type: 'admin',
 		userId: null,
@@ -150,6 +151,7 @@ const SessionsView = ({
 					setCurrentUserId(data.userId)
 					setViewMode({ type: 'admin', userId: data.userId, showAll: false })
 				}
+				setCurrentSessionIp(data.ipAddress)
 			})
 			.catch(error => { addError(error) })
 	}, [API_URL, addError])
@@ -200,6 +202,7 @@ const SessionsView = ({
 						userMap={userMaps.kioskMap}
 						sessionGroups={groupedSessions.kioskGroups}
 						viewMode={viewMode}
+						currentUserId={currentUserId}
 						onSelect={handleSelect}
 					/>
 				</div>
@@ -219,6 +222,7 @@ const SessionsView = ({
 										key={session._id}
 										session={session}
 										currentSessionId={currentSessionId}
+										currentSessionIp={currentSessionIp}
 										onDelete={deleteSession}
 									/>
 								))}
