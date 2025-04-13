@@ -178,8 +178,8 @@ const SessionsView = ({
 	return (
 		<div className="flex">
 			{/* Sidebar */}
-			<div className="w-64 bg-gray-100 rounded-lg shadow-md overflow-y-auto mr-6 self-start mt-2 ml-2"> {/* Removed p-4, added mt-2 ml-2 */}
-				<div className="mb-6 border-b pb-4 px-4 pt-4"> {/* Added padding back here for content */}
+			<div className="w-64 bg-gray-100 rounded-lg shadow-md overflow-y-auto mr-6 self-start mt-2 ml-2">
+				<div className="mb-6 border-b pb-4 px-4 pt-4">
 					<SessionGroup
 						title="Administratorer"
 						type="admin"
@@ -193,7 +193,7 @@ const SessionsView = ({
 					/>
 				</div>
 
-				<div className="px-4 pb-4"> {/* Added padding back here for content */}
+				<div className="px-4 pb-4">
 					<SessionGroup
 						title="Kiosker"
 						type="kiosk"

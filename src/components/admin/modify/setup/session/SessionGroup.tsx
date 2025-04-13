@@ -38,16 +38,16 @@ const SessionGroup = ({
 				className={`group py-2 px-3 rounded-md flex items-center mb-2 cursor-pointer transition-colors duration-150 ${
 					isGroupSelected
 						? 'bg-blue-100 text-blue-900 font-bold'
-						: 'text-gray-700 font-semibold hover:bg-gray-200' // Changed hover background to gray-200
+						: 'text-gray-700 font-semibold hover:bg-gray-200'
 				}`}
 				onClick={() => { onSelect(type, null, true) }}
 			>
 				<span className="flex-grow">{title}</span>
 				<span
-					className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 transition-colors duration-150 ${// Added transition
+					className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 transition-colors duration-150 ${
 						isGroupSelected
 							? 'bg-blue-200 text-blue-800'
-							: 'bg-gray-200 text-gray-800 group-hover:bg-gray-300 group-hover:text-gray-900' // Added group-hover styles
+							: 'bg-gray-200 text-gray-800 group-hover:bg-gray-300 group-hover:text-gray-900'
 					}`}
 				>
 					{totalSessionCount}
@@ -65,10 +65,10 @@ const SessionGroup = ({
 						<button
 							type="button"
 							key={userId}
-							className={`group w-full text-left px-3 py-1 rounded flex items-center transition-colors duration-150 ${// Added transition
+							className={`group w-full text-left px-3 py-1 rounded flex items-center transition-colors duration-150 ${
 								isUserSelected
 									? 'bg-blue-100 text-blue-900'
-									: 'text-gray-800 hover:bg-gray-200' // Restored hover:bg-gray-200
+									: 'text-gray-800 hover:bg-gray-200'
 							}`}
 							onClick={() => { onSelect(type, userId, false) }}
 						>
@@ -78,10 +78,10 @@ const SessionGroup = ({
 								</span>
 								{isCurrentUser && (
 									<span
-										className={`ml-2 flex-shrink-0 text-xs px-1.5 rounded-sm transition-colors duration-150 ${// Added transition
+										className={`ml-2 flex-shrink-0 text-xs px-1.5 rounded-sm transition-colors duration-150 ${
 											isUserSelected
 												? 'bg-blue-200 text-blue-800'
-												: 'bg-gray-200 text-gray-700 group-hover:bg-gray-300 group-hover:text-gray-900' // Added group-hover styles
+												: 'bg-gray-200 text-gray-700 group-hover:bg-gray-300 group-hover:text-gray-900'
 										}`}
 									>
 										{'Dig\r'}
@@ -89,8 +89,8 @@ const SessionGroup = ({
 								)}
 							</div>
 							<span
-								className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 flex-shrink-0 transition-colors duration-150 ${// Added transition
-									isUserSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-800 group-hover:bg-gray-300 group-hover:text-gray-900' // Added group-hover styles
+								className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 flex-shrink-0 transition-colors duration-150 ${
+									isUserSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-800 group-hover:bg-gray-300 group-hover:text-gray-900'
 								}`}
 							>
 								{sessionCount}
