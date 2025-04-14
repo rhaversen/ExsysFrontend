@@ -52,50 +52,50 @@ const info: Record<string, string[]> = {
 // Hardcoded prop definitions for each resource type
 const propInfo: Record<string, PropDefinition[]> = {
 	Produkter: [
-		{ name: 'Aktiv', message: 'Om produktet vises på kiosken' },
-		{ name: 'Billede', message: 'Visuel repræsentation' },
-		{ name: 'Navn', message: 'Produktets visningsnavn på kiosken' },
-		{ name: 'Pris', message: 'Beløbet der opkræves for produktet' },
-		{ name: 'Bestillingsvindue', message: 'Tidsrum hvor produktet vises på kiosken' },
-		{ name: 'Tilvalg', message: 'Tilvalg der er foreslået for produktet' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor produktet ikke kan vælges' }
+		{ name: 'Aktiv', message: 'Bestemmer om produktet vises på kiosken.' },
+		{ name: 'Billede', message: 'Visuel repræsentation.' },
+		{ name: 'Navn', message: 'Produktets visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Pris', message: 'Beløbet der opkræves for produktet.' },
+		{ name: 'Bestillingsvindue', message: 'Tidsrum hvor produktet vises på kiosken.' },
+		{ name: 'Tilvalg', message: 'Tilvalg der vises som foreslået for produktet.' },
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor produktet ikke vises.' }
 	],
 	Tilvalg: [
-		{ name: 'Billede', message: 'Visuel repræsentation' },
-		{ name: 'Navn', message: 'Tilvalgets visningsnavn på kiosken' },
-		{ name: 'Pris', message: 'Beløbet der opkræves for tilvalget' },
-		{ name: 'Produkter', message: 'Produkter hvor tilvalget kan vælges' }
+		{ name: 'Billede', message: 'Visuel repræsentation.' },
+		{ name: 'Navn', message: 'Tilvalgets visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Pris', message: 'Beløbet der opkræves for tilvalget.' },
+		{ name: 'Produkter', message: 'Produkter hvor tilvalget vises som en tilkøbsmulighed.' }
 	],
 	Aktiviteter: [
-		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken' },
-		{ name: 'Deaktiverede Produkter', message: 'Produkter som ikke kan vælges for aktiviteten' },
-		{ name: 'Fremhævede Spisesteder', message: 'Spisesteder som vises som foreslået' },
-		{ name: 'Deaktiverede Spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten' },
-		{ name: 'Fremhævende Kiosker', message: 'Kiosker som vil vise aktiviteten som foreslået' },
-		{ name: 'Deaktiverede Kiosker', message: 'Kiosker hvor aktiviteten ikke kan vælges' }
+		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Deaktiverede Produkter', message: 'Produkter som ikke kan vælges for aktiviteten.' },
+		{ name: 'Fremhævede Spisesteder', message: 'Spisesteder som vises som foreslået.' },
+		{ name: 'Deaktiverede Spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten.' },
+		{ name: 'Fremhævende Kiosker', message: 'Kiosker som vil vise aktiviteten som foreslået.' },
+		{ name: 'Deaktiverede Kiosker', message: 'Kiosker hvor aktiviteten ikke kan vælges.' }
 	],
 	Spisesteder: [
-		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken' },
-		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken' },
-		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges' }
+		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken. Burde forklare lokationen af spisestedet.' },
+		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået.' },
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges.' }
 	],
 	Kiosker: [
-		{ name: 'Navn', message: 'Kioskens visningsnavn for intern identifikation' },
-		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login' },
-		{ name: 'Adgangskode', message: 'Adgangskode til kiosk login' },
-		{ name: 'Tilknyttet Kortlæser', message: 'Kioskens tilknyttede kortlæser' },
-		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges' }
+		{ name: 'Navn', message: 'Navn til intern identificering. Kioskens navn bør gøre det nemt at identificere den, f.eks. ved at angive placering eller funktion.' },
+		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login.' },
+		{ name: 'Adgangskode', message: 'Adgangskode til kiosk login.' },
+		{ name: 'Tilknyttet Kortlæser', message: 'Kioskens tilknyttede kortlæser.' },
+		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået.' },
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges.' }
 	],
 	Kortlæsere: [
-		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation' },
-		{ name: 'Parring Kode', message: 'Indtastet parring kode fra SumUp-enheden' },
-		{ name: 'Tilknyttet Kiosk', message: 'Kortlæserens tilknyttede kiosk' }
+		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation.' },
+		{ name: 'Parring Kode', message: 'Indtastet parring kode fra SumUp-enheden.' },
+		{ name: 'Tilknyttet Kiosk', message: 'Kortlæserens tilknyttede kiosk.' }
 	],
 	Admins: [
-		{ name: 'Brugernavn', message: 'Brugernavnet til admin login' },
-		{ name: 'Adgangskode', message: 'Adgangskoden til admin login' }
+		{ name: 'Brugernavn', message: 'Brugernavnet til admin login.' },
+		{ name: 'Adgangskode', message: 'Adgangskoden til admin login.' }
 	]
 }
 
