@@ -9,12 +9,14 @@ import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa
 const SessionItem = ({
 	session,
 	currentSessionId,
-	currentSessionIp,
+	currentPublicIp,
+	isLoadingIp,
 	onDelete
 }: {
 	session: SessionType
 	currentSessionId: string | null
-	currentSessionIp: string | null
+	currentPublicIp: string | null
+	isLoadingIp: boolean
 	onDelete: (sessionId: string) => void
 }): ReactElement => {
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
@@ -46,7 +48,7 @@ const SessionItem = ({
 	} = parseUserAgent(session.userAgent)
 
 	const isCurrentSession = currentSessionId === session._id
-	const isSameIpAsCurrent = currentSessionIp === session.ipAddress
+	const isSameIpAsCurrent = !isLoadingIp && currentPublicIp === session.ipAddress
 
 	// Get appropriate device icon
 	const DeviceIcon = (): ReactElement => {
@@ -97,14 +99,20 @@ const SessionItem = ({
 				<span className="text-gray-600 font-medium">{'IP:'}</span>
 				<span className="text-gray-800 flex items-center">
 					{session.ipAddress}
-					{isSameIpAsCurrent && ( // Display indicator if IPs match
-						<span
-							className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded font-medium"
-							title="Samme IP som din nuværende session"
-						>
-							{'Nuværende IP'}
-						</span>
-					)}
+					{isLoadingIp
+						? (
+							<span className="ml-2 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded font-medium">
+								{'Checker IP...'}
+							</span>
+						)
+						: isSameIpAsCurrent && (
+							<span
+								className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded font-medium"
+								title="Samme IP som din nuværende session"
+							>
+								{'Nuværende IP'}
+							</span>
+						)}
 				</span>
 
 				{/* Login Time */}

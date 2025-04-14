@@ -8,6 +8,7 @@ import SessionItem from './SessionItem'
 import SessionGroup from './SessionGroup'
 import { FaExclamationTriangle } from 'react-icons/fa'
 import { timeSince } from '@/lib/timeUtils'
+import { publicIpv4 } from 'public-ip'
 
 interface ViewMode {
 	type: 'admin' | 'kiosk'
@@ -30,7 +31,8 @@ const SessionsView = ({
 	// Core state
 	const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-	const [currentSessionIp, setCurrentSessionIp] = useState<string | null>(null)
+	const [currentPublicIp, setCurrentPublicIp] = useState<string | null>(null)
+	const [isLoadingIp, setIsLoadingIp] = useState<boolean>(true)
 	const [viewMode, setViewMode] = useState<ViewMode>({
 		type: 'admin',
 		userId: null,
@@ -142,6 +144,23 @@ const SessionsView = ({
 		[API_URL, addError]
 	)
 
+	// Get current public IP
+	useEffect(() => {
+		const fetchPublicIp = async (): Promise<void> => {
+			try {
+				setIsLoadingIp(true)
+				const ip = await publicIpv4()
+				setCurrentPublicIp(ip)
+			} catch (error) {
+				console.error('Failed to fetch public IP:', error)
+			} finally {
+				setIsLoadingIp(false)
+			}
+		}
+
+		fetchPublicIp().catch(error => { addError(error) })
+	}, [addError])
+
 	// Get current session on load
 	useEffect(() => {
 		axios.get<SessionType>(`${API_URL}/v1/sessions/current`, {
@@ -153,7 +172,6 @@ const SessionsView = ({
 					setCurrentUserId(data.userId)
 					setViewMode({ type: 'admin', userId: data.userId, showAll: false })
 				}
-				setCurrentSessionIp(data.ipAddress)
 			})
 			.catch(error => { addError(error) })
 	}, [API_URL, addError])
@@ -316,7 +334,8 @@ const SessionsView = ({
 										key={session._id}
 										session={session}
 										currentSessionId={currentSessionId}
-										currentSessionIp={currentSessionIp}
+										currentPublicIp={currentPublicIp}
+										isLoadingIp={isLoadingIp}
 										onDelete={deleteSession}
 									/>
 								))}
