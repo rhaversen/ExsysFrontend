@@ -3,8 +3,6 @@
 import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
-import { LoadingImage } from '@/lib/images'
-import Image from 'next/image'
 import { useSound } from '@/contexts/SoundProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { type RoomType, type ActivityType, type OrderType } from '@/types/backendDataTypes'
@@ -122,18 +120,14 @@ export default function Page (): ReactElement {
 			{allActive.length === 0
 				? (
 					<>
-						<p className="flex justify-center p-10 font-bold text-gray-800 text-2xl">
-							{'Ingen Ordrer 😊'}
-						</p>
-						<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center">
-							<Image
-								src={LoadingImage.src}
-								alt={LoadingImage.alt}
-								priority
-								draggable="false"
-								width={100}
-								height={100}
-							/>
+
+						<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col justify-center items-center">
+							<div className="text-gray-800 text-2xl">
+								{'Ingen Ordrer 😊'}
+							</div>
+							<div className="text-gray-800 text-lg mt-2">
+								{'Nye ordrer vil automatisk blive vist her'}
+							</div>
 						</div>
 					</>
 				)
