@@ -115,15 +115,15 @@ const SessionsView = ({
 	const sessionsToDisplay = useMemo(() => {
 		const { type, userId, showAll } = viewMode
 
-		if (type === 'admin') {
-			if (showAll) return adminSessions
-			if (userId != null) return groupedSessions.adminGroups[userId] ?? []
-		} else {
-			if (showAll) return kioskSessions
-			if (userId != null) return groupedSessions.kioskGroups[userId] ?? []
+		// Return sessions for a specific user
+		if (!showAll && userId !== null) {
+			if (type === 'admin') return groupedSessions.adminGroups[userId] ?? []
+			else return groupedSessions.kioskGroups[userId] ?? []
 		}
 
-		return []
+		// Return all sessions, but we'll handle the display differently in the render
+		if (type === 'admin') return adminSessions
+		else return kioskSessions
 	}, [viewMode, adminSessions, kioskSessions, groupedSessions])
 
 	// Handler for sidebar item clicks
@@ -231,6 +231,78 @@ const SessionsView = ({
 		return result.sort((a, b) => b.sessionCount - a.sessionCount)
 	}, [groupedSessions.kioskGroups, userMaps.kioskMap])
 
+	// Generate the grouped sessions view for "All Sessions" mode
+	const renderGroupedSessions = (): ReactElement => {
+		const { type } = viewMode
+		const isAdmin = type === 'admin'
+		const userMap = isAdmin ? userMaps.adminMap : userMaps.kioskMap
+		const userGroups = isAdmin ? groupedSessions.adminGroups : groupedSessions.kioskGroups
+
+		// Get sorted user IDs for display order
+		const userIdsToDisplay = Object.keys(userGroups).sort((a, b) => {
+			const nameA = userMap[a]?.name ?? ''
+			const nameB = userMap[b]?.name ?? ''
+			return nameA.localeCompare(nameB)
+		})
+
+		if (userIdsToDisplay.length === 0) {
+			return <div className="text-gray-500">{'Ingen sessioner at vise'}</div>
+		}
+
+		return (
+			<>
+				{userIdsToDisplay.map(userId => {
+					const sessions = userGroups[userId] ?? []
+					const userName = userMap[userId]?.name ?? (isAdmin ? 'Ukendt Administrator' : 'Ukendt Kiosk')
+					const isCurrentUser = isAdmin && userId === currentUserId
+
+					return (
+						<div key={userId} className="mb-8">
+							<div className="mb-3 pb-2 border-b border-gray-400 flex items-center">
+								<div
+									className="flex items-center cursor-pointer group p-1 rounded transition-colors"
+									onClick={() => { handleSelect(type, userId, false) }}
+								>
+									<h3 className="text-lg font-medium text-gray-800 group-hover:text-blue-600">
+										{userName}
+									</h3>
+									{isCurrentUser && (
+										<span className="ml-2 bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded group-hover:bg-blue-100 group-hover:text-blue-800 font-medium">
+											{'Dig'}
+										</span>
+									)}
+									<span className="ml-3 bg-gray-100 text-gray-700 text-sm px-2 py-0.5 rounded group-hover:bg-blue-100 group-hover:text-blue-800">
+										{sessions.length} {sessions.length === 1 ? 'session' : 'sessioner'}
+									</span>
+								</div>
+
+								{type === 'kiosk' && sessions.length > 1 && (
+									<span className="ml-2 flex items-center text-amber-600">
+										<FaExclamationTriangle className="mr-1" size={14} />
+										<span className="text-sm font-medium">{'Flere sessioner'}</span>
+									</span>
+								)}
+							</div>
+
+							<div className="grid gap-4">
+								{sessions.map(session => (
+									<SessionItem
+										key={session._id}
+										session={session}
+										currentSessionId={currentSessionId}
+										currentPublicIp={currentPublicIp}
+										isLoadingIp={isLoadingIp}
+										onDelete={deleteSession}
+									/>
+								))}
+							</div>
+						</div>
+					)
+				})}
+			</>
+		)
+	}
+
 	return (
 		<div className="flex">
 			{/* Sidebar */}
@@ -328,22 +400,28 @@ const SessionsView = ({
 								</div>
 							)}
 
-							<div className="grid gap-4">
-								{sessionsToDisplay.map(session => (
-									<SessionItem
-										key={session._id}
-										session={session}
-										currentSessionId={currentSessionId}
-										currentPublicIp={currentPublicIp}
-										isLoadingIp={isLoadingIp}
-										onDelete={deleteSession}
-									/>
-								))}
+							{/* Render sessions - grouped if showing all, or individual if for a specific user */}
+							{viewMode.showAll
+								? renderGroupedSessions()
+								: (
+									<div className="grid gap-4">
+										{sessionsToDisplay.map(session => (
+											<SessionItem
+												key={session._id}
+												session={session}
+												currentSessionId={currentSessionId}
+												currentPublicIp={currentPublicIp}
+												isLoadingIp={isLoadingIp}
+												onDelete={deleteSession}
+											/>
+										))}
 
-								{sessionsToDisplay.length === 0 && (
-									<div className="text-gray-500">{'Ingen sessioner at vise'}</div>
-								)}
-							</div>
+										{sessionsToDisplay.length === 0 && (
+											<div className="text-gray-500">{'Ingen sessioner at vise'}</div>
+										)}
+									</div>
+								)
+							}
 						</div>
 					)
 					: (
