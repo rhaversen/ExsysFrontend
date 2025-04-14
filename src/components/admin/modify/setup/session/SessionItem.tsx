@@ -133,7 +133,9 @@ const SessionItem = ({
 			</div>
 
 			{/* User Agent Details */}
-			<div className="text-gray-600 w-full text-wrap text-xs mt-3 max-w-full bg-gray-50 p-2 rounded break-all">
+			<div className={`w-full text-wrap text-xs mt-3 max-w-full p-2 rounded break-all ${
+				isCurrentSession ? 'bg-blue-100 text-blue-800' : 'bg-gray-50 text-gray-600'
+			}`}>
 				{session.userAgent}
 			</div>
 		</div>
