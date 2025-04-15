@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import CloseableModal from '@/components/ui/CloseableModal'
+import KioskCircle from '@/components/ui/KioskCircle'
 import dayjs from 'dayjs'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { FiCheck, FiX } from 'react-icons/fi'
 
 // Utility: Get next available product time
 function getNextProductAvailableTime (products: ProductType[]): string | null {
@@ -56,6 +56,11 @@ function KioskStatusModalContent ({
 
 	const isClosed = isKioskClosed(kiosk)
 
+	// Get circle content (kiosk tag or first letter of name)
+	const circleContent = (kiosk.kioskTag.length > 0) && kiosk.kioskTag.trim() !== ''
+		? kiosk.kioskTag
+		: kiosk.name.charAt(0).toUpperCase()
+
 	const handlePatch = (): void => {
 		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
 		else if (mode === 'until') onPatch({ manualClosed: false, closedUntil: until })
@@ -67,9 +72,12 @@ function KioskStatusModalContent ({
 	return (
 		<CloseableModal canClose onClose={onClose}>
 			<div className="text-center flex flex-col gap-4">
-				<div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl font-bold border-2 shadow mb-2 ${isClosed ? 'bg-red-200 text-red-800 border-red-400' : 'bg-blue-200 text-blue-800 border-blue-400'}`}>
-					{((kiosk.kioskTag.length > 0) && kiosk.kioskTag !== '') ? kiosk.kioskTag : kiosk.name}
-				</div>
+				<KioskCircle
+					isClosed={isClosed}
+					content={circleContent}
+					size="md"
+					className="mx-auto mb-2"
+				/>
 				<h2 className="text-2xl font-bold text-gray-800">{kiosk.name}</h2>
 				{isClosed
 					? (
@@ -77,8 +85,8 @@ function KioskStatusModalContent ({
 							{(kiosk.manualClosed) && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
 							{((kiosk.closedUntil != null) && !kiosk.manualClosed) && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('DD-MM-YYYY HH:mm')}</p>}
 							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
 								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
+								<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
 							</div>
 						</>
 					)
@@ -118,8 +126,8 @@ function KioskStatusModalContent ({
 								)}
 							</div>
 							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching || (mode === 'until' && (until == null))} onClick={handlePatch} className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Luk kiosk'}</button>
 								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
+								<button type="button" disabled={isPatching || (mode === 'until' && (until == null))} onClick={handlePatch} className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Luk kiosk'}</button>
 							</div>
 						</>
 					)}
@@ -172,22 +180,11 @@ function KioskStatusManager ({ kiosks, products }: { kiosks: KioskType[], produc
 
 						return (
 							<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
-								<div className="relative">
-									<div
-										className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold shadow-sm ${
-											closed
-												? 'bg-white text-yellow-700 ring-2 ring-yellow-400'
-												: 'bg-white text-green-700 ring-2 ring-green-400'
-										}`}
-										title={statusText}
-									>
-										<div className={`absolute inset-2 rounded-full opacity-20 ${closed ? 'bg-yellow-400' : 'bg-green-400'}`}></div>
-										<span className="relative z-10">{circleContent}</span>
-									</div>
-									<div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-sm border border-gray-100 bg-white ${closed ? 'text-yellow-600' : 'text-green-600'}`}>
-										{closed ? <FiX size={14} /> : <FiCheck size={14} />}
-									</div>
-								</div>
+								<KioskCircle
+									isClosed={closed}
+									content={circleContent}
+									size="md"
+								/>
 
 								<div className="flex-1">
 									<div className="text-sm font-medium text-gray-700 mb-1 line-clamp-2">{kiosk.name}</div>
