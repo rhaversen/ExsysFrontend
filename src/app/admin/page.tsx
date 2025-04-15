@@ -1,13 +1,12 @@
 'use client'
 
 import { useUser } from '@/contexts/UserProvider'
-import type { OrderType, ConfigsType, KioskType, ProductType } from '@/types/backendDataTypes'
+import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
-import { useConfig } from '@/contexts/ConfigProvider'
 import { GiCookingPot } from 'react-icons/gi'
-import { FaEdit, FaChartBar, FaStore, FaStoreSlash, FaSyncAlt } from 'react-icons/fa'
+import { FaEdit, FaChartBar, FaStoreSlash, FaSyncAlt } from 'react-icons/fa'
 import CloseableModal from '@/components/ui/CloseableModal'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { io, type Socket } from 'socket.io-client'
@@ -16,18 +15,14 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { currentUser } = useUser()
-	const { config } = useConfig()
 	const [pendingOrders, setPendingOrders] = useState<number>(0)
 	const [totalOrdersToday, setTotalOrdersToday] = useState<number>(0)
 	const [hasMounted, setHasMounted] = useState(false)
 	const [showKioskModal, setShowKioskModal] = useState(false)
-	const [kioskAction, setKioskAction] = useState<'open' | 'close'>('open')
 	const [showRefreshModal, setShowRefreshModal] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
-
-	const kioskIsOpen = config?.configs.kioskIsOpen ?? true
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
 		try {
@@ -89,13 +84,15 @@ export default function Page (): ReactElement | null {
 		}
 	}, [API_URL])
 
-	const handleToggleKiosk = async (): Promise<void> => {
+	const handleCloseAllKiosks = async (): Promise<void> => {
 		try {
-			const newValue = !kioskIsOpen
-			await axios.patch<ConfigsType>(
-				`${API_URL}/v1/configs`,
-				{ kioskIsOpen: newValue },
-				{ withCredentials: true }
+			await Promise.all(
+				kiosks.map(async kiosk =>
+					await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
+						{ manualClosed: true, closedUntil: null },
+						{ withCredentials: true }
+					)
+				)
 			)
 			setShowKioskModal(false)
 		} catch (error) {
@@ -112,11 +109,6 @@ export default function Page (): ReactElement | null {
 		} catch (error) {
 			console.error(error)
 		}
-	}
-
-	const openKioskConfirmation = (): void => {
-		setKioskAction(kioskIsOpen ? 'close' : 'open')
-		setShowKioskModal(true)
 	}
 
 	useEffect(() => {
@@ -215,38 +207,23 @@ export default function Page (): ReactElement | null {
 					</button>
 				</div>
 
-				{/* Kiosk Open/Close */}
+				{/* Kiosk Close All */}
 				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-					{kioskIsOpen
-						? <FaStore className="text-green-500 text-2xl" />
-						: <FaStoreSlash className="text-red-500 text-2xl" />
-					}
+					<FaStoreSlash className="text-red-500 text-2xl" />
 					<div className="flex flex-col flex-grow px-4">
 						<span className="text-lg text-gray-800">
-							{'Kioskerne er '}
-							{kioskIsOpen
-								? <span className="text-green-600 font-bold">{'åbne'}</span>
-								: <span className="text-red-600 font-bold">{'lukkede'}</span>
-							}
-							{' for bestillinger'}
+							{'Luk alle kiosker for bestillinger'}
 						</span>
 						<div className="text-sm text-gray-600">
-							{kioskIsOpen
-								? 'Kunder kan bruge kioskerne til at bestille mad'
-								: 'Kunder kan ikke bestille mad via kioskerne'
-							}
+							{'Dette vil lukke alle kiosker manuelt for nye bestillinger, indtil de åbnes igen individuelt.'}
 						</div>
 					</div>
 					<button
 						type="button"
-						onClick={openKioskConfirmation}
-						className={`px-5 py-2 rounded-full text-white transition-all shadow-md ${
-							kioskIsOpen
-								? 'bg-red-500 hover:bg-red-600'
-								: 'bg-green-500 hover:bg-green-600'
-						}`}
+						onClick={() => { setShowKioskModal(true) }}
+						className="px-5 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all shadow-md"
 					>
-						{kioskIsOpen ? 'Luk kioskerne' : 'Åben kioskerne'}
+						{'Luk alle kiosker'}
 					</button>
 				</div>
 
@@ -308,47 +285,23 @@ export default function Page (): ReactElement | null {
 					canClose={true}
 					canComplete={true}
 					onClose={() => { setShowKioskModal(false) }}
-					onComplete={() => { void handleToggleKiosk() }}
+					onComplete={() => { void handleCloseAllKiosks() }}
 				>
 					<div className="text-center flex flex-col gap-4">
-						{kioskAction === 'open'
-							? <FaStore className="text-green-500 text-4xl mx-auto" />
-							: <FaStoreSlash className="text-red-500 text-4xl mx-auto" />
-						}
+						<FaStoreSlash className="text-red-500 text-4xl mx-auto" />
 						<h2 className="text-2xl font-bold text-gray-800">
-							{kioskAction === 'open' ? 'Åben kioskerne?' : 'Luk kioskerne manuelt?'}
+							{'Luk alle kiosker?'}
 						</h2>
 						<div className="text-left">
-							{kioskAction === 'open'
-								? (
-									<>
-										<p className="text-gray-700 text-lg font-medium">
-											{'Kioskerne vil igen automatisk åbne og lukke efter køkkenets åbningstider.'}
-										</p>
-										<p className="text-gray-600">
-											{'Køkkenets åbningstider bestemmes automatisk efter produkternes bestillingsvinduer.'}
-										</p>
-									</>
-								)
-								: (
-									<>
-										<p className="text-gray-700 text-lg font-medium">
-											{'Kioskerne lukkes for nye bestillinger, indtil de åbnes igen manuelt.'}
-										</p>
-										<p className="text-gray-600">
-											{'Kioskerne forbliver logget ind og funktionelle, så de nemt kan åbnes igen.'}
-										</p>
-										<p className="text-gray-600">
-											{'Luk kun kioskerne ved særlige situationer, f.eks. ved tekniske problemer eller hvis køkkenet må lukke akut.'}
-										</p>
-										<p className="text-gray-600">
-											{'Ved normal drift vil kioskerne automatisk åbne og lukke ifølge køkkenets åbningstider.'}
-										</p>
-										<p className="text-gray-600">
-											{'Køkkenets åbningstider bestemmes automatisk efter produkternes bestillingsvinduer.'}
-										</p>
-									</>
-								)}
+							<p className="text-gray-700 text-lg font-medium">
+								{'Dette vil lukke alle kiosker manuelt for nye bestillinger.'}
+							</p>
+							<p className="text-gray-600">
+								{'Kioskerne forbliver logget ind og funktionelle, men kan ikke modtage nye bestillinger.'}
+							</p>
+							<p className="text-gray-600">
+								{'For at åbne en kiosk igen, skal det gøres individuelt under statusoversigten.'}
+							</p>
 						</div>
 						<div className="flex gap-4 justify-center pt-2">
 							<button
@@ -360,14 +313,10 @@ export default function Page (): ReactElement | null {
 							</button>
 							<button
 								type="button"
-								onClick={() => { void handleToggleKiosk() }}
-								className={`px-5 py-2 text-white rounded-md transition ${
-									kioskAction === 'open'
-										? 'bg-green-500 hover:bg-green-600'
-										: 'bg-red-500 hover:bg-red-600'
-								}`}
+								onClick={() => { void handleCloseAllKiosks() }}
+								className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition"
 							>
-								{kioskAction === 'open' ? 'Åben' : 'Luk'}
+								{'Luk alle'}
 							</button>
 						</div>
 					</div>

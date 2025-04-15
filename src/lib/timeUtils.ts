@@ -190,3 +190,46 @@ export function sortProductsByOrderwindow (products: ProductType[]): ProductType
 export function getTimeStringFromOrderwindowTime (orderWindowTime: Time): string {
 	return `${orderWindowTime.hour.toString().padStart(2, '0')}:${orderWindowTime.minute.toString().padStart(2, '0')}`
 }
+
+// Returns the soonest next available product (not currently available), or null if all are available or no products
+export function getNextAvailableProductTime (products: ProductType[]): { product: ProductType, from: Time, date: Date } | null {
+	const now = new Date()
+	let soonest: { product: ProductType, from: Time, date: Date } | null = null
+	for (const product of products) {
+		if (!product.isActive) continue
+		const { from, to } = product.orderWindow
+		const fromDate = new Date()
+		fromDate.setHours(from.hour, from.minute, 0, 0)
+		const toDate = new Date()
+		toDate.setHours(to.hour, to.minute, 0, 0)
+
+		// If currently in window, skip
+		if (isCurrentTimeInOrderWindow(product.orderWindow)) continue
+
+		// Handle overnight window (from > to)
+		let nextFromDate = new Date(fromDate)
+		if (fromDate > toDate) {
+			// If now is before from, today is the next opening
+			if (now < fromDate) {
+				nextFromDate = new Date(fromDate)
+			} else {
+				// Otherwise, next opening is tomorrow
+				nextFromDate = new Date(fromDate)
+				nextFromDate.setDate(nextFromDate.getDate() + 1)
+			}
+		} else {
+			// Not overnight: if now is before from, today is the next opening; else, tomorrow
+			if (now < fromDate) {
+				nextFromDate = new Date(fromDate)
+			} else {
+				nextFromDate = new Date(fromDate)
+				nextFromDate.setDate(nextFromDate.getDate() + 1)
+			}
+		}
+
+		if (soonest === null || nextFromDate < soonest.date) {
+			soonest = { product, from, date: new Date(nextFromDate) }
+		}
+	}
+	return soonest
+}
