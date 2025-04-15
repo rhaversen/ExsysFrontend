@@ -281,16 +281,13 @@ export default function Page (): ReactElement | null {
 							<button
 								type="button"
 								onClick={() => { setShowRefreshModal(false) }}
-								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition"
+								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800"
 							>
 								{'Annuller'}
 							</button>
 							<button
 								type="button"
-								onClick={() => {
-									void handleForceRefresh()
-									setShowRefreshModal(false)
-								}}
+								onClick={() => { void handleForceRefresh() }}
 								className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition"
 							>
 								{'Genindlæs'}
@@ -351,9 +348,9 @@ export default function Page (): ReactElement | null {
 							<button
 								type="button"
 								onClick={() => { setShowKioskModal(false) }}
-								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition"
+								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800"
 							>
-								{'Annuller\r'}
+								{'Annuller'}
 							</button>
 							<button
 								type="button"
