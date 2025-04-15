@@ -1,5 +1,7 @@
 import sortConfig from '@/lib/SortConfig'
 import { useState } from 'react'
+import { sortProductsByOrderwindowFrom, sortProductsByOrderwindowTo } from '@/lib/timeUtils'
+import { type ProductType } from '@/types/backendDataTypes'
 
 export default function useSorting (type: keyof typeof sortConfig | null): {
 	sortField: string
@@ -53,6 +55,14 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 	}
 
 	const sortByField = (items: any[]): any[] => {
+		if (sortField === 'orderWindow.from.hour') {
+			const sorted = sortProductsByOrderwindowFrom([...items as ProductType[]])
+			return sortDirection === 'asc' ? sorted : sorted.reverse()
+		}
+		if (sortField === 'orderWindow.to.hour') {
+			const sorted = sortProductsByOrderwindowTo([...items as ProductType[]])
+			return sortDirection === 'asc' ? sorted : sorted.reverse()
+		}
 		return items.slice().sort((a, b) => {
 			const valA = resolveProperty(a, sortField)
 			const valB = resolveProperty(b, sortField)

@@ -175,7 +175,7 @@ export function isKioskClosed (kiosk: KioskType): boolean {
 	return false
 }
 
-export function sortProductsByOrderwindow (products: ProductType[]): ProductType[] {
+export function sortProductsByOrderwindowFrom (products: ProductType[]): ProductType[] {
 	return products.sort((a, b) => {
 		const aOrderWindow = a.orderWindow
 		const bOrderWindow = b.orderWindow
@@ -184,6 +184,18 @@ export function sortProductsByOrderwindow (products: ProductType[]): ProductType
 		const bFrom = bOrderWindow.from.hour * 60 + bOrderWindow.from.minute
 
 		return aFrom - bFrom
+	})
+}
+
+export function sortProductsByOrderwindowTo (products: ProductType[]): ProductType[] {
+	return products.sort((a, b) => {
+		const aOrderWindow = a.orderWindow
+		const bOrderWindow = b.orderWindow
+
+		const aTo = aOrderWindow.to.hour * 60 + aOrderWindow.to.minute
+		const bTo = bOrderWindow.to.hour * 60 + bOrderWindow.to.minute
+
+		return aTo - bTo
 	})
 }
 
