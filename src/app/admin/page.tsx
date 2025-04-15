@@ -277,7 +277,7 @@ export default function Page (): ReactElement | null {
 								{'Genindlæsningen sker øjeblikkeligt og kan ikke fortrydes.'}
 							</p>
 							<p className="text-gray-600">
-								{'Iganværende bestillinger vil blive nulstillet, men færdige bestillinger vil ikke blive påvirket.'}
+								{'Igangværende bestillinger vil blive nulstillet, men færdige bestillinger vil ikke blive påvirket.'}
 							</p>
 							<p className="text-gray-600">
 								{'Brug kun denne funktion hvis det er nødvendigt, eller uden for åbningstiderne.'}
