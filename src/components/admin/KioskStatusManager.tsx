@@ -57,7 +57,7 @@ function KioskStatusModalContent ({
 					? (
 						<>
 							{(kiosk.manualClosed) && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
-							{((kiosk.closedUntil != null) && !kiosk.manualClosed) && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('DD-MM-YYYY HH:mm')}</p>}
+							{((kiosk.closedUntil != null) && !kiosk.manualClosed) && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('DD/MM YYYY kl. HH:mm')}</p>}
 							<div className="flex gap-4 justify-center pt-2">
 								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
 								<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
@@ -85,7 +85,7 @@ function KioskStatusModalContent ({
 								{mode === 'until' && (
 									<div className="flex flex-col gap-2 mt-2">
 										<label className="text-sm text-gray-700 font-medium">{'Vælg dato og tid:'}</label>
-										<input id="close-until-input" type="datetime-local" className="border rounded px-2 py-1 text-gray-700" value={(until != null) ? dayjs(until).format('YYYY-MM-DDTHH:mm') : ''} onChange={e => { setUntil((e.target.value.length > 0) ? dayjs(e.target.value).toISOString() : null) }} min={dayjs().format('YYYY-MM-DDTHH:mm')} placeholder="Vælg dato og tid" />
+										<input id="close-until-input" type="datetime-local" className="border rounded px-2 py-1 text-gray-700" value={(until != null) ? dayjs(until).format('DD/MM YYYY kl. HH:mm') : ''} onChange={e => { setUntil((e.target.value.length > 0) ? dayjs(e.target.value).toISOString() : null) }} min={dayjs().format('DD/MM YYYY kl. HH:mm')} placeholder="Vælg dato og tid" />
 									</div>
 								)}
 								{mode === 'nextProduct' && (
@@ -93,7 +93,7 @@ function KioskStatusModalContent ({
 										<span className="text-sm text-gray-700 font-medium">
 											{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
 												const t = getNextAvailableProductTime(products)?.date
-												return (t != null) ? dayjs(t).format('DD-MM-YYYY HH:mm') : 'Ingen produkter tilgængelige'
+												return (t != null) ? dayjs(t).format('DD/MM YYYY kl. HH:mm') : 'Ingen produkter tilgængelige'
 											})()}
 										</span>
 									</div>
@@ -142,9 +142,8 @@ function KioskStatusManager ({ kiosks, products }: { kiosks: KioskType[], produc
 						if (kiosk.manualClosed) {
 							statusText = 'Lukket manuelt'
 						} else if (kiosk.closedUntil != null) {
-							const closedUntilTime = dayjs(kiosk.closedUntil).format('HH:mm')
-							const closedUntilDate = dayjs(kiosk.closedUntil).format('DD/MM')
-							statusText = `Lukket indtil ${closedUntilTime} ${closedUntilDate}`
+							const closedUntil = dayjs(kiosk.closedUntil).format('DD/MM YYYY kl. HH:mm')
+							statusText = `Lukket indtil ${closedUntil}`
 						} else {
 							statusText = 'Lukket'
 						}
