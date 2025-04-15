@@ -1,4 +1,4 @@
-import { type ProductType, type OrderWindow, type Time } from '@/types/backendDataTypes'
+import { type ProductType, type OrderWindow, type Time, type KioskType } from '@/types/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
 	const {
@@ -164,6 +164,15 @@ export function timeUntil (dateString: string | number): string {
 	}
 
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
+}
+
+export function isKioskClosed (kiosk: KioskType): boolean {
+	if (kiosk.manualClosed) return true
+	if (kiosk.closedUntil != null) {
+		const closedUntilDate = new Date(kiosk.closedUntil)
+		return closedUntilDate > new Date()
+	}
+	return false
 }
 
 export function sortProductsByOrderwindow (products: ProductType[]): ProductType[] {

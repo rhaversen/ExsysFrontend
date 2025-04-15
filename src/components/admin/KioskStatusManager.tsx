@@ -4,6 +4,7 @@ import KioskCircle from '@/components/ui/KioskCircle'
 import dayjs from 'dayjs'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
+import { isKioskClosed } from '@/lib/timeUtils'
 
 // Utility: Get next available product time
 function getNextProductAvailableTime (products: ProductType[]): string | null {
@@ -20,16 +21,6 @@ function getNextProductAvailableTime (products: ProductType[]): string | null {
 		if (next < soonest) soonest = next
 	}
 	return soonest.toISOString()
-}
-
-// Utility: Is kiosk closed?
-function isKioskClosed (kiosk: KioskType): boolean {
-	if (kiosk.manualClosed) return true
-	if (kiosk.closedUntil != null) {
-		const closedUntilDate = new Date(kiosk.closedUntil)
-		return closedUntilDate > new Date()
-	}
-	return false
 }
 
 // Modal content for kiosk status
