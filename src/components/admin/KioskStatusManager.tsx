@@ -4,24 +4,7 @@ import KioskCircle from '@/components/ui/KioskCircle'
 import dayjs from 'dayjs'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { isKioskClosed } from '@/lib/timeUtils'
-
-// Utility: Get next available product time
-function getNextProductAvailableTime (products: ProductType[]): string | null {
-	if (products.length === 0) return null
-	const now = new Date()
-	const getNextDate = (from: { hour: number, minute: number }): Date => {
-		const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), from.hour, from.minute))
-		if (next < now) next.setUTCDate(next.getUTCDate() + 1)
-		return next
-	}
-	let soonest = getNextDate(products[0].orderWindow.from)
-	for (let i = 1; i < products.length; i++) {
-		const next = getNextDate(products[i].orderWindow.from)
-		if (next < soonest) soonest = next
-	}
-	return soonest.toISOString()
-}
+import { getNextAvailableProductTime, isKioskClosed } from '@/lib/timeUtils'
 
 // Modal content for kiosk status
 function KioskStatusModalContent ({
@@ -55,7 +38,7 @@ function KioskStatusModalContent ({
 	const handlePatch = (): void => {
 		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
 		else if (mode === 'until') onPatch({ manualClosed: false, closedUntil: until })
-		else onPatch({ manualClosed: false, closedUntil: getNextProductAvailableTime(products) })
+		else onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTime(products)?.date.toISOString() ?? null })
 	}
 
 	const handleOpenKiosk = (): void => { onPatch({ manualClosed: false, closedUntil: null }) }
@@ -109,7 +92,7 @@ function KioskStatusModalContent ({
 									<div className="flex flex-col gap-2 mt-2">
 										<span className="text-sm text-gray-700 font-medium">
 											{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-												const t = getNextProductAvailableTime(products)
+												const t = getNextAvailableProductTime(products)?.date
 												return (t != null) ? dayjs(t).format('DD-MM-YYYY HH:mm') : 'Ingen produkter tilgængelige'
 											})()}
 										</span>

@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { FaStoreSlash } from 'react-icons/fa'
+import { FaStore } from 'react-icons/fa'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
+import { getNextAvailableProductTime } from '@/lib/timeUtils'
+import dayjs from 'dayjs'
 
 const AllKiosksStatusManager = ({
 	kiosks,
@@ -14,22 +16,6 @@ const AllKiosksStatusManager = ({
 	const [allKiosksMode, setAllKiosksMode] = useState<'manual' | 'until' | 'nextProduct' | 'open'>('manual')
 	const [allKiosksUntil, setAllKiosksUntil] = useState<string | null>(null)
 	const [isProcessing, setIsProcessing] = useState(false)
-
-	function getNextProductAvailableTime (products: ProductType[]): string | null {
-		if (products.length === 0) return null
-		const now = new Date()
-		const getNextDate = (from: { hour: number, minute: number }): Date => {
-			const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), from.hour, from.minute))
-			if (next < now) next.setUTCDate(next.getUTCDate() + 1)
-			return next
-		}
-		let soonest = getNextDate(products[0].orderWindow.from)
-		for (let i = 1; i < products.length; i++) {
-			const next = getNextDate(products[i].orderWindow.from)
-			if (next < soonest) soonest = next
-		}
-		return soonest.toISOString()
-	}
 
 	const handleAllKiosksAction = async (): Promise<void> => {
 		try {
@@ -55,7 +41,7 @@ const AllKiosksStatusManager = ({
 					)
 				)
 			} else if (allKiosksMode === 'nextProduct') {
-				const until = getNextProductAvailableTime(products)
+				const until = getNextAvailableProductTime(products)?.date.toISOString()
 				if (until == null) return
 				await Promise.all(
 					kiosks.map(async kiosk =>
@@ -86,7 +72,7 @@ const AllKiosksStatusManager = ({
 	return (
 		<div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
 			<div className="flex items-center gap-4">
-				<FaStoreSlash className="text-red-500 text-2xl" />
+				<FaStore className="text-blue-500 text-2xl" />
 				<div className="flex flex-col flex-grow">
 					<span className="text-lg text-gray-800">
 						{'Administrer alle kioskers status'}
@@ -132,8 +118,8 @@ const AllKiosksStatusManager = ({
 				<div className="flex flex-col gap-2 mt-2">
 					<span className="text-sm text-gray-700 font-medium">
 						{'Kioskerne åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-							const t = getNextProductAvailableTime(products)
-							return (t != null) ? t.substring(0, 16).replace('T', ' ') : 'Ingen produkter tilgængelige'
+							const t = getNextAvailableProductTime(products)?.date.toISOString()
+							return dayjs(t).format('DD-MM-YYYY HH:mm') ?? 'Ingen produkter tilgængelige'
 						})()}
 					</span>
 				</div>
