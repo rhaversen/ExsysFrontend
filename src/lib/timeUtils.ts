@@ -206,36 +206,52 @@ export function getTimeStringFromOrderwindowTime (orderWindowTime: Time): string
 // Returns the soonest next available product (not currently available), or null if all are available or no products
 export function getNextAvailableProductTime (products: ProductType[]): { product: ProductType, from: Time, date: Date } | null {
 	const now = new Date()
+	const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds()))
 	let soonest: { product: ProductType, from: Time, date: Date } | null = null
 	for (const product of products) {
 		if (!product.isActive) continue
 		const { from, to } = product.orderWindow
-		const fromDate = new Date()
-		fromDate.setHours(from.hour, from.minute, 0, 0)
-		const toDate = new Date()
-		toDate.setHours(to.hour, to.minute, 0, 0)
+		// Treat from and to as UTC
+		const fromDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), from.hour, from.minute, 0, 0))
+		const toDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), to.hour, to.minute, 0, 0))
 
 		// If currently in window, skip
-		if (isCurrentTimeInOrderWindow(product.orderWindow)) continue
+		// Use UTC time for isCurrentTimeInOrderWindow logic
+		const currentHour = nowUTC.getUTCHours()
+		const currentMinute = nowUTC.getUTCMinutes()
+		const fromHour = from.hour
+		const fromMinute = from.minute
+		const toHour = to.hour
+		const toMinute = to.minute
+		let inWindow: boolean
+		if (fromHour > toHour || (fromHour === toHour && fromMinute > toMinute)) {
+			inWindow = (currentHour > fromHour || (currentHour === fromHour && currentMinute >= fromMinute)) ||
+				(currentHour < toHour || (currentHour === toHour && currentMinute < toMinute))
+		} else {
+			inWindow = (currentHour >= fromHour && currentHour <= toHour) &&
+				(currentHour === fromHour ? currentMinute >= fromMinute : true) &&
+				(currentHour === toHour ? currentMinute < toMinute : true)
+		}
+		if (inWindow) continue
 
 		// Handle overnight window (from > to)
 		let nextFromDate = new Date(fromDate)
 		if (fromDate > toDate) {
-			// If now is before from, today is the next opening
-			if (now < fromDate) {
+			// If nowUTC is before from, today is the next opening
+			if (nowUTC < fromDate) {
 				nextFromDate = new Date(fromDate)
 			} else {
 				// Otherwise, next opening is tomorrow
 				nextFromDate = new Date(fromDate)
-				nextFromDate.setDate(nextFromDate.getDate() + 1)
+				nextFromDate.setUTCDate(nextFromDate.getUTCDate() + 1)
 			}
 		} else {
-			// Not overnight: if now is before from, today is the next opening; else, tomorrow
-			if (now < fromDate) {
+			// Not overnight: if nowUTC is before from, today is the next opening; else, tomorrow
+			if (nowUTC < fromDate) {
 				nextFromDate = new Date(fromDate)
 			} else {
 				nextFromDate = new Date(fromDate)
-				nextFromDate.setDate(nextFromDate.getDate() + 1)
+				nextFromDate.setUTCDate(nextFromDate.getUTCDate() + 1)
 			}
 		}
 
