@@ -154,12 +154,14 @@ export default function Page (): ReactElement | null {
 
 	return (
 		<main className="p-8 flex flex-col items-center">
-			{/* Welcome and Status Section */}
 			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl">
+
+				{/* Welcome */}
 				<p className="text-3xl font-bold text-gray-800">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
 
+				{/* Statistics section */}
 				<div className="grid grid-cols-2 gap-4">
 					<div className="bg-blue-50 p-4 rounded-lg">
 						<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
@@ -171,9 +173,29 @@ export default function Page (): ReactElement | null {
 					</div>
 				</div>
 
-				<KioskStatusManager kiosks={kiosks} products={products} />
+				{/* Task selection buttons */}
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-2xl">
+					<Link href="/admin/kitchen" className="w-full">
+						<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+							<GiCookingPot className="w-12 h-12 mb-3"/>
+							<span className="text-lg font-medium">{'Se bestillinger'}</span>
+						</div>
+					</Link>
+					<Link href="/admin/modify" className="w-full">
+						<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+							<FaEdit className="w-12 h-12 mb-3"/>
+							<span className="text-lg font-medium">{'Rediger opsætning'}</span>
+						</div>
+					</Link>
+					<Link href="/admin/statistics" className="w-full">
+						<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+							<FaChartBar className="w-12 h-12 mb-3"/>
+							<span className="text-lg font-medium">{'Se statistik'}</span>
+						</div>
+					</Link>
+				</div>
 
-				{/* Kiosk Refresh Status */}
+				{/* Kiosk Refresh */}
 				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
 					<FaSyncAlt className="text-blue-500 text-2xl" />
 					<div className="flex flex-col flex-grow px-4">
@@ -193,7 +215,7 @@ export default function Page (): ReactElement | null {
 					</button>
 				</div>
 
-				{/* Kiosk Open/Close Status */}
+				{/* Kiosk Open/Close */}
 				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
 					{kioskIsOpen
 						? <FaStore className="text-green-500 text-2xl" />
@@ -228,27 +250,11 @@ export default function Page (): ReactElement | null {
 					</button>
 				</div>
 
-				{/* Task selection buttons with grid layout and icons */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-2xl">
-					<Link href="/admin/kitchen" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<GiCookingPot className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se bestillinger'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/modify" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaEdit className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Rediger opsætning'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/statistics" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaChartBar className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se statistik'}</span>
-						</div>
-					</Link>
-				</div>
+				{/* Kiosk Status */}
+				<KioskStatusManager
+					kiosks={kiosks}
+					products={products}
+				/>
 			</div>
 
 			{showRefreshModal && (

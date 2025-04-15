@@ -153,62 +153,59 @@ function KioskStatusManager ({ kiosks, products }: { kiosks: KioskType[], produc
 	}
 
 	return (
-		<div className="flex flex-col w-full max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-			<h2 className="text-lg font-medium text-gray-800 px-6 py-4 border-b border-gray-100">{'Kiosk Oversigt'}</h2>
-			<div className="p-6">
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					{kiosks.map(kiosk => {
-						const closed = isKioskClosed(kiosk)
-						// Show tag inside circle if available, otherwise first letter of kiosk name
-						const circleContent = (kiosk.kioskTag.length > 0) && kiosk.kioskTag.trim() !== ''
-							? kiosk.kioskTag
-							: kiosk.name.charAt(0).toUpperCase()
+		<div className="flex flex-col w-full max-w-2xl mx-auto">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				{kiosks.map(kiosk => {
+					const closed = isKioskClosed(kiosk)
+					// Show tag inside circle if available, otherwise first letter of kiosk name
+					const circleContent = (kiosk.kioskTag.length > 0) && kiosk.kioskTag.trim() !== ''
+						? kiosk.kioskTag
+						: kiosk.name.charAt(0).toUpperCase()
 
-						// Create appropriate status text based on why kiosk is closed
-						let statusText = 'Åben'
-						if (closed) {
-							if (kiosk.manualClosed) {
-								statusText = 'Lukket manuelt'
-							} else if (kiosk.closedUntil != null) {
-								const closedUntilTime = dayjs(kiosk.closedUntil).format('HH:mm')
-								const closedUntilDate = dayjs(kiosk.closedUntil).format('DD/MM')
-								statusText = `Lukket indtil ${closedUntilTime} ${closedUntilDate}`
-							} else {
-								statusText = 'Lukket'
-							}
+					// Create appropriate status text based on why kiosk is closed
+					let statusText = 'Åben'
+					if (closed) {
+						if (kiosk.manualClosed) {
+							statusText = 'Lukket manuelt'
+						} else if (kiosk.closedUntil != null) {
+							const closedUntilTime = dayjs(kiosk.closedUntil).format('HH:mm')
+							const closedUntilDate = dayjs(kiosk.closedUntil).format('DD/MM')
+							statusText = `Lukket indtil ${closedUntilTime} ${closedUntilDate}`
+						} else {
+							statusText = 'Lukket'
 						}
+					}
 
-						return (
-							<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
-								<KioskCircle
-									isClosed={closed}
-									content={circleContent}
-									size="md"
-								/>
+					return (
+						<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
+							<KioskCircle
+								isClosed={closed}
+								content={circleContent}
+								size="md"
+							/>
 
-								<div className="flex-1">
-									<div className="text-sm font-medium text-gray-700 mb-1 line-clamp-2">{kiosk.name}</div>
-									<div className="flex items-center gap-2">
-										<span className="text-xs text-gray-500">{statusText}</span>
-										<button
-											type="button"
-											disabled={isPatching}
-											onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
-											className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-												closed
-													? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
-													: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
-											} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-											aria-label={closed ? 'Åben kiosk' : 'Luk kiosk'}
-										>
-											{closed ? 'Åben' : 'Luk'}
-										</button>
-									</div>
+							<div className="flex-1">
+								<div className="text-sm font-medium text-gray-700 mb-1 line-clamp-2">{kiosk.name}</div>
+								<div className="flex items-center gap-2">
+									<span className="text-xs text-gray-500">{statusText}</span>
+									<button
+										type="button"
+										disabled={isPatching}
+										onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
+										className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+											closed
+												? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+												: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+										} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
+										aria-label={closed ? 'Åben kiosk' : 'Luk kiosk'}
+									>
+										{closed ? 'Åben' : 'Luk'}
+									</button>
 								</div>
 							</div>
-						)
-					})}
-				</div>
+						</div>
+					)
+				})}
 			</div>
 			{showModal && (selectedKiosk != null) && (
 				<KioskStatusModalContent
