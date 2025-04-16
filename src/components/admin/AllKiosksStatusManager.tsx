@@ -21,6 +21,18 @@ const AllKiosksStatusManager = ({
 	const [isProcessing, setIsProcessing] = useState(false)
 	const { addError } = useError()
 
+	// Check if there is any available products
+	const hasAvailableProducts = products.some(p => p.isActive)
+
+	// Helper to format ISO string to local datetime-local value
+	const getLocalDateTimeValue = (isoString: string | null): string => {
+		if (isoString == null) return ''
+		const date = new Date(isoString)
+		const tzOffset = date.getTimezoneOffset() * 60000
+		const localISO = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
+		return localISO
+	}
+
 	const handleAllKiosksAction = async (): Promise<void> => {
 		try {
 			if (API_URL == null) return
@@ -73,6 +85,9 @@ const AllKiosksStatusManager = ({
 		}
 	}
 
+	const now = new Date()
+	const isUntilInPast = allKiosksMode === 'until' && allKiosksUntil != null && new Date(allKiosksUntil) <= now
+
 	return (
 		<div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
 			<div className="flex items-center gap-4">
@@ -111,9 +126,9 @@ const AllKiosksStatusManager = ({
 						id="close-until-all-input"
 						type="datetime-local"
 						className="border rounded px-2 py-1 text-gray-700"
-						value={(allKiosksUntil != null) ? allKiosksUntil.substring(0, 16) : ''}
+						value={getLocalDateTimeValue(allKiosksUntil)}
 						onChange={e => { setAllKiosksUntil((e.target.value.length > 0) ? new Date(e.target.value).toISOString() : null) }}
-						min={new Date().toISOString().substring(0, 16)}
+						min={dayjs().format('YYYY-MM-DDTHH:mm')}
 						placeholder="Vælg dato og tid"
 					/>
 				</div>
@@ -121,17 +136,22 @@ const AllKiosksStatusManager = ({
 			{allKiosksMode === 'nextProduct' && (
 				<div className="flex flex-col gap-2 mt-2">
 					<span className="text-sm text-gray-700 font-medium">
-						{'Kioskerne åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-							const t = getNextAvailableProductTimeLocal(products)?.date.toISOString()
-							return dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') ?? 'Ingen produkter tilgængelige'
-						})()}
+						<div>
+							{'Kioskerne åbner automatisk når næste produkt bliver tilgængeligt:'}
+						</div>
+						<div>
+							{(() => {
+								const t = getNextAvailableProductTimeLocal(products)?.date
+								return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
+							})()}
+						</div>
 					</span>
 				</div>
 			)}
 			<div className="flex gap-4 justify-end pt-2">
 				<button
 					type="button"
-					disabled={isProcessing || (allKiosksMode === 'until' && (allKiosksUntil == null))}
+					disabled={isProcessing || (allKiosksMode === 'until' && (allKiosksUntil == null)) || (allKiosksMode === 'until' && isUntilInPast) || (allKiosksMode === 'nextProduct' && !hasAvailableProducts)}
 					onClick={() => { void handleAllKiosksAction() }}
 					className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition disabled:opacity-50"
 				>

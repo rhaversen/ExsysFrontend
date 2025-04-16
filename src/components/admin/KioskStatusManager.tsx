@@ -33,10 +33,22 @@ function KioskStatusModalContent ({
 
 	const isClosed = isKioskClosed(kiosk)
 
+	// Check if there is any available products
+	const hasAvailableProducts = products.some(p => p.isActive)
+
 	// Get circle content (kiosk tag or first letter of name)
 	const circleContent = (kiosk.kioskTag.length > 0) && kiosk.kioskTag.trim() !== ''
 		? kiosk.kioskTag
 		: kiosk.name.charAt(0).toUpperCase()
+
+	// Helper to format ISO string to local datetime-local value
+	const getLocalDateTimeValue = (isoString: string | null): string => {
+		if (isoString == null) return ''
+		const date = new Date(isoString)
+		const tzOffset = date.getTimezoneOffset() * 60000
+		const localISO = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
+		return localISO
+	}
 
 	const handlePatch = (): void => {
 		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
@@ -45,6 +57,8 @@ function KioskStatusModalContent ({
 	}
 
 	const handleOpenKiosk = (): void => { onPatch({ manualClosed: false, closedUntil: null }) }
+
+	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= now
 
 	return (
 		<CloseableModal canClose onClose={onClose}>
@@ -88,23 +102,36 @@ function KioskStatusModalContent ({
 								{mode === 'until' && (
 									<div className="flex flex-col gap-2 mt-2">
 										<label className="text-sm text-gray-700 font-medium">{'Vælg dato og tid:'}</label>
-										<input id="close-until-input" type="datetime-local" className="border rounded px-2 py-1 text-gray-700" value={(until != null) ? dayjs(until).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : ''} onChange={e => { setUntil((e.target.value.length > 0) ? dayjs(e.target.value).toISOString() : null) }} min={dayjs().format('dddd [d.] DD/MM YYYY [kl.] HH:mm')} placeholder="Vælg dato og tid" />
+										<input
+											id="close-until-input"
+											type="datetime-local"
+											className="border rounded px-2 py-1 text-gray-700"
+											value={getLocalDateTimeValue(until)}
+											onChange={e => { setUntil((e.target.value.length > 0) ? new Date(e.target.value).toISOString() : null) }}
+											min={dayjs().format('YYYY-MM-DDTHH:mm')}
+											placeholder="Vælg dato og tid"
+										/>
 									</div>
 								)}
 								{mode === 'nextProduct' && (
 									<div className="flex flex-col gap-2 mt-2">
 										<span className="text-sm text-gray-700 font-medium">
-											{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-												const t = getNextAvailableProductTimeLocal(products)?.date
-												return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
-											})()}
+											<div>
+												{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt:'}
+											</div>
+											<div>
+												{(() => {
+													const t = getNextAvailableProductTimeLocal(products)?.date
+													return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
+												})()}
+											</div>
 										</span>
 									</div>
 								)}
 							</div>
 							<div className="flex gap-4 justify-center pt-2">
 								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-								<button type="button" disabled={isPatching || (mode === 'until' && (until == null))} onClick={handlePatch} className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Luk kiosk'}</button>
+								<button type="button" disabled={isPatching || (mode === 'until' && (until == null)) || (mode === 'until' && isUntilInPast) || (mode === 'nextProduct' && !hasAvailableProducts)} onClick={handlePatch} className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${(isPatching || (mode === 'nextProduct' && !hasAvailableProducts) || (mode === 'until' && (until == null)) || (mode === 'until' && isUntilInPast)) ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Luk kiosk'}</button>
 							</div>
 						</>
 					)}
@@ -168,10 +195,9 @@ function KioskStatusManager ({ kiosks, products }: { kiosks: KioskType[], produc
 										type="button"
 										disabled={isPatching}
 										onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
-										className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-											closed
-												? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
-												: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+										className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${closed
+											? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+											: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
 										} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
 										aria-label={closed ? 'Åben kiosk' : 'Luk kiosk'}
 									>
