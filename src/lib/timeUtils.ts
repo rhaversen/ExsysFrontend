@@ -1,10 +1,7 @@
 import { type ProductType, type OrderWindow, type Time, type KioskType } from '@/types/backendDataTypes'
 
 export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow {
-	const {
-		from,
-		to
-	} = orderWindow
+	const { from, to } = orderWindow
 
 	// Create Date objects for the 'from' and 'to' times in local time
 	const fromDate = new Date()
@@ -18,29 +15,18 @@ export function convertOrderWindowToUTC (orderWindow: OrderWindow): OrderWindow 
 		toDate.setDate(toDate.getDate() + 1)
 	}
 
-	// Convert the Date objects to UTC
-	const fromUTCDate = new Date(fromDate.toUTCString())
-	const toUTCDate = new Date(toDate.toUTCString())
+	// Use convertTimeToUTC for time conversion
+	const fromUTC = convertTimeToUTC({ hour: fromDate.getHours(), minute: fromDate.getMinutes() })
+	const toUTC = convertTimeToUTC({ hour: toDate.getHours(), minute: toDate.getMinutes() })
 
-	// Return the new orderWindow object in UTC
-	const orderWindowConverted = {
-		from: {
-			hour: fromUTCDate.getUTCHours(),
-			minute: fromUTCDate.getUTCMinutes()
-		},
-		to: {
-			hour: toUTCDate.getUTCHours(),
-			minute: toUTCDate.getUTCMinutes()
-		}
+	return {
+		from: fromUTC,
+		to: toUTC
 	}
-	return orderWindowConverted
 }
 
 export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindow {
-	const {
-		from,
-		to
-	} = orderWindow
+	const { from, to } = orderWindow
 
 	// Get the current time in UTC
 	const now = new Date()
@@ -57,18 +43,34 @@ export function convertOrderWindowFromUTC (orderWindow: OrderWindow): OrderWindo
 		toDate.setDate(toDate.getDate() + 1)
 	}
 
-	// Return the new orderWindow object in local time
-	const orderWindowConverted = {
-		from: {
-			hour: fromDate.getHours(),
-			minute: fromDate.getMinutes()
-		},
-		to: {
-			hour: toDate.getHours(),
-			minute: toDate.getMinutes()
-		}
+	// Use convertTimeFromUTC for time conversion
+	const fromLocal = convertTimeFromUTC({ hour: fromDate.getUTCHours(), minute: fromDate.getUTCMinutes() })
+	const toLocal = convertTimeFromUTC({ hour: toDate.getUTCHours(), minute: toDate.getUTCMinutes() })
+
+	return {
+		from: fromLocal,
+		to: toLocal
 	}
-	return orderWindowConverted
+}
+
+const convertTimeToUTC = (time: Time): Time => {
+	const date = new Date()
+	date.setHours(time.hour, time.minute, 0, 0)
+	const utcDate = new Date(date.toUTCString())
+	return {
+		hour: utcDate.getUTCHours(),
+		minute: utcDate.getUTCMinutes()
+	}
+}
+
+export const convertTimeFromUTC = (time: Time): Time => {
+	const date = new Date()
+	date.setUTCHours(time.hour, time.minute, 0, 0)
+	const localDate = new Date(date.toString())
+	return {
+		hour: localDate.getHours(),
+		minute: localDate.getMinutes()
+	}
 }
 
 export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
@@ -203,58 +205,24 @@ export function getTimeStringFromOrderwindowTime (orderWindowTime: Time): string
 	return `${orderWindowTime.hour.toString().padStart(2, '0')}:${orderWindowTime.minute.toString().padStart(2, '0')}`
 }
 
-// Returns the soonest next available product (not currently available), or null if all are available or no products
+// Returns the soonest next available product time, even if currently available, looping over products and days
+// Assumes products are in local time (orderWindow is local)
 export function getNextAvailableProductTime (products: ProductType[]): { product: ProductType, from: Time, date: Date } | null {
 	const now = new Date()
-	const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds()))
 	let soonest: { product: ProductType, from: Time, date: Date } | null = null
 	for (const product of products) {
 		if (!product.isActive) continue
-		const { from, to } = product.orderWindow
-		// Treat from and to as UTC
-		const fromDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), from.hour, from.minute, 0, 0))
-		const toDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), to.hour, to.minute, 0, 0))
-
-		// If currently in window, skip
-		// Use UTC time for isCurrentTimeInOrderWindow logic
-		const currentHour = nowUTC.getUTCHours()
-		const currentMinute = nowUTC.getUTCMinutes()
-		const fromHour = from.hour
-		const fromMinute = from.minute
-		const toHour = to.hour
-		const toMinute = to.minute
-		let inWindow: boolean
-		if (fromHour > toHour || (fromHour === toHour && fromMinute > toMinute)) {
-			inWindow = (currentHour > fromHour || (currentHour === fromHour && currentMinute >= fromMinute)) ||
-				(currentHour < toHour || (currentHour === toHour && currentMinute < toMinute))
+		const { from } = product.orderWindow
+		// Calculate the next occurrence of the 'from' time (today if still upcoming, else tomorrow)
+		const fromDateToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), from.hour, from.minute, 0, 0)
+		let nextFromDate: Date
+		if (now < fromDateToday) {
+			nextFromDate = fromDateToday
 		} else {
-			inWindow = (currentHour >= fromHour && currentHour <= toHour) &&
-				(currentHour === fromHour ? currentMinute >= fromMinute : true) &&
-				(currentHour === toHour ? currentMinute < toMinute : true)
+			// If already past, next occurrence is tomorrow
+			nextFromDate = new Date(fromDateToday)
+			nextFromDate.setDate(nextFromDate.getDate() + 1)
 		}
-		if (inWindow) continue
-
-		// Handle overnight window (from > to)
-		let nextFromDate = new Date(fromDate)
-		if (fromDate > toDate) {
-			// If nowUTC is before from, today is the next opening
-			if (nowUTC < fromDate) {
-				nextFromDate = new Date(fromDate)
-			} else {
-				// Otherwise, next opening is tomorrow
-				nextFromDate = new Date(fromDate)
-				nextFromDate.setUTCDate(nextFromDate.getUTCDate() + 1)
-			}
-		} else {
-			// Not overnight: if nowUTC is before from, today is the next opening; else, tomorrow
-			if (nowUTC < fromDate) {
-				nextFromDate = new Date(fromDate)
-			} else {
-				nextFromDate = new Date(fromDate)
-				nextFromDate.setUTCDate(nextFromDate.getUTCDate() + 1)
-			}
-		}
-
 		if (soonest === null || nextFromDate < soonest.date) {
 			soonest = { product, from, date: new Date(nextFromDate) }
 		}

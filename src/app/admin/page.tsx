@@ -12,6 +12,7 @@ import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { io, type Socket } from 'socket.io-client'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
+import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
 
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -23,6 +24,17 @@ export default function Page (): ReactElement | null {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
+
+	// Process product data
+	const processProductData = (product: ProductType): ProductType => ({
+		...product,
+		orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+	})
+
+	// Process all products data
+	const processProductsData = useCallback((productsData: ProductType[]): ProductType[] => {
+		return productsData.map(processProductData)
+	}, [])
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
 		try {
@@ -78,11 +90,12 @@ export default function Page (): ReactElement | null {
 	const fetchProducts = useCallback(async (): Promise<void> => {
 		try {
 			const response = await axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true })
-			setProducts(response.data)
+			const processedProducts = processProductsData(response.data)
+			setProducts(processedProducts)
 		} catch (error) {
 			console.error(error)
 		}
-	}, [API_URL])
+	}, [API_URL, processProductsData])
 
 	const handleForceRefresh = async (): Promise<void> => {
 		try {
@@ -110,7 +123,7 @@ export default function Page (): ReactElement | null {
 		return () => { socketInstance.disconnect() }
 	}, [API_URL])
 
-	// Listen for kiosk and product CUD events
+	// Listen for kiosk CUD events
 	useEntitySocketListeners<KioskType>(
 		socket,
 		'kiosk',
@@ -118,12 +131,28 @@ export default function Page (): ReactElement | null {
 		kiosk => { setKiosks(prev => prev.map(k => k._id === kiosk._id ? kiosk : k)) },
 		id => { setKiosks(prev => prev.filter(k => k._id !== id)) }
 	)
+
+	// Products
 	useEntitySocketListeners<ProductType>(
 		socket,
 		'product',
-		product => { setProducts(prev => [...prev, product]) },
-		product => { setProducts(prev => prev.map(p => p._id === product._id ? product : p)) },
-		id => { setProducts(prev => prev.filter(p => p._id !== id)) }
+		item => {
+			setProducts(prev => {
+				const updated = processProductData(item)
+				return prev.some(p => p._id === updated._id)
+					? prev.map(p => (p._id === updated._id ? updated : p))
+					: [...prev, updated]
+			})
+		},
+		item => {
+			setProducts(prev => {
+				const updated = processProductData(item)
+				return prev.map(p => (p._id === updated._id ? updated : p))
+			})
+		},
+		id => {
+			setProducts(prev => prev.filter(p => p._id !== id))
+		}
 	)
 
 	if (!hasMounted) return null

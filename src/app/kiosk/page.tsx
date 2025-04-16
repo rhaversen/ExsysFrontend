@@ -15,6 +15,7 @@ import ProgressBar from '@/components/kiosk/ProgressBar'
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
+import dayjs from 'dayjs'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -335,6 +336,44 @@ export default function Page (): ReactElement {
 		}
 	}, [resetTimer, showTimeoutWarning, viewState])
 
+	// Helper to check if a date is today (local time)
+	function isDateToday (date: Date): boolean {
+		const now = new Date()
+		return (
+			date.getFullYear() === now.getFullYear() &&
+			date.getMonth() === now.getMonth() &&
+			date.getDate() === now.getDate()
+		)
+	}
+
+	// Helper to check if a date is tomorrow (local time)
+	function isDateTomorrow (date: Date): boolean {
+		const now = new Date()
+		const tomorrow = new Date(now)
+		tomorrow.setHours(0, 0, 0, 0)
+		tomorrow.setDate(now.getDate() + 1)
+		console.log('Now', now)
+		console.log('Tomorrow', tomorrow)
+		return (
+			date.getFullYear() === tomorrow.getFullYear() &&
+			date.getMonth() === tomorrow.getMonth() &&
+			date.getDate() === tomorrow.getDate()
+		)
+	}
+
+	// Helper to format opening message
+	function getOpeningMessage (date: Date, timeStr: string): string {
+		console.log(date, timeStr)
+		if (isDateToday(date)) {
+			return `Vi åbner igen kl. ${timeStr}`
+		} else if (isDateTomorrow(date)) {
+			return `Vi åbner igen i morgen kl. ${timeStr}`
+		} else {
+			const formatted = dayjs(date).locale('da').format('dddd [d.] DD/MM')
+			return `Vi åbner igen ${formatted} kl. ${timeStr}`
+		}
+	}
+
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
 		switch (viewState) {
@@ -437,20 +476,22 @@ export default function Page (): ReactElement {
 						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 							<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 							<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
-							{products.length > 0 && (kiosk != null) && !kiosk.manualClosed && (
+							{products.length > 0 && products.some(p => p.isActive) && (kiosk != null) && !kiosk.manualClosed && (
 								<p className="text-center">
 									{(kiosk.closedUntil != null && new Date(kiosk.closedUntil) > new Date())
 										? (() => {
+											// If the kiosk is closed until a specific date, show that date
 											const closedUntilDate = new Date(kiosk.closedUntil)
 											const hours = closedUntilDate.getHours().toString().padStart(2, '0')
 											const minutes = closedUntilDate.getMinutes().toString().padStart(2, '0')
-											return `Vi åbner igen kl. ${hours}:${minutes}`
+											return getOpeningMessage(closedUntilDate, `${hours}:${minutes}`)
 										})()
 										: (() => {
+											// If the kiosk is closed until the next product is available, show that date
 											const next = getNextAvailableProductTime(products)
 											if (next != null) {
 												const nextProductAvailableTime = getTimeStringFromOrderwindowTime(next.from)
-												return `Vi åbner igen kl. ${nextProductAvailableTime}`
+												return getOpeningMessage(next.date, nextProductAvailableTime)
 											}
 											return null
 										})()}
@@ -463,7 +504,6 @@ export default function Page (): ReactElement {
 					<KioskSessionInfo />
 				</div>
 			</div>
-
 		)
 	}
 
