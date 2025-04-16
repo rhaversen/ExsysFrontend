@@ -4,6 +4,7 @@ import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
 import dayjs from 'dayjs'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const AllKiosksStatusManager = ({
 	kiosks,
@@ -16,6 +17,7 @@ const AllKiosksStatusManager = ({
 	const [allKiosksMode, setAllKiosksMode] = useState<'manual' | 'until' | 'nextProduct' | 'open'>('manual')
 	const [allKiosksUntil, setAllKiosksUntil] = useState<string | null>(null)
 	const [isProcessing, setIsProcessing] = useState(false)
+	const { addError } = useError()
 
 	const handleAllKiosksAction = async (): Promise<void> => {
 		try {
@@ -63,7 +65,7 @@ const AllKiosksStatusManager = ({
 			}
 			setAllKiosksUntil(null)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		} finally {
 			setIsProcessing(false)
 		}

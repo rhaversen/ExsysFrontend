@@ -11,11 +11,11 @@ interface ErrorProviderProps {
 const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 	const [errors, setErrors] = useState<ErrorInfo[]>([])
 
-	const addError = useCallback((error: unknown) => {
-		console.error(error)
+	const addError = useCallback((...args: unknown[]) => {
+		console.error(...args)
 		setErrors(prevErrors => [...prevErrors, {
 			id: Date.now(),
-			error
+			error: args
 		}])
 	}, [])
 

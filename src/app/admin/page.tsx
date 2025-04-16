@@ -13,9 +13,11 @@ import { io, type Socket } from 'socket.io-client'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
 import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
 	const { currentUser } = useUser()
 	const [pendingOrders, setPendingOrders] = useState<number>(0)
 	const [totalOrdersToday, setTotalOrdersToday] = useState<number>(0)
@@ -53,9 +55,9 @@ export default function Page (): ReactElement | null {
 			const uniqueActivities = new Set(response.data.map(order => order.activityId))
 			setPendingOrders(uniqueActivities.size)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL])
+	}, [API_URL, addError])
 
 	const fetchTotalOrdersToday = useCallback(async (): Promise<void> => {
 		try {
@@ -74,18 +76,18 @@ export default function Page (): ReactElement | null {
 			const uniqueActivities = new Set(response.data.map(order => order.activityId))
 			setTotalOrdersToday(uniqueActivities.size)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL])
+	}, [API_URL, addError])
 
 	const fetchKiosks = useCallback(async (): Promise<void> => {
 		try {
 			const response = await axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true })
 			setKiosks(response.data)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL])
+	}, [API_URL, addError])
 
 	const fetchProducts = useCallback(async (): Promise<void> => {
 		try {
@@ -93,9 +95,9 @@ export default function Page (): ReactElement | null {
 			const processedProducts = processProductsData(response.data)
 			setProducts(processedProducts)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		}
-	}, [API_URL, processProductsData])
+	}, [API_URL, addError, processProductsData])
 
 	const handleForceRefresh = async (): Promise<void> => {
 		try {
@@ -104,7 +106,7 @@ export default function Page (): ReactElement | null {
 			})
 			setShowRefreshModal(false)
 		} catch (error) {
-			console.error(error)
+			addError(error)
 		}
 	}
 

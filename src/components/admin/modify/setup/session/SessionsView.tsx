@@ -152,7 +152,7 @@ const SessionsView = ({
 				const ip = await publicIpv4()
 				setCurrentPublicIp(ip)
 			} catch (error) {
-				console.error('Failed to fetch public IP:', error)
+				addError('Failed to fetch public IP:', error)
 			} finally {
 				setIsLoadingIp(false)
 			}

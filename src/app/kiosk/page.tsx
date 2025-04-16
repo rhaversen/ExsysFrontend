@@ -352,8 +352,6 @@ export default function Page (): ReactElement {
 		const tomorrow = new Date(now)
 		tomorrow.setHours(0, 0, 0, 0)
 		tomorrow.setDate(now.getDate() + 1)
-		console.log('Now', now)
-		console.log('Tomorrow', tomorrow)
 		return (
 			date.getFullYear() === tomorrow.getFullYear() &&
 			date.getMonth() === tomorrow.getMonth() &&
@@ -363,7 +361,6 @@ export default function Page (): ReactElement {
 
 	// Helper to format opening message
 	function getOpeningMessage (date: Date, timeStr: string): string {
-		console.log(date, timeStr)
 		if (isDateToday(date)) {
 			return `Vi åbner igen kl. ${timeStr}`
 		} else if (isDateTomorrow(date)) {
