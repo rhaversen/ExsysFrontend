@@ -1,6 +1,10 @@
 {
 	"cSpell.language": "en-US,en,lorem,en-GB,da-DK,da",
-	"cSpell.words": ["esnext", "tailwindcss"],
+	"cSpell.words": [
+		"esnext",
+		"Orderwindow",
+		"tailwindcss"
+	],
 	"eslint.format.enable": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "always"
