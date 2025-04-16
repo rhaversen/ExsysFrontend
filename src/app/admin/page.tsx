@@ -8,6 +8,7 @@ import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
+import EntitiesTimelineOverview from '@/components/admin/EntitiesTimelineOverview'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -232,6 +233,11 @@ export default function Page (): ReactElement | null {
 				{/* Kiosk Status */}
 				<KioskStatusManager
 					kiosks={kiosks}
+					products={products}
+				/>
+
+				{/* Entities Timeline Overview */}
+				<EntitiesTimelineOverview
 					products={products}
 				/>
 			</div>
