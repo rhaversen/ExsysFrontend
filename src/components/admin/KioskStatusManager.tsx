@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import dayjs from 'dayjs'
+import 'dayjs/locale/da'
+
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
@@ -20,6 +22,7 @@ function KioskStatusModalContent ({
 	onPatch: (patch: Partial<KioskType>) => void
 	onClose: () => void
 }): React.ReactElement {
+	dayjs.locale('da')
 	// Treat closedUntil in the past as not set
 	const now = new Date()
 	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > now ? kiosk.closedUntil : null

@@ -16,8 +16,11 @@ import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import dayjs from 'dayjs'
+import 'dayjs/locale/da'
 
 export default function Page (): ReactElement {
+	dayjs.locale('da')
+
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -366,7 +369,7 @@ export default function Page (): ReactElement {
 		} else if (isDateTomorrow(date)) {
 			return `Vi åbner igen i morgen kl. ${timeStr}`
 		} else {
-			const formatted = dayjs(date).locale('da').format('dddd [d.] DD/MM')
+			const formatted = dayjs(date).format('dddd [d.] DD/MM')
 			return `Vi åbner igen ${formatted} kl. ${timeStr}`
 		}
 	}

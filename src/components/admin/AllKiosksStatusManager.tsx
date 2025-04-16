@@ -4,6 +4,7 @@ import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
 import dayjs from 'dayjs'
+import 'dayjs/locale/da'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const AllKiosksStatusManager = ({
@@ -13,6 +14,7 @@ const AllKiosksStatusManager = ({
 	kiosks: KioskType[]
 	products: ProductType[]
 }): React.ReactElement => {
+	dayjs.locale('da')
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const [allKiosksMode, setAllKiosksMode] = useState<'manual' | 'until' | 'nextProduct' | 'open'>('manual')
 	const [allKiosksUntil, setAllKiosksUntil] = useState<string | null>(null)
