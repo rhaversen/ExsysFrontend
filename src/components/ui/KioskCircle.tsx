@@ -1,50 +1,71 @@
 import React from 'react'
+import { FaExclamationTriangle, FaUserSlash, FaUsers } from 'react-icons/fa'
 import { FiCheck, FiX } from 'react-icons/fi'
 
+export type KioskWarningStatus = 'inactive' | 'multisession' | 'nosession'
+
+const KIOSK_RING = {
+	open: 'ring-2 ring-green-400',
+	closed: 'ring-2 ring-yellow-400'
+}
+const KIOSK_TEXT = {
+	open: 'text-green-700',
+	closed: 'text-yellow-700'
+}
+const KIOSK_WARNING = {
+	inactive: {
+		bg: 'bg-orange-400',
+		icon: <FaExclamationTriangle className="w-3.5 h-3.5 text-orange-700" />
+	},
+	multisession: {
+		bg: 'bg-orange-400',
+		icon: <FaUsers className="w-3.5 h-3.5 text-orange-700" />
+	},
+	nosession: {
+		bg: 'bg-orange-400',
+		icon: <FaUserSlash className="w-3.5 h-3.5 text-orange-700" />
+	},
+	none: {
+		bg: 'bg-transparent',
+		icon: null
+	}
+}
+
+const KIOSK_STATUS_ICON = {
+	open: <FiCheck className="w-3.5 h-3.5 text-green-600" />,
+	closed: <FiX className="w-3.5 h-3.5 text-yellow-600" />
+}
+
 const KioskCircle = ({
+	warningStatus,
 	isClosed,
-	content,
-	size = 'md',
+	kioskTag,
 	className = ''
 }: {
+	warningStatus?: KioskWarningStatus
 	isClosed: boolean
-	content: string | React.ReactNode
-	size?: 'sm' | 'md' | 'lg'
+	kioskTag: string
 	className?: string
 }): React.ReactElement => {
-	// Calculate sizes based on the size prop
-	const dimensions = {
-		sm: 'w-12 h-12 text-base',
-		md: 'w-16 h-16 text-xl',
-		lg: 'w-20 h-20 text-2xl'
-	}
+	const ringClass = isClosed ? KIOSK_RING.closed : KIOSK_RING.open
+	const textClass = isClosed ? KIOSK_TEXT.closed : KIOSK_TEXT.open
+	const statusIcon = isClosed ? KIOSK_STATUS_ICON.closed : KIOSK_STATUS_ICON.open
 
-	const indicatorSizes = {
-		sm: 'w-5 h-5 -bottom-0.5 -right-0.5',
-		md: 'w-6 h-6 -bottom-1 -right-1',
-		lg: 'w-7 h-7 -bottom-1 -right-1'
-	}
-
-	const iconSizes = {
-		sm: 12,
-		md: 14,
-		lg: 16
-	}
+	const warningKey = warningStatus ?? 'none'
+	const { bg: bgClass, icon: warningIcon } = KIOSK_WARNING[warningKey]
 
 	return (
 		<div className={`relative ${className}`}>
 			<div
-				className={`${dimensions[size]} rounded-full flex items-center justify-center font-semibold shadow-sm ${isClosed
-					? 'bg-white text-yellow-700 ring-2 ring-yellow-400'
-					: 'bg-white text-green-700 ring-2 ring-green-400'
-				}`}
-				title={isClosed ? 'Lukket' : 'Åben'}
+				className={`w-16 h-16 text-xl rounded-full flex items-center justify-center font-semibold shadow-sm bg-white ${ringClass}`}
 			>
-				<div className={`absolute inset-2 rounded-full opacity-20 ${isClosed ? 'bg-yellow-400' : 'bg-green-400'}`}></div>
-				<span className="relative z-10">{content}</span>
+				<div className={`absolute inset-2 rounded-full opacity-20 ${bgClass}`}></div>
+				<span className={`relative z-10 text-lg ${textClass}`}>{kioskTag}</span>
 			</div>
-			<div className={`absolute ${indicatorSizes[size]} rounded-full flex items-center justify-center shadow-sm border border-gray-100 bg-white ${isClosed ? 'text-yellow-600' : 'text-green-600'}`}>
-				{isClosed ? <FiX size={iconSizes[size]} /> : <FiCheck size={iconSizes[size]} />}
+			<div
+				className="absolute w-6 h-6 -bottom-1 -right-1 rounded-full flex items-center justify-center shadow-sm border border-gray-100 bg-white"
+			>
+				{warningIcon ?? statusIcon}
 			</div>
 		</div>
 	)
