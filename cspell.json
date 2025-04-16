@@ -1,9 +1,7 @@
 {
     "version": "0.2",
     "language": "en-US,da-DK",
-    "dictionaries": [
-        "da-dk"
-    ],
+    "import": ["@cspell/dict-da-dk/cspell-ext.json"],
     "ignorePaths": [
         "node_modules/**",
         ".next/**",
