@@ -1,8 +1,9 @@
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useState } from 'react'
+
 import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ConfigsType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useState } from 'react'
 
 const ConfigsView = ({
 	label,

@@ -1,6 +1,7 @@
+import React, { type ReactElement, useEffect, useMemo } from 'react'
+
 import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
 import { type InlineValidation } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useEffect, useMemo } from 'react'
 
 const EditableField = ({
 	fieldName,

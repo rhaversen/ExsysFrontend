@@ -1,9 +1,10 @@
+import React, { type ReactElement, useEffect, useState } from 'react'
+
 import OrderSummary from '@/components/kiosk/cart/OrderSummary'
 import AsyncImage from '@/components/ui/AsyncImage'
 import { KioskImages } from '@/lib/images'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useEffect, useState } from 'react'
 
 const CartWindow = ({
 	price,

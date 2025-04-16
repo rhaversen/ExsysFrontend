@@ -1,12 +1,15 @@
 'use client'
 
-import { useUser } from '@/contexts/UserProvider'
-import { type AdminType } from '@/types/backendDataTypes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { type ReactElement, useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
+
+import { useUser } from '@/contexts/UserProvider'
+import { type AdminType } from '@/types/backendDataTypes'
+
 import LogoutButton from '../LogoutButton'
+
 import PageLink from './PageLink'
 
 const Header = (): ReactElement | null => {

@@ -1,7 +1,8 @@
 'use client'
 
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useEffect } from 'react'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function DailyReloader ({
 	reloadHour = 0,

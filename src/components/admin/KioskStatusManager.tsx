@@ -1,12 +1,13 @@
+import axios from 'axios'
+import dayjs from 'dayjs'
 import React, { useState, useEffect } from 'react'
+
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
-import dayjs from 'dayjs'
-import 'dayjs/locale/da'
-
-import type { KioskType, ProductType } from '@/types/backendDataTypes'
-import axios from 'axios'
 import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
+import type { KioskType, ProductType } from '@/types/backendDataTypes'
+
+import 'dayjs/locale/da'
 
 // Modal content for kiosk status
 function KioskStatusModalContent ({

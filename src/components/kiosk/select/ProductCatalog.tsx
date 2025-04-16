@@ -1,10 +1,11 @@
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { useInterval } from 'react-use'
+
 import Product from '@/components/kiosk/select/Product'
 import ScrollIndicator from '@/components/kiosk/select/ScrollIndicator'
 import { isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { useInterval } from 'react-use'
 
 const ProductCatalog = ({
 	cart,

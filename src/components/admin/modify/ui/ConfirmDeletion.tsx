@@ -1,5 +1,6 @@
-import CloseableModal from '@/components/ui/CloseableModal'
 import { type ReactElement, useCallback, useState } from 'react'
+
+import CloseableModal from '@/components/ui/CloseableModal'
 
 const ConfirmDeletion = ({
 	itemName,

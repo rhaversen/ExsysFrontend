@@ -1,3 +1,7 @@
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { io, type Socket } from 'socket.io-client'
+
 import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
@@ -13,9 +17,6 @@ import {
 	type ProductType
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 const OrderView = ({
 	kiosk,

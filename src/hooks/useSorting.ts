@@ -1,5 +1,6 @@
-import sortConfig from '@/lib/SortConfig'
 import { useState } from 'react'
+
+import sortConfig from '@/lib/SortConfig'
 import { sortProductsByLocalOrderWindowFrom, sortProductsByLocalOrderWindowTo } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 

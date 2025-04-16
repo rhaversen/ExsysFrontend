@@ -1,11 +1,13 @@
+import axios from 'axios'
+import dayjs from 'dayjs'
 import React, { useState } from 'react'
 import { FaStore } from 'react-icons/fa'
-import type { KioskType, ProductType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
-import dayjs from 'dayjs'
-import 'dayjs/locale/da'
+
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import type { KioskType, ProductType } from '@/types/backendDataTypes'
+
+import 'dayjs/locale/da'
 
 const AllKiosksStatusManager = ({
 	kiosks,

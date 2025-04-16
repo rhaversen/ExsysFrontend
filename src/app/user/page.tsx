@@ -1,5 +1,8 @@
 'use client'
 
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 import Products from '@/components/order/Products'
 import RoomSelector from '@/components/order/RoomSelector'
@@ -7,8 +10,6 @@ import SubmitButton from '@/components/ui/SubmitButton'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { convertUTCOrderWindowToLocal, isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
 import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

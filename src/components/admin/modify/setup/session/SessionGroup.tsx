@@ -1,6 +1,7 @@
-import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
 import { type ReactElement } from 'react'
 import { FaExclamationTriangle } from 'react-icons/fa'
+
+import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
 
 interface ViewMode {
 	type: 'admin' | 'kiosk'

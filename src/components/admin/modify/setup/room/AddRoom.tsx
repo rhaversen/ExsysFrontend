@@ -1,12 +1,14 @@
-import EditableField from '@/components/admin/modify/ui/EditableField'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
+import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+import EditableField from '@/components/admin/modify/ui/EditableField'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
-import SelectionWindow from '../../ui/SelectionWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import { AdminImages } from '@/lib/images'
-import Image from 'next/image'
+import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
+
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const AddRoom = ({
 	rooms,

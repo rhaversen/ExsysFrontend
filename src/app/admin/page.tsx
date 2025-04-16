@@ -1,19 +1,20 @@
 'use client'
 
-import { useUser } from '@/contexts/UserProvider'
-import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
-import { GiCookingPot } from 'react-icons/gi'
 import { FaEdit, FaChartBar, FaSyncAlt } from 'react-icons/fa'
-import CloseableModal from '@/components/ui/CloseableModal'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
-import KioskStatusManager from '@/components/admin/KioskStatusManager'
+
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
-import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
+import KioskStatusManager from '@/components/admin/KioskStatusManager'
+import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { useUser } from '@/contexts/UserProvider'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
+import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

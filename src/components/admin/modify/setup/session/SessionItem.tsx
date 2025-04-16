@@ -1,10 +1,11 @@
 'use client'
 
+import { type ReactElement, useEffect, useState } from 'react'
+import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
+
 import { parseUserAgent } from '@/lib/ParsingUtils'
 import { timeSince, timeUntil } from '@/lib/timeUtils'
 import { type SessionType } from '@/types/backendDataTypes'
-import { type ReactElement, useEffect, useState } from 'react'
-import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
 
 const SessionItem = ({
 	session,

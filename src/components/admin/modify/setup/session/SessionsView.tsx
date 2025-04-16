@@ -1,14 +1,16 @@
 'use client'
 
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import SessionItem from './SessionItem'
-import SessionGroup from './SessionGroup'
-import { FaExclamationTriangle } from 'react-icons/fa'
-import { timeSince } from '@/lib/timeUtils'
 import { publicIpv4 } from 'public-ip'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { FaExclamationTriangle } from 'react-icons/fa'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { timeSince } from '@/lib/timeUtils'
+import { type AdminType, type KioskType, type SessionType } from '@/types/backendDataTypes'
+
+import SessionGroup from './SessionGroup'
+import SessionItem from './SessionItem'
 
 interface ViewMode {
 	type: 'admin' | 'kiosk'

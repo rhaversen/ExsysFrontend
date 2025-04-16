@@ -1,5 +1,4 @@
 'use client'
-import { AdminSounds } from '@/lib/sounds'
 import React, {
 	createContext,
 	type Dispatch,
@@ -10,6 +9,8 @@ import React, {
 	useEffect,
 	useState
 } from 'react'
+
+import { AdminSounds } from '@/lib/sounds'
 
 interface SoundContextType {
 	isMuted: boolean

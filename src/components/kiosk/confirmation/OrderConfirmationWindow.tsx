@@ -1,10 +1,11 @@
+import Image from 'next/image'
+import React, { type ReactElement, useEffect, useState } from 'react'
+
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
-import Image from 'next/image'
-import React, { type ReactElement, useEffect, useState } from 'react'
 
 const OrderConfirmationWindow = ({
 	price,

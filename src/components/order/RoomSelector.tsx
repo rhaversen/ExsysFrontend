@@ -1,5 +1,6 @@
-import { type RoomType } from '@/types/backendDataTypes'
 import React, { type ReactElement, useCallback, useState } from 'react'
+
+import { type RoomType } from '@/types/backendDataTypes'
 
 const RoomSelector = ({
 	rooms,

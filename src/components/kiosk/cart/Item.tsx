@@ -1,8 +1,9 @@
+import React, { type ReactElement, useCallback } from 'react'
+
 import QuantityAdjuster from '@/components/kiosk/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'
 import { KioskImages } from '@/lib/images'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useCallback } from 'react'
 
 const Item = ({
 	imageURL,

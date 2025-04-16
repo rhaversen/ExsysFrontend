@@ -1,5 +1,9 @@
 'use client'
 
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { io, type Socket } from 'socket.io-client'
+
 import AdminView from '@/components/admin/modify/AdminView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
@@ -16,9 +20,6 @@ import {
 	type RoomType,
 	type SessionType
 } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

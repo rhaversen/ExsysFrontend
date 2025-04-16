@@ -1,21 +1,23 @@
 'use client'
 
+import axios from 'axios'
+import dayjs from 'dayjs'
+import { useRouter } from 'next/navigation'
+import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
+import { io, type Socket } from 'socket.io-client'
+
+import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
+import ProgressBar from '@/components/kiosk/ProgressBar'
+import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { convertUTCOrderWindowToLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed, getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
-import { io, type Socket } from 'socket.io-client'
-import ProgressBar from '@/components/kiosk/ProgressBar'
-import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
-import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
-import { useConfig } from '@/contexts/ConfigProvider'
-import dayjs from 'dayjs'
+
 import 'dayjs/locale/da'
 
 export default function Page (): ReactElement {

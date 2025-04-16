@@ -1,7 +1,8 @@
+import React, { type ReactElement } from 'react'
+
 import Product from '@/components/order/Product'
 import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
-import React, { type ReactElement } from 'react'
 
 const Products = ({
 	products,
