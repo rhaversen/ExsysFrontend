@@ -12,7 +12,7 @@ import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { io, type Socket } from 'socket.io-client'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -28,7 +28,7 @@ export default function Page (): ReactElement | null {
 	// Process product data
 	const processProductData = (product: ProductType): ProductType => ({
 		...product,
-		orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
 	})
 
 	// Process all products data

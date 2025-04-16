@@ -3,7 +3,7 @@ import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { convertLocalOrderWindowToUTC } from '@/lib/timeUtils'
 import {
 	type OptionType,
 	type PatchProductType,
@@ -35,7 +35,7 @@ const Product = ({
 	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
 		return {
 			...product,
-			orderWindow: (product.orderWindow !== undefined) ? convertOrderWindowToUTC(product.orderWindow) : undefined
+			orderWindow: (product.orderWindow !== undefined) ? convertLocalOrderWindowToUTC(product.orderWindow) : undefined
 		}
 	}
 

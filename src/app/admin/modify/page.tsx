@@ -5,7 +5,7 @@ import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type AdminType,
@@ -70,7 +70,7 @@ export default function Page (): ReactElement {
 			const productsData = productsResponse.data
 			// Convert orderWindow to local time for all products
 			productsData.forEach((product) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+				product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
 			})
 			setProducts(productsData)
 			setOptions(optionsResponse.data)
@@ -243,7 +243,7 @@ export default function Page (): ReactElement {
 		CreateUpdateHandler<ProductType>(setProducts),
 		CreateDeleteHandler<ProductType>(setProducts),
 		(product) => {
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
 			return product
 		}
 	)

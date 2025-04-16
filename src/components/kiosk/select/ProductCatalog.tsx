@@ -1,6 +1,6 @@
 import Product from '@/components/kiosk/select/Product'
 import ScrollIndicator from '@/components/kiosk/select/ScrollIndicator'
-import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
@@ -24,7 +24,7 @@ const ProductCatalog = ({
 			products.reduce(
 				(acc, product) => ({
 					...acc,
-					[product._id]: isCurrentTimeInOrderWindow(product.orderWindow)
+					[product._id]: isCurrentTimeInLocalOrderWindow(product.orderWindow)
 				}),
 				{}
 			)

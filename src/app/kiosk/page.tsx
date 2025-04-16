@@ -4,7 +4,7 @@ import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC, getTimeStringFromOrderwindowTime, isCurrentTimeInOrderWindow, isKioskClosed, getNextAvailableProductTime } from '@/lib/timeUtils'
+import { convertUTCOrderWindowToLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed, getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
@@ -68,7 +68,7 @@ export default function Page (): ReactElement {
 	// Process product data
 	const processProductData = (product: ProductType): ProductType => ({
 		...product,
-		orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
 	})
 
 	// Process all products data
@@ -80,7 +80,7 @@ export default function Page (): ReactElement {
 		if (kioskData == null) return true
 		if (isKioskClosed(kioskData)) return true
 		const hasAvailable = productsData.some(
-			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
+			p => p.isActive && isCurrentTimeInLocalOrderWindow(p.orderWindow)
 		)
 		return !hasAvailable
 	}, [])
@@ -488,9 +488,9 @@ export default function Page (): ReactElement {
 										})()
 										: (() => {
 											// If the kiosk is closed until the next product is available, show that date
-											const next = getNextAvailableProductTime(products)
+											const next = getNextAvailableProductTimeLocal(products)
 											if (next != null) {
-												const nextProductAvailableTime = getTimeStringFromOrderwindowTime(next.from)
+												const nextProductAvailableTime = getTimeStringFromLocalOrderWindowTime(next.from)
 												return getOpeningMessage(next.date, nextProductAvailableTime)
 											}
 											return null

@@ -4,7 +4,7 @@ import KioskCircle from '@/components/ui/KioskCircle'
 import dayjs from 'dayjs'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { getNextAvailableProductTime, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
 
 // Modal content for kiosk status
 function KioskStatusModalContent ({
@@ -38,7 +38,7 @@ function KioskStatusModalContent ({
 	const handlePatch = (): void => {
 		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
 		else if (mode === 'until') onPatch({ manualClosed: false, closedUntil: until })
-		else onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTime(products)?.date.toISOString() ?? null })
+		else onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTimeLocal(products)?.date.toISOString() ?? null })
 	}
 
 	const handleOpenKiosk = (): void => { onPatch({ manualClosed: false, closedUntil: null }) }
@@ -92,7 +92,7 @@ function KioskStatusModalContent ({
 									<div className="flex flex-col gap-2 mt-2">
 										<span className="text-sm text-gray-700 font-medium">
 											{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-												const t = getNextAvailableProductTime(products)?.date
+												const t = getNextAvailableProductTimeLocal(products)?.date
 												return (t != null) ? dayjs(t).format('[d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
 											})()}
 										</span>

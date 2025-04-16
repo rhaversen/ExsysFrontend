@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { FaStore } from 'react-icons/fa'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 import axios from 'axios'
-import { getNextAvailableProductTime } from '@/lib/timeUtils'
+import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
 import dayjs from 'dayjs'
 
 const AllKiosksStatusManager = ({
@@ -41,7 +41,7 @@ const AllKiosksStatusManager = ({
 					)
 				)
 			} else if (allKiosksMode === 'nextProduct') {
-				const until = getNextAvailableProductTime(products)?.date.toISOString()
+				const until = getNextAvailableProductTimeLocal(products)?.date.toISOString()
 				if (until == null) return
 				await Promise.all(
 					kiosks.map(async kiosk =>
@@ -118,7 +118,7 @@ const AllKiosksStatusManager = ({
 				<div className="flex flex-col gap-2 mt-2">
 					<span className="text-sm text-gray-700 font-medium">
 						{'Kioskerne åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
-							const t = getNextAvailableProductTime(products)?.date.toISOString()
+							const t = getNextAvailableProductTimeLocal(products)?.date.toISOString()
 							return dayjs(t).format('[d.] DD/MM YYYY [kl.] HH:mm') ?? 'Ingen produkter tilgængelige'
 						})()}
 					</span>
