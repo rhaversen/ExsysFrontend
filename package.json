@@ -7,7 +7,8 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "upgrade": "npm update && npx ncu -u && npm install"
+    "upgrade": "npm update && npx ncu -u && npm install",
+    "spellcheck": "npx cspell ."
   },
   "dependencies": {
     "axios": "^1.8.4",
@@ -22,11 +23,13 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@cspell/dict-da-dk": "^4.0.3",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.14.0",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "cspell": "^8.18.1",
     "eslint": "^8.57.0",
     "eslint-config-love": "^47.0.0",
     "eslint-config-next": "15.3.0",
