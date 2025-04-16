@@ -123,7 +123,7 @@ const AllKiosksStatusManager = ({
 					<span className="text-sm text-gray-700 font-medium">
 						{'Kioskerne åbner automatisk når næste produkt bliver tilgængeligt: '}{(() => {
 							const t = getNextAvailableProductTimeLocal(products)?.date.toISOString()
-							return dayjs(t).format('[d.] DD/MM YYYY [kl.] HH:mm') ?? 'Ingen produkter tilgængelige'
+							return dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') ?? 'Ingen produkter tilgængelige'
 						})()}
 					</span>
 				</div>
