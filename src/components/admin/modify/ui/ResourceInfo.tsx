@@ -35,7 +35,7 @@ const info: Record<string, string[]> = {
 		'Repræsenterer systemets SumUp-kortlæsere, hvortil kortbetalinger tilsendes.',
 		'Kan knyttes til en kiosk for at muliggøre kortbetaling.',
 		'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes i systemet. Hvis enheden har et nummer trykt på den, indtastes det også i systemet. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.',
-		'Ved fjernelse af en enhed skal kortlæseren slettes i systemet, og derefter frakoples API\'en på SumUp-enheden',
+		'Ved fjernelse af en enhed skal kortlæseren slettes i systemet, og derefter frakobles API\'en på SumUp-enheden',
 		'Kortlæserens nummer (#) er printet på den fysiske enhed.'
 	],
 	Produkter: [

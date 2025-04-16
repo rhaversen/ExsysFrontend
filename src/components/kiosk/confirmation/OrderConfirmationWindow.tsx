@@ -19,9 +19,9 @@ const OrderConfirmationWindow = ({
 }): ReactElement => {
 	const { config } = useConfig()
 
-	const autocloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
+	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
-	const [remainingSeconds, setRemainingSeconds] = useState(autocloseMs / 1000)
+	const [remainingSeconds, setRemainingSeconds] = useState(autoCloseMs / 1000)
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
 
 	useEffect(() => {
@@ -42,9 +42,9 @@ const OrderConfirmationWindow = ({
 		if (!canClose || orderStatus === 'awaitingPayment') return
 		const timeoutId = setTimeout(() => {
 			onClose()
-		}, autocloseMs)
+		}, autoCloseMs)
 		return () => { clearTimeout(timeoutId) }
-	}, [autocloseMs, canClose, orderStatus, onClose])
+	}, [autoCloseMs, canClose, orderStatus, onClose])
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',

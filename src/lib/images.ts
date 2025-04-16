@@ -61,7 +61,7 @@ export const KioskImages = {
 export const AdminImages = {
 	confirmModification: {
 		src: '/images/checkmark_green.svg',
-		alt: 'Berkræft'
+		alt: 'Bekræft'
 	},
 	edit: {
 		src: '/images/pen_blue.svg',
