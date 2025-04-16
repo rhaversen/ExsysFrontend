@@ -7,6 +7,8 @@ import KioskCircle from '@/components/ui/KioskCircle'
 import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 
+import CloseModeSelector from './ui/CloseModeSelector'
+
 import 'dayjs/locale/da'
 
 // Modal content for kiosk status
@@ -41,15 +43,6 @@ function KioskStatusModalContent ({
 	const circleContent = (kiosk.kioskTag.length > 0) && kiosk.kioskTag.trim() !== ''
 		? kiosk.kioskTag
 		: kiosk.name.charAt(0).toUpperCase()
-
-	// Helper to format ISO string to local datetime-local value
-	const getLocalDateTimeValue = (isoString: string | null): string => {
-		if (isoString == null) return ''
-		const date = new Date(isoString)
-		const tzOffset = date.getTimezoneOffset() * 60000
-		const localISO = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
-		return localISO
-	}
 
 	const handlePatch = (): void => {
 		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
@@ -86,49 +79,13 @@ function KioskStatusModalContent ({
 						<>
 							<div className="text-left space-y-2">
 								<p className="text-gray-700 text-lg font-medium">{'Vælg hvordan kiosken skal lukkes:'}</p>
-								<div className="flex flex-col gap-2 text-gray-700">
-									<label className="flex items-center gap-2">
-										<input type="radio" checked={mode === 'manual'} onChange={() => { setMode('manual'); setUntil(null) }} />
-										<span className="font-medium">{'Luk manuelt (indtil åbnet igen)'}</span>
-									</label>
-									<label className="flex items-center gap-2">
-										<input type="radio" checked={mode === 'until'} onChange={() => { setMode('until') }} />
-										<span className="font-medium">{'Luk indtil bestemt dato/tidspunkt'}</span>
-									</label>
-									<label className="flex items-center gap-2">
-										<input type="radio" checked={mode === 'nextProduct'} onChange={() => { setMode('nextProduct'); setUntil(null) }} />
-										<span className="font-medium">{'Luk indtil næste produkt bliver tilgængeligt'}</span>
-									</label>
-								</div>
-								{mode === 'until' && (
-									<div className="flex flex-col gap-2 mt-2">
-										<label className="text-sm text-gray-700 font-medium">{'Vælg dato og tid:'}</label>
-										<input
-											id="close-until-input"
-											type="datetime-local"
-											className="border rounded px-2 py-1 text-gray-700"
-											value={getLocalDateTimeValue(until)}
-											onChange={e => { setUntil((e.target.value.length > 0) ? new Date(e.target.value).toISOString() : null) }}
-											min={dayjs().format('YYYY-MM-DDTHH:mm')}
-											placeholder="Vælg dato og tid"
-										/>
-									</div>
-								)}
-								{mode === 'nextProduct' && (
-									<div className="flex flex-col gap-2 mt-2">
-										<span className="text-sm text-gray-700 font-medium">
-											<div>
-												{'Kiosken åbner automatisk når næste produkt bliver tilgængeligt:'}
-											</div>
-											<div>
-												{(() => {
-													const t = getNextAvailableProductTimeLocal(products)?.date
-													return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
-												})()}
-											</div>
-										</span>
-									</div>
-								)}
+								<CloseModeSelector<'manual' | 'until' | 'nextProduct'>
+									mode={mode}
+									setMode={setMode}
+									until={until}
+									setUntil={setUntil}
+									products={products}
+								/>
 							</div>
 							<div className="flex gap-4 justify-center pt-2">
 								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
