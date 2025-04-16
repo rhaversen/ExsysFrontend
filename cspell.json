@@ -1,6 +1,9 @@
 {
     "version": "0.2",
     "language": "en-US,da-DK",
+    "dictionaries": [
+        "da-dk"
+    ],
     "ignorePaths": [
         "node_modules/**",
         ".next/**",
