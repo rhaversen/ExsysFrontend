@@ -208,68 +208,73 @@ const KioskStatusManager = ({
 	}, [API_URL])
 
 	return (
-		<div className="flex flex-col w-full max-w-2xl mx-auto">
-			{loadingSessions
-				? (
-					<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser sessions...'}</div>
-				)
-				: (
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						{kiosks.map(kiosk => {
-							const kioskSessions = sessions.filter(s => s.type === 'kiosk' && s.userId === kiosk._id)
-							const { base, warning } = getKioskStatus(kiosk, kioskSessions)
-							const statusText = getStatusText(kiosk, base)
-							const warningText = getWarningText(warning)
-							return (
-								<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
-									<KioskCircle
-										warningStatus={warning}
-										isClosed={base === 'closed'}
-										kioskTag={kiosk.kioskTag}
-									/>
-									<div className="flex-1">
-										<div className="text-sm font-medium text-gray-700 mb-1 line-clamp-2 flex items-center gap-2">{kiosk.name}</div>
-										<div className="flex items-center gap-2">
-											<span className={`text-xs ${warning != null ? 'text-orange-600 font-semibold' : 'text-gray-500'}`}>{statusText}</span>
-											<button
-												type="button"
-												disabled={isPatching}
-												onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
-												className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${base === 'closed'
-													? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
-													: warning != null
-														? 'bg-white text-orange-700 border border-orange-200 hover:bg-orange-50'
-														: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
-												} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-												aria-label={base === 'closed' ? 'Åben kiosk' : 'Luk kiosk'}
-											>
-												{base === 'closed' ? 'Åben' : 'Luk'}
-											</button>
+		<div>
+			<h2 className="text-lg text-gray-800">
+				{'Kiosk status og håndtering'}
+			</h2>
+			<div className="flex flex-col w-full max-w-2xl mx-auto">
+				{loadingSessions
+					? (
+						<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser sessions...'}</div>
+					)
+					: (
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							{kiosks.map(kiosk => {
+								const kioskSessions = sessions.filter(s => s.type === 'kiosk' && s.userId === kiosk._id)
+								const { base, warning } = getKioskStatus(kiosk, kioskSessions)
+								const statusText = getStatusText(kiosk, base)
+								const warningText = getWarningText(warning)
+								return (
+									<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
+										<KioskCircle
+											warningStatus={warning}
+											isClosed={base === 'closed'}
+											kioskTag={kiosk.kioskTag}
+										/>
+										<div className="flex-1">
+											<div className="text-sm font-medium text-gray-700 mb-1 line-clamp-2 flex items-center gap-2">{kiosk.name}</div>
+											<div className="flex items-center gap-2">
+												<span className={`text-xs ${warning != null ? 'text-orange-600 font-semibold' : 'text-gray-500'}`}>{statusText}</span>
+												<button
+													type="button"
+													disabled={isPatching}
+													onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
+													className={`px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${base === 'closed'
+														? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+														: warning != null
+															? 'bg-white text-orange-700 border border-orange-200 hover:bg-orange-50'
+															: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+													} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
+													aria-label={base === 'closed' ? 'Åben kiosk' : 'Luk kiosk'}
+												>
+													{base === 'closed' ? 'Åben' : 'Luk'}
+												</button>
+											</div>
+											{(warningText.length > 0) && (
+												<div className="text-xs text-orange-600 mt-1">{warningText}</div>
+											)}
 										</div>
-										{(warningText.length > 0) && (
-											<div className="text-xs text-orange-600 mt-1">{warningText}</div>
-										)}
 									</div>
-								</div>
-							)
-						})}
-					</div>
+								)
+							})}
+						</div>
+					)}
+				{showModal && (selectedKiosk != null) && (
+					<KioskStatusModalContent
+						kiosk={selectedKiosk}
+						products={products}
+						isPatching={isPatching}
+						onPatch={patch => {
+							setIsPatching(true)
+							void handlePatchKiosk(selectedKiosk._id, patch).finally(() => {
+								setIsPatching(false)
+								setShowModal(false)
+							})
+						}}
+						onClose={() => { setShowModal(false) }}
+					/>
 				)}
-			{showModal && (selectedKiosk != null) && (
-				<KioskStatusModalContent
-					kiosk={selectedKiosk}
-					products={products}
-					isPatching={isPatching}
-					onPatch={patch => {
-						setIsPatching(true)
-						void handlePatchKiosk(selectedKiosk._id, patch).finally(() => {
-							setIsPatching(false)
-							setShowModal(false)
-						})
-					}}
-					onClose={() => { setShowModal(false) }}
-				/>
-			)}
+			</div>
 		</div>
 	)
 }
