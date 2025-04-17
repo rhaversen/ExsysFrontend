@@ -1,8 +1,9 @@
 'use client'
 
+import React, { type ReactNode, useCallback, useState } from 'react'
+
 import ErrorWindow from '@/components/ui/ErrorWindow'
 import { ErrorContext, type ErrorInfo } from '@/contexts/ErrorContext/ErrorContext'
-import React, { type ReactNode, useCallback, useState } from 'react'
 
 interface ErrorProviderProps {
 	children: ReactNode
@@ -11,11 +12,11 @@ interface ErrorProviderProps {
 const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 	const [errors, setErrors] = useState<ErrorInfo[]>([])
 
-	const addError = useCallback((error: unknown) => {
-		console.error(error)
+	const addError = useCallback((...args: unknown[]) => {
+		console.error(...args)
 		setErrors(prevErrors => [...prevErrors, {
 			id: Date.now(),
-			error
+			error: args
 		}])
 	}, [])
 

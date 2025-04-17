@@ -1,7 +1,8 @@
+import { type Metadata } from 'next'
+
 import KioskBroadcastedEventHandlers from '@/components/kiosk/KioskBroadcastedEventHandlers'
 import ConfigProvider from '@/contexts/ConfigProvider'
 import KioskAuthProvider from '@/contexts/KioskAuthProvider'
-import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
 	title: {

@@ -1,5 +1,4 @@
 'use client'
-import { type AdminType, type KioskType } from '@/types/backendDataTypes'
 import React, {
 	createContext,
 	type Dispatch,
@@ -10,6 +9,8 @@ import React, {
 	useEffect,
 	useState
 } from 'react'
+
+import { type AdminType, type KioskType } from '@/types/backendDataTypes'
 
 type UserType = KioskType | AdminType
 

@@ -1,7 +1,8 @@
+import { type Metadata } from 'next'
+
 import Header from '@/components/admin/ui/header/Header'
 import AdminAuthProvider from '@/contexts/AdminAuthProvider'
 import ConfigProvider from '@/contexts/ConfigProvider'
-import { type Metadata } from 'next'
 
 export const metadata: Metadata = {
 	title: {

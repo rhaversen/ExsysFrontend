@@ -176,6 +176,8 @@ export interface KioskType {
 	readerId: ReaderType | null
 	activities: ActivityType[]
 	disabledActivities: Array<ActivityType['_id']>
+	closedUntil: string | null
+	manualClosed: boolean
 	createdAt: string
 	updatedAt: string
 }
@@ -187,6 +189,8 @@ export interface PostKioskType {
 	readerId?: ReaderType['_id']
 	activities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
+	closedUntil?: string | null
+	manualClosed?: boolean
 }
 
 export interface PatchKioskType {
@@ -196,6 +200,8 @@ export interface PatchKioskType {
 	readerId?: ReaderType['_id'] | null
 	activities?: Array<ActivityType['_id']>
 	disabledActivities?: Array<ActivityType['_id']>
+	closedUntil?: string | null
+	manualClosed?: boolean
 }
 
 // Session types
@@ -218,7 +224,6 @@ export interface ConfigsType {
 		kioskInactivityTimeoutMs: number
 		kioskInactivityTimeoutWarningMs: number
 		kioskOrderConfirmationTimeoutMs: number
-		kioskIsOpen: boolean
 	}
 	createdAt: Date
 	updatedAt: Date

@@ -1,8 +1,9 @@
+import React, { type ReactElement, useEffect, useState } from 'react'
+
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
-import EntityCard from '../../ui/EntityCard'
 import {
 	type ActivityType,
 	type PatchActivityType,
@@ -12,9 +13,10 @@ import {
 	type PatchKioskType,
 	type ProductType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useEffect, useState } from 'react'
-import SelectionWindow from '../../ui/SelectionWindow'
+
+import EntityCard from '../../ui/EntityCard'
 import ItemsDisplay from '../../ui/ItemsDisplay'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Activity = ({
 	activity,

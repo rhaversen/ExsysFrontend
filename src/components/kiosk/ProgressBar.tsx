@@ -1,7 +1,9 @@
+import React from 'react'
+
+import { KioskImages } from '@/lib/images'
 import { type ActivityType, type RoomType } from '@/types/backendDataTypes'
 import { type ViewState } from '@/types/frontendDataTypes'
-import React from 'react'
-import { KioskImages } from '@/lib/images'
+
 import AsyncImage from '../ui/AsyncImage'
 
 const ProgressButton = ({

@@ -1,8 +1,9 @@
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
 import OptionsBar from '@/components/kiosk/select/OptionsBar'
 import ProductCatalog from '@/components/kiosk/select/ProductCatalog'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const SelectionWindow = ({
 	cart,

@@ -1,6 +1,7 @@
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import axios from 'axios'
 import { useCallback } from 'react'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 const useCUDOperations = <PostType, PatchType, ReturnType = void> (
 	entityPath: string,

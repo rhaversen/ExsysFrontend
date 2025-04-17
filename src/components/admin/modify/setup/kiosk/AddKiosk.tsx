@@ -1,13 +1,15 @@
-import EditableField from '@/components/admin/modify/ui/EditableField'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
 import axios from 'axios'
+import Image from 'next/image'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+import EditableField from '@/components/admin/modify/ui/EditableField'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { AdminImages } from '@/lib/images'
+import { type ActivityType, type KioskType, type PostKioskType, type ReaderType } from '@/types/backendDataTypes'
+
 import EditableDropdown from '../../ui/EditableDropdown'
 import SelectionWindow from '../../ui/SelectionWindow'
-import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
-import { AdminImages } from '@/lib/images'
-import Image from 'next/image'
 
 const AddKiosk = ({
 	kiosks,

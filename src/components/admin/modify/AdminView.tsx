@@ -1,5 +1,12 @@
 'use client'
 
+import React, { type ReactElement, useState, useEffect } from 'react'
+import { FaPlus, FaMinus } from 'react-icons/fa'
+
+import AddOption from '@/components/admin/modify/catalog/option/AddOption'
+import Option from '@/components/admin/modify/catalog/option/Option'
+import AddProduct from '@/components/admin/modify/catalog/product/AddProduct'
+import Product from '@/components/admin/modify/catalog/product/Product'
 import Activity from '@/components/admin/modify/setup/activity/Activity'
 import AddActivity from '@/components/admin/modify/setup/activity/AddActivity'
 import AddAdmin from '@/components/admin/modify/setup/admin/AddAdmin'
@@ -11,16 +18,11 @@ import AddReader from '@/components/admin/modify/setup/reader/AddReader'
 import Reader from '@/components/admin/modify/setup/reader/Reader'
 import AddRoom from '@/components/admin/modify/setup/room/AddRoom'
 import Room from '@/components/admin/modify/setup/room/Room'
-import AddOption from '@/components/admin/modify/catalog/option/AddOption'
-import Option from '@/components/admin/modify/catalog/option/Option'
-import AddProduct from '@/components/admin/modify/catalog/product/AddProduct'
-import Product from '@/components/admin/modify/catalog/product/Product'
+import ResourceInfo from '@/components/admin/modify/ui/ResourceInfo'
 import SortingControl from '@/components/admin/modify/ui/SortingControl'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
-import ResourceInfo from '@/components/admin/modify/ui/ResourceInfo'
 import useSorting from '@/hooks/useSorting'
 import type sortConfig from '@/lib/SortConfig'
-import { FaPlus, FaMinus } from 'react-icons/fa'
 import {
 	type ProductType,
 	type ActivityType,
@@ -30,7 +32,6 @@ import {
 	type RoomType,
 	type OptionType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState, useEffect } from 'react'
 
 type ViewType = 'Aktiviteter' | 'Spisesteder' | 'Kiosker' | 'Kortlæsere' | 'Admins' | 'Konfiguration' | 'Produkter' | 'Tilvalg'
 

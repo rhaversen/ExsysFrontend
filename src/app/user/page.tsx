@@ -1,14 +1,15 @@
 'use client'
 
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 import Products from '@/components/order/Products'
 import RoomSelector from '@/components/order/RoomSelector'
 import SubmitButton from '@/components/ui/SubmitButton'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertOrderWindowFromUTC, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { convertUTCOrderWindowToLocal, isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
 import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -41,7 +42,7 @@ export default function Page (): ReactElement {
 		const availabilities = products.reduce(
 			(acc: Record<ProductType['_id'], boolean>, product) => ({
 				...acc,
-				[product._id]: isCurrentTimeInOrderWindow(convertOrderWindowFromUTC(
+				[product._id]: isCurrentTimeInLocalOrderWindow(convertUTCOrderWindowToLocal(
 					product.orderWindow
 				))
 			}),

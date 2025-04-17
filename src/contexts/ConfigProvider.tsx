@@ -1,8 +1,10 @@
 'use client'
-import { type ConfigsType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
+
+import { type ConfigsType } from '@/types/backendDataTypes'
+
 import { useError } from './ErrorContext/ErrorContext'
 
 interface ConfigContextType {

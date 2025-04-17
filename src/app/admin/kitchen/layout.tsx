@@ -1,5 +1,6 @@
-import SoundProvider from '@/contexts/SoundProvider'
 import { type Metadata } from 'next'
+
+import SoundProvider from '@/contexts/SoundProvider'
 
 export const metadata: Metadata = {
 	title: {

@@ -1,13 +1,15 @@
+import React, { type ReactElement, useEffect, useState } from 'react'
+
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type PatchRoomType, type PostRoomType, type RoomType, type ActivityType, type PatchActivityType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useEffect, useState } from 'react'
-import SelectionWindow from '../../ui/SelectionWindow'
-import ItemsDisplay from '../../ui/ItemsDisplay'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
+
 import EntityCard from '../../ui/EntityCard'
+import ItemsDisplay from '../../ui/ItemsDisplay'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Room = ({
 	rooms,

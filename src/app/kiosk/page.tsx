@@ -1,22 +1,28 @@
 'use client'
 
-import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
-import OrderView from '@/components/kiosk/OrderView'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC, getTimeStringFromOrderwindowTime, isCurrentTimeInOrderWindow, sortProductsByOrderwindow } from '@/lib/timeUtils'
-import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
-import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 import axios from 'axios'
+import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
 import { io, type Socket } from 'socket.io-client'
-import ProgressBar from '@/components/kiosk/ProgressBar'
+
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
+import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
+import OrderView from '@/components/kiosk/OrderView'
+import ProgressBar from '@/components/kiosk/ProgressBar'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { convertUTCOrderWindowToLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed, getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
+import { type CartType, type ViewState } from '@/types/frontendDataTypes'
+
+import 'dayjs/locale/da'
 
 export default function Page (): ReactElement {
+	dayjs.locale('da')
+
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
@@ -34,7 +40,6 @@ export default function Page (): ReactElement {
 	})
 	const [selectedActivity, setSelectedActivity] = useState<ActivityType | null>(null)
 	const [activities, setActivities] = useState<ActivityType[]>([])
-	const [hasAvailableProducts, setisClosed] = useState(true)
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('welcome')
@@ -47,8 +52,7 @@ export default function Page (): ReactElement {
 	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
-
-	const kioskIsOpen = config?.configs.kioskIsOpen ?? false
+	const [isKioskClosedState, setIsKioskClosedState] = useState<boolean>(true)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -69,7 +73,7 @@ export default function Page (): ReactElement {
 	// Process product data
 	const processProductData = (product: ProductType): ProductType => ({
 		...product,
-		orderWindow: convertOrderWindowFromUTC(product.orderWindow)
+		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
 	})
 
 	// Process all products data
@@ -77,11 +81,13 @@ export default function Page (): ReactElement {
 		return productsData.map(processProductData)
 	}, [])
 
-	// Function to check if the current time has any active order windows
-	const updateKioskClosedStatus = useCallback((products: ProductType[]) => {
-		const shouldBeClosed = !products.some(product => isCurrentTimeInOrderWindow(product.orderWindow))
-
-		setisClosed(shouldBeClosed)
+	const computeIsKioskClosed = useCallback((kioskData: KioskType | null, productsData: ProductType[]) => {
+		if (kioskData == null) return true
+		if (isKioskClosed(kioskData)) return true
+		const hasAvailable = productsData.some(
+			p => p.isActive && isCurrentTimeInLocalOrderWindow(p.orderWindow)
+		)
+		return !hasAvailable
 	}, [])
 
 	// Load all data
@@ -112,29 +118,29 @@ export default function Page (): ReactElement {
 			setActivities(activitiesData)
 			setRooms(roomsData)
 
+			// Update if kiosk is open or closed
+			setIsKioskClosedState(computeIsKioskClosed(kioskData, processedProducts))
+
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
-
-			// Check if the current time has any active order windows
-			updateKioskClosedStatus(processedProducts)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, updateKioskClosedStatus, addError])
+	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, computeIsKioskClosed, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			updateKioskClosedStatus(products)
+			setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
 		}, 1000)
 
 		return () => { clearInterval(interval) }
-	}, [products, updateKioskClosedStatus])
+	}, [products, computeIsKioskClosed, kiosk])
 
-	// Initialize on mount and when Closed status changes
+	// Initialize on mount
 	useEffect(() => {
 		initialSetup().catch(addError)
-	}, [hasAvailableProducts, initialSetup, addError])
+	}, [initialSetup, addError])
 
 	// Initialize WebSocket connection
 	useEffect(() => {
@@ -155,7 +161,7 @@ export default function Page (): ReactElement {
 			setProducts(prev => {
 				const updated = processProductData(item)
 				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				updateKioskClosedStatus(newProducts)
+				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
 				return newProducts
 			})
 		},
@@ -163,14 +169,14 @@ export default function Page (): ReactElement {
 			setProducts(prev => {
 				const updated = processProductData(item)
 				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				updateKioskClosedStatus(newProducts)
+				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				updateKioskClosedStatus(products)
+				setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
 				return products
 			})
 		}
@@ -222,6 +228,7 @@ export default function Page (): ReactElement {
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
+				setIsKioskClosedState(computeIsKioskClosed(kioskUpdate, products))
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
 				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
@@ -334,6 +341,41 @@ export default function Page (): ReactElement {
 		}
 	}, [resetTimer, showTimeoutWarning, viewState])
 
+	// Helper to check if a date is today (local time)
+	function isDateToday (date: Date): boolean {
+		const now = new Date()
+		return (
+			date.getFullYear() === now.getFullYear() &&
+			date.getMonth() === now.getMonth() &&
+			date.getDate() === now.getDate()
+		)
+	}
+
+	// Helper to check if a date is tomorrow (local time)
+	function isDateTomorrow (date: Date): boolean {
+		const now = new Date()
+		const tomorrow = new Date(now)
+		tomorrow.setHours(0, 0, 0, 0)
+		tomorrow.setDate(now.getDate() + 1)
+		return (
+			date.getFullYear() === tomorrow.getFullYear() &&
+			date.getMonth() === tomorrow.getMonth() &&
+			date.getDate() === tomorrow.getDate()
+		)
+	}
+
+	// Helper to format opening message
+	function getOpeningMessage (date: Date, timeStr: string): string {
+		if (isDateToday(date)) {
+			return `Vi åbner igen kl. ${timeStr}`
+		} else if (isDateTomorrow(date)) {
+			return `Vi åbner igen i morgen kl. ${timeStr}`
+		} else {
+			const formatted = dayjs(date).format('dddd [d.] DD/MM')
+			return `Vi åbner igen ${formatted} kl. ${timeStr}`
+		}
+	}
+
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
 		switch (viewState) {
@@ -428,7 +470,7 @@ export default function Page (): ReactElement {
 		}
 	}
 
-	if (hasAvailableProducts || !kioskIsOpen) {
+	if (isKioskClosedState) {
 		return (
 			<div className="flex flex-col h-screen">
 				<div className="flex-1">
@@ -436,9 +478,25 @@ export default function Page (): ReactElement {
 						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
 							<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
 							<p className="text-center">{'Kiosken er lukket for bestillinger'}</p>
-							{products.length > 0 && kioskIsOpen && !hasAvailableProducts && (
+							{products.length > 0 && products.some(p => p.isActive) && (kiosk != null) && !kiosk.manualClosed && (
 								<p className="text-center">
-									{`Vi åbner igen kl. ${getTimeStringFromOrderwindowTime(sortProductsByOrderwindow(products)[0].orderWindow.from)}`}
+									{(kiosk.closedUntil != null && new Date(kiosk.closedUntil) > new Date())
+										? (() => {
+											// If the kiosk is closed until a specific date, show that date
+											const closedUntilDate = new Date(kiosk.closedUntil)
+											const hours = closedUntilDate.getHours().toString().padStart(2, '0')
+											const minutes = closedUntilDate.getMinutes().toString().padStart(2, '0')
+											return getOpeningMessage(closedUntilDate, `${hours}:${minutes}`)
+										})()
+										: (() => {
+											// If the kiosk is closed until the next product is available, show that date
+											const next = getNextAvailableProductTimeLocal(products)
+											if (next != null) {
+												const nextProductAvailableTime = getTimeStringFromLocalOrderWindowTime(next.from)
+												return getOpeningMessage(next.date, nextProductAvailableTime)
+											}
+											return null
+										})()}
 								</p>
 							)}
 						</div>
@@ -448,7 +506,6 @@ export default function Page (): ReactElement {
 					<KioskSessionInfo />
 				</div>
 			</div>
-
 		)
 	}
 
