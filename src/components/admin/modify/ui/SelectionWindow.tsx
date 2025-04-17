@@ -1,5 +1,6 @@
-import CloseableModal from '@/components/ui/CloseableModal'
 import { type ReactElement, useCallback } from 'react'
+
+import CloseableModal from '@/components/ui/CloseableModal'
 
 interface Item {
 	_id: string

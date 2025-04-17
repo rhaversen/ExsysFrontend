@@ -1,7 +1,8 @@
+import React, { type ReactElement } from 'react'
+
 import Option from '@/components/kiosk/select/Option'
 import { type OptionType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement } from 'react'
 
 const OptionsBar = ({
 	cart,

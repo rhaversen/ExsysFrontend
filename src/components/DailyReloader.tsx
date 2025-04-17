@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react'
 
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+
 export default function DailyReloader ({
 	reloadHour = 0,
 	randomDelayMinutes = 10
@@ -9,6 +11,8 @@ export default function DailyReloader ({
 	reloadHour?: number
 	randomDelayMinutes?: number
 }): null {
+	const { addError } = useError()
+
 	useEffect(() => {
 		const setMidnightReload = (): NodeJS.Timeout | undefined => {
 			try {
@@ -25,20 +29,20 @@ export default function DailyReloader ({
 				const randomDelay = Math.floor(Math.random() * randomDelayMinutes * 60 * 1000)
 				const msToReload = target.getTime() - now.getTime() + randomDelay
 
-				console.log(`Page will reload in ${Math.floor(msToReload / 1000 / 60)} minutes`)
+				console.info(`Page will reload in ${Math.floor(msToReload / 1000 / 60)} minutes`)
 
 				return setTimeout(() => {
 					window.location.reload()
 				}, msToReload)
 			} catch (error) {
-				console.error('Failed to set reload timer')
+				addError('Failed to set reload timer')
 				return undefined
 			}
 		}
 
 		const timeoutId = setMidnightReload()
 		return () => { (timeoutId !== null) && clearTimeout(timeoutId) }
-	}, [randomDelayMinutes, reloadHour])
+	}, [addError, randomDelayMinutes, reloadHour])
 
 	return null
 }

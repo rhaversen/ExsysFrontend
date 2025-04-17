@@ -7,7 +7,7 @@ export interface ErrorInfo {
 
 interface ErrorContextType {
 	errors: ErrorInfo[]
-	addError: (error: unknown) => void
+	addError: (...args: unknown[]) => void
 	removeError: (id: number) => void
 }
 

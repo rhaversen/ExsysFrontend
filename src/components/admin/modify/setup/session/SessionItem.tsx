@@ -1,20 +1,23 @@
 'use client'
 
+import { type ReactElement, useEffect, useState } from 'react'
+import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
+
 import { parseUserAgent } from '@/lib/ParsingUtils'
 import { timeSince, timeUntil } from '@/lib/timeUtils'
 import { type SessionType } from '@/types/backendDataTypes'
-import { type ReactElement, useEffect, useState } from 'react'
-import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
 
 const SessionItem = ({
 	session,
 	currentSessionId,
-	currentSessionIp,
+	currentPublicIp,
+	isLoadingIp,
 	onDelete
 }: {
 	session: SessionType
 	currentSessionId: string | null
-	currentSessionIp: string | null
+	currentPublicIp: string | null
+	isLoadingIp: boolean
 	onDelete: (sessionId: string) => void
 }): ReactElement => {
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
@@ -46,7 +49,7 @@ const SessionItem = ({
 	} = parseUserAgent(session.userAgent)
 
 	const isCurrentSession = currentSessionId === session._id
-	const isSameIpAsCurrent = currentSessionIp === session.ipAddress
+	const isSameIpAsCurrent = !isLoadingIp && currentPublicIp === session.ipAddress
 
 	// Get appropriate device icon
 	const DeviceIcon = (): ReactElement => {
@@ -97,14 +100,20 @@ const SessionItem = ({
 				<span className="text-gray-600 font-medium">{'IP:'}</span>
 				<span className="text-gray-800 flex items-center">
 					{session.ipAddress}
-					{isSameIpAsCurrent && ( // Display indicator if IPs match
-						<span
-							className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded font-medium"
-							title="Samme IP som din nuværende session"
-						>
-							{'Nuværende IP'}
-						</span>
-					)}
+					{isLoadingIp
+						? (
+							<span className="ml-2 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded font-medium">
+								{'Checker IP...'}
+							</span>
+						)
+						: isSameIpAsCurrent && (
+							<span
+								className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded font-medium"
+								title="Samme IP som din nuværende session"
+							>
+								{'Nuværende IP'}
+							</span>
+						)}
 				</span>
 
 				{/* Login Time */}
@@ -125,7 +134,9 @@ const SessionItem = ({
 			</div>
 
 			{/* User Agent Details */}
-			<div className="text-gray-600 w-full text-wrap text-xs mt-3 max-w-full bg-gray-50 p-2 rounded break-all">
+			<div className={`w-full text-wrap text-xs mt-3 max-w-full p-2 rounded break-all ${
+				isCurrentSession ? 'bg-blue-100 text-blue-800' : 'bg-gray-50 text-gray-600'
+			}`}>
 				{session.userAgent}
 			</div>
 		</div>

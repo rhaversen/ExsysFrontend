@@ -1,7 +1,9 @@
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type ConfigsType } from '@/types/backendDataTypes'
 import axios from 'axios'
 import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { type ConfigsType } from '@/types/backendDataTypes'
+
 import Config from './Config'
 
 const ConfigsView = (): ReactElement => {

@@ -1,11 +1,13 @@
+import React, { type ReactElement, useState, useEffect } from 'react'
+
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type PatchReaderType, type PostReaderType, type ReaderType, type KioskType, type PatchKioskType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState, useEffect } from 'react'
+
 import EditableDropdown from '../../ui/EditableDropdown'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import EntityCard from '../../ui/EntityCard'
 
 const Reader = ({

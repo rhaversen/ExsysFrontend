@@ -1,5 +1,8 @@
 const sortConfig = {
 	Produkter: [{
+		prop: 'isActive',
+		label: 'Aktiv'
+	}, {
 		prop: 'name',
 		label: 'Navn'
 	}, {

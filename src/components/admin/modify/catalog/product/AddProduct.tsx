@@ -1,16 +1,18 @@
+import Image from 'next/image'
+import React, { type ReactElement, useState } from 'react'
+
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
-import { convertOrderWindowToUTC } from '@/lib/timeUtils'
+import { AdminImages } from '@/lib/images'
+import { convertLocalOrderWindowToUTC } from '@/lib/timeUtils'
 import { type PatchProductType, type ActivityType, type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
+
+import InlineValidation from '../../ui/InlineValidation'
 import ItemsDisplay from '../../ui/ItemsDisplay'
 import SelectionWindow from '../../ui/SelectionWindow'
-import InlineValidation from '../../ui/InlineValidation'
-import { AdminImages } from '@/lib/images'
-import Image from 'next/image'
 
 const AddProduct = ({
 	products,
@@ -56,7 +58,7 @@ const AddProduct = ({
 	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
 		return {
 			...product,
-			orderWindow: (product.orderWindow !== undefined) ? convertOrderWindowToUTC(product.orderWindow) : undefined
+			orderWindow: (product.orderWindow !== undefined) ? convertLocalOrderWindowToUTC(product.orderWindow) : undefined
 		}
 	}
 

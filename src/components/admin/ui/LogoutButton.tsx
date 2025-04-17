@@ -1,8 +1,10 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { type ReactElement } from 'react'
-import { useError } from '../../../contexts/ErrorContext/ErrorContext'
+
 import { useUser } from '@/contexts/UserProvider'
+
+import { useError } from '../../../contexts/ErrorContext/ErrorContext'
 
 const LogoutButton = ({
 	className = ''

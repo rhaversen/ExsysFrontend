@@ -1,7 +1,8 @@
+import React, { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
+
 import Item from '@/components/kiosk/cart/Item'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartItemType, type CartType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
 
 const OrderSummary = ({
 	products,
