@@ -1,5 +1,6 @@
 'use client'
 
+import { isAxiosError } from 'axios'
 import React, { type ReactNode, useCallback, useState } from 'react'
 
 import ErrorWindow from '@/components/ui/ErrorWindow'
@@ -13,6 +14,10 @@ const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
 	const [errors, setErrors] = useState<ErrorInfo[]>([])
 
 	const addError = useCallback((...args: unknown[]) => {
+		const err = args[0]
+		if (isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403)) {
+			return
+		}
 		console.error(...args)
 		setErrors(prevErrors => [...prevErrors, {
 			id: Date.now(),
