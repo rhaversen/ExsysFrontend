@@ -207,9 +207,9 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const handleBarHover = useCallback((hover: TooltipProps | null): void => { setHovered(hover) }, [])
 
 	return (
-		<div ref={containerRef} className="overflow-visible" style={{ minHeight: height }}>
+		<div ref={containerRef} className="overflow-visible mb-5" style={{ minHeight: height }}>
 			{/* styled title */}
-			<h2 className="mb-4 text-lg font-bold text-gray-800">
+			<h2 className="mb-5 text-lg text-gray-800">
 				{'Produkter og deres bestillingsvinduer\r'}
 			</h2>
 
@@ -217,7 +217,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 			<svg
 				width={maxLabelWidth + timelineWidth + 40}
 				height={height}
-				className="block select-none bg-white rounded-lg overflow-visible"
+				className="block select-none overflow-visible"
 			>
 				{/* top axis */}
 				<g transform={`translate(${maxLabelWidth},${PADDING})`}>
