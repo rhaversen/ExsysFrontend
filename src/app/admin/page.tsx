@@ -173,19 +173,19 @@ export default function Page (): ReactElement | null {
 							<Link href="/admin/kitchen" className="w-full">
 								<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
 									<GiCookingPot className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium">{'Se bestillinger'}</span>
+									<span className="text-lg font-medium text-center">{'Se bestillinger'}</span>
 								</div>
 							</Link>
 							<Link href="/admin/modify" className="w-full">
 								<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
 									<FaEdit className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium">{'Rediger opsætning'}</span>
+									<span className="text-lg font-medium text-center">{'Rediger opsætning'}</span>
 								</div>
 							</Link>
 							<Link href="/admin/statistics" className="w-full">
 								<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
 									<FaChartBar className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium">{'Se statistik'}</span>
+									<span className="text-lg font-medium text-center">{'Se statistik'}</span>
 								</div>
 							</Link>
 						</div>
