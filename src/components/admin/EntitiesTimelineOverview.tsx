@@ -196,7 +196,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	useLayoutEffect(() => {
 		function updateWidth (): void {
 			if (containerRef.current != null) {
-				setTimelineWidth(Math.max(300, containerRef.current.offsetWidth - maxLabelWidth - 40))
+				setTimelineWidth(Math.max(100, containerRef.current.offsetWidth - maxLabelWidth - 40))
 			}
 		}
 		updateWidth()
