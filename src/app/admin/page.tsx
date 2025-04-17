@@ -3,14 +3,14 @@
 import axios from 'axios'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
-import { FaEdit, FaChartBar, FaSyncAlt } from 'react-icons/fa'
+import { FaEdit, FaChartBar } from 'react-icons/fa'
 import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
 import EntitiesTimelineOverview from '@/components/admin/EntitiesTimelineOverview'
+import KioskRefresh from '@/components/admin/KioskRefresh'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
-import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
@@ -24,7 +24,6 @@ export default function Page (): ReactElement | null {
 	const [pendingOrders, setPendingOrders] = useState<number>(0)
 	const [totalOrdersToday, setTotalOrdersToday] = useState<number>(0)
 	const [hasMounted, setHasMounted] = useState(false)
-	const [showRefreshModal, setShowRefreshModal] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -101,17 +100,6 @@ export default function Page (): ReactElement | null {
 		}
 	}, [API_URL, addError, processProductsData])
 
-	const handleForceRefresh = async (): Promise<void> => {
-		try {
-			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
-				withCredentials: true
-			})
-			setShowRefreshModal(false)
-		} catch (error) {
-			addError(error)
-		}
-	}
-
 	useEffect(() => {
 		setHasMounted(true)
 		fetchPendingOrders().catch(() => { setPendingOrders(0) })
@@ -163,130 +151,57 @@ export default function Page (): ReactElement | null {
 
 	return (
 		<main className="p-8 flex flex-col items-center">
-			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl">
-
-				{/* Welcome */}
+			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl xl:max-w-6xl">
 				<p className="text-3xl font-bold text-gray-800">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
-
-				{/* Statistics section */}
-				<div className="grid grid-cols-2 gap-4">
-					<div className="bg-blue-50 p-4 rounded-lg">
-						<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
-						<p className="text-2xl font-bold text-blue-700">{totalOrdersToday}</p>
+				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+					<div className="flex flex-col gap-6">
+						{/* Statistics section */}
+						<div className="grid grid-cols-2 gap-4">
+							<div className="bg-blue-50 p-4 rounded-lg">
+								<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
+								<p className="text-2xl font-bold text-blue-700">{totalOrdersToday}</p>
+							</div>
+							<div className="bg-amber-50 p-4 rounded-lg">
+								<p className="text-sm text-amber-600 mb-1">{'Afventende bestillinger'}</p>
+								<p className="text-2xl font-bold text-amber-700">{pendingOrders}</p>
+							</div>
+						</div>
+						{/* Task selection buttons */}
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+							<Link href="/admin/kitchen" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<GiCookingPot className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Se bestillinger'}</span>
+								</div>
+							</Link>
+							<Link href="/admin/modify" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<FaEdit className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Rediger opsætning'}</span>
+								</div>
+							</Link>
+							<Link href="/admin/statistics" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<FaChartBar className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Se statistik'}</span>
+								</div>
+							</Link>
+						</div>
+						{/* Kiosk Refresh Component */}
+						<KioskRefresh />
+						{/* All Kiosks Status Manager */}
+						<AllKiosksStatusManager kiosks={kiosks} products={products} />
 					</div>
-					<div className="bg-amber-50 p-4 rounded-lg">
-						<p className="text-sm text-amber-600 mb-1">{'Afventende bestillinger'}</p>
-						<p className="text-2xl font-bold text-amber-700">{pendingOrders}</p>
+					<div className="flex flex-col gap-6">
+						{/* Kiosk Status */}
+						<KioskStatusManager kiosks={kiosks} products={products} />
+						{/* Entities Timeline Overview */}
+						<EntitiesTimelineOverview products={products} />
 					</div>
 				</div>
-
-				{/* Task selection buttons */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-2xl">
-					<Link href="/admin/kitchen" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<GiCookingPot className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se bestillinger'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/modify" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaEdit className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Rediger opsætning'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/statistics" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaChartBar className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se statistik'}</span>
-						</div>
-					</Link>
-				</div>
-
-				{/* Kiosk Refresh */}
-				<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-					<FaSyncAlt className="text-blue-500 text-2xl" />
-					<div className="flex flex-col flex-grow px-4">
-						<span className="text-lg text-gray-800">
-							{'Genindlæs kiosker'}
-						</span>
-						<div className="text-sm text-gray-600">
-							{'Tvinger alle kiosker til at genindlæse deres interface'}
-						</div>
-					</div>
-					<button
-						type="button"
-						onClick={() => { setShowRefreshModal(true) }}
-						className="px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md"
-					>
-						{'Genindlæs'}
-					</button>
-				</div>
-
-				{/* All Kiosks Status Manager */}
-				<AllKiosksStatusManager
-					kiosks={kiosks}
-					products={products}
-				/>
-
-				{/* Kiosk Status */}
-				<KioskStatusManager
-					kiosks={kiosks}
-					products={products}
-				/>
-
-				{/* Entities Timeline Overview */}
-				<EntitiesTimelineOverview
-					products={products}
-				/>
 			</div>
-
-			{showRefreshModal && (
-				<CloseableModal
-					canClose={true}
-					canComplete={true}
-					onClose={() => { setShowRefreshModal(false) }}
-					onComplete={() => { void handleForceRefresh() }}
-				>
-					<div className="text-center flex flex-col gap-4">
-						<FaSyncAlt className="text-blue-500 text-4xl mx-auto" />
-						<h2 className="text-2xl font-bold text-gray-800">
-							{'Genindlæs alle kiosker?'}
-						</h2>
-						<div className="text-left">
-							<p className="text-gray-700 text-lg font-medium">
-								{'Dette vil tvinge alle kiosker til at genindlæse deres interface.'}
-							</p>
-							<p className="text-gray-600">
-								{'Genindlæsningen sker øjeblikkeligt og kan ikke fortrydes.'}
-							</p>
-							<p className="text-gray-600">
-								{'Igangværende bestillinger vil blive nulstillet, men færdige bestillinger vil ikke blive påvirket.'}
-							</p>
-							<p className="text-gray-600">
-								{'Brug kun denne funktion hvis det er nødvendigt, eller uden for åbningstiderne.'}
-							</p>
-						</div>
-						<div className="flex gap-4 justify-center pt-2">
-							<button
-								type="button"
-								onClick={() => { setShowRefreshModal(false) }}
-								className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800"
-							>
-								{'Annuller'}
-							</button>
-							<button
-								type="button"
-								onClick={() => { void handleForceRefresh() }}
-								className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition"
-							>
-								{'Genindlæs'}
-							</button>
-						</div>
-					</div>
-				</CloseableModal>
-			)}
 		</main>
 	)
 }
