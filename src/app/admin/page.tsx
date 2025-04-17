@@ -151,66 +151,56 @@ export default function Page (): ReactElement | null {
 
 	return (
 		<main className="p-8 flex flex-col items-center">
-			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl">
-
-				{/* Welcome */}
+			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl xl:max-w-6xl">
 				<p className="text-3xl font-bold text-gray-800">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
-
-				{/* Statistics section */}
-				<div className="grid grid-cols-2 gap-4">
-					<div className="bg-blue-50 p-4 rounded-lg">
-						<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
-						<p className="text-2xl font-bold text-blue-700">{totalOrdersToday}</p>
+				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+					<div className="flex flex-col gap-6">
+						{/* Statistics section */}
+						<div className="grid grid-cols-2 gap-4">
+							<div className="bg-blue-50 p-4 rounded-lg">
+								<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
+								<p className="text-2xl font-bold text-blue-700">{totalOrdersToday}</p>
+							</div>
+							<div className="bg-amber-50 p-4 rounded-lg">
+								<p className="text-sm text-amber-600 mb-1">{'Afventende bestillinger'}</p>
+								<p className="text-2xl font-bold text-amber-700">{pendingOrders}</p>
+							</div>
+						</div>
+						{/* Task selection buttons */}
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+							<Link href="/admin/kitchen" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<GiCookingPot className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Se bestillinger'}</span>
+								</div>
+							</Link>
+							<Link href="/admin/modify" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<FaEdit className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Rediger opsætning'}</span>
+								</div>
+							</Link>
+							<Link href="/admin/statistics" className="w-full">
+								<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
+									<FaChartBar className="w-12 h-12 mb-3"/>
+									<span className="text-lg font-medium">{'Se statistik'}</span>
+								</div>
+							</Link>
+						</div>
+						{/* Kiosk Refresh Component */}
+						<KioskRefresh />
+						{/* All Kiosks Status Manager */}
+						<AllKiosksStatusManager kiosks={kiosks} products={products} />
 					</div>
-					<div className="bg-amber-50 p-4 rounded-lg">
-						<p className="text-sm text-amber-600 mb-1">{'Afventende bestillinger'}</p>
-						<p className="text-2xl font-bold text-amber-700">{pendingOrders}</p>
+					<div className="flex flex-col gap-6">
+						{/* Kiosk Status */}
+						<KioskStatusManager kiosks={kiosks} products={products} />
+						{/* Entities Timeline Overview */}
+						<EntitiesTimelineOverview products={products} />
 					</div>
 				</div>
-
-				{/* Task selection buttons */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-2xl">
-					<Link href="/admin/kitchen" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<GiCookingPot className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se bestillinger'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/modify" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaEdit className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Rediger opsætning'}</span>
-						</div>
-					</Link>
-					<Link href="/admin/statistics" className="w-full">
-						<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-							<FaChartBar className="w-12 h-12 mb-3"/>
-							<span className="text-lg font-medium">{'Se statistik'}</span>
-						</div>
-					</Link>
-				</div>
-
-				{/* Kiosk Refresh Component */}
-				<KioskRefresh />
-
-				{/* All Kiosks Status Manager */}
-				<AllKiosksStatusManager
-					kiosks={kiosks}
-					products={products}
-				/>
-
-				{/* Kiosk Status */}
-				<KioskStatusManager
-					kiosks={kiosks}
-					products={products}
-				/>
-
-				{/* Entities Timeline Overview */}
-				<EntitiesTimelineOverview
-					products={products}
-				/>
 			</div>
 		</main>
 	)
