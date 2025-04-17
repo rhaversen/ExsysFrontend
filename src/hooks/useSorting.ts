@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import sortConfig from '@/lib/SortConfig'
 import { sortProductsByLocalOrderWindowFrom, sortProductsByLocalOrderWindowTo } from '@/lib/timeUtils'
@@ -17,6 +17,12 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 	// const defaultField = sortConfig[Object.keys(sortConfig)[0] as keyof typeof sortConfig][0].prop
 	const [sortField, setSortField] = useState('createdAt')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+
+	// reset to default on type change
+	useEffect(() => {
+		setSortField('createdAt')
+		setSortDirection('desc')
+	}, [type])
 
 	// If no type provided, return inactive sorting state
 	if (type === null) {
