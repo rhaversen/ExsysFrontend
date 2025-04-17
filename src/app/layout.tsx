@@ -1,10 +1,12 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { type ReactElement } from 'react'
+
 import DailyReloader from '@/components/DailyReloader'
 import ErrorProvider from '@/contexts/ErrorContext/ErrorProvider'
 import UserProvider from '@/contexts/UserProvider'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+
 import './globals.css'
-import { type ReactElement } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 

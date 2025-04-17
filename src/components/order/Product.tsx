@@ -1,6 +1,7 @@
+import React, { type ReactElement, useCallback, useState } from 'react'
+
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 import { type OrderWindow, type ProductType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useCallback, useState } from 'react'
 
 const Product = ({
 	id,

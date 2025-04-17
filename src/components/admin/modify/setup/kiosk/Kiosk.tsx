@@ -1,7 +1,8 @@
+import React, { type ReactElement, useState } from 'react'
+
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
-import EditableDropdown from '../../ui/EditableDropdown'
-import SelectionWindow from '../../ui/SelectionWindow'
+import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import {
@@ -11,9 +12,10 @@ import {
 	type PostKioskType,
 	type ReaderType
 } from '@/types/backendDataTypes'
-import React, { type ReactElement, useState } from 'react'
-import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
+
+import EditableDropdown from '../../ui/EditableDropdown'
 import EntityCard from '../../ui/EntityCard'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Kiosk = ({
 	kiosks,

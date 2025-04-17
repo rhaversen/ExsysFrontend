@@ -1,8 +1,10 @@
+import React, { type ReactElement, useCallback, useState } from 'react'
+
 import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
 import { AdminSounds } from '@/lib/sounds'
-import React, { type ReactElement, useCallback, useState } from 'react'
+
 import CloseableModal from '../../ui/CloseableModal'
 
 const SoundsConfig = ({ onClose }: { onClose: () => void }): ReactElement => {

@@ -1,6 +1,7 @@
-import { LoadingImage } from '@/lib/images'
 import Image from 'next/image'
 import React, { type ReactElement, useState, useEffect, useRef } from 'react'
+
+import { LoadingImage } from '@/lib/images'
 
 const AsyncImage = ({
 	className,

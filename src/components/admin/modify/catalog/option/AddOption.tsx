@@ -1,13 +1,15 @@
+import axios from 'axios'
+import Image from 'next/image'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { type OptionType, type PostOptionType, type ProductType } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
-import SelectionWindow from '../../ui/SelectionWindow'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { AdminImages } from '@/lib/images'
-import Image from 'next/image'
+import { type OptionType, type PostOptionType, type ProductType } from '@/types/backendDataTypes'
+
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const AddOption = ({
 	options,

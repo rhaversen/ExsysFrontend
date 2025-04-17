@@ -1,8 +1,9 @@
+import React, { type ReactElement, useMemo, useRef, useEffect } from 'react'
+
 import Block from '@/components/admin/kitchen/Block'
+import { useSound } from '@/contexts/SoundProvider'
 import { type OrderType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
-import React, { type ReactElement, useMemo, useRef, useEffect } from 'react'
-import { useSound } from '@/contexts/SoundProvider'
 
 const RoomCol = ({
 	room,

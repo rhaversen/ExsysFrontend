@@ -1,11 +1,15 @@
 'use client'
 
+import axios from 'axios'
+import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { io, type Socket } from 'socket.io-client'
+
 import AdminView from '@/components/admin/modify/AdminView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertOrderWindowFromUTC } from '@/lib/timeUtils'
+import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type AdminType,
@@ -16,9 +20,6 @@ import {
 	type RoomType,
 	type SessionType
 } from '@/types/backendDataTypes'
-import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -70,7 +71,7 @@ export default function Page (): ReactElement {
 			const productsData = productsResponse.data
 			// Convert orderWindow to local time for all products
 			productsData.forEach((product) => {
-				product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+				product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
 			})
 			setProducts(productsData)
 			setOptions(optionsResponse.data)
@@ -243,7 +244,7 @@ export default function Page (): ReactElement {
 		CreateUpdateHandler<ProductType>(setProducts),
 		CreateDeleteHandler<ProductType>(setProducts),
 		(product) => {
-			product.orderWindow = convertOrderWindowFromUTC(product.orderWindow)
+			product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
 			return product
 		}
 	)

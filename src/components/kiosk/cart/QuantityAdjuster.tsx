@@ -1,5 +1,6 @@
-import QuantityAdjustButton from '@/components/kiosk/cart/QuantityAdjustButton'
 import { type ReactElement } from 'react'
+
+import QuantityAdjustButton from '@/components/kiosk/cart/QuantityAdjustButton'
 
 const QuantityAdjuster = ({
 	quantity,

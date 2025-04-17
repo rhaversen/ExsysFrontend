@@ -1,13 +1,15 @@
+import React, { type ReactElement, useEffect, useState } from 'react'
+
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
-import SelectionWindow from '../../ui/SelectionWindow'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { type OptionType, type PatchOptionType, type PostOptionType, type ProductType, type PatchProductType } from '@/types/backendDataTypes'
-import React, { type ReactElement, useEffect, useState } from 'react'
+
 import EntityCard from '../../ui/EntityCard'
+import SelectionWindow from '../../ui/SelectionWindow'
 
 const Option = ({
 	option,
