@@ -1,7 +1,7 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
-import { FaStore } from 'react-icons/fa'
+import { FaStore, FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
@@ -24,6 +24,7 @@ const AllKiosksStatusManager = ({
 	const [allKiosksUntil, setAllKiosksUntil] = useState<string | null>(null)
 	const [isProcessing, setIsProcessing] = useState(false)
 	const { addError } = useError()
+	const [showOptions, setShowOptions] = useState(false)
 
 	// Check if there is any available products
 	const hasAvailableProducts = products.some(p => p.isActive)
@@ -84,7 +85,7 @@ const AllKiosksStatusManager = ({
 	const isUntilInPast = allKiosksMode === 'until' && allKiosksUntil != null && new Date(allKiosksUntil) <= now
 
 	return (
-		<div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
+		<div className="relative flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
 			<div className="flex items-center gap-4">
 				<FaStore className="text-blue-500 text-2xl" />
 				<div className="flex flex-col flex-grow">
@@ -96,22 +97,38 @@ const AllKiosksStatusManager = ({
 					</div>
 				</div>
 			</div>
-			<CloseModeSelector
-				mode={allKiosksMode}
-				setMode={setAllKiosksMode}
-				until={allKiosksUntil}
-				setUntil={setAllKiosksUntil}
-				products={products}
-				showOpenOption={true}
-			/>
-			<div className="flex gap-4 justify-end pt-2">
+
+			{showOptions && (
+				<>
+					<CloseModeSelector
+						mode={allKiosksMode}
+						setMode={setAllKiosksMode}
+						until={allKiosksUntil}
+						setUntil={setAllKiosksUntil}
+						products={products}
+						showOpenOption={true}
+					/>
+					<div className="flex gap-4 justify-end pt-2">
+						<button
+							type="button"
+							disabled={isProcessing || (allKiosksMode === 'until' && (allKiosksUntil == null)) || (allKiosksMode === 'until' && isUntilInPast) || (allKiosksMode === 'nextProduct' && !hasAvailableProducts)}
+							onClick={() => { void handleAllKiosksAction() }}
+							className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition disabled:opacity-50"
+						>
+							{allKiosksMode === 'open' ? 'Åbn alle' : 'Luk alle'}
+						</button>
+					</div>
+				</>
+			)}
+
+			{/* toggle button: fixed vertical position */}
+			<div className="absolute right-4 top-5">
 				<button
 					type="button"
-					disabled={isProcessing || (allKiosksMode === 'until' && (allKiosksUntil == null)) || (allKiosksMode === 'until' && isUntilInPast) || (allKiosksMode === 'nextProduct' && !hasAvailableProducts)}
-					onClick={() => { void handleAllKiosksAction() }}
-					className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition disabled:opacity-50"
+					onClick={() => { setShowOptions(prev => !prev) }}
+					className="w-[120px] h-[40px] shadow-md flex items-center justify-center gap-2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
 				>
-					{allKiosksMode === 'open' ? 'Åbn alle' : 'Luk alle'}
+					{showOptions ? (<><span>{'Skjul'}</span> <FaChevronUp /></>) : (<><span>{'Udvid'}</span> <FaChevronDown /></>)}
 				</button>
 			</div>
 		</div>
