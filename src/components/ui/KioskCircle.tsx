@@ -2,7 +2,7 @@ import React from 'react'
 import { FaExclamationTriangle, FaUserSlash, FaUsers } from 'react-icons/fa'
 import { FiCheck, FiX } from 'react-icons/fi'
 
-export type KioskWarningStatus = 'inactive' | 'multisession' | 'nosession'
+export type KioskWarningStatus = 'inactive' | 'multiSession' | 'noSession'
 
 const KIOSK_RING = {
 	open: 'ring-2 ring-green-400',
@@ -17,11 +17,11 @@ const KIOSK_WARNING = {
 		bg: 'bg-orange-400',
 		icon: <FaExclamationTriangle className="w-3.5 h-3.5 text-orange-700" />
 	},
-	multisession: {
+	multiSession: {
 		bg: 'bg-orange-400',
 		icon: <FaUsers className="w-3.5 h-3.5 text-orange-700" />
 	},
-	nosession: {
+	noSession: {
 		bg: 'bg-orange-400',
 		icon: <FaUserSlash className="w-3.5 h-3.5 text-orange-700" />
 	},

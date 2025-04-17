@@ -14,7 +14,7 @@ import CloseModeSelector from './ui/CloseModeSelector'
 // --- Types and helpers ---
 // Kiosk status and warning types for clarity and extensibility
 export type KioskBaseStatus = 'open' | 'closed'
-export type KioskWarning = 'inactive' | 'multisession' | 'nosession'
+export type KioskWarning = 'inactive' | 'multiSession' | 'noSession'
 
 export interface KioskStatus {
 	base: KioskBaseStatus
@@ -26,8 +26,8 @@ export interface KioskStatus {
  */
 function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus {
 	const closed = isKioskClosed(kiosk)
-	if (sessions.length === 0) return { base: closed ? 'closed' : 'open', warning: 'nosession' }
-	if (sessions.length > 1) return { base: closed ? 'closed' : 'open', warning: 'multisession' }
+	if (sessions.length === 0) return { base: closed ? 'closed' : 'open', warning: 'noSession' }
+	if (sessions.length > 1) return { base: closed ? 'closed' : 'open', warning: 'multiSession' }
 	const lastActivity = new Date(sessions[0].lastActivity)
 	if (Date.now() - lastActivity.getTime() > 24 * 60 * 60 * 1000) {
 		return { base: closed ? 'closed' : 'open', warning: 'inactive' }
@@ -50,11 +50,11 @@ function getStatusText (kiosk: KioskType, base: KioskBaseStatus): string {
  */
 function getWarningText (warning?: KioskWarning): string {
 	switch (warning) {
-		case 'nosession':
+		case 'noSession':
 			return 'Kiosken er ikke logget ind.'
 		case 'inactive':
 			return 'Seneste aktivitet var for over 24 timer siden. Tjek om kiosken er offline.'
-		case 'multisession':
+		case 'multiSession':
 			return 'Kiosken har flere aktive sessioner. Gå til "Modificer" -> "Login Sessioner", og fjern unødvendige logins for denne kiosk.'
 		default:
 			return ''
