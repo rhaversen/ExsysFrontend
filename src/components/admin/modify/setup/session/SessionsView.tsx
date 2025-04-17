@@ -306,9 +306,9 @@ const SessionsView = ({
 	}
 
 	return (
-		<div className="flex">
+		<div className="flex flex-col md:flex-row">
 			{/* Sidebar */}
-			<div className="w-64 bg-gray-100 rounded-lg shadow-md overflow-y-auto mr-6 self-start mt-2 ml-2">
+			<div className="w-full md:w-64 bg-gray-100 rounded-lg shadow-md overflow-y-auto md:mr-6 self-start mt-2 ml-2">
 				<div className="mb-6 border-b pb-4 px-4 pt-4">
 					<SessionGroup
 						title="Administratorer"
