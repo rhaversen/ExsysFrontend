@@ -182,8 +182,8 @@ export function sortProductsByLocalOrderWindowFrom (products: ProductType[]): Pr
 		const aOrderWindow = a.orderWindow
 		const bOrderWindow = b.orderWindow
 
-		const aFrom = aOrderWindow.from.hour * 60 + aOrderWindow.from.minute
-		const bFrom = bOrderWindow.from.hour * 60 + bOrderWindow.from.minute
+		const aFrom = (aOrderWindow?.from.hour ?? Number.POSITIVE_INFINITY) * 60 + (aOrderWindow?.from.minute ?? Number.POSITIVE_INFINITY)
+		const bFrom = (bOrderWindow?.from.hour ?? Number.POSITIVE_INFINITY) * 60 + (bOrderWindow?.from.minute ?? Number.POSITIVE_INFINITY)
 
 		return aFrom - bFrom
 	})
@@ -194,8 +194,8 @@ export function sortProductsByLocalOrderWindowTo (products: ProductType[]): Prod
 		const aOrderWindow = a.orderWindow
 		const bOrderWindow = b.orderWindow
 
-		const aTo = aOrderWindow.to.hour * 60 + aOrderWindow.to.minute
-		const bTo = bOrderWindow.to.hour * 60 + bOrderWindow.to.minute
+		const aTo = (aOrderWindow?.to.hour ?? Number.POSITIVE_INFINITY) * 60 + (aOrderWindow?.to.minute ?? Number.POSITIVE_INFINITY)
+		const bTo = (bOrderWindow?.to.hour ?? Number.POSITIVE_INFINITY) * 60 + (bOrderWindow?.to.minute ?? Number.POSITIVE_INFINITY)
 
 		return aTo - bTo
 	})
