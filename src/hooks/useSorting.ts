@@ -4,15 +4,7 @@ import sortConfig from '@/lib/SortConfig'
 import { sortProductsByLocalOrderWindowFrom, sortProductsByLocalOrderWindowTo } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 
-export default function useSorting (type: keyof typeof sortConfig | null): {
-	sortField: string
-	setSortField: (field: string) => void
-	sortDirection: 'asc' | 'desc'
-	setSortDirection: (direction: 'asc' | 'desc') => void
-	sortByField: (items: any[]) => any[]
-	sortingOptions: Array<{ prop: string, label: string }>
-	isEnabled: boolean
-} {
+export default function useSorting(type: keyof typeof sortConfig | null) {
 	// Default field is first field of first category in sortConfig
 	// const defaultField = sortConfig[Object.keys(sortConfig)[0] as keyof typeof sortConfig][0].prop
 	const [sortField, setSortField] = useState('createdAt')
@@ -31,7 +23,7 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 			setSortField,
 			sortDirection,
 			setSortDirection,
-			sortByField: (items) => items,
+			sortByField: <U>(items: U[]): U[] => items,
 			sortingOptions: [],
 			isEnabled: false
 		}
@@ -40,8 +32,8 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 	// Get available fields for this type
 	const sortingOptions = sortConfig[type]
 
-	const resolveProperty = (obj: any, path: string): any => {
-		return path.split('.').reduce((acc, part) => acc != null ? acc[part] : undefined, obj)
+	const resolveProperty = (obj: unknown, path: string): unknown => {
+		return path.split('.').reduce((acc, part) => (acc != null && typeof acc === 'object') ? (acc as Record<string, unknown>)[part] : undefined, obj)
 	}
 
 	const compareStrings = (strA: string, strB: string): number => {
@@ -52,23 +44,32 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 		return 0
 	}
 
-	const compareValues = (valA: any, valB: any): number => {
+	const compareValues = (valA: unknown, valB: unknown): number => {
 		if (typeof valA === 'string' && typeof valB === 'string') {
 			return compareStrings(valA, valB)
 		}
-		return sortDirection === 'asc'
-			? (valA > valB ? 1 : -1)
-			: (valA < valB ? 1 : -1)
+		if (typeof valA === 'number' && typeof valB === 'number') {
+			return sortDirection === 'asc'
+				? (valA > valB ? 1 : -1)
+				: (valA < valB ? 1 : -1)
+		}
+		if (valA instanceof Date && valB instanceof Date) {
+			return sortDirection === 'asc'
+				? (valA.getTime() > valB.getTime() ? 1 : -1)
+				: (valA.getTime() < valB.getTime() ? 1 : -1)
+		}
+		// fallback: convert to string and compare
+		return compareStrings(String(valA), String(valB))
 	}
 
-	const sortByField = (items: any[]): any[] => {
+	const sortByField = <U>(items: U[]): U[] => {
 		if (sortField === 'orderWindow.from.hour') {
 			const sorted = sortProductsByLocalOrderWindowFrom([...items as ProductType[]])
-			return sortDirection === 'asc' ? sorted : sorted.reverse()
+			return (sortDirection === 'asc' ? sorted : sorted.reverse()) as U[]
 		}
 		if (sortField === 'orderWindow.to.hour') {
 			const sorted = sortProductsByLocalOrderWindowTo([...items as ProductType[]])
-			return sortDirection === 'asc' ? sorted : sorted.reverse()
+			return sortDirection === 'asc' ? (sorted as U[]) : (sorted.reverse() as U[])
 		}
 		return items.slice().sort((a, b) => {
 			const valA = resolveProperty(a, sortField)
@@ -84,6 +85,6 @@ export default function useSorting (type: keyof typeof sortConfig | null): {
 		setSortDirection,
 		sortByField,
 		sortingOptions,
-		isEnabled: true
+		isEnabled: type !== null
 	}
 }
