@@ -81,7 +81,7 @@ export default function Page (): ReactElement {
 			setAdmins(adminsResponse.data)
 			setReaders(readersResponse.data)
 			setSessions(sessionsResponse.data)
-		} catch (error: any) {
+		} catch (error) {
 			addError(error)
 		}
 	}, [API_URL, addError])

@@ -193,8 +193,8 @@ const KioskStatusManager = ({
 			try {
 				const res = await axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
 				setSessions(res.data)
-			} catch (e) {
-				// Optionally handle error
+			} catch (error) {
+				addError(error)
 			} finally {
 				setLoadingSessions(false)
 			}

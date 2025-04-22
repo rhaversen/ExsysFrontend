@@ -58,7 +58,7 @@ export default function Page (): ReactElement {
 	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Helper function to fetch data with error handling
-	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
+	const fetchData = useCallback(async <T,>(url: string, config = {}): Promise<T> => {
 		const response = await axios.get(url, { withCredentials: true, ...config })
 		return response.data
 	}, [])
@@ -101,12 +101,12 @@ export default function Page (): ReactElement {
 				optionsData,
 				activitiesData,
 				roomsData
-			]: [KioskType, ProductType[], OptionType[], ActivityType[], RoomType[]] = await Promise.all([
-				fetchData(`${API_URL}/v1/kiosks/me`),
-				fetchData(`${API_URL}/v1/products`),
-				fetchData(`${API_URL}/v1/options`),
-				fetchData(`${API_URL}/v1/activities`),
-				fetchData(`${API_URL}/v1/rooms`)
+			] = await Promise.all([
+				fetchData<KioskType>(`${API_URL}/v1/kiosks/me`),
+				fetchData<ProductType[]>(`${API_URL}/v1/products`),
+				fetchData<OptionType[]>(`${API_URL}/v1/options`),
+				fetchData<ActivityType[]>(`${API_URL}/v1/activities`),
+				fetchData<RoomType[]>(`${API_URL}/v1/rooms`)
 			])
 
 			const processedProducts = processProductsData(productsData)

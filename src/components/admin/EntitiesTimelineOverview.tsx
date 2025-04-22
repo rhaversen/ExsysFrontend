@@ -70,7 +70,7 @@ const Axis: React.FC<{
 	labelY: number
 	timelineWidth: number
 	rowCount: number
-}> = ({ yOffset, tickDir, labelY, timelineWidth, rowCount }) => (
+}> = ({ yOffset, tickDir, labelY, timelineWidth }) => (
 	<g transform={`translate(${AXIS_HOURS[0] /* placeholder, parent translate applied */},${yOffset})`} className="select-none">
 		<line x1={0} y1={0} x2={timelineWidth} y2={0} stroke="#cbd5e0" strokeWidth={1} />
 		{AXIS_HOURS.map(hour => {

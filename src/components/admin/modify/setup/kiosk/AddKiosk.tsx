@@ -55,7 +55,7 @@ const AddKiosk = ({
 	}, [])
 
 	const postKiosk = useCallback((kiosk: PostKioskType): void => {
-		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
+		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then(() => {
 			onClose()
 		}).catch((error) => {
 			addError(error)
@@ -79,7 +79,7 @@ const AddKiosk = ({
 	const handleKioskTagChange = useCallback((v: KioskType['kioskTag']): void => {
 		setKiosk({
 			...kiosk,
-			kioskTag: (v === '') ? undefined : v as any
+			kioskTag: (v === '') ? undefined : v as KioskType['kioskTag']
 		})
 	}, [kiosk])
 

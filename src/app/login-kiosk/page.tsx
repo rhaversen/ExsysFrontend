@@ -14,7 +14,11 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 	const { setCurrentUser } = useUser()
 
-	const login = useCallback(async (credentials: any) => {
+	const login = useCallback(async (credentials: {
+			kioskTag: FormDataEntryValue | null
+			password: FormDataEntryValue | null
+			stayLoggedIn: boolean
+		}) => {
 		try {
 			const response = await axios.post<{
 				auth: boolean
@@ -22,7 +26,7 @@ export default function Page (): ReactElement {
 			}>(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			setCurrentUser(response.data.user)
 			router.replace('/kiosk')
-		} catch (error: any) {
+		} catch (error) {
 			setCurrentUser(null)
 			addError(error)
 		}
@@ -40,8 +44,9 @@ export default function Page (): ReactElement {
 		event.preventDefault() // Prevent default form submission
 		const formData = new FormData(event.currentTarget)
 		const credentials = {
-			kioskTag: String(formData.get('kioskTag')),
-			password: formData.get('password')
+			kioskTag: formData.get('kioskTag'),
+			password: formData.get('password'),
+			stayLoggedIn: true // Always stay logged in for kiosk
 		}
 		login(credentials).catch(addError)
 	}, [addError, login])

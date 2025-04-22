@@ -81,7 +81,8 @@ const OrderView = ({
 		// If the new quantity is less than or equal to zero, remove the item
 		if (newQuantity <= 0) {
 			const newCart = { ...cart }
-			const { [_id]: _, ...updatedItems } = newCart[type]
+			const updatedItems = { ...newCart[type] }
+			delete updatedItems[_id]
 			newCart[type] = updatedItems
 			updateCart(newCart)
 			return
@@ -103,14 +104,13 @@ const OrderView = ({
 		const availableOptionIds = new Set(options.map(o => o._id))
 
 		let updated = false
-		let newProducts = { ...cart.products }
-		let newOptions = { ...cart.options }
+		const newProducts = { ...cart.products }
+		const newOptions = { ...cart.options }
 
 		// Check products
 		Object.keys(newProducts).forEach(id => {
 			if (!availableProductIds.has(id)) {
-				const { [id]: _, ...rest } = newProducts
-				newProducts = rest
+				delete newProducts[id]
 				updated = true
 			}
 		})
@@ -118,8 +118,7 @@ const OrderView = ({
 		// Check options
 		Object.keys(newOptions).forEach(id => {
 			if (!availableOptionIds.has(id)) {
-				const { [id]: _, ...rest } = newOptions
-				newOptions = rest
+				delete newOptions[id]
 				updated = true
 			}
 		})

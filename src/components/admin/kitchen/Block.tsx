@@ -67,8 +67,8 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 				status
 			}, { withCredentials: true })
 			onUpdatedOrders(response.data)
-		} catch (err: any) {
-			addError(err)
+		} catch (error) {
+			addError(error)
 		}
 	}, [API_URL, localOrders, onUpdatedOrders, addError])
 

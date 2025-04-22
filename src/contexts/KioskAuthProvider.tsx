@@ -67,8 +67,8 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 	useEntitySocketListeners<SessionType>(
 		socket,
 		'session',
-		(_newSession) => { /* Do nothing */ },
-		(_updatedSession) => { /* Do nothing */ },
+		() => { /* Do nothing for create */ },
+		() => { /* Do nothing for update */ },
 		(deletedSessionId) => {
 			// If the current session is deleted, log out the user
 			if (deletedSessionId === currentSession) {

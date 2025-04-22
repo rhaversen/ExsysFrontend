@@ -6,7 +6,7 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import { AdminImages } from '@/lib/images'
-import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType } from '@/types/backendDataTypes'
+import { type PostRoomType, type RoomType, type ActivityType, type PostActivityType, PatchRoomType, PatchActivityType } from '@/types/backendDataTypes'
 
 import SelectionWindow from '../../ui/SelectionWindow'
 
@@ -20,8 +20,8 @@ const AddRoom = ({
 	onClose: () => void
 }): ReactElement => {
 	const { addError } = useError()
-	const { createEntityAsync: createRoomAsync } = useCUDOperations<PostRoomType, any, RoomType>('/v1/rooms')
-	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<PostActivityType, any, ActivityType>('/v1/activities')
+	const { createEntityAsync: createRoomAsync } = useCUDOperations<PostRoomType, PatchRoomType, RoomType>('/v1/rooms')
+	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<PostActivityType, PatchActivityType, ActivityType>('/v1/activities')
 
 	const [room, setRoom] = useState<PostRoomType>({
 		name: '',
@@ -68,6 +68,7 @@ const AddRoom = ({
 				disabledActivities.map(async activity =>
 					await updateActivityAsync(activity._id, {
 						...activity,
+						rooms: activity.rooms.map(r => typeof r === 'string' ? r : r._id),
 						disabledRooms: [...activity.disabledRooms, createdRoom._id]
 					})
 				)

@@ -64,7 +64,7 @@ export default function Page (): ReactElement {
 			setRooms(roomsRes.data)
 			setActivities(actsRes.data)
 			setOrders(ordersRes.data)
-		} catch (error: any) {
+		} catch (error) {
 			addError(error)
 		}
 	}, [API_URL, addError])

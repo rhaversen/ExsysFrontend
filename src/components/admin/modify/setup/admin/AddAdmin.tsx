@@ -41,7 +41,7 @@ const AddAdmin = ({
 	}, [])
 
 	const postAdmin = useCallback((admin: PostAdminType): void => {
-		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then((response) => {
+		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then(() => {
 			onClose()
 		}).catch((error) => {
 			addError(error)
