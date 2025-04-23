@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
 import type { ProductType } from '@/types/backendDataTypes'
@@ -13,25 +13,41 @@ const getLocalDateTimeValue = (isoString: string | null): string => {
 	return localISO
 }
 
+// A self-contained component managing its own mode and until state, with confirm/cancel actions
+interface CloseModeSelectorProps<Mode extends string = 'manual' | 'until' | 'nextProduct' | 'open'> {
+  products: ProductType[]
+  showOpenOption?: boolean
+  initialMode?: Mode
+  initialUntil?: string | null
+  isPatching?: boolean
+  onConfirm: (mode: Mode, until: string | null) => void
+  onCancel?: () => void
+  confirmText?: string
+  cancelText?: string
+  confirmLabelMap?: Partial<Record<Mode, string>>
+}
 function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProduct' | 'open'> (
 	{
-		mode,
-		setMode,
-		until,
-		setUntil,
 		products,
 		showOpenOption = false,
-		minDateTime
-	}: {
-		mode: Mode
-		setMode: (mode: Mode) => void
-		until: string | null
-		setUntil: (until: string | null) => void
-		products: ProductType[]
-		showOpenOption?: boolean
-		minDateTime?: string
-	}
+		initialMode = 'manual' as Mode,
+		initialUntil = null,
+		isPatching = false,
+		onConfirm,
+		onCancel,
+		confirmText,
+		cancelText,
+		confirmLabelMap
+	}: CloseModeSelectorProps<Mode>
 ): React.ReactElement {
+	const [mode, setMode] = useState<Mode>(initialMode)
+	const [until, setUntil] = useState<string | null>(initialUntil)
+	const hasAvailableProducts = products.some(p => p.isActive)
+	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= new Date()
+
+	// Determine confirm button label based on mode and mapping
+	const buttonLabel = confirmLabelMap?.[mode] ?? confirmText ?? (mode === 'open' ? 'Åbn' : 'Luk')
+
 	return (
 		<div className="flex flex-col gap-2 text-gray-700">
 			<label className="flex items-center gap-2">
@@ -59,8 +75,8 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 						type="datetime-local"
 						className="border rounded px-2 py-1 text-gray-700"
 						value={getLocalDateTimeValue(until)}
-						onChange={e => { setUntil((e.target.value.length > 0) ? new Date(e.target.value).toISOString() : null) }}
-						min={minDateTime ?? dayjs().format('YYYY-MM-DDTHH:mm')}
+						onChange={e => { setUntil(e.target.value ? new Date(e.target.value).toISOString() : null) }}
+						min={dayjs().format('YYYY-MM-DDTHH:mm')}
 						placeholder="Vælg dato og tid"
 					/>
 				</div>
@@ -74,14 +90,33 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 						<div>
 							{(() => {
 								const t = getNextAvailableProductOrderWindowFrom(products)?.date
-								return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
+								return t ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
 							})()}
 						</div>
 					</span>
 				</div>
 			)}
+			<div className="flex gap-4 justify-end pt-2">
+				{(cancelText != null) && onCancel && (
+					<button
+						type="button"
+						disabled={isPatching}
+						onClick={onCancel}
+						className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800"
+					>
+						{cancelText}
+					</button>
+				)}
+				<button
+					type="button"
+					disabled={isPatching || (mode === 'until' && (until == null || isUntilInPast)) || (mode === 'nextProduct' && !hasAvailableProducts)}
+					onClick={() => onConfirm(mode, until)}
+					className="px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					{buttonLabel}
+				</button>
+			</div>
 		</div>
 	)
 }
-
 export default CloseModeSelector

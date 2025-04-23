@@ -1,6 +1,6 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import 'dayjs/locale/da'
 
 import CloseableModal from '@/components/ui/CloseableModal'
@@ -77,20 +77,16 @@ function KioskStatusModalContent ({
 	onClose: () => void
 }): React.ReactElement {
 	dayjs.locale('da')
-	const now = useMemo(() => new Date(), [])
-	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > now ? kiosk.closedUntil : null
-	const [mode, setMode] = useState<'manual' | 'until' | 'nextProduct'>(
-		!kiosk.manualClosed && (closedUntilValid != null) ? 'until' : 'manual'
-	)
-	const [until, setUntil] = useState<string | null>(closedUntilValid)
+	// Prepare mode/initial values for selector
 	const isClosed = isKioskClosedBackendState(kiosk)
-	const hasAvailableProducts = useMemo(() => products.some(p => p.isActive), [products])
-	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= now
+	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > new Date()
+	const initialMode = !kiosk.manualClosed && closedUntilValid ? 'until' : 'manual'
+	const initialUntil = closedUntilValid ? kiosk.closedUntil : null
 
-	// Handles patching the kiosk state
-	const handlePatch = useCallback(() => {
+	// Handles closing via selector confirm
+	const handleConfirmClose = (mode: 'manual' | 'until' | 'nextProduct', until: string | null) => {
 		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
-	}, [mode, until, products, onPatch])
+	}
 
 	// Handles opening the kiosk
 	const handleOpenKiosk = useCallback(() => {
@@ -106,55 +102,31 @@ function KioskStatusModalContent ({
 					className="mx-auto mb-2"
 				/>
 				<h2 className="text-2xl font-bold text-gray-800">{kiosk.name}</h2>
-				{isClosed
-					? (
-						<>
-							{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
-							{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
-								<p className="text-red-700 font-semibold mt-2">
-									{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}
-								</p>
-							)}
-							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-								<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
-							</div>
-						</>
-					)
-					: (
-						<>
-							<div className="text-left space-y-2">
-								<p className="text-gray-700 text-lg font-medium">{'Vælg hvordan kiosken skal lukkes:'}</p>
-								<CloseModeSelector<'manual' | 'until' | 'nextProduct'>
-									mode={mode}
-									setMode={setMode}
-									until={until}
-									setUntil={setUntil}
-									products={products}
-								/>
-							</div>
-							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-								<button
-									type="button"
-									disabled={
-										isPatching ||
-										(mode === 'until' && ((until == null) || isUntilInPast)) ||
-										(mode === 'nextProduct' && !hasAvailableProducts)
-									}
-									onClick={handlePatch}
-									className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${isPatching ||
-											(mode === 'nextProduct' && !hasAvailableProducts) ||
-											(mode === 'until' && ((until == null) || isUntilInPast))
-										? 'opacity-50 cursor-not-allowed'
-										: ''
-									}`}
-								>
-									{'Luk kiosk\r'}
-								</button>
-							</div>
-						</>
-					)}
+				{isClosed ? (
+					<>
+						{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
+						{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
+							<p className="text-red-700 font-semibold mt-2">
+								{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}
+							</p>
+						)}
+						<div className="flex gap-4 justify-center pt-2">
+							<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
+							<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
+						</div>
+					</>
+				) : (
+					<CloseModeSelector<'manual' | 'until' | 'nextProduct'>
+						products={products}
+						initialMode={initialMode}
+						initialUntil={initialUntil}
+						isPatching={isPatching}
+						onConfirm={handleConfirmClose}
+						onCancel={onClose}
+						cancelText="Annuller"
+						confirmLabelMap={{ manual: 'Luk kiosk', until: 'Luk kiosk', nextProduct: 'Luk kiosk' }}
+					/>
+				)}
 			</div>
 		</CloseableModal>
 	)
