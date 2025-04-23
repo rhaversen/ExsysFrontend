@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable hover effects for touch devices */
+@custom-variant hover (&:hover);
+
 :root {
 	--background: #ffffff;
 	--foreground: #171717;
