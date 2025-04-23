@@ -6,13 +6,11 @@ import { type ReactElement, useEffect, useState } from 'react'
 const PageLink = ({
 	text,
 	link,
-	className,
 	selected,
 	onSelect
 }: {
 	text: string
 	link: string
-	className?: string
 	selected: boolean
 	onSelect: () => void
 }): ReactElement => {
@@ -32,7 +30,7 @@ const PageLink = ({
 	}, [pathname])
 
 	return (
-		<div className={`flex ${className} p-2`}>
+		<div className="flex text-white p-2">
 			<button
 				type="button"
 				onClick={handleClick}
