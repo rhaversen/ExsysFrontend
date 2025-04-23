@@ -14,7 +14,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertUTCOrderWindowToLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed, getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import { getNextAvailableProductTimeLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -70,17 +70,6 @@ export default function Page (): ReactElement {
 		}))
 	}, [])
 
-	// Process product data
-	const processProductData = (product: ProductType): ProductType => ({
-		...product,
-		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
-	})
-
-	// Process all products data
-	const processProductsData = useCallback((productsData: ProductType[]): ProductType[] => {
-		return productsData.map(processProductData)
-	}, [])
-
 	const computeIsKioskClosed = useCallback((kioskData: KioskType | null, productsData: ProductType[]) => {
 		if (kioskData == null) { return true }
 		if (isKioskClosed(kioskData)) { return true }
@@ -109,24 +98,22 @@ export default function Page (): ReactElement {
 				fetchData<RoomType[]>(`${API_URL}/v1/rooms`)
 			])
 
-			const processedProducts = processProductsData(productsData)
-
-			// Process and set data
+			// Set data
 			setKiosk(kioskData)
-			setProducts(processedProducts)
+			setProducts(productsData)
 			setOptions(optionsData)
 			setActivities(activitiesData)
 			setRooms(roomsData)
 
 			// Update if kiosk is open or closed
-			setIsKioskClosedState(computeIsKioskClosed(kioskData, processedProducts))
+			setIsKioskClosedState(computeIsKioskClosed(kioskData, productsData))
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, computeIsKioskClosed, addError])
+	}, [API_URL, fetchData, updateCheckoutMethods, computeIsKioskClosed, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
@@ -159,16 +146,14 @@ export default function Page (): ReactElement {
 		'product',
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
+				const newProducts = prev.map(p => (p._id === item._id ? item : p))
 				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
 				return newProducts
 			})
 		},
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
+				const newProducts = prev.map(p => (p._id === item._id ? item : p))
 				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
 				return newProducts
 			})

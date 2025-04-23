@@ -7,7 +7,6 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
-import { convertLocalOrderWindowToUTC } from '@/lib/timeUtils'
 import {
 	type OptionType,
 	type PatchProductType,
@@ -34,13 +33,6 @@ const Product = ({
 }): ReactElement => {
 	const { addError } = useError()
 
-	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
-		return {
-			...product,
-			orderWindow: (product.orderWindow !== undefined) ? convertLocalOrderWindowToUTC(product.orderWindow) : undefined
-		}
-	}
-
 	const [isEditing, setIsEditing] = useState(false)
 	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>(
 		activities.filter(a => a.disabledProducts.includes(product._id))
@@ -55,7 +47,7 @@ const Product = ({
 	const {
 		updateEntity,
 		deleteEntity
-	} = useCUDOperations<PostProductType, PatchProductType>('/v1/products', preprocessOrderWindow)
+	} = useCUDOperations<PostProductType, PatchProductType>('/v1/products')
 	const {
 		updateEntityAsync: updateActivityAsync
 	} = useCUDOperations<ActivityType, PatchActivityType>('/v1/activities')

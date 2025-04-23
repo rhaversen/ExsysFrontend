@@ -6,23 +6,16 @@ export default function useEntitySocketListeners<T> (
 	entityName: string,
 	handleAdd: (item: T) => void,
 	handleUpdate: (item: T) => void,
-	handleDelete: (id: string) => void,
-	preprocessItem?: (item: T) => T
+	handleDelete: (id: string) => void
 ): void {
 	useEffect(() => {
 		if (socket === null) { return }
 
 		const onAdd = (item: T): void => {
-			if (preprocessItem !== undefined) {
-				item = preprocessItem(item)
-			}
 			handleAdd(item)
 		}
 
 		const onUpdate = (item: T): void => {
-			if (preprocessItem !== undefined) {
-				item = preprocessItem(item)
-			}
 			handleUpdate(item)
 		}
 
@@ -35,5 +28,5 @@ export default function useEntitySocketListeners<T> (
 			socket.off(`${entityName}Updated`, onUpdate)
 			socket.off(`${entityName}Deleted`, handleDelete)
 		}
-	}, [socket, entityName, handleAdd, handleUpdate, handleDelete, preprocessItem])
+	}, [socket, entityName, handleAdd, handleUpdate, handleDelete])
 }

@@ -1,7 +1,6 @@
 import { type ReactElement } from 'react'
 
 import Product from '@/components/order/Product'
-import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 
 const Products = ({
@@ -26,7 +25,7 @@ const Products = ({
 					price={product.price}
 					onQuantityChange={onQuantityChange}
 					disabled={!availabilities[product._id]}
-					orderWindow={convertUTCOrderWindowToLocal(product.orderWindow)}
+					orderWindow={product.orderWindow}
 				/>
 			))}
 		</div>

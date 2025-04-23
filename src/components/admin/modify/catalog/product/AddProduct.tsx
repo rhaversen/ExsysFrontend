@@ -7,7 +7,6 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { AdminImages } from '@/lib/images'
-import { convertLocalOrderWindowToUTC } from '@/lib/timeUtils'
 import { type PatchProductType, type ActivityType, type OptionType, type PostProductType, type ProductType, PostActivityType, PatchActivityType } from '@/types/backendDataTypes'
 
 import InlineValidation from '../../ui/InlineValidation'
@@ -55,14 +54,7 @@ const AddProduct = ({
 		formIsValid
 	} = useFormState(initialProduct, true)
 
-	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
-		return {
-			...product,
-			orderWindow: (product.orderWindow !== undefined) ? convertLocalOrderWindowToUTC(product.orderWindow) : undefined
-		}
-	}
-
-	const { createEntityAsync: createProductAsync } = useCUDOperations<PostProductType, PatchProductType, ProductType>('/v1/products', preprocessOrderWindow)
+	const { createEntityAsync: createProductAsync } = useCUDOperations<PostProductType, PatchProductType, ProductType>('/v1/products')
 	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<PostActivityType, PatchActivityType, ActivityType>('/v1/activities')
 
 	const handleCancel = (): void => {

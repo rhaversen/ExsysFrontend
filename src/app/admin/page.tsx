@@ -14,7 +14,6 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement | null {
@@ -27,17 +26,6 @@ export default function Page (): ReactElement | null {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
-
-	// Process product data
-	const processProductData = (product: ProductType): ProductType => ({
-		...product,
-		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
-	})
-
-	// Process all products data
-	const processProductsData = useCallback((productsData: ProductType[]): ProductType[] => {
-		return productsData.map(processProductData)
-	}, [])
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
 		try {
@@ -93,12 +81,12 @@ export default function Page (): ReactElement | null {
 	const fetchProducts = useCallback(async (): Promise<void> => {
 		try {
 			const response = await axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true })
-			const processedProducts = processProductsData(response.data)
+			const processedProducts = response.data
 			setProducts(processedProducts)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, addError, processProductsData])
+	}, [API_URL, addError])
 
 	useEffect(() => {
 		setHasMounted(true)
@@ -130,16 +118,14 @@ export default function Page (): ReactElement | null {
 		'product',
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				return prev.some(p => p._id === updated._id)
-					? prev.map(p => (p._id === updated._id ? updated : p))
-					: [...prev, updated]
+				return prev.some(p => p._id === item._id)
+					? prev.map(p => (p._id === item._id ? item : p))
+					: [...prev, item]
 			})
 		},
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				return prev.map(p => (p._id === updated._id ? updated : p))
+				return prev.map(p => (p._id === item._id ? item : p))
 			})
 		},
 		id => {
