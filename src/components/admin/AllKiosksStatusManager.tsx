@@ -79,8 +79,13 @@ const AllKiosksStatusManager = ({
 				<div className="flex items-center flex-grow gap-4">
 					<FaStore className="text-blue-500 text-2xl flex-shrink-0" />
 					<div className="flex flex-col">
-						<span className="text-lg text-gray-800">{'Administrer alle kioskers status'}</span>
-						<div className="text-sm text-gray-600">{'Luk eller åbn alle kiosker for bestillinger på én gang.'}</div>
+						<div className="text-lg text-gray-800">{'Administrer alle kioskers status på en gang'}</div>
+						<div className="text-sm text-gray-600">
+							<div>{'Luk eller åbn alle kiosker for bestillinger.'}</div>
+							<div>{'Kiosker kan åbnes og lukkes for bestillinger når nødvendigt.'}</div>
+							<div>{'Kioskerne forbliver funktionelle og logget ind, så de nemt kan åbnes igen.'}</div>
+							<div>{'Kioskerne kan også åbnes og lukkes individuelt i kiosk status og håndtering.'}</div>
+						</div>
 					</div>
 				</div>
 				<button
@@ -98,7 +103,6 @@ const AllKiosksStatusManager = ({
 						products={products}
 						showOpenOption={true}
 						initialMode="manual"
-						initialUntil={null}
 						isPatching={isProcessing}
 						onConfirm={(mode, until) => { void handleAllKiosksAction(mode, until) }}
 						onCancel={() => setShowOptions(false)}

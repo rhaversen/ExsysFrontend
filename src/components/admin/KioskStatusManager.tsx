@@ -41,7 +41,7 @@ function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus
 function getStatusText (kiosk: KioskType, base: KioskBaseStatus): string {
 	if (base === 'open') { return 'Åben' }
 	if (kiosk.manualClosed) { return 'Lukket manuelt' }
-	if (kiosk.closedUntil != null) { return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}` }
+	if (kiosk.closedUntil != null) { return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}` }
 	return 'Lukket'
 }
 
@@ -81,7 +81,7 @@ function KioskStatusModalContent ({
 	const isClosed = isKioskClosedBackendState(kiosk)
 	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > new Date()
 	const initialMode = !kiosk.manualClosed && closedUntilValid ? 'until' : 'manual'
-	const initialUntil = closedUntilValid ? kiosk.closedUntil : null
+	const initialUntil = closedUntilValid ? (kiosk.closedUntil as string) : undefined
 
 	// Handles closing via selector confirm
 	const handleConfirmClose = (mode: 'manual' | 'until' | 'nextProduct', until: string | null) => {
@@ -107,12 +107,13 @@ function KioskStatusModalContent ({
 						{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
 						{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
 							<p className="text-red-700 font-semibold mt-2">
-								{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}
+								{'Kiosken er lukket indtil: '}
+								{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
 							</p>
 						)}
 						<div className="flex gap-4 justify-center pt-2">
 							<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-							<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
+							<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åbn kiosk'}</button>
 						</div>
 					</>
 				) : (
@@ -215,9 +216,9 @@ const KioskStatusManager = ({
 															? 'bg-white text-orange-700 border border-orange-200 hover:bg-orange-50'
 															: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
 													} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-													aria-label={base === 'closed' ? 'Åben kiosk' : 'Luk kiosk'}
+													aria-label={base === 'closed' ? 'Åbn kiosk' : 'Luk kiosk'}
 												>
-													{base === 'closed' ? 'Åben' : 'Luk'}
+													{base === 'closed' ? 'Åbn' : 'Luk'}
 												</button>
 											</div>
 											{(warningText.length > 0) && (
