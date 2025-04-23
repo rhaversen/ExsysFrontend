@@ -77,6 +77,14 @@ export default function Page (): ReactElement {
 			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
 		return !hasAvailable
+	}
+
+	const handleCloseKiosk = useCallback(() => {
+		setIsKioskClosedState(true)
+		setSelectedActivity(null)
+		setSelectedRoom(null)
+		setViewState('welcome')
+		setCart({ products: {}, options: {} })
 	}, [])
 
 	// Load all data
@@ -113,16 +121,20 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, updateCheckoutMethods, computeIsKioskClosed, addError])
+	}, [API_URL, fetchData, updateCheckoutMethods, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
+			const isKioskClosed = computeIsKioskClosed(kiosk, products)
+			setIsKioskClosedState(isKioskClosed)
+			if (isKioskClosed) {
+				handleCloseKiosk()
+			}
 		}, 1000)
 
 		return () => { clearInterval(interval) }
-	}, [products, computeIsKioskClosed, kiosk])
+	}, [products, kiosk, handleCloseKiosk])
 
 	// Initialize on mount
 	useEffect(() => {
@@ -213,7 +225,10 @@ export default function Page (): ReactElement {
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
-				setIsKioskClosedState(computeIsKioskClosed(kioskUpdate, products))
+				const isKioskClosed = computeIsKioskClosed(kioskUpdate, products)
+				if (isKioskClosed) {
+					handleCloseKiosk()
+				}
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
 				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
@@ -331,8 +346,8 @@ export default function Page (): ReactElement {
 		const now = new Date()
 		return (
 			date.getFullYear() === now.getFullYear() &&
-			date.getMonth() === now.getMonth() &&
-			date.getDate() === now.getDate()
+		date.getMonth() === now.getMonth() &&
+		date.getDate() === now.getDate()
 		)
 	}
 
@@ -344,8 +359,8 @@ export default function Page (): ReactElement {
 		tomorrow.setDate(now.getDate() + 1)
 		return (
 			date.getFullYear() === tomorrow.getFullYear() &&
-			date.getMonth() === tomorrow.getMonth() &&
-			date.getDate() === tomorrow.getDate()
+		date.getMonth() === tomorrow.getMonth() &&
+		date.getDate() === tomorrow.getDate()
 		)
 	}
 
