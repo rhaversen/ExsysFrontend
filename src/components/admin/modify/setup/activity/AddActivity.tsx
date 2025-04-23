@@ -6,7 +6,7 @@ import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import { AdminImages } from '@/lib/images'
-import { type RoomType, type KioskType, type ActivityType, type PostActivityType, type ProductType, type PatchKioskType } from '@/types/backendDataTypes'
+import { type RoomType, type KioskType, type ActivityType, type PostActivityType, type ProductType, type PatchKioskType, type PatchActivityType, PostKioskType } from '@/types/backendDataTypes'
 
 import SelectionWindow from '../../ui/SelectionWindow'
 
@@ -23,10 +23,9 @@ const AddActivity = ({
 	products: ProductType[]
 	onClose: () => void
 }): ReactElement => {
-	const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 	const { addError } = useError()
-	const { updateEntityAsync: updateKioskAsync } = useCUDOperations<KioskType, PatchKioskType>('/v1/kiosks')
+	const { updateEntityAsync: updateKioskAsync } = useCUDOperations<PostKioskType, PatchKioskType, KioskType>('/v1/kiosks')
+	const { createEntityAsync: createActivityAsync } = useCUDOperations<PostActivityType, PatchActivityType, ActivityType>('/v1/activities')
 
 	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
@@ -59,48 +58,27 @@ const AddActivity = ({
 		})
 	}, [])
 
-	const postActivity = useCallback((activity: PostActivityType): void => {
-		fetch(`${API_URL}/v1/activities`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			credentials: 'include',
-			body: JSON.stringify(activity)
-		})
-			.then(async response => {
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`)
-				}
-				return await response.json()
-			})
-			.then(async (response) => {
-				const activityId = response._id
-				try {
-				// Update each selected kiosk to include the new activity
-				await Promise.all(selectedKiosks.map(async kiosk => {
-					await updateKioskAsync(kiosk._id, {
-						activities: [...kiosk.activities.map(a => a._id), activityId]
-					})
-				}
-				))
-
-				// Update each disabled kiosk to include the activity in disabledActivities
-				await Promise.all(disabledKiosks.map(async kiosk => {
-					await updateKioskAsync(kiosk._id, {
-						disabledActivities: [...kiosk.disabledActivities, activityId]
-					})
-				}
-				))
-
-				onClose()
-				} catch (error) {
-					addError(error as Error)
-				}
-			}).catch((error) => {
-				addError(error)
-			})
-	}, [API_URL, onClose, addError, selectedKiosks, disabledKiosks, updateKioskAsync])
+	const postActivity = useCallback(async (activity: PostActivityType): Promise<void> => {
+		try {
+			const response = await createActivityAsync(activity)
+			const activityId = response._id
+			// Update each selected kiosk to include the new activity
+			await Promise.all(selectedKiosks.map(async kiosk => {
+				await updateKioskAsync(kiosk._id, {
+					activities: [...kiosk.activities.map(a => a._id), activityId]
+				})
+			}))
+			// Update each disabled kiosk to include the activity in disabledActivities
+			await Promise.all(disabledKiosks.map(async kiosk => {
+				await updateKioskAsync(kiosk._id, {
+					disabledActivities: [...kiosk.disabledActivities, activityId]
+				})
+			}))
+			onClose()
+		} catch (error) {
+			addError(error)
+		}
+	}, [onClose, addError, selectedKiosks, disabledKiosks, updateKioskAsync, createActivityAsync])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setActivity({
