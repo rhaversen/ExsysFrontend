@@ -1,19 +1,10 @@
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
+import 'dayjs/locale/da'
 
 import { getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
 import type { ProductType } from '@/types/backendDataTypes'
 
-// Helper to format ISO string to local datetime-local value
-const getLocalDateTimeValue = (isoString: string | null): string => {
-	if (isoString == null) { return '' }
-	const date = new Date(isoString)
-	const tzOffset = date.getTimezoneOffset() * 60000
-	const localISO = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
-	return localISO
-}
-
-// A self-contained component managing its own mode and until state, with confirm/cancel actions
 interface CloseModeSelectorProps<Mode extends string = 'manual' | 'until' | 'nextProduct' | 'open'> {
   products: ProductType[]
   showOpenOption?: boolean
@@ -40,8 +31,15 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 		confirmLabelMap
 	}: CloseModeSelectorProps<Mode>
 ): React.ReactElement {
+	dayjs.locale('da')
+
 	const [mode, setMode] = useState<Mode>(initialMode)
-	const [until, setUntil] = useState<string | null>(initialUntil)
+	// Set default until to now + 1 minute if mode is 'until' and no initialUntil is provided
+	const getDefaultUntil = () => {
+		if (initialUntil != null) { return initialUntil }
+		return dayjs().add(1, 'minute').toISOString()
+	}
+	const [until, setUntil] = useState<string | null>(initialMode === 'until' ? getDefaultUntil() : initialUntil)
 	const hasAvailableProducts = products.some(p => p.isActive)
 	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= new Date()
 
@@ -55,7 +53,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 				<span className="font-medium">{'Luk manuelt (indtil åbnet igen)'}</span>
 			</label>
 			<label className="flex items-center gap-2">
-				<input type="radio" checked={mode === 'until'} onChange={() => { setMode('until' as Mode) }} />
+				<input type="radio" checked={mode === 'until'} onChange={() => { setMode('until' as Mode); setUntil(dayjs().add(1, 'minute').toISOString()) }} />
 				<span className="font-medium">{'Luk indtil bestemt dato/tidspunkt'}</span>
 			</label>
 			<label className="flex items-center gap-2">
@@ -74,7 +72,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 					<input
 						type="datetime-local"
 						className="border rounded px-2 py-1 text-gray-700"
-						value={getLocalDateTimeValue(until)}
+						value={(until != null) ? dayjs(until).format('YYYY-MM-DDTHH:mm') : ''}
 						onChange={e => { setUntil(e.target.value ? new Date(e.target.value).toISOString() : null) }}
 						min={dayjs().format('YYYY-MM-DDTHH:mm')}
 						placeholder="Vælg dato og tid"
