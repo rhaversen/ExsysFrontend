@@ -95,7 +95,7 @@ export function timeUntil (dateString: string | number): string {
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
 
-export function isKioskClosed (kiosk: KioskType): boolean {
+export function isKioskClosedBackendState (kiosk: KioskType): boolean {
 	if (kiosk.manualClosed) { return true }
 	if (kiosk.closedUntil != null) {
 		const closedUntilDate = new Date(kiosk.closedUntil)

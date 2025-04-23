@@ -6,7 +6,7 @@ import 'dayjs/locale/da'
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductOrderWindowFrom, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, isKioskClosedBackendState } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -25,7 +25,7 @@ export interface KioskStatus {
  * Returns the current status and warning for a kiosk based on its sessions and closed state.
  */
 function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus {
-	const closed = isKioskClosed(kiosk)
+	const closed = isKioskClosedBackendState(kiosk)
 	if (sessions.length === 0) { return { base: closed ? 'closed' : 'open', warning: 'noSession' } }
 	if (sessions.length > 1) { return { base: closed ? 'closed' : 'open', warning: 'multiSession' } }
 	const lastActivity = new Date(sessions[0].lastActivity)
@@ -83,7 +83,7 @@ function KioskStatusModalContent ({
 		!kiosk.manualClosed && (closedUntilValid != null) ? 'until' : 'manual'
 	)
 	const [until, setUntil] = useState<string | null>(closedUntilValid)
-	const isClosed = isKioskClosed(kiosk)
+	const isClosed = isKioskClosedBackendState(kiosk)
 	const hasAvailableProducts = useMemo(() => products.some(p => p.isActive), [products])
 	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= now
 

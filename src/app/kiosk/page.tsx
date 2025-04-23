@@ -14,7 +14,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { getNextAvailableProductOrderWindowFrom, getTimeStringFromOrderWindowTime, isCurrentTimeInOrderWindow, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, getTimeStringFromOrderWindowTime, isCurrentTimeInOrderWindow, isKioskClosedBackendState } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -70,21 +70,31 @@ export default function Page (): ReactElement {
 		}))
 	}, [])
 
-	const computeIsKioskClosed = useCallback((kioskData: KioskType | null, productsData: ProductType[]) => {
-		if (kioskData == null) { return true }
-		if (isKioskClosed(kioskData)) { return true }
+	// Check if the kiosk is closed based on the current time and order windows and if there are any active products
+	function isKioskClosed (
+		kioskData: KioskType | null,
+		productsData: ProductType[]
+	): boolean {
+		if (!kioskData) { return true }
+		if (isKioskClosedBackendState(kioskData)) { return true }
 		const hasAvailable = productsData.some(
 			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
 		return !hasAvailable
 	}
 
-	const handleCloseKiosk = useCallback(() => {
-		setIsKioskClosedState(true)
-		setSelectedActivity(null)
-		setSelectedRoom(null)
-		setViewState('welcome')
-		setCart({ products: {}, options: {} })
+	const updateKioskClosedState = useCallback((
+		kioskData: KioskType | null,
+		productsData: ProductType[]
+	) => {
+		const closed = isKioskClosed(kioskData, productsData)
+		setIsKioskClosedState(closed)
+		if (closed) {
+			setSelectedActivity(null)
+			setSelectedRoom(null)
+			setViewState('welcome')
+			setCart({ products: {}, options: {} })
+		}
 	}, [])
 
 	// Load all data
@@ -114,7 +124,7 @@ export default function Page (): ReactElement {
 			setRooms(roomsData)
 
 			// Update if kiosk is open or closed
-			setIsKioskClosedState(computeIsKioskClosed(kioskData, productsData))
+			updateKioskClosedState(kioskData, productsData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
@@ -126,15 +136,11 @@ export default function Page (): ReactElement {
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			const isKioskClosed = computeIsKioskClosed(kiosk, products)
-			setIsKioskClosedState(isKioskClosed)
-			if (isKioskClosed) {
-				handleCloseKiosk()
-			}
+			updateKioskClosedState(kiosk, products)
 		}, 1000)
 
 		return () => { clearInterval(interval) }
-	}, [products, kiosk, handleCloseKiosk])
+	}, [products, kiosk, updateKioskClosedState])
 
 	// Initialize on mount
 	useEffect(() => {
@@ -159,21 +165,21 @@ export default function Page (): ReactElement {
 		item => {
 			setProducts(prev => {
 				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
+				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		item => {
 			setProducts(prev => {
 				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
+				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
+				updateKioskClosedState(kiosk, products)
 				return products
 			})
 		}
@@ -225,10 +231,7 @@ export default function Page (): ReactElement {
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
-				const isKioskClosed = computeIsKioskClosed(kioskUpdate, products)
-				if (isKioskClosed) {
-					handleCloseKiosk()
-				}
+				updateKioskClosedState(kioskUpdate, products)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
 				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
