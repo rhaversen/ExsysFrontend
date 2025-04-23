@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { FaStore, FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
 import type { KioskType, ProductType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -53,7 +53,7 @@ const AllKiosksStatusManager = ({
 					)
 				)
 			} else if (allKiosksMode === 'nextProduct') {
-				const until = getNextAvailableProductTimeLocal(products)?.date.toISOString()
+				const until = getNextAvailableProductOrderWindowFrom(products)?.date.toISOString()
 				if (until == null) { return }
 				await Promise.all(
 					kiosks.map(async kiosk =>

@@ -6,7 +6,7 @@ import 'dayjs/locale/da'
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, isKioskClosed } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -89,7 +89,7 @@ function KioskStatusModalContent ({
 
 	// Handles patching the kiosk state
 	const handlePatch = useCallback(() => {
-		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTimeLocal(products)?.date.toISOString() ?? null }) }
+		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
 	}, [mode, until, products, onPatch])
 
 	// Handles opening the kiosk

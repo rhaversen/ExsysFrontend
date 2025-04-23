@@ -1,6 +1,6 @@
 import { type ProductType, type OrderWindow, type Time, type KioskType } from '@/types/backendDataTypes'
 
-export function isCurrentTimeInLocalOrderWindow (orderWindow: OrderWindow): boolean {
+export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 	const now = new Date()
 	const currentHour = now.getHours()
 	const currentMinute = now.getMinutes()
@@ -104,7 +104,7 @@ export function isKioskClosed (kiosk: KioskType): boolean {
 	return false
 }
 
-export function sortProductsByLocalOrderWindowFrom (products: ProductType[]): ProductType[] {
+export function sortProductsByOrderWindowFrom (products: ProductType[]): ProductType[] {
 	return products.sort((a, b) => {
 		const aOrderWindow = a.orderWindow
 		const bOrderWindow = b.orderWindow
@@ -116,7 +116,7 @@ export function sortProductsByLocalOrderWindowFrom (products: ProductType[]): Pr
 	})
 }
 
-export function sortProductsByLocalOrderWindowTo (products: ProductType[]): ProductType[] {
+export function sortProductsByOrderWindowTo (products: ProductType[]): ProductType[] {
 	return products.sort((a, b) => {
 		const aOrderWindow = a.orderWindow
 		const bOrderWindow = b.orderWindow
@@ -128,13 +128,12 @@ export function sortProductsByLocalOrderWindowTo (products: ProductType[]): Prod
 	})
 }
 
-export function getTimeStringFromLocalOrderWindowTime (orderWindowTime: Time): string {
+export function getTimeStringFromOrderWindowTime (orderWindowTime: Time): string {
 	return `${orderWindowTime.hour.toString().padStart(2, '0')}:${orderWindowTime.minute.toString().padStart(2, '0')}`
 }
 
 // Returns the soonest next available product time, even if currently available, looping over products and days
-// Assumes products are in local time (orderWindow is local)
-export function getNextAvailableProductTimeLocal (products: ProductType[]): { product: ProductType, from: Time, date: Date } | null {
+export function getNextAvailableProductOrderWindowFrom (products: ProductType[]): { product: ProductType, from: Time, date: Date } | null {
 	const now = new Date()
 	let soonest: { product: ProductType, from: Time, date: Date } | null = null
 	for (const product of products) {

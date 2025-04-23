@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import React from 'react'
 
-import { getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
 import type { ProductType } from '@/types/backendDataTypes'
 
 // Helper to format ISO string to local datetime-local value
@@ -73,7 +73,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 						</div>
 						<div>
 							{(() => {
-								const t = getNextAvailableProductTimeLocal(products)?.date
+								const t = getNextAvailableProductOrderWindowFrom(products)?.date
 								return (t != null) ? dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm') : 'Ingen produkter tilgængelige'
 							})()}
 						</div>

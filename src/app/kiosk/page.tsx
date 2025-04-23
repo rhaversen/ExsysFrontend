@@ -14,7 +14,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { getNextAvailableProductTimeLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, getTimeStringFromOrderWindowTime, isCurrentTimeInOrderWindow, isKioskClosed } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -74,7 +74,7 @@ export default function Page (): ReactElement {
 		if (kioskData == null) { return true }
 		if (isKioskClosed(kioskData)) { return true }
 		const hasAvailable = productsData.some(
-			p => p.isActive && isCurrentTimeInLocalOrderWindow(p.orderWindow)
+			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
 		return !hasAvailable
 	}, [])
@@ -479,9 +479,9 @@ export default function Page (): ReactElement {
 										})()
 										: (() => {
 											// If the kiosk is closed until the next product is available, show that date
-											const next = getNextAvailableProductTimeLocal(products)
+											const next = getNextAvailableProductOrderWindowFrom(products)
 											if (next != null) {
-												const nextProductAvailableTime = getTimeStringFromLocalOrderWindowTime(next.from)
+												const nextProductAvailableTime = getTimeStringFromOrderWindowTime(next.from)
 												return getOpeningMessage(next.date, nextProductAvailableTime)
 											}
 											return null
