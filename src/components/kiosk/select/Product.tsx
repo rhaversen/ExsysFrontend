@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 import AsyncImage from '@/components/ui/AsyncImage'
 import { KioskImages } from '@/lib/images'

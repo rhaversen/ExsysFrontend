@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const ErrorWindow = ({
 	error,

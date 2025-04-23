@@ -1,5 +1,5 @@
 'use client'
-import React, { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 
 import { useUser } from '@/contexts/UserProvider'
 import { type KioskType } from '@/types/backendDataTypes'

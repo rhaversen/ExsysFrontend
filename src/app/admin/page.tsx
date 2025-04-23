@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
 import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { type ReactElement, useState, useEffect } from 'react'
+import { type ReactElement, useState, useEffect } from 'react'
 import { FaPlus, FaMinus } from 'react-icons/fa'
 
 import AddOption from '@/components/admin/modify/catalog/option/AddOption'

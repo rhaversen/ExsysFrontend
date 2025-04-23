@@ -1,4 +1,4 @@
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 
 import Product from '@/components/kiosk/select/Product'

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, type ReactNode, useEffect, useState, useCallback } from 'react'
+import { type ReactElement, type ReactNode, useEffect, useState, useCallback } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
 import { AdminImages } from '@/lib/images'

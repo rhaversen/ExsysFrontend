@@ -1,4 +1,4 @@
-import React, { type ReactElement, useMemo, useRef, useEffect } from 'react'
+import { type ReactElement, useMemo, useRef, useEffect } from 'react'
 
 import Block from '@/components/admin/kitchen/Block'
 import { useSound } from '@/contexts/SoundProvider'

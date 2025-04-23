@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 import Products from '@/components/order/Products'

@@ -1,9 +1,10 @@
 'use client'
 
-import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const router = useRouter()

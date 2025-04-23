@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'

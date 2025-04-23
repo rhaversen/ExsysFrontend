@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 import { useUser } from '@/contexts/UserProvider'
 

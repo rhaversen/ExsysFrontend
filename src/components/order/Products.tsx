@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 import Product from '@/components/order/Product'
 import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'

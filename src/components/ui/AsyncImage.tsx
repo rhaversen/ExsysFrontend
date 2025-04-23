@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, useState, useEffect, useRef } from 'react'
+import { type ReactElement, useState, useEffect, useRef } from 'react'
 
 import { LoadingImage } from '@/lib/images'
 

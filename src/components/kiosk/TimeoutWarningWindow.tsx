@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useConfig } from '@/contexts/ConfigProvider'

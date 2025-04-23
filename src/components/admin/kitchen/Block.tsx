@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'

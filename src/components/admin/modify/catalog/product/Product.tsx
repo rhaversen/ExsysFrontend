@@ -1,4 +1,4 @@
-import React, { type ReactElement, useState, useEffect } from 'react'
+import { type ReactElement, useState, useEffect } from 'react'
 
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'

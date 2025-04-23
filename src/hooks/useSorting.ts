@@ -4,7 +4,7 @@ import sortConfig from '@/lib/SortConfig'
 import { sortProductsByLocalOrderWindowFrom, sortProductsByLocalOrderWindowTo } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 
-export default function useSorting(type: keyof typeof sortConfig | null) {
+export default function useSorting (type: keyof typeof sortConfig | null) {
 	// Default field is first field of first category in sortConfig
 	// const defaultField = sortConfig[Object.keys(sortConfig)[0] as keyof typeof sortConfig][0].prop
 	const [sortField, setSortField] = useState('createdAt')

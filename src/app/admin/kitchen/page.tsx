@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'

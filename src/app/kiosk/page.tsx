@@ -3,7 +3,7 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
+import { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
