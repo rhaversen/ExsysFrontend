@@ -82,8 +82,8 @@ export default function Page (): ReactElement {
 	}, [])
 
 	const computeIsKioskClosed = useCallback((kioskData: KioskType | null, productsData: ProductType[]) => {
-		if (kioskData == null) return true
-		if (isKioskClosed(kioskData)) return true
+		if (kioskData == null) { return true }
+		if (isKioskClosed(kioskData)) { return true }
 		const hasAvailable = productsData.some(
 			p => p.isActive && isCurrentTimeInLocalOrderWindow(p.orderWindow)
 		)
@@ -92,7 +92,7 @@ export default function Page (): ReactElement {
 
 	// Load all data
 	const initialSetup = useCallback(async (): Promise<void> => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 
 		try {
 			const [
@@ -144,7 +144,7 @@ export default function Page (): ReactElement {
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)
 
@@ -197,7 +197,7 @@ export default function Page (): ReactElement {
 		'activity',
 		activity => { setActivities(prev => [...prev, activity]) },
 		activity => {
-			if (kiosk === null) return
+			if (kiosk === null) { return }
 			// If the selected activity is no longer associated with the kiosk, deselect it
 			if (!kiosk.activities.some(a => a._id === activity._id)) {
 				setSelectedActivity(null)
@@ -289,7 +289,7 @@ export default function Page (): ReactElement {
 	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
 
 	const handleProgressClick = (clickedView: ViewState): void => {
-		if (clickedView === viewState) return
+		if (clickedView === viewState) { return }
 
 		if (clickedView === 'activity' && canClickActivity) {
 			setViewState('activity')
@@ -396,17 +396,21 @@ export default function Page (): ReactElement {
 					</div>
 				)
 			case 'activity':
+				if (kiosk == null) {
+					setViewState('welcome')
+					return null
+				}
 				return (
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Vælg den aktivitet du deltager i"
 						items={
 							activities
-								.filter(activity => !(kiosk?.disabledActivities?.includes(activity._id) ?? false))
+								.filter(activity => !(kiosk.disabledActivities?.includes(activity._id) ?? false))
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={activities
-							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
+							.filter(activity => kiosk.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onSelect={handleActivitySelect}
 					/>

@@ -43,6 +43,7 @@ const AddAdmin = ({
 	const postAdmin = useCallback((admin: PostAdminType): void => {
 		axios.post(API_URL + '/v1/admins', admin, { withCredentials: true }).then(() => {
 			onClose()
+			return null
 		}).catch((error) => {
 			addError(error)
 		})
@@ -67,7 +68,7 @@ const AddAdmin = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postAdmin(admin)
 	}, [postAdmin, admin, formIsValid])
 

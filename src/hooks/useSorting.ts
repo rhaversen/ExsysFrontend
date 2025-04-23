@@ -39,8 +39,8 @@ export default function useSorting (type: keyof typeof sortConfig | null) {
 	const compareStrings = (strA: string, strB: string): number => {
 		const lowerStrA = strA.toLowerCase()
 		const lowerStrB = strB.toLowerCase()
-		if (lowerStrA < lowerStrB) return sortDirection === 'asc' ? -1 : 1
-		if (lowerStrA > lowerStrB) return sortDirection === 'asc' ? 1 : -1
+		if (lowerStrA < lowerStrB) { return sortDirection === 'asc' ? -1 : 1 }
+		if (lowerStrA > lowerStrB) { return sortDirection === 'asc' ? 1 : -1 }
 		return 0
 	}
 

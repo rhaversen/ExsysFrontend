@@ -35,6 +35,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-kiosk`, { withCredentials: true }).then(() => {
 			router.replace('/kiosk')
+			return null
 		}).catch(() => {
 			// Do nothing
 		})

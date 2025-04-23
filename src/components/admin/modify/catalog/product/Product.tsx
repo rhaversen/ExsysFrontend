@@ -101,6 +101,7 @@ const Product = ({
 			})
 		]).then(() => {
 			setIsEditing(false)
+			return null
 		}).catch((error) => {
 			addError(error)
 		})

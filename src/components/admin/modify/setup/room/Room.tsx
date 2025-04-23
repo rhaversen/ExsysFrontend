@@ -98,6 +98,7 @@ const Room = ({
 			})
 		]).then(() => {
 			setIsEditing(false)
+			return null
 		}).catch((error) => {
 			addError(error as Error)
 		})

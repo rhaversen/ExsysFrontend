@@ -31,7 +31,7 @@ const AllKiosksStatusManager = ({
 
 	const handleAllKiosksAction = async (): Promise<void> => {
 		try {
-			if (API_URL == null) return
+			if (API_URL == null) { return }
 			setIsProcessing(true)
 			if (allKiosksMode === 'manual') {
 				await Promise.all(
@@ -43,7 +43,7 @@ const AllKiosksStatusManager = ({
 					)
 				)
 			} else if (allKiosksMode === 'until') {
-				if (allKiosksUntil == null) return
+				if (allKiosksUntil == null) { return }
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
@@ -54,7 +54,7 @@ const AllKiosksStatusManager = ({
 				)
 			} else if (allKiosksMode === 'nextProduct') {
 				const until = getNextAvailableProductTimeLocal(products)?.date.toISOString()
-				if (until == null) return
+				if (until == null) { return }
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,

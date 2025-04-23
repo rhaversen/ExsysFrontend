@@ -109,7 +109,7 @@ export default function Page (): ReactElement | null {
 	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
 
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) return
+		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) { return }
 		const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL)
 		setSocket(socketInstance)
 		return () => { socketInstance.disconnect() }
@@ -147,7 +147,7 @@ export default function Page (): ReactElement | null {
 		}
 	)
 
-	if (!hasMounted) return null
+	if (!hasMounted) { return null }
 
 	return (
 		<main className="p-8 flex flex-col items-center">

@@ -24,16 +24,16 @@ function measureTextWidth (text: string, font: string): number {
 	}
 	const canvas = fn._canvas
 	const context = canvas.getContext('2d')
-	if (context == null) return 0
+	if (context == null) { return 0 }
 	context.font = font
 	return context.measureText(text).width
 }
 
 function getBarSegments (from: number, to: number): Array<{ start: number, end: number }> {
-	if (from === to) return []
+	if (from === to) { return [] }
 	// no wrap if ending exactly at midnight
-	if (to === 0) return [{ start: from, end: 1440 }]
-	if (from < to) return [{ start: from, end: to }]
+	if (to === 0) { return [{ start: from, end: 1440 }] }
+	if (from < to) { return [{ start: from, end: to }] }
 	return [
 		{ start: from, end: 1440 },
 		{ start: 0, end: to }
@@ -186,7 +186,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [hovered, setHovered] = useState<null | { name: string, from: number, to: number, y: number, x: number }>(null)
 	const labelFont = '500 15px Inter, Arial, sans-serif'
 	const maxLabelWidth = useMemo(() => {
-		if (typeof window === 'undefined') return 120
+		if (typeof window === 'undefined') { return 120 }
 		return Math.ceil(Math.max(...products.map(p => measureTextWidth(p.name, labelFont)), 0)) + 16
 	}, [products])
 	const [timelineWidth, setTimelineWidth] = useState(600)

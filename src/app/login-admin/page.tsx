@@ -35,6 +35,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true }).then(() => {
 			router.push('/admin')
+			return null
 		}).catch(() => {
 			// Do nothing
 		})

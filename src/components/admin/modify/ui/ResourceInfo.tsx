@@ -101,9 +101,9 @@ const propInfo: Record<string, PropDefinition[]> = {
 
 const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 	const details = info[viewName]
-	const props = propInfo[viewName] ?? []
+	const propDefs = propInfo[viewName] ?? []
 
-	if ((details?.length) === 0 && props.length === 0) return null
+	if ((details?.length) === 0 && propDefs.length === 0) { return null }
 
 	return (
 		<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
@@ -139,7 +139,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 
 			{/* Props and messages section */}
 			<div className="flex flex-col justify-evenly gap-0 sm:flex-row sm:flex-wrap sm:gap-1 text-gray-700">
-				{props.map((prop, index) => (
+				{propDefs.map((prop, index) => (
 					<div
 						key={index}
 						className="flex flex-col items-center text-center p-2 flex-1"

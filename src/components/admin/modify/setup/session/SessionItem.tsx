@@ -53,8 +53,8 @@ const SessionItem = ({
 
 	// Get appropriate device icon
 	const DeviceIcon = (): ReactElement => {
-		if (deviceType.includes('mobile')) return <FaMobile className="text-blue-500" size={16} />
-		if (deviceType.includes('tablet')) return <FaTablet className="text-purple-500" size={16} />
+		if (deviceType.includes('mobile')) { return <FaMobile className="text-blue-500" size={16} /> }
+		if (deviceType.includes('tablet')) { return <FaTablet className="text-purple-500" size={16} /> }
 		return <FaDesktop className="text-gray-700" size={16} />
 	}
 

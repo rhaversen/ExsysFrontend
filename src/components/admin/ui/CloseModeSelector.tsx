@@ -6,7 +6,7 @@ import type { ProductType } from '@/types/backendDataTypes'
 
 // Helper to format ISO string to local datetime-local value
 const getLocalDateTimeValue = (isoString: string | null): string => {
-	if (isoString == null) return ''
+	if (isoString == null) { return '' }
 	const date = new Date(isoString)
 	const tzOffset = date.getTimezoneOffset() * 60000
 	const localISO = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)

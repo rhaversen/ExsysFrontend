@@ -58,7 +58,7 @@ export default function Page (): ReactElement {
 	}, [API_URL, setRooms])
 
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null) return
+		if (API_URL === undefined || API_URL === null) { return }
 		fetchRooms().catch((error) => {
 			addError(error)
 		})

@@ -54,7 +54,7 @@ export default function AdminAuthProvider ({ children }: Readonly<{ children: Re
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)
 

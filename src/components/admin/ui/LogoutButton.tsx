@@ -20,6 +20,7 @@ const LogoutButton = ({
 		axios.post(`${API_URL}/v1/auth/logout-local`, {}, { withCredentials: true }).then(() => {
 			setCurrentUser(null)
 			router.push('/login-admin')
+			return null
 		}).catch(addError)
 	}
 

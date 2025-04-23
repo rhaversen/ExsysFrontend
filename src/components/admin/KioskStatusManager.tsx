@@ -26,8 +26,8 @@ export interface KioskStatus {
  */
 function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus {
 	const closed = isKioskClosed(kiosk)
-	if (sessions.length === 0) return { base: closed ? 'closed' : 'open', warning: 'noSession' }
-	if (sessions.length > 1) return { base: closed ? 'closed' : 'open', warning: 'multiSession' }
+	if (sessions.length === 0) { return { base: closed ? 'closed' : 'open', warning: 'noSession' } }
+	if (sessions.length > 1) { return { base: closed ? 'closed' : 'open', warning: 'multiSession' } }
 	const lastActivity = new Date(sessions[0].lastActivity)
 	if (Date.now() - lastActivity.getTime() > 24 * 60 * 60 * 1000) {
 		return { base: closed ? 'closed' : 'open', warning: 'inactive' }
@@ -39,9 +39,9 @@ function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus
  * Returns a human-readable status string for the kiosk.
  */
 function getStatusText (kiosk: KioskType, base: KioskBaseStatus): string {
-	if (base === 'open') return 'Åben'
-	if (kiosk.manualClosed) return 'Lukket manuelt'
-	if (kiosk.closedUntil != null) return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}`
+	if (base === 'open') { return 'Åben' }
+	if (kiosk.manualClosed) { return 'Lukket manuelt' }
+	if (kiosk.closedUntil != null) { return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}` }
 	return 'Lukket'
 }
 
@@ -89,9 +89,7 @@ function KioskStatusModalContent ({
 
 	// Handles patching the kiosk state
 	const handlePatch = useCallback(() => {
-		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
-		else if (mode === 'until') onPatch({ manualClosed: false, closedUntil: until })
-		else onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTimeLocal(products)?.date.toISOString() ?? null })
+		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTimeLocal(products)?.date.toISOString() ?? null }) }
 	}, [mode, until, products, onPatch])
 
 	// Handles opening the kiosk

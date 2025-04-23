@@ -23,7 +23,7 @@ const EditingControls = ({
 }): ReactElement => {
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent): void => {
-			if (!isEditing) return
+			if (!isEditing) { return }
 
 			if (event.key === 'Escape' && canClose) {
 				handleUndoEdit()

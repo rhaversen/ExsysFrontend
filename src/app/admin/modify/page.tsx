@@ -106,7 +106,7 @@ export default function Page (): ReactElement {
 			(item: T) => {
 				setState((prevItems) => {
 					const index = prevItems.findIndex((i) => i._id === item._id)
-					if (index === -1) return prevItems
+					if (index === -1) { return prevItems }
 					const newItems = [...prevItems]
 					newItems[index] = item
 					return newItems
@@ -314,7 +314,7 @@ export default function Page (): ReactElement {
 
 	// Fetch data on component mount
 	useEffect(() => {
-		if (hasFetchedData.current) return // Prevent double fetching
+		if (hasFetchedData.current) { return } // Prevent double fetching
 		hasFetchedData.current = true
 
 		fetchData().catch(addError)
@@ -322,7 +322,7 @@ export default function Page (): ReactElement {
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
 		// Initialize WebSocket connection
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)

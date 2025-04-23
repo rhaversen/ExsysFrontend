@@ -79,7 +79,7 @@ export default function Page (): ReactElement {
 
 	// Socket setup
 	useEffect(() => {
-		if (WS_URL == null) return
+		if (WS_URL == null) { return }
 		const s = io(WS_URL)
 		setSocket(s)
 		return () => { s.disconnect() }
@@ -87,7 +87,7 @@ export default function Page (): ReactElement {
 
 	// Listen for new orders
 	useEffect(() => {
-		if (socket == null) return
+		if (socket == null) { return }
 		const onCreated = (o: OrderType): void => { setOrders(prev => [...prev, o]) }
 		socket.on('orderCreated', onCreated)
 		return () => { socket.off('orderCreated', onCreated) }

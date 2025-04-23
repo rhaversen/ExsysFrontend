@@ -77,23 +77,23 @@ const AddActivity = ({
 			.then(async (response) => {
 				const activityId = response._id
 				try {
-					// Update each selected kiosk to include the new activity
-					await Promise.all(selectedKiosks.map(async kiosk => {
-						await updateKioskAsync(kiosk._id, {
-							activities: [...kiosk.activities.map(a => a._id), activityId]
-						})
-					}
-					))
+				// Update each selected kiosk to include the new activity
+				await Promise.all(selectedKiosks.map(async kiosk => {
+					await updateKioskAsync(kiosk._id, {
+						activities: [...kiosk.activities.map(a => a._id), activityId]
+					})
+				}
+				))
 
-					// Update each disabled kiosk to include the activity in disabledActivities
-					await Promise.all(disabledKiosks.map(async kiosk => {
-						await updateKioskAsync(kiosk._id, {
-							disabledActivities: [...kiosk.disabledActivities, activityId]
-						})
-					}
-					))
+				// Update each disabled kiosk to include the activity in disabledActivities
+				await Promise.all(disabledKiosks.map(async kiosk => {
+					await updateKioskAsync(kiosk._id, {
+						disabledActivities: [...kiosk.disabledActivities, activityId]
+					})
+				}
+				))
 
-					onClose()
+				onClose()
 				} catch (error) {
 					addError(error as Error)
 				}
@@ -172,7 +172,7 @@ const AddActivity = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postActivity(activity)
 	}, [activity, postActivity, formIsValid])
 
@@ -296,10 +296,9 @@ const AddActivity = ({
 					<button
 						onClick={handleAdd}
 						disabled={!formIsValid}
-						className={`px-3 py-1 text-sm rounded-full flex items-center ${
-							formIsValid
-								? 'bg-blue-600 hover:bg-blue-700 text-white'
-								: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+						className={`px-3 py-1 text-sm rounded-full flex items-center ${formIsValid
+							? 'bg-blue-600 hover:bg-blue-700 text-white'
+							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
 						}`}
 						type="button"
 					>

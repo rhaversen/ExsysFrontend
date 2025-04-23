@@ -134,7 +134,7 @@ export function timeSince (dateString: string): string {
 export function timeUntil (dateString: string | number): string {
 	const seconds = Math.floor((new Date(dateString).valueOf() - new Date().getTime()) / 1000)
 
-	if (seconds <= 0) return 'Udløbet'
+	if (seconds <= 0) { return 'Udløbet' }
 
 	let interval = Math.floor(seconds / 31536000)
 	if (interval >= 1) {
@@ -169,7 +169,7 @@ export function timeUntil (dateString: string | number): string {
 }
 
 export function isKioskClosed (kiosk: KioskType): boolean {
-	if (kiosk.manualClosed) return true
+	if (kiosk.manualClosed) { return true }
 	if (kiosk.closedUntil != null) {
 		const closedUntilDate = new Date(kiosk.closedUntil)
 		return closedUntilDate > new Date()
@@ -211,7 +211,7 @@ export function getNextAvailableProductTimeLocal (products: ProductType[]): { pr
 	const now = new Date()
 	let soonest: { product: ProductType, from: Time, date: Date } | null = null
 	for (const product of products) {
-		if (!product.isActive) continue
+		if (!product.isActive) { continue }
 		const { from } = product.orderWindow
 		// Calculate the next occurrence of the 'from' time (today if still upcoming, else tomorrow)
 		const fromDateToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), from.hour, from.minute, 0, 0)

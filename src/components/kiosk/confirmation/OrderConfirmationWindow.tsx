@@ -40,7 +40,7 @@ const OrderConfirmationWindow = ({
 	}, [])
 
 	useEffect(() => {
-		if (!canClose || orderStatus === 'awaitingPayment') return
+		if (!canClose || orderStatus === 'awaitingPayment') { return }
 		const timeoutId = setTimeout(() => {
 			onClose()
 		}, autoCloseMs)

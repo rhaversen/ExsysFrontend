@@ -114,7 +114,7 @@ const AddRoom = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postRoom(room).catch((error) => {
 			addError(error as Error)
 		})

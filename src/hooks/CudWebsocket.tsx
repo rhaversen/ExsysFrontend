@@ -10,7 +10,7 @@ export default function useEntitySocketListeners<T> (
 	preprocessItem?: (item: T) => T
 ): void {
 	useEffect(() => {
-		if (socket === null) return
+		if (socket === null) { return }
 
 		const onAdd = (item: T): void => {
 			if (preprocessItem !== undefined) {

@@ -32,8 +32,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 
 	useEffect(() => {
 		const statuses = localOrders.map(o => o.status)
-		if (statuses.every(s => s === 'delivered')) setBlockStatus('delivered')
-		else if (statuses.every(s => s === 'confirmed' || s === 'delivered')) {
+		if (statuses.every(s => s === 'delivered')) { setBlockStatus('delivered') } else if (statuses.every(s => s === 'confirmed' || s === 'delivered')) {
 			setBlockStatus('confirmed')
 		} else {
 			setBlockStatus('pending')

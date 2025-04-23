@@ -161,6 +161,7 @@ const OrderView = ({
 				} else {
 					setOrderStatus('awaitingPayment')
 				}
+				return null
 			})
 			.catch(error => {
 				addError(error)
@@ -204,7 +205,7 @@ const OrderView = ({
 	}, [socket, order, addError])
 
 	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
 		// Initialize WebSocket connection
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)

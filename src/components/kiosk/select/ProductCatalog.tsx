@@ -40,7 +40,7 @@ const ProductCatalog = ({
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
 	const checkScrollIndicator = (): void => {
-		if (containerRef.current === null) return
+		if (containerRef.current === null) { return }
 
 		const {
 			scrollTop,

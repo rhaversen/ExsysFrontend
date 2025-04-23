@@ -25,7 +25,7 @@ const RoomCol = ({
 		const grouped: Record<string, OrderType[]> = {}
 		orders.forEach(o => {
 			const key = o.activityId
-			if (grouped[key] === undefined) grouped[key] = []
+			if (grouped[key] === undefined) { grouped[key] = [] }
 			grouped[key].push(o)
 		})
 		return grouped

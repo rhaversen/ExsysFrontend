@@ -71,31 +71,30 @@ const AddProduct = ({
 		onClose() // Close the modal when canceling
 	}
 
-	const handleAdd = (): void => {
-		if (!formIsValid) return
+	const handleAdd = async (): Promise<void> => {
+		if (!formIsValid) { return }
 
-		// First create the product
-		createProductAsync({
-			...newProduct,
-			options: newProduct.options
-		}).then(response => {
+		try {
+			// First create the product
+			const response = await createProductAsync({
+				...newProduct,
+				options: newProduct.options
+			})
 			const productId = response._id
 
 			// Then update activities with disabled products if any
-			Promise.all(disabledActivities.map(async activity => {
+			await Promise.all(disabledActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					disabledProducts: [...activity.disabledProducts, productId]
 				})
-			})).then(() => {
-				resetFormState()
-				setDisabledActivities([])
-				onClose()
-			}).catch(error => {
-				addError(error)
-			})
-		}).catch(error => {
+			}))
+
+			resetFormState()
+			setDisabledActivities([])
+			onClose()
+		} catch (error) {
 			addError(error)
-		})
+		}
 	}
 
 	return (

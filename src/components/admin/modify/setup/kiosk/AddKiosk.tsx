@@ -57,6 +57,7 @@ const AddKiosk = ({
 	const postKiosk = useCallback((kiosk: PostKioskType): void => {
 		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then(() => {
 			onClose()
+			return null
 		}).catch((error) => {
 			addError(error)
 		})
@@ -123,7 +124,7 @@ const AddKiosk = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postKiosk(kiosk)
 	}, [postKiosk, kiosk, formIsValid])
 

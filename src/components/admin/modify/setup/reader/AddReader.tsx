@@ -45,28 +45,31 @@ const AddReader = ({
 		})
 	}, [])
 
-	const postReader = useCallback((): void => {
-		axios.post(API_URL + '/v1/readers', reader, { withCredentials: true }).then((response) => {
+	const postReader = useCallback(async (): Promise<void> => {
+		try {
+			const response = await axios.post(API_URL + '/v1/readers', reader, { withCredentials: true })
 			const newReaderId = response.data._id
 
 			// If a kiosk was selected, update it to point to this reader
 			if (selectedKioskId != null) {
 				const kioskToUpdate = kiosks.find(k => k._id === selectedKioskId)
 				if (kioskToUpdate != null) {
-					axios.patch(
-						API_URL + `/v1/kiosks/${selectedKioskId}`,
-						{ ...kioskToUpdate, readerId: newReaderId },
-						{ withCredentials: true }
-					).catch(error => {
+					try {
+						await axios.patch(
+							API_URL + `/v1/kiosks/${selectedKioskId}`,
+							{ ...kioskToUpdate, readerId: newReaderId },
+							{ withCredentials: true }
+						)
+					} catch (error) {
 						addError(error)
-					})
+					}
 				}
 			}
 
 			onClose()
-		}).catch((error) => {
+		} catch (error) {
 			addError(error)
-		})
+		}
 	}, [API_URL, onClose, addError, reader, selectedKioskId, kiosks])
 
 	const handlePairingCodeChange = useCallback((v: string): void => {
@@ -92,7 +95,7 @@ const AddReader = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postReader()
 	}, [postReader, formIsValid])
 
