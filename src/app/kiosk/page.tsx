@@ -131,7 +131,7 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, updateCheckoutMethods, addError])
+	}, [API_URL, fetchData, updateKioskClosedState, updateCheckoutMethods, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
