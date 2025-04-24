@@ -77,6 +77,7 @@ export default function Page (): ReactElement {
 		direction: 'asc' | 'desc'
 	}>({ field: 'createdAt', direction: 'desc' })
 	const [activeSection, setActiveSection] = useState<StatSection>('overview')
+	const [clickedSection, setClickedSection] = useState<StatSection | null>(null)
 
 	// Create refs for sections
 	const overviewRef = useRef<HTMLDivElement>(null)
@@ -498,55 +499,45 @@ export default function Page (): ReactElement {
 		? `${percentDelivered.toFixed(1)}%`
 		: '-'
 
-	// Scroll to section when navigation item is clicked
+	// Scroll offset to account for sticky header height
+	const SCROLL_OFFSET = 100 // set this to your header’s height
+
+	// Scroll to section when navigation item is clicked (grey until scroll lands)
 	const scrollToSection = (section: StatSection) => {
-		setActiveSection(section)
-		sectionRefs[section]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+		setClickedSection(section)
+		const element = sectionRefs[section]?.current
+		if (element) {
+			const top = element.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET
+			window.scrollTo({ top, behavior: 'smooth' })
+			setTimeout(() => setClickedSection(null), 500) // clear grey shortly after
+		}
 	}
 
-	// Update active section based on scroll position
+	// Update active section based on which section has the largest visible area
 	useEffect(() => {
 		if (loading) { return }
-
 		const handleScroll = () => {
-			const scrollPosition = window.scrollY + 100 // Add offset to improve detection
-
-			// Find which section is currently most visible
-			let currentSection: StatSection = 'overview'
-			const sectionPositions = Object.entries(sectionRefs).map(([section, ref]) => {
-				const element = ref.current
-				if (!element) { return { section, position: 0 } }
-
-				return {
-					section: section as StatSection,
-					position: element.getBoundingClientRect().top + window.scrollY
+			let best: StatSection = 'overview'
+			let maxVis = 0
+			const vh = window.innerHeight
+			Object.entries(sectionRefs).forEach(([sec, ref]) => {
+				const el = ref.current
+				if (!el) { return }
+				const r = el.getBoundingClientRect()
+				const top = Math.max(r.top, 0)
+				const bottom = Math.min(r.bottom, vh)
+				const vis = bottom - top
+				if (vis > maxVis) {
+					maxVis = vis
+					best = sec as StatSection
 				}
 			})
-
-			// Sort by position and find the first section that's before the current scroll position
-			sectionPositions.sort((a, b) => a.position - b.position)
-
-			for (let i = sectionPositions.length - 1; i >= 0; i--) {
-				if (sectionPositions[i].position <= scrollPosition) {
-					currentSection = sectionPositions[i].section as StatSection
-					break
-				}
-			}
-
-			// Only update if section changed
-			if (currentSection !== activeSection) {
-				setActiveSection(currentSection)
-			}
+			if (best !== activeSection) { setActiveSection(best) }
 		}
-
 		window.addEventListener('scroll', handleScroll)
-		// Call once to set initial section
 		handleScroll()
-
-		return () => {
-			window.removeEventListener('scroll', handleScroll)
-		}
-	}, [loading, activeSection, sectionRefs])
+		return () => { window.removeEventListener('scroll', handleScroll) }
+	}, [loading, sectionRefs, activeSection])
 
 	return (
 		<div className="flex flex-col md:flex-row max-w-7xl mx-auto text-black">
@@ -603,7 +594,13 @@ export default function Page (): ReactElement {
 						<p className="text-sm font-medium text-gray-700 mb-2">{'Sektioner'}</p>
 						<button
 							onClick={() => scrollToSection('overview')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'overview' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'overview'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'overview'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiBarChart2 className="mr-2" />
@@ -612,7 +609,13 @@ export default function Page (): ReactElement {
 						</button>
 						<button
 							onClick={() => scrollToSection('sales')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'sales' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'sales'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'sales'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiDollarSign className="mr-2" />
@@ -621,7 +624,13 @@ export default function Page (): ReactElement {
 						</button>
 						<button
 							onClick={() => scrollToSection('products')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'products' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'products'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'products'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiPackage className="mr-2" />
@@ -630,7 +639,13 @@ export default function Page (): ReactElement {
 						</button>
 						<button
 							onClick={() => scrollToSection('customers')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'customers' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'customers'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'customers'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiUsers className="mr-2" />
@@ -639,7 +654,13 @@ export default function Page (): ReactElement {
 						</button>
 						<button
 							onClick={() => scrollToSection('time')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'time' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'time'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'time'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiClock className="mr-2" />
@@ -648,7 +669,13 @@ export default function Page (): ReactElement {
 						</button>
 						<button
 							onClick={() => scrollToSection('orders')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${activeSection === 'orders' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'orders'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'orders'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
 						>
 							<div className="flex items-center">
 								<FiShoppingCart className="mr-2" />
@@ -665,8 +692,7 @@ export default function Page (): ReactElement {
 				{!loading && (
 					<>
 						{/* OVERVIEW SECTION */}
-						<div className="mb-8">
-							<div ref={sectionRefs.overview}></div>
+						<div ref={sectionRefs.overview} className="mb-8">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiBarChart2 className="mr-2 text-blue-600" />
 								{'Overblik\r'}
@@ -713,8 +739,7 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* SALES SECTION */}
-						<div className="mb-12">
-							<div ref={sectionRefs.sales}></div>
+						<div ref={sectionRefs.sales} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiDollarSign className="mr-2 text-blue-600" />
 								{'Salgsanalyse\r'}
@@ -803,8 +828,7 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* PRODUCTS SECTION */}
-						<div className="mb-12">
-							<div ref={sectionRefs.products}></div>
+						<div ref={sectionRefs.products} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiPackage className="mr-2 text-blue-600" />
 								{'Produktanalyse\r'}
@@ -846,8 +870,7 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* CUSTOMERS SECTION (LOCATIONS) */}
-						<div className="mb-12">
-							<div ref={sectionRefs.customers}></div>
+						<div ref={sectionRefs.customers} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiUsers className="mr-2 text-blue-600" />
 								{'Lokaler og Kiosker\r'}
@@ -873,8 +896,7 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* TIME PATTERNS SECTION */}
-						<div className="mb-12">
-							<div ref={sectionRefs.time}></div>
+						<div ref={sectionRefs.time} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiClock className="mr-2 text-blue-600" />
 								{'Tidsmønstre\r'}
@@ -914,8 +936,7 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* ORDERS SECTION */}
-						<div className="mb-12">
-							<div ref={sectionRefs.orders}></div>
+						<div ref={sectionRefs.orders} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiShoppingCart className="mr-2 text-blue-600" />
 								{'Ordrer\r'}
