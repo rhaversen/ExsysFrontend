@@ -80,7 +80,7 @@ const KioskCircle = ({
 				></div>
 				<span
 					title={textTooltip}
-					className={`relative z-10 text-lg ${textClass}`}
+					className={`relative text-lg ${textClass}`}
 				>
 					{kioskTag}
 				</span>
