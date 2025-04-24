@@ -328,6 +328,19 @@ export default function Page (): ReactElement {
 		.slice(0, 5)
 	const busiestRoom = topRooms.length > 0 ? `${topRooms[0][0]} (${topRooms[0][1]})` : '-'
 
+	// Kiosk usage analysis
+	const kioskOrderCounts: Record<string, number> = {}
+	orders.forEach(order => {
+		const kioskName = kiosks.find(k => k._id === order.kioskId)?.name ?? 'Unknown'
+		kioskOrderCounts[kioskName] = (kioskOrderCounts[kioskName] || 0) + 1
+	})
+
+	// Travleste kiosk (show amount)
+	const topKiosks = Object.entries(kioskOrderCounts)
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 5)
+	const busiestKiosk = topKiosks.length > 0 ? `${topKiosks[0][0]} (${topKiosks[0][1]})` : '-'
+
 	// Activity analysis
 	const activityOrderCounts: Record<string, number> = {}
 	orders.forEach(order => {
@@ -458,6 +471,10 @@ export default function Page (): ReactElement {
 							<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
 							<div className="text-xl font-bold">{busiestRoom}</div>
 						</div>
+						<div className="bg-orange-50 rounded p-3" title="Kiosken med flest bestillinger (med antal)">
+							<div className="text-xs text-orange-700">{'Travleste kiosk'}</div>
+							<div className="text-xl font-bold">{busiestKiosk}</div>
+						</div>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 mb-8">
 						<SvgLineGraph
@@ -542,6 +559,11 @@ export default function Page (): ReactElement {
 							data={topActivities.map(a => a[1])}
 							labels={topActivities.map(a => a[0])}
 							label="Ordrevolumen per aktivitet"
+						/>
+						<SvgPieChart
+							data={topKiosks.map(k => k[1])}
+							labels={topKiosks.map(k => k[0])}
+							label="Ordrevolumen per kiosk"
 						/>
 					</div>
 					<div className="mb-8">
