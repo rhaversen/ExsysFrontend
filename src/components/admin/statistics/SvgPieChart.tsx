@@ -82,6 +82,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 			labelX,
 			labelY,
 			percentage: percentage.toFixed(1),
+			value,
 			label: labels[i]
 		}
 
@@ -120,7 +121,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 								setTooltip({
 									x: e.nativeEvent.offsetX,
 									y: e.nativeEvent.offsetY,
-									text: `${slice.label}: ${formatValue(Number(slice.percentage))}%`
+									text: `${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`
 								})
 							}}
 							onMouseLeave={() => setTooltip(null)}
