@@ -4,6 +4,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { type ReactElement } from 'react'
 import { useEffect, useState } from 'react'
+import { FiCheck, FiClock, FiDollarSign, FiAlertTriangle, FiCoffee, FiPackage } from 'react-icons/fi'
 import { io, type Socket } from 'socket.io-client'
 
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
@@ -65,6 +66,10 @@ export default function Page (): ReactElement {
 	const [loading, setLoading] = useState(true)
 	const [socket, setSocket] = useState<Socket | null>(null)
 	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
+	const [orderSort, setOrderSort] = useState<{
+		field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'products' | 'total',
+		direction: 'asc' | 'desc'
+	}>({ field: 'createdAt', direction: 'desc' })
 
 	// Setup websocket connection
 	useEffect(() => {
@@ -244,9 +249,6 @@ export default function Page (): ReactElement {
 	})
 	const mostSoldProductEntry = Object.entries(productSales).sort((a, b) => b[1] - a[1])[0]
 	const mostSoldProduct = mostSoldProductEntry !== undefined ? `${mostSoldProductEntry[0]} (${mostSoldProductEntry[1]})` : '-'
-
-	// Missed orders (pending or confirmed, not delivered)
-	const missedOrders = orders.filter(o => o.status === 'pending' || o.status === 'confirmed')
 
 	// Payment status breakdown
 	const paymentStatusCount = orders.reduce((acc, o) => {
@@ -532,6 +534,250 @@ export default function Page (): ReactElement {
 							label="Ordrevolumen per aktivitet"
 						/>
 					</div>
+					<div className="mb-8">
+						<h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+							<FiPackage className="text-blue-600" />
+							{'Alle ordrer'}
+							{orders.length > 0 && <span className="text-sm text-gray-500 font-normal">{'('}{orders.length}{')'}</span>}
+						</h2>
+						{orders.length === 0 ? (
+							<div className="text-gray-500 p-8 text-center bg-gray-50 rounded border border-gray-200">
+								{'Ingen ordrer i den valgte periode'}
+							</div>
+						) : (
+							<div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+								<table className="w-full text-sm bg-white">
+									<thead>
+										<tr className="bg-gray-100 text-left">
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
+												onClick={() => setOrderSort({
+													field: 'createdAt',
+													direction: orderSort.field === 'createdAt' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center gap-1">
+													{'Tidspunkt'}
+													{orderSort.field === 'createdAt' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
+												onClick={() => setOrderSort({
+													field: 'paymentStatus',
+													direction: orderSort.field === 'paymentStatus' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center gap-1">
+													{'Betaling'}
+													{orderSort.field === 'paymentStatus' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
+												onClick={() => setOrderSort({
+													field: 'status',
+													direction: orderSort.field === 'status' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center gap-1">
+													{'Status'}
+													{orderSort.field === 'status' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
+												onClick={() => setOrderSort({
+													field: 'room',
+													direction: orderSort.field === 'room' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center gap-1">
+													{'Lokale'}
+													{orderSort.field === 'room' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+											<th className="p-3 border-b">{'Indhold'}</th>
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors text-right"
+												onClick={() => setOrderSort({
+													field: 'total',
+													direction: orderSort.field === 'total' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center justify-end gap-1">
+													{'Beløb'}
+													{orderSort.field === 'total' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{[...orders]
+											.sort((a, b) => {
+												if (orderSort.field === 'createdAt') {
+													return orderSort.direction === 'desc'
+														? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+														: new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+												} else if (orderSort.field === 'status') {
+													return orderSort.direction === 'desc'
+														? b.status.localeCompare(a.status)
+														: a.status.localeCompare(b.status)
+												} else if (orderSort.field === 'paymentStatus') {
+													return orderSort.direction === 'desc'
+														? b.paymentStatus.localeCompare(a.paymentStatus)
+														: a.paymentStatus.localeCompare(b.paymentStatus)
+												} else if (orderSort.field === 'room') {
+													const roomNameA = rooms.find(r => r._id === a.roomId)?.name ?? 'Unknown'
+													const roomNameB = rooms.find(r => r._id === b.roomId)?.name ?? 'Unknown'
+													return orderSort.direction === 'desc'
+														? roomNameB.localeCompare(roomNameA)
+														: roomNameA.localeCompare(roomNameB)
+												} else if (orderSort.field === 'total') {
+													const totalA = getOrderTotal(a, products, options)
+													const totalB = getOrderTotal(b, products, options)
+													return orderSort.direction === 'desc'
+														? totalB - totalA
+														: totalA - totalB
+												}
+												return 0
+											})
+											.map((order, index) => {
+												const total = getOrderTotal(order, products, options)
+												const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
+
+												// Calculate relative time for better understanding
+												const orderTime = new Date(order.createdAt)
+												const now = new Date()
+												const minutesAgo = Math.floor((now.getTime() - orderTime.getTime()) / 60000)
+
+												// Determine if order is recent (less than 30 minutes)
+												const isRecent = minutesAgo < 30
+
+												// Get formatted time
+												const formattedTime = dayjs(order.createdAt).format('HH:mm')
+												const formattedDate = dayjs(order.createdAt).format('DD/MM/YYYY')
+
+												return (
+													<tr
+														key={order._id}
+														className={`
+															border-b border-gray-100 
+															${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+															${isRecent ? 'animate-pulse-light' : ''}
+															hover:bg-blue-50 transition-colors
+														`}
+													>
+														<td className="p-3">
+															{/* Determine if order is from today */}
+															{order.createdAt.slice(0, 10) === today ? (
+																// Today's orders: prioritize time
+																<>
+																	<div className="font-medium">{formattedTime}</div>
+																	<div className="text-gray-500 text-xs">{formattedDate}</div>
+																	{isRecent && (
+																		<div className="text-xs text-blue-600 font-semibold">
+																			{minutesAgo === 0 ? 'Lige nu' : `${minutesAgo} min. siden`}
+																		</div>
+																	)}
+																</>
+															) : (
+																// Older orders: prioritize date
+																<>
+																	<div className="font-medium">{formattedDate}</div>
+																	<div className="text-gray-500 text-xs">{formattedTime}</div>
+																</>
+															)}
+														</td>
+														<td className="p-3">
+															{order.paymentStatus === 'successful' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" title="Betaling gennemført">
+																	<FiDollarSign className="w-3 h-3" />
+																	{'Betalt'}
+																</span>
+															)}
+															{order.paymentStatus === 'pending' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" title="Afventer betaling">
+																	<FiClock className="w-3 h-3" />
+																	{'Afventer'}
+																</span>
+															)}
+															{order.paymentStatus === 'failed' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800" title="Betaling fejlede">
+																	<FiAlertTriangle className="w-3 h-3" />
+																	{'Fejlet'}
+																</span>
+															)}
+														</td>
+														<td className="p-3">
+															{order.status === 'pending' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" title="Afventer behandling">
+																	<FiClock className="w-3 h-3" />
+																	{'Afventer'}
+																</span>
+															)}
+															{order.status === 'confirmed' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Ordre er bekræftet">
+																	<FiCoffee className="w-3 h-3" />
+																	{'I produktion'}
+																</span>
+															)}
+															{order.status === 'delivered' && (
+																<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" title="Ordre er leveret">
+																	<FiCheck className="w-3 h-3" />
+																	{'Leveret'}
+																</span>
+															)}
+														</td>
+														<td className="p-3">
+															<div className="truncate max-w-[100px]" title={roomName}>
+																{roomName}
+															</div>
+														</td>
+														<td className="p-3">
+															<div className="max-w-[200px] truncate" title={order.products.map(p => `${p.name} (${p.quantity})`).join(', ')}>
+																{order.products.length > 0 ? (
+																	<span>
+																		{order.products[0].name}
+																		{order.products.length > 1 && ` +${order.products.length - 1} mere`}
+																	</span>
+																) : (
+																	<span className="text-gray-400">{'Ingen produkter'}</span>
+																)}
+															</div>
+														</td>
+														<td className="p-3 text-right font-medium">
+															{total.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}
+														</td>
+													</tr>
+												)
+											})}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</div>
 					<div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
 						<div className="bg-gray-50 rounded p-3">
 							<div className="font-semibold mb-2">{'Betalingsstatus'}</div>
@@ -548,35 +794,6 @@ export default function Page (): ReactElement {
 								<li>{'Senere: '}<b>{checkoutMethodCount.later || 0}</b></li>
 							</ul>
 						</div>
-					</div>
-					<div className="mb-8">
-						<h2 className="text-lg font-semibold mb-2">{'Missede ordrer (ikke leveret)'}</h2>
-						{missedOrders.length === 0 ? (
-							<div className="text-gray-500">{'Ingen missede ordrer'}</div>
-						) : (
-							<table className="w-full text-sm border">
-								<thead>
-									<tr className="bg-gray-100">
-										<th className="border px-2 py-1">{'Dato'}</th>
-										<th className="border px-2 py-1">{'Status'}</th>
-										<th className="border px-2 py-1">{'Betaling'}</th>
-										<th className="border px-2 py-1">{'Produkter'}</th>
-										<th className="border px-2 py-1">{'Total'}</th>
-									</tr>
-								</thead>
-								<tbody>
-									{missedOrders.map(order => (
-										<tr key={order._id}>
-											<td className="border px-2 py-1">{dayjs(order.createdAt).format('DD/MM/YYYY HH:mm')}</td>
-											<td className="border px-2 py-1">{order.status}</td>
-											<td className="border px-2 py-1">{order.paymentStatus}</td>
-											<td className="border px-2 py-1">{order.products.map(p => `${p.name} (${p.quantity})`).join(', ')}</td>
-											<td className="border px-2 py-1">{getOrderTotal(order, products, options).toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						)}
 					</div>
 				</>
 			)}

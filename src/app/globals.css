@@ -38,3 +38,16 @@ body {
 .hover\:bounceOrig:hover {
 	animation: bounceOrig 1s infinite;
 }
+
+@keyframes pulse-light {
+  0%, 100% {
+    background-color: white;
+  }
+  50% {
+    background-color: rgba(219, 234, 254, 0.4); /* light blue-100 */
+  }
+}
+
+.animate-pulse-light {
+  animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
