@@ -35,13 +35,17 @@ export default function DailyReloader ({
 					window.location.reload()
 				}, msToReload)
 			} catch (error) {
-				addError('Failed to set reload timer')
+				addError('Failed to set reload timer', error)
 				return undefined
 			}
 		}
 
 		const timeoutId = setMidnightReload()
-		return () => { (timeoutId !== null) && clearTimeout(timeoutId) }
+		return () => {
+			if (timeoutId !== null && timeoutId !== undefined) {
+				clearTimeout(timeoutId)
+			}
+		}
 	}, [addError, randomDelayMinutes, reloadHour])
 
 	return null

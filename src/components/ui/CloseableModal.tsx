@@ -1,4 +1,4 @@
-import React, { type ReactElement, type ReactNode, useEffect } from 'react'
+import { type ReactElement, type ReactNode, useEffect } from 'react'
 
 const CloseableModal = ({
 	canClose = true,

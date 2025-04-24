@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import ItemsDisplay from '@/components/admin/modify/ui/ItemsDisplay'
@@ -55,8 +55,9 @@ const AddKiosk = ({
 	}, [])
 
 	const postKiosk = useCallback((kiosk: PostKioskType): void => {
-		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then((response) => {
+		axios.post(API_URL + '/v1/kiosks', kiosk, { withCredentials: true }).then(() => {
 			onClose()
+			return null
 		}).catch((error) => {
 			addError(error)
 		})
@@ -79,7 +80,7 @@ const AddKiosk = ({
 	const handleKioskTagChange = useCallback((v: KioskType['kioskTag']): void => {
 		setKiosk({
 			...kiosk,
-			kioskTag: (v === '') ? undefined : v as any
+			kioskTag: (v === '') ? undefined : v as KioskType['kioskTag']
 		})
 	}, [kiosk])
 
@@ -123,7 +124,7 @@ const AddKiosk = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postKiosk(kiosk)
 	}, [postKiosk, kiosk, formIsValid])
 

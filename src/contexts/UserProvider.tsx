@@ -1,4 +1,6 @@
 'use client'
+
+import Cookies from 'js-cookie'
 import React, {
 	createContext,
 	type Dispatch,
@@ -15,13 +17,13 @@ import { type AdminType, type KioskType } from '@/types/backendDataTypes'
 type UserType = KioskType | AdminType
 
 interface UserContextType {
-	currentUser: UserType | null
-	setCurrentUser: Dispatch<SetStateAction<UserType | null>>
+  currentUser: UserType | null
+  setCurrentUser: Dispatch<SetStateAction<UserType | null>>
 }
 
 const UserContext = createContext<UserContextType>({
 	currentUser: null,
-	setCurrentUser: () => { }
+	setCurrentUser: () => {}
 })
 
 export const useUser = (): UserContextType => useContext(UserContext)
@@ -29,24 +31,24 @@ export const useUser = (): UserContextType => useContext(UserContext)
 export default function UserProvider ({ children }: { readonly children: ReactNode }): ReactElement {
 	const [currentUser, setCurrentUser] = useState<UserType | null>(() => {
 		if (typeof window !== 'undefined') {
-			const storedUser = localStorage.getItem('currentUser')
-			return (storedUser !== null) ? JSON.parse(storedUser) : null
+			const cookie = Cookies.get('currentUser')
+			return (cookie != null) ? JSON.parse(cookie) : null
 		}
 		return null
 	})
 
 	useEffect(() => {
 		if (currentUser !== null) {
-			localStorage.setItem('currentUser', JSON.stringify(currentUser))
+			Cookies.set('currentUser', JSON.stringify(currentUser), { expires: 365, path: '/' })
 		} else {
-			localStorage.removeItem('currentUser')
+			Cookies.remove('currentUser', { path: '/' })
 		}
 	}, [currentUser])
 
 	const value = React.useMemo(() => ({
 		currentUser,
 		setCurrentUser
-	}), [currentUser, setCurrentUser])
+	}), [currentUser])
 
 	return (
 		<UserContext.Provider value={value}>

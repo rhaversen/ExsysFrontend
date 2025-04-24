@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useConfig } from '@/contexts/ConfigProvider'
@@ -17,7 +17,7 @@ const TimeoutWarningWindow = ({
 	useEffect(() => {
 		const timer = setInterval(() => {
 			setRemainingSeconds(prev => {
-				if (prev <= 1) {
+				if (prev < 1) {
 					clearInterval(timer)
 					// Schedule timeout callback for next tick to avoid state updates during render
 					setTimeout(() => {
@@ -41,7 +41,7 @@ const TimeoutWarningWindow = ({
 				<p className="text-center text-lg w-60">
 					{'Din bestilling vil blive annulleret om '}
 					<strong>{remainingSeconds}</strong>
-					{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
+					{' sekund'}{remainingSeconds == 1 ? '' : 'er'}
 				</p>
 				<div className="flex flex-col gap-4 w-full">
 					<button

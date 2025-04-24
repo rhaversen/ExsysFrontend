@@ -14,7 +14,11 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 	const { setCurrentUser } = useUser()
 
-	const login = useCallback(async (credentials: any) => {
+	const login = useCallback(async (credentials: {
+		name: FormDataEntryValue | null
+		password: FormDataEntryValue | null
+		stayLoggedIn: boolean
+	}) => {
 		try {
 			const response = await axios.post<{
 				auth: boolean
@@ -22,7 +26,7 @@ export default function Page (): ReactElement {
 			}>(`${API_URL}/v1/auth/login-admin-local`, credentials, { withCredentials: true })
 			setCurrentUser(response.data.user)
 			router.push('/admin')
-		} catch (error: any) {
+		} catch (error) {
 			setCurrentUser(null)
 			addError(error)
 		}
@@ -31,6 +35,7 @@ export default function Page (): ReactElement {
 	useEffect(() => {
 		axios.get(`${API_URL}/v1/auth/is-admin`, { withCredentials: true }).then(() => {
 			router.push('/admin')
+			return null
 		}).catch(() => {
 			// Do nothing
 		})

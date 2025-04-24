@@ -8,14 +8,14 @@ const useKioskEvents = (): ReactElement => {
 	const [socket, setSocket] = useState<Socket | null>(null)
 
 	useEffect(() => {
-		if (WS_URL == null) return
+		if (WS_URL == null) { return }
 		const s = io(WS_URL)
 		setSocket(s)
 		return () => { s.disconnect() }
 	}, [WS_URL])
 
 	useEffect(() => {
-		if (socket == null) return
+		if (socket == null) { return }
 		const onRefresh = (): void => { window.location.reload() }
 		socket.on('kiosk-refresh', onRefresh)
 		return () => { socket.off('kiosk-refresh', onRefresh) }

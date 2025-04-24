@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 const ErrorWindow = ({
 	error,
@@ -17,15 +17,15 @@ const ErrorWindow = ({
 	const [showError, setShowError] = useState(false)
 
 	const errorMessage = ((): string => {
-		if (error === undefined || error === null) return ''
-		if (typeof error === 'string') return error
+		if (error === undefined || error === null) { return '' }
+		if (typeof error === 'string') { return error }
 		if (typeof error === 'object') {
 			if (error instanceof AxiosError) {
-				if (error.response?.data !== undefined && error.response?.data !== '') return error.response.data.error
-				if (error.message !== undefined && error.message !== '') return error.message
+				if (error.response?.data !== undefined && error.response?.data !== '') { return error.response.data.error }
+				if (error.message !== undefined && error.message !== '') { return error.message }
 				return JSON.stringify(error)
 			}
-			if (error instanceof Error) return error.message
+			if (error instanceof Error) { return error.message }
 		}
 		return JSON.stringify(error)
 	})()

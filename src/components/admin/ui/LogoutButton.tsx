@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 import { useUser } from '@/contexts/UserProvider'
 
@@ -20,6 +20,7 @@ const LogoutButton = ({
 		axios.post(`${API_URL}/v1/auth/logout-local`, {}, { withCredentials: true }).then(() => {
 			setCurrentUser(null)
 			router.push('/login-admin')
+			return null
 		}).catch(addError)
 	}
 

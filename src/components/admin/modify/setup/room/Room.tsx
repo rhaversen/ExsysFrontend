@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 
 import ConfirmDeletion from '@/components/admin/modify/ui/ConfirmDeletion'
 import EditableField from '@/components/admin/modify/ui/EditableField'
@@ -98,6 +98,7 @@ const Room = ({
 			})
 		]).then(() => {
 			setIsEditing(false)
+			return null
 		}).catch((error) => {
 			addError(error as Error)
 		})

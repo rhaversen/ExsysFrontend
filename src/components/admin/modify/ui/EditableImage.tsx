@@ -1,4 +1,4 @@
-import React, { type ReactElement, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 
 import ImageList from '@/components/admin/modify/ui/ImageList'
 import AsyncImage from '@/components/ui/AsyncImage'

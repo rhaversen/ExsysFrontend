@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
@@ -7,8 +7,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import useFormState from '@/hooks/useFormState'
 import { AdminImages } from '@/lib/images'
-import { convertLocalOrderWindowToUTC } from '@/lib/timeUtils'
-import { type PatchProductType, type ActivityType, type OptionType, type PostProductType, type ProductType } from '@/types/backendDataTypes'
+import { type PatchProductType, type ActivityType, type OptionType, type PostProductType, type ProductType, PostActivityType, PatchActivityType } from '@/types/backendDataTypes'
 
 import InlineValidation from '../../ui/InlineValidation'
 import ItemsDisplay from '../../ui/ItemsDisplay'
@@ -55,15 +54,8 @@ const AddProduct = ({
 		formIsValid
 	} = useFormState(initialProduct, true)
 
-	const preprocessOrderWindow = (product: PostProductType | PatchProductType): PostProductType | PatchProductType => {
-		return {
-			...product,
-			orderWindow: (product.orderWindow !== undefined) ? convertLocalOrderWindowToUTC(product.orderWindow) : undefined
-		}
-	}
-
-	const { createEntityAsync: createProductAsync 	} = useCUDOperations<PostProductType, PatchProductType, ProductType>('/v1/products', preprocessOrderWindow)
-	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<ActivityType, any>('/v1/activities')
+	const { createEntityAsync: createProductAsync } = useCUDOperations<PostProductType, PatchProductType, ProductType>('/v1/products')
+	const { updateEntityAsync: updateActivityAsync } = useCUDOperations<PostActivityType, PatchActivityType, ActivityType>('/v1/activities')
 
 	const handleCancel = (): void => {
 		resetFormState()
@@ -71,31 +63,30 @@ const AddProduct = ({
 		onClose() // Close the modal when canceling
 	}
 
-	const handleAdd = (): void => {
-		if (!formIsValid) return
+	const handleAdd = async (): Promise<void> => {
+		if (!formIsValid) { return }
 
-		// First create the product
-		createProductAsync({
-			...newProduct,
-			options: newProduct.options
-		}).then(response => {
+		try {
+			// First create the product
+			const response = await createProductAsync({
+				...newProduct,
+				options: newProduct.options
+			})
 			const productId = response._id
 
 			// Then update activities with disabled products if any
-			Promise.all(disabledActivities.map(async activity => {
+			await Promise.all(disabledActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					disabledProducts: [...activity.disabledProducts, productId]
 				})
-			})).then(() => {
-				resetFormState()
-				setDisabledActivities([])
-				onClose()
-			}).catch(error => {
-				addError(error)
-			})
-		}).catch(error => {
+			}))
+
+			resetFormState()
+			setDisabledActivities([])
+			onClose()
+		} catch (error) {
 			addError(error)
-		})
+		}
 	}
 
 	return (

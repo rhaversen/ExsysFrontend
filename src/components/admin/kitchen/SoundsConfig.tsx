@@ -1,4 +1,4 @@
-import React, { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useState } from 'react'
 
 import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'

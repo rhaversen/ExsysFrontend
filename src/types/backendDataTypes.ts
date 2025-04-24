@@ -9,6 +9,8 @@ export interface OrderWindow {
 	to: Time
 }
 
+export type PaymentStatus = 'pending' | 'successful' | 'failed'
+
 // Product types
 export interface ProductType {
 	_id: string
@@ -114,6 +116,9 @@ export interface OrderType {
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
 	status: 'pending' | 'confirmed' | 'delivered'
+	paymentId: string
+	paymentStatus: PaymentStatus
+	checkoutMethod: 'sumUp' | 'later'
 	createdAt: string
 	updatedAt: string
 }

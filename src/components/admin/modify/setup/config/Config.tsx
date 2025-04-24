@@ -32,6 +32,7 @@ const ConfigsView = ({
 		axios.patch<ConfigsType>(API_URL + '/v1/configs', patch, { withCredentials: true }).then((response) => {
 			onSave(label, Number(response.data.configs[label])) // Value from backend is in ms
 			showSuccessMessage()
+			return null
 		}).catch((error) => {
 			addError(error)
 		})

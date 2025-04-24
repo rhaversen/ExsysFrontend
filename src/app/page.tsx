@@ -2,12 +2,15 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
+
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
 export default function Page (): ReactElement {
 	const router = useRouter()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const [loginAs, setLoginAs] = useState<'Admin' | 'Kiosk' | null>(null)
+	const { addError } = useError()
 
 	const checkAuth = useCallback(async (): Promise<void> => {
 		try {
@@ -18,7 +21,7 @@ export default function Page (): ReactElement {
 				setLoginAs('Admin')
 				return
 			} catch (error) {
-				// Not an admin
+				addError(error)
 			}
 
 			try {
@@ -26,14 +29,15 @@ export default function Page (): ReactElement {
 				setLoginAs('Kiosk')
 				return
 			} catch (error) {
-				// Not a kiosk
+				addError(error)
 			}
 
 			setLoginAs(null) // No roles match
 		} catch (error) {
 			setLoginAs(null) // Authentication check failed
+			addError(error)
 		}
-	}, [API_URL])
+	}, [API_URL, addError])
 
 	useEffect(() => {
 		checkAuth().catch(() => {

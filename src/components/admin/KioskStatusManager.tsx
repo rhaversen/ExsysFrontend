@@ -1,12 +1,12 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import 'dayjs/locale/da'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductTimeLocal, isKioskClosed } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, isKioskClosedBackendState } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -25,9 +25,9 @@ export interface KioskStatus {
  * Returns the current status and warning for a kiosk based on its sessions and closed state.
  */
 function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus {
-	const closed = isKioskClosed(kiosk)
-	if (sessions.length === 0) return { base: closed ? 'closed' : 'open', warning: 'noSession' }
-	if (sessions.length > 1) return { base: closed ? 'closed' : 'open', warning: 'multiSession' }
+	const closed = isKioskClosedBackendState(kiosk)
+	if (sessions.length === 0) { return { base: closed ? 'closed' : 'open', warning: 'noSession' } }
+	if (sessions.length > 1) { return { base: closed ? 'closed' : 'open', warning: 'multiSession' } }
 	const lastActivity = new Date(sessions[0].lastActivity)
 	if (Date.now() - lastActivity.getTime() > 24 * 60 * 60 * 1000) {
 		return { base: closed ? 'closed' : 'open', warning: 'inactive' }
@@ -39,9 +39,9 @@ function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus
  * Returns a human-readable status string for the kiosk.
  */
 function getStatusText (kiosk: KioskType, base: KioskBaseStatus): string {
-	if (base === 'open') return 'Åben'
-	if (kiosk.manualClosed) return 'Lukket manuelt'
-	if (kiosk.closedUntil != null) return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}`
+	if (base === 'open') { return 'Åben' }
+	if (kiosk.manualClosed) { return 'Lukket manuelt' }
+	if (kiosk.closedUntil != null) { return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}` }
 	return 'Lukket'
 }
 
@@ -77,22 +77,16 @@ function KioskStatusModalContent ({
 	onClose: () => void
 }): React.ReactElement {
 	dayjs.locale('da')
-	const now = useMemo(() => new Date(), [])
-	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > now ? kiosk.closedUntil : null
-	const [mode, setMode] = useState<'manual' | 'until' | 'nextProduct'>(
-		!kiosk.manualClosed && (closedUntilValid != null) ? 'until' : 'manual'
-	)
-	const [until, setUntil] = useState<string | null>(closedUntilValid)
-	const isClosed = isKioskClosed(kiosk)
-	const hasAvailableProducts = useMemo(() => products.some(p => p.isActive), [products])
-	const isUntilInPast = mode === 'until' && until != null && new Date(until) <= now
+	// Prepare mode/initial values for selector
+	const isClosed = isKioskClosedBackendState(kiosk)
+	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > new Date()
+	const initialMode = !kiosk.manualClosed && closedUntilValid ? 'until' : 'manual'
+	const initialUntil = closedUntilValid ? (kiosk.closedUntil as string) : undefined
 
-	// Handles patching the kiosk state
-	const handlePatch = useCallback(() => {
-		if (mode === 'manual') onPatch({ manualClosed: true, closedUntil: null })
-		else if (mode === 'until') onPatch({ manualClosed: false, closedUntil: until })
-		else onPatch({ manualClosed: false, closedUntil: getNextAvailableProductTimeLocal(products)?.date.toISOString() ?? null })
-	}, [mode, until, products, onPatch])
+	// Handles closing via selector confirm
+	const handleConfirmClose = (mode: 'manual' | 'until' | 'nextProduct', until: string | null) => {
+		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
+	}
 
 	// Handles opening the kiosk
 	const handleOpenKiosk = useCallback(() => {
@@ -108,55 +102,32 @@ function KioskStatusModalContent ({
 					className="mx-auto mb-2"
 				/>
 				<h2 className="text-2xl font-bold text-gray-800">{kiosk.name}</h2>
-				{isClosed
-					? (
-						<>
-							{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
-							{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
-								<p className="text-red-700 font-semibold mt-2">
-									{'Kiosken er lukket indtil: '}{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm')}
-								</p>
-							)}
-							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-								<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åben kiosk'}</button>
-							</div>
-						</>
-					)
-					: (
-						<>
-							<div className="text-left space-y-2">
-								<p className="text-gray-700 text-lg font-medium">{'Vælg hvordan kiosken skal lukkes:'}</p>
-								<CloseModeSelector<'manual' | 'until' | 'nextProduct'>
-									mode={mode}
-									setMode={setMode}
-									until={until}
-									setUntil={setUntil}
-									products={products}
-								/>
-							</div>
-							<div className="flex gap-4 justify-center pt-2">
-								<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
-								<button
-									type="button"
-									disabled={
-										isPatching ||
-										(mode === 'until' && ((until == null) || isUntilInPast)) ||
-										(mode === 'nextProduct' && !hasAvailableProducts)
-									}
-									onClick={handlePatch}
-									className={`px-5 py-2 text-white rounded-md transition bg-red-500 hover:bg-red-600 ${isPatching ||
-											(mode === 'nextProduct' && !hasAvailableProducts) ||
-											(mode === 'until' && ((until == null) || isUntilInPast))
-										? 'opacity-50 cursor-not-allowed'
-										: ''
-									}`}
-								>
-									{'Luk kiosk\r'}
-								</button>
-							</div>
-						</>
-					)}
+				{isClosed ? (
+					<>
+						{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
+						{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
+							<p className="text-red-700 font-semibold mt-2">
+								{'Kiosken er lukket indtil: '}
+								{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
+							</p>
+						)}
+						<div className="flex gap-4 justify-center pt-2">
+							<button type="button" disabled={isPatching} onClick={onClose} className="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded-md transition text-gray-800">{'Annuller'}</button>
+							<button type="button" disabled={isPatching} onClick={handleOpenKiosk} className={`px-5 py-2 text-white rounded-md transition bg-green-500 hover:bg-green-600 ${isPatching ? 'opacity-50 cursor-not-allowed' : ''}`}>{'Åbn kiosk'}</button>
+						</div>
+					</>
+				) : (
+					<CloseModeSelector<'manual' | 'until' | 'nextProduct'>
+						products={products}
+						initialMode={initialMode}
+						initialUntil={initialUntil}
+						isPatching={isPatching}
+						onConfirm={handleConfirmClose}
+						onCancel={onClose}
+						cancelText="Annuller"
+						confirmLabelMap={{ manual: 'Luk kiosk', until: 'Luk kiosk', nextProduct: 'Luk kiosk' }}
+					/>
+				)}
 			</div>
 		</CloseableModal>
 	)
@@ -193,8 +164,8 @@ const KioskStatusManager = ({
 			try {
 				const res = await axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
 				setSessions(res.data)
-			} catch (e) {
-				// Optionally handle error
+			} catch (error) {
+				addError(error)
 			} finally {
 				setLoadingSessions(false)
 			}
@@ -208,11 +179,11 @@ const KioskStatusManager = ({
 	}, [API_URL])
 
 	return (
-		<div>
+		<div className='p-4 bg-gray-50 rounded-lg'>
 			<h2 className="text-lg text-gray-800">
 				{'Kiosk status og håndtering'}
 			</h2>
-			<div className="flex flex-col w-full max-w-2xl mx-auto">
+			<div className="flex flex-col w-full mx-auto">
 				{loadingSessions
 					? (
 						<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser sessions...'}</div>
@@ -225,7 +196,7 @@ const KioskStatusManager = ({
 								const statusText = getStatusText(kiosk, base)
 								const warningText = getWarningText(warning)
 								return (
-									<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
+									<div key={kiosk._id} className="flex items-center gap-4 p-1">
 										<KioskCircle
 											warningStatus={warning}
 											isClosed={base === 'closed'}
@@ -245,9 +216,9 @@ const KioskStatusManager = ({
 															? 'bg-white text-orange-700 border border-orange-200 hover:bg-orange-50'
 															: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
 													} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-													aria-label={base === 'closed' ? 'Åben kiosk' : 'Luk kiosk'}
+													aria-label={base === 'closed' ? 'Åbn kiosk' : 'Luk kiosk'}
 												>
-													{base === 'closed' ? 'Åben' : 'Luk'}
+													{base === 'closed' ? 'Åbn' : 'Luk'}
 												</button>
 											</div>
 											{(warningText.length > 0) && (

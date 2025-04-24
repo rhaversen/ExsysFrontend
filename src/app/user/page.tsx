@@ -1,14 +1,14 @@
 'use client'
 
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import DeliveryTimeSelector from '@/components/order/DeliveryTimeSelector'
 import Products from '@/components/order/Products'
 import RoomSelector from '@/components/order/RoomSelector'
 import SubmitButton from '@/components/ui/SubmitButton'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { convertUTCOrderWindowToLocal, isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
+import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement {
@@ -42,9 +42,7 @@ export default function Page (): ReactElement {
 		const availabilities = products.reduce(
 			(acc: Record<ProductType['_id'], boolean>, product) => ({
 				...acc,
-				[product._id]: isCurrentTimeInLocalOrderWindow(convertUTCOrderWindowToLocal(
-					product.orderWindow
-				))
+				[product._id]: isCurrentTimeInOrderWindow(product.orderWindow)
 			}),
 			{}
 		)
@@ -58,7 +56,7 @@ export default function Page (): ReactElement {
 	}, [API_URL, setRooms])
 
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null) return
+		if (API_URL === undefined || API_URL === null) { return }
 		fetchRooms().catch((error) => {
 			addError(error)
 		})

@@ -1,4 +1,4 @@
-import React, { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useState } from 'react'
 
 import QuantityAdjuster from '@/components/ui/QuantityAdjuster'
 import { type OrderWindow, type ProductType } from '@/types/backendDataTypes'

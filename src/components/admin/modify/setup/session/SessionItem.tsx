@@ -53,13 +53,13 @@ const SessionItem = ({
 
 	// Get appropriate device icon
 	const DeviceIcon = (): ReactElement => {
-		if (deviceType.includes('mobile')) return <FaMobile className="text-blue-500" size={16} />
-		if (deviceType.includes('tablet')) return <FaTablet className="text-purple-500" size={16} />
+		if (deviceType.includes('mobile')) { return <FaMobile className="text-blue-500" size={16} /> }
+		if (deviceType.includes('tablet')) { return <FaTablet className="text-purple-500" size={16} /> }
 		return <FaDesktop className="text-gray-700" size={16} />
 	}
 
 	return (
-		<div className={`border rounded-lg p-4 shadow-sm w-full ${isCurrentSession ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}>
+		<div className={`border border-gray-300 rounded-lg p-4 w-full ${isCurrentSession ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}>
 			{/* Status bar */}
 			<div className="flex justify-between items-center mb-3">
 				<div className="flex items-center space-x-2">
