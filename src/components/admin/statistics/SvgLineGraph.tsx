@@ -25,12 +25,27 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
+	// responsiveness: measure container width
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [chartWidth, setChartWidth] = useState<number>(width)
+
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
 			const bbox = tooltipTextRef.current.getBBox()
 			setTooltipDims({ width: bbox.width, height: bbox.height })
 		}
 	}, [tooltip])
+
+	useLayoutEffect(() => {
+		function updateWidth () {
+			if (containerRef.current) {
+				setChartWidth(containerRef.current.offsetWidth)
+			}
+		}
+		updateWidth()
+		window.addEventListener('resize', updateWidth)
+		return () => window.removeEventListener('resize', updateWidth)
+	}, [width])
 
 	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
 
@@ -39,8 +54,12 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	const paddingRight = 32
 	const paddingTop = 32
 	const paddingBottom = 32
-	const graphWidth = width - paddingLeft - paddingRight
+	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = height - paddingTop - paddingBottom
+
+	// dynamically throttle X‑axis labels
+	const maxLabels = Math.max(1, Math.floor(graphWidth / 50))
+	const xTickInterval = Math.ceil(labels.length / maxLabels)
 
 	const maxY = Math.max(...data, 1)
 	const minY = Math.min(...data, 0)
@@ -65,9 +84,6 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	const yTicks = 5
 	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => minY + (i * yRange) / yTicks)
 
-	// limit x-axis labels to avoid overlap
-	const xTickInterval = Math.ceil(labels.length / 8)
-
 	// Find today index for indicator (if enabled)
 	let todayIndex: number | null = null
 	if (showTodayIndicator) {
@@ -88,130 +104,136 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
 	return (
-		<svg
-			width={width}
-			height={height}
-			className="bg-white rounded shadow"
-			style={{ position: 'relative', overflow: 'visible' }}
-			onMouseLeave={() => setTooltip(null)}
-		>
-			 {/* Today vertical indicator */}
-			{showTodayIndicator && todayIndex !== null && todayIndex >= 0 && (
-				<line
-					x1={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
-					x2={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
-					y1={paddingTop}
-					y2={paddingTop + graphHeight}
-					stroke="#ef4444"
-					strokeDasharray="4 2"
-					strokeWidth={2}
-				/>
-			)}
-			{/* Y axis grid and labels */}
-			{yTickVals.map((v, i) => {
-				const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
-				return (
-					<g key={i}>
-						<line x1={paddingLeft} x2={width - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
-						<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">{v.toFixed(0)}</text>
-					</g>
-				)
-			})}
-			{/* X axis labels (filtered to prevent overlap) */}
-			{labels.map((lbl, i) => {
-				if (i === labels.length - 2) { return null }
-				if (
-					i !== labels.length - 1 &&
-					(i % xTickInterval !== 0 || i > labels.length - 1 - xTickInterval)
-				) { return null }
-				// When there's only one data point, place it in the middle
-				const x = data.length === 1
-					? paddingLeft + graphWidth / 2
-					: paddingLeft + (i * graphWidth) / (labels.length - 1)
-				return (
-					<text key={i} x={x} y={height - paddingBottom / 2} fontSize={11} textAnchor="middle" fill="#6b7280">
-						{lbl}
-					</text>
-				)
-			})}
-			{/* Y axis label */}
-			{(yLabel != null) && (
-				<text
-					x={paddingLeft / 2}
-					y={height / 2}
-					fontSize={12}
-					textAnchor="middle"
-					fill="#6b7280"
-					transform={`rotate(-90 ${paddingLeft / 2},${height / 2})`}
-				>
-					{yLabel}
-				</text>
-			)}
-			{/* Line path */}
-			<path d={path} fill="none" stroke={color} strokeWidth={2.5} />
-			{/* Dots with hover tooltips */}
-			{points.map(([x, y], i) => (
-				<g key={i}>
-					<circle
-						cx={x}
-						cy={y}
-						r={2.5}
-						fill={color}
-						onMouseMove={e => {
-							setTooltip({
-								x: e.nativeEvent.offsetX,
-								y: e.nativeEvent.offsetY,
-								text: `${labels[i]}: ${formatValue(data[i])}`
-							})
-						}}
-						onMouseLeave={() => setTooltip(null)}
-						style={{ cursor: 'pointer' }}
+		<div ref={containerRef} style={{ width: '100%' }}>
+			<svg
+				viewBox={`0 0 ${chartWidth} ${height}`}
+				preserveAspectRatio="xMidYMid meet"
+				className="bg-white rounded shadow"
+				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
+				onMouseLeave={() => setTooltip(null)}
+			>
+				{/* Today vertical indicator */}
+				{showTodayIndicator && todayIndex !== null && todayIndex >= 0 && (
+					<line
+						x1={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
+						x2={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
+						y1={paddingTop}
+						y2={paddingTop + graphHeight}
+						stroke="#ef4444"
+						strokeDasharray="4 2"
+						strokeWidth={2}
 					/>
-				</g>
-			))}
-			{/* Title */}
-			{(label != null) && (
-				<text x={width / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
-					{label}
-				</text>
-			)}
-			{/* Tooltip */}
-			{tooltip && (
-				<g pointerEvents="none">
+				)}
+				{/* Y axis grid and labels */}
+				{yTickVals.map((v, i) => {
+					const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
+					return (
+						<g key={i}>
+							<line x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
+							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">{v.toFixed(0)}</text>
+						</g>
+					)
+				})}
+				{/* X axis labels (filtered to prevent overlap) */}
+				{labels.map((lbl, i) => {
+					// skip unless it's a tick position or the last label
+					if (i !== labels.length - 1 && (i % xTickInterval !== 0)) { return null }
+					// When there's only one data point, place it in the middle
+					const x = data.length === 1
+						? paddingLeft + graphWidth / 2
+						: paddingLeft + (i * graphWidth) / (labels.length - 1)
+					return (
+						<text
+							key={i}
+							x={x}
+							y={height - paddingBottom / 2}
+							fontSize={11}
+							textAnchor="middle"
+							fill="#6b7280"
+						>
+							{lbl}
+						</text>
+					)
+				})}
+				{/* Y axis label */}
+				{(yLabel != null) && (
 					<text
-						ref={tooltipTextRef}
-						x={tooltip.x + 18}
-						y={tooltip.y - 6}
-						fontSize={13}
-						fill="#fff"
-						fontWeight={500}
-						style={{ visibility: 'hidden' }}
+						x={paddingLeft / 2}
+						y={height / 2}
+						fontSize={12}
+						textAnchor="middle"
+						fill="#6b7280"
+						transform={`rotate(-90 ${paddingLeft / 2},${height / 2})`}
 					>
-						{tooltip.text}
+						{yLabel}
 					</text>
-					{tooltipDims.width > 0 && (
-						<rect
-							x={tooltip.x + 10}
-							y={tooltip.y - 24}
-							width={tooltipDims.width + 16}
-							height={tooltipDims.height + 10}
-							rx={5}
-							fill="#111827"
-							opacity={0.92}
+				)}
+				{/* Line path */}
+				<path d={path} fill="none" stroke={color} strokeWidth={2.5} />
+				{/* Dots with hover tooltips */}
+				{points.map(([x, y], i) => (
+					<g key={i}>
+						<circle
+							cx={x}
+							cy={y}
+							r={2.5}
+							fill={color}
+							onMouseMove={e => {
+								setTooltip({
+									x: e.nativeEvent.offsetX,
+									y: e.nativeEvent.offsetY,
+									text: `${labels[i]}: ${formatValue(data[i])}`
+								})
+							}}
+							onMouseLeave={() => setTooltip(null)}
+							style={{ cursor: 'pointer' }}
 						/>
-					)}
-					<text
-						x={tooltip.x + 18}
-						y={tooltip.y - 6}
-						fontSize={13}
-						fill="#fff"
-						fontWeight={500}
-					>
-						{tooltip.text}
+					</g>
+				))}
+				{/* Title */}
+				{(label != null) && (
+					<text x={chartWidth / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+						{label}
 					</text>
-				</g>
-			)}
-		</svg>
+				)}
+				{/* Tooltip */}
+				{tooltip && (
+					<g pointerEvents="none">
+						<text
+							ref={tooltipTextRef}
+							x={tooltip.x + 18}
+							y={tooltip.y - 6}
+							fontSize={13}
+							fill="#fff"
+							fontWeight={500}
+							style={{ visibility: 'hidden' }}
+						>
+							{tooltip.text}
+						</text>
+						{tooltipDims.width > 0 && (
+							<rect
+								x={tooltip.x + 10}
+								y={tooltip.y - 24}
+								width={tooltipDims.width + 16}
+								height={tooltipDims.height + 10}
+								rx={5}
+								fill="#111827"
+								opacity={0.92}
+							/>
+						)}
+						<text
+							x={tooltip.x + 18}
+							y={tooltip.y - 6}
+							fontSize={13}
+							fill="#fff"
+							fontWeight={500}
+						>
+							{tooltip.text}
+						</text>
+					</g>
+				)}
+			</svg>
+		</div>
 	)
 }
 
