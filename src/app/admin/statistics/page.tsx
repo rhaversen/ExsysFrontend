@@ -67,10 +67,20 @@ export default function Page (): ReactElement {
 	const [loading, setLoading] = useState(true)
 	const [socket, setSocket] = useState<Socket | null>(null)
 	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
+	const [currentTime, setCurrentTime] = useState<Date>(new Date())
 	const [orderSort, setOrderSort] = useState<{
 		field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'kiosk' | 'products' | 'total',
 		direction: 'asc' | 'desc'
 	}>({ field: 'createdAt', direction: 'desc' })
+
+	// Update current time every minute to refresh relative times
+	useEffect(() => {
+		const timer = setInterval(() => {
+			setCurrentTime(new Date())
+		}, 60000) // Update every minute
+
+		return () => clearInterval(timer)
+	}, [])
 
 	// Setup websocket connection
 	useEffect(() => {
@@ -724,8 +734,7 @@ export default function Page (): ReactElement {
 
 												// Calculate relative time for better understanding
 												const orderTime = new Date(order.createdAt)
-												const now = new Date()
-												const minutesAgo = Math.floor((now.getTime() - orderTime.getTime()) / 60000)
+												const minutesAgo = Math.floor((currentTime.getTime() - orderTime.getTime()) / 60000)
 
 												// Determine if order is recent (less than 30 minutes)
 												const isRecent = minutesAgo < 30
