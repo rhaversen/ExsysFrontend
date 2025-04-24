@@ -319,6 +319,21 @@ export default function Page (): ReactElement {
 		? (orders.filter(o => o.status === 'delivered').length / orders.length) * 100
 		: 0
 
+	// Display strings for key metrics when no orders exist
+	const totalSalesDisplay = totalSales.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })
+	const avgOrderValueDisplay = totalOrders
+		? avgOrderValue.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })
+		: '-'
+	const avgProductsDisplay = totalOrders
+		? averageProductsPerOrder.toFixed(1)
+		: '-'
+	const busiestTimeDisplay = totalOrders
+		? `${busiest.hour}:00 ${dayNames[busiest.day]}`
+		: '-'
+	const deliveryPercentDisplay = totalOrders
+		? `${percentDelivered.toFixed(1)}%`
+		: '-'
+
 	return (
 		<main className="bg-white rounded shadow p-6 max-w-6xl mx-auto text-black">
 			<div className="flex justify-between items-center mb-4">
@@ -357,7 +372,7 @@ export default function Page (): ReactElement {
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 						<div className="bg-blue-50 rounded p-3">
 							<div className="text-xs text-blue-700">{'Omsætning'}</div>
-							<div className="text-xl font-bold">{totalSales.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</div>
+							<div className="text-xl font-bold">{totalSalesDisplay}</div>
 						</div>
 						<div className="bg-green-50 rounded p-3">
 							<div className="text-xs text-green-700">{'Antal ordrer'}</div>
@@ -365,7 +380,7 @@ export default function Page (): ReactElement {
 						</div>
 						<div className="bg-purple-50 rounded p-3">
 							<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
-							<div className="text-xl font-bold">{avgOrderValue.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</div>
+							<div className="text-xl font-bold">{avgOrderValueDisplay}</div>
 						</div>
 						<div className="bg-amber-50 rounded p-3">
 							<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
@@ -373,15 +388,15 @@ export default function Page (): ReactElement {
 						</div>
 						<div className="bg-indigo-50 rounded p-3">
 							<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
-							<div className="text-xl font-bold">{averageProductsPerOrder.toFixed(1)}</div>
+							<div className="text-xl font-bold">{avgProductsDisplay}</div>
 						</div>
 						<div className="bg-rose-50 rounded p-3">
 							<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
-							<div className="text-xl font-bold">{`${busiest.hour}:00 ${dayNames[busiest.day]}`}</div>
+							<div className="text-xl font-bold">{busiestTimeDisplay}</div>
 						</div>
 						<div className="bg-teal-50 rounded p-3">
 							<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
-							<div className="text-xl font-bold">{`${percentDelivered.toFixed(1)}%`}</div>
+							<div className="text-xl font-bold">{deliveryPercentDisplay}</div>
 						</div>
 						<div className="bg-cyan-50 rounded p-3">
 							<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
