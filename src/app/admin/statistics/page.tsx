@@ -713,11 +713,11 @@ export default function Page (): ReactElement {
 														? roomNameB.localeCompare(roomNameA)
 														: roomNameA.localeCompare(roomNameB)
 												} else if (orderSort.field === 'kiosk') {
-													const kiosNamekA = kiosks.find(k => k._id === a.kioskId)?.name ?? 'Unknown'
+													const kioskNameA = kiosks.find(k => k._id === a.kioskId)?.name ?? 'Unknown'
 													const kioskNameB = kiosks.find(k => k._id === b.kioskId)?.name ?? 'Unknown'
 													return orderSort.direction === 'desc'
-														? kioskNameB.localeCompare(kiosNamekA)
-														: kiosNamekA.localeCompare(kioskNameB)
+														? kioskNameB.localeCompare(kioskNameA)
+														: kioskNameA.localeCompare(kioskNameB)
 												} else if (orderSort.field === 'total') {
 													const totalA = getOrderTotal(a, products, options)
 													const totalB = getOrderTotal(b, products, options)
