@@ -1,0 +1,198 @@
+import React, { useState, useRef, useLayoutEffect } from 'react'
+
+interface SvgBarChartProps {
+  data: number[]
+  labels: string[]
+  width?: number
+  height?: number
+  color?: string
+  label?: string
+  yLabel?: string
+}
+
+const SvgBarChart: React.FC<SvgBarChartProps> = ({
+	data,
+	labels,
+	width = 500,
+	height = 180,
+	color = '#6366f1', // Tailwind indigo-500
+	label,
+	yLabel
+}) => {
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
+	const tooltipTextRef = useRef<SVGTextElement>(null)
+
+	useLayoutEffect(() => {
+		if (tooltip && tooltipTextRef.current) {
+			const bbox = tooltipTextRef.current.getBBox()
+			setTooltipDims({ width: bbox.width, height: bbox.height })
+		}
+	}, [tooltip])
+
+	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
+
+	// Padding for axes
+	const paddingLeft = 64
+	const paddingRight = 32
+	const paddingTop = 32
+	const paddingBottom = 48 // More space for labels
+	const graphWidth = width - paddingLeft - paddingRight
+	const graphHeight = height - paddingTop - paddingBottom
+
+	const maxY = Math.max(...data, 1)
+	const minY = 0
+	const yRange = maxY - minY || 1
+
+	// Bar width calculation
+	const barWidth = Math.min(30, (graphWidth / data.length) * 0.7)
+	const barSpacing = (graphWidth - (barWidth * data.length)) / (data.length + 1)
+
+	// Y axis ticks
+	const yTicks = 5
+	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => minY + (i * yRange) / yTicks)
+
+	// Helper for formatting numbers: 1 decimal if needed, else integer
+	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
+
+	return (
+		<svg
+			width={width}
+			height={height}
+			className="bg-white rounded shadow"
+			style={{ position: 'relative', overflow: 'visible' }}
+			onMouseLeave={() => setTooltip(null)}
+		>
+			{/* Y axis grid and labels */}
+			{yTickVals.map((v, i) => {
+				const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
+				return (
+					<g key={i}>
+						<line x1={paddingLeft} x2={width - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
+						<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">
+							{typeof v === 'number' && v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}
+						</text>
+					</g>
+				)
+			})}
+
+			{/* X axis labels */}
+			{labels.map((lbl, i) => {
+				const x = paddingLeft + barSpacing + i * (barWidth + barSpacing) + barWidth / 2
+				return (
+					<text
+						key={i}
+						x={x}
+						y={height - paddingBottom / 2}
+						fontSize={11}
+						textAnchor="middle"
+						fill="#6b7280"
+						transform={labels.length > 10 ? `rotate(-45, ${x}, ${height - paddingBottom / 2})` : undefined}
+					>
+						{lbl}
+					</text>
+				)
+			})}
+
+			{/* Y axis label */}
+			{(yLabel != null) && (
+				<text
+					x={paddingLeft / 2}
+					y={height / 2}
+					fontSize={12}
+					textAnchor="middle"
+					fill="#6b7280"
+					transform={`rotate(-90 ${paddingLeft / 2},${height / 2})`}
+				>
+					{yLabel}
+				</text>
+			)}
+
+			{/* Bars with hover tooltips */}
+			{data.map((value, i) => {
+				const x = paddingLeft + barSpacing + i * (barWidth + barSpacing)
+				const barHeight = (value / yRange) * graphHeight
+				const y = paddingTop + graphHeight - barHeight
+				return (
+					<g key={i}>
+						<rect
+							x={x}
+							y={y}
+							width={barWidth}
+							height={barHeight}
+							fill={color}
+							rx={2}
+							onMouseMove={e => {
+								setTooltip({
+									x: e.nativeEvent.offsetX,
+									y: e.nativeEvent.offsetY,
+									text: `${labels[i]}: ${formatValue(value)}`
+								})
+							}}
+							onMouseLeave={() => setTooltip(null)}
+							style={{ cursor: 'pointer' }}
+						/>
+						{barHeight > 15 && (
+							<text
+								x={x + barWidth / 2}
+								y={y + 12}
+								fontSize={10}
+								textAnchor="middle"
+								fill="white"
+								fontWeight="bold"
+							>
+								{value.toFixed(0)}
+							</text>
+						)}
+					</g>
+				)
+			})}
+
+			{/* Title */}
+			{(label != null) && (
+				<text x={width / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+					{label}
+				</text>
+			)}
+
+			{/* Tooltip */}
+			{tooltip && (
+				<g pointerEvents="none">
+					<text
+						ref={tooltipTextRef}
+						x={tooltip.x + 18}
+						y={tooltip.y - 6}
+						fontSize={13}
+						fill="#fff"
+						fontWeight={500}
+						style={{ visibility: 'hidden' }}
+					>
+						{tooltip.text}
+					</text>
+					{tooltipDims.width > 0 && (
+						<rect
+							x={tooltip.x + 10}
+							y={tooltip.y - 24}
+							width={tooltipDims.width + 16}
+							height={tooltipDims.height + 10}
+							rx={5}
+							fill="#111827"
+							opacity={0.92}
+						/>
+					)}
+					<text
+						x={tooltip.x + 18}
+						y={tooltip.y - 6}
+						fontSize={13}
+						fill="#fff"
+						fontWeight={500}
+					>
+						{tooltip.text}
+					</text>
+				</g>
+			)}
+		</svg>
+	)
+}
+
+export default SvgBarChart

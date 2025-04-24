@@ -1,9 +1,9 @@
-import React, { type ReactElement, useEffect, useMemo } from 'react'
+import { type ReactElement, useEffect, useMemo } from 'react'
 
 import ValidationErrorWindow from '@/components/admin/modify/ui/ValidationErrorWindow'
 import { type InlineValidation } from '@/types/frontendDataTypes'
 
-const EditableField = ({
+const InlineValidationField = ({
 	fieldName,
 	validations,
 	onValidationChange
@@ -40,4 +40,4 @@ const EditableField = ({
 	)
 }
 
-export default EditableField
+export default InlineValidationField

@@ -1,4 +1,4 @@
-import React, { type ReactElement, useCallback } from 'react'
+import { type ReactElement, useCallback } from 'react'
 
 import QuantityAdjuster from '@/components/kiosk/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'

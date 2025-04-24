@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, type ReactNode, useEffect, useState, useCallback } from 'react'
+import { type ReactElement, type ReactNode, useEffect, useState, useCallback } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
 import { AdminImages } from '@/lib/images'
@@ -23,7 +23,7 @@ const EditingControls = ({
 }): ReactElement => {
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent): void => {
-			if (!isEditing) return
+			if (!isEditing) { return }
 
 			if (event.key === 'Escape' && canClose) {
 				handleUndoEdit()
@@ -249,7 +249,7 @@ const EntityCard = ({
 	}
 
 	return (
-		<div className="border rounded-lg bg-white hover:bg-gray-50 w-full shadow-sm relative">
+		<div className="border border-gray-200 rounded-lg bg-white hover:bg-gray-50 w-full relative">
 			<div className="flex justify-between items-center p-1">
 				<div className="flex items-center gap-3">
 					{isActive !== undefined && onToggleActivity != null && (

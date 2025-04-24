@@ -1,9 +1,9 @@
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 
 import Product from '@/components/kiosk/select/Product'
 import ScrollIndicator from '@/components/kiosk/select/ScrollIndicator'
-import { isCurrentTimeInLocalOrderWindow } from '@/lib/timeUtils'
+import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 
@@ -25,7 +25,7 @@ const ProductCatalog = ({
 			products.reduce(
 				(acc, product) => ({
 					...acc,
-					[product._id]: isCurrentTimeInLocalOrderWindow(product.orderWindow)
+					[product._id]: isCurrentTimeInOrderWindow(product.orderWindow)
 				}),
 				{}
 			)
@@ -40,7 +40,7 @@ const ProductCatalog = ({
 	useInterval(updateProductAvailabilities, 1000 * 10) // Update product availabilities every 10 seconds
 
 	const checkScrollIndicator = (): void => {
-		if (containerRef.current === null) return
+		if (containerRef.current === null) { return }
 
 		const {
 			scrollTop,

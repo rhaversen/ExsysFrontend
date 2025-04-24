@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 const ViewSelectionBar = <T extends string>({
 	subLevel,

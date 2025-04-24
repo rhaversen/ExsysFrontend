@@ -24,16 +24,16 @@ function measureTextWidth (text: string, font: string): number {
 	}
 	const canvas = fn._canvas
 	const context = canvas.getContext('2d')
-	if (context == null) return 0
+	if (context == null) { return 0 }
 	context.font = font
 	return context.measureText(text).width
 }
 
 function getBarSegments (from: number, to: number): Array<{ start: number, end: number }> {
-	if (from === to) return []
+	if (from === to) { return [] }
 	// no wrap if ending exactly at midnight
-	if (to === 0) return [{ start: from, end: 1440 }]
-	if (from < to) return [{ start: from, end: to }]
+	if (to === 0) { return [{ start: from, end: 1440 }] }
+	if (from < to) { return [{ start: from, end: to }] }
 	return [
 		{ start: from, end: 1440 },
 		{ start: 0, end: to }
@@ -70,7 +70,7 @@ const Axis: React.FC<{
 	labelY: number
 	timelineWidth: number
 	rowCount: number
-}> = ({ yOffset, tickDir, labelY, timelineWidth, rowCount }) => (
+}> = ({ yOffset, tickDir, labelY, timelineWidth }) => (
 	<g transform={`translate(${AXIS_HOURS[0] /* placeholder, parent translate applied */},${yOffset})`} className="select-none">
 		<line x1={0} y1={0} x2={timelineWidth} y2={0} stroke="#cbd5e0" strokeWidth={1} />
 		{AXIS_HOURS.map(hour => {
@@ -144,7 +144,7 @@ const ProductTimelineRow: React.FC<ProductTimelineRowProps> = ({
 				x={0} y={y}
 				width={labelWidth + timelineWidth + 40}
 				height={ROW_HEIGHT}
-				className={idx % 2 === 0 ? 'fill-gray-50' : 'fill-white'}
+				className={idx % 2 === 0 ? 'fill-gray-100/50' : 'fill-gray-200/50'}
 			/>
 			{/* per‐row grid */}
 			{AXIS_HOURS.map(hour => {
@@ -186,7 +186,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [hovered, setHovered] = useState<null | { name: string, from: number, to: number, y: number, x: number }>(null)
 	const labelFont = '500 15px Inter, Arial, sans-serif'
 	const maxLabelWidth = useMemo(() => {
-		if (typeof window === 'undefined') return 120
+		if (typeof window === 'undefined') { return 120 }
 		return Math.ceil(Math.max(...products.map(p => measureTextWidth(p.name, labelFont)), 0)) + 16
 	}, [products])
 	const [timelineWidth, setTimelineWidth] = useState(600)
@@ -207,7 +207,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const handleBarHover = useCallback((hover: TooltipProps | null): void => { setHovered(hover) }, [])
 
 	return (
-		<div ref={containerRef} className="overflow-visible mb-5" style={{ minHeight: height }}>
+		<div ref={containerRef} className="p-4 bg-gray-50 rounded-lg overflow-visible mb-5 w-full" style={{ minHeight: height }}>
 			{/* styled title */}
 			<h2 className="mb-5 text-lg text-gray-800">
 				{'Produkter og deres bestillingsvinduer\r'}
@@ -215,10 +215,25 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 
 			{/* SVG frame with background & rounded corners */}
 			<svg
-				width={maxLabelWidth + timelineWidth + 40}
+				width="100%"
 				height={height}
-				className="block select-none overflow-visible"
+				viewBox={`0 0 ${maxLabelWidth + timelineWidth + 40} ${height}`}
+				className="block select-none overflow-visible w-full"
 			>
+				{/* Define a clipPath for rounded corners around the rows */}
+				<defs>
+					<clipPath id="rowsClip">
+						<rect
+							x={0}
+							y={PADDING}
+							width={maxLabelWidth + timelineWidth + 40}
+							height={products.length * ROW_HEIGHT}
+							rx={16}
+							ry={16}
+						/>
+					</clipPath>
+				</defs>
+
 				{/* top axis */}
 				<g transform={`translate(${maxLabelWidth},${PADDING})`}>
 					<Axis
@@ -227,15 +242,17 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 					/>
 				</g>
 
-				{/* rows */}
-				{products.map((p, idx) => (
-					<ProductTimelineRow
-						key={p._id} product={p} idx={idx}
-						timelineWidth={timelineWidth}
-						labelWidth={maxLabelWidth}
-						onBarHover={handleBarHover}
-					/>
-				))}
+				{/* rows with rounded corners using clipPath */}
+				<g clipPath="url(#rowsClip)">
+					{products.map((p, idx) => (
+						<ProductTimelineRow
+							key={p._id} product={p} idx={idx}
+							timelineWidth={timelineWidth}
+							labelWidth={maxLabelWidth}
+							onBarHover={handleBarHover}
+						/>
+					))}
+				</g>
 
 				{/* bottom axis */}
 				<g transform={`translate(${maxLabelWidth},${PADDING + products.length * ROW_HEIGHT})`}>

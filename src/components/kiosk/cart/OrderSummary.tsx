@@ -1,4 +1,4 @@
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import Item from '@/components/kiosk/cart/Item'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'

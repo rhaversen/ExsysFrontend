@@ -46,7 +46,7 @@ export default function ConfigProvider ({ children }: Readonly<{ children: React
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)
 
@@ -57,7 +57,7 @@ export default function ConfigProvider ({ children }: Readonly<{ children: React
 
 	// Listen for config updates
 	useEffect(() => {
-		if (socket === null) return
+		if (socket === null) { return }
 
 		const handleConfigUpdate = (updatedConfig: ConfigsType): void => {
 			setConfig(updatedConfig)

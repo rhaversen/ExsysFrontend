@@ -119,13 +119,11 @@ const SessionsView = ({
 
 		// Return sessions for a specific user
 		if (!showAll && userId !== null) {
-			if (type === 'admin') return groupedSessions.adminGroups[userId] ?? []
-			else return groupedSessions.kioskGroups[userId] ?? []
+			if (type === 'admin') { return groupedSessions.adminGroups[userId] ?? [] } else { return groupedSessions.kioskGroups[userId] ?? [] }
 		}
 
 		// Return all sessions, but we'll handle the display differently in the render
-		if (type === 'admin') return adminSessions
-		else return kioskSessions
+		if (type === 'admin') { return adminSessions } else { return kioskSessions }
 	}, [viewMode, adminSessions, kioskSessions, groupedSessions])
 
 	// Handler for sidebar item clicks
@@ -174,6 +172,7 @@ const SessionsView = ({
 					setCurrentUserId(data.userId)
 					setViewMode({ type: 'admin', userId: data.userId, showAll: false })
 				}
+				return null
 			})
 			.catch(error => { addError(error) })
 	}, [API_URL, addError])
@@ -183,15 +182,15 @@ const SessionsView = ({
 		const { type, userId, showAll } = viewMode
 
 		if (type === 'admin') {
-			if (showAll) return 'Alle Administrator Sessioner'
+			if (showAll) { return 'Alle Administrator Sessioner' }
 			if (userId != null) {
 				return userId === currentUserId
 					? 'Mine Sessioner'
 					: `Administrator: ${userMaps.adminMap[userId]?.name ?? 'Ukendt Navn'}`
 			}
 		} else {
-			if (showAll) return 'Alle Kiosk Sessioner'
-			if (userId != null) return `Kiosk: ${userMaps.kioskMap[userId]?.name ?? 'Ukendt navn'}`
+			if (showAll) { return 'Alle Kiosk Sessioner' }
+			if (userId != null) { return `Kiosk: ${userMaps.kioskMap[userId]?.name ?? 'Ukendt navn'}` }
 		}
 
 		return ''
@@ -206,7 +205,7 @@ const SessionsView = ({
 
 	// Sort sessions by lastActivity to suggest which one to keep
 	const sortedKioskSessions = useMemo(() => {
-		if (!showKioskMultipleSessionsWarning || viewMode.userId === null) return []
+		if (!showKioskMultipleSessionsWarning || viewMode.userId === null) { return [] }
 
 		return [...(groupedSessions.kioskGroups[viewMode.userId] ?? [])]
 			.sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime())
@@ -308,8 +307,8 @@ const SessionsView = ({
 	return (
 		<div className="flex flex-col md:flex-row">
 			{/* Sidebar */}
-			<div className="w-full md:w-64 bg-gray-100 rounded-lg shadow-md overflow-y-auto md:mr-6 self-start mt-2 ml-2">
-				<div className="mb-6 border-b pb-4 px-4 pt-4">
+			<div className="w-full md:w-64 bg-gray-100 md:rounded-lg shadow-md overflow-y-auto md:mr-6 self-start md:mt-2 md:ml-2">
+				<div className="mb-6 border-b border-gray-300 pb-4 px-4 pt-4">
 					<SessionGroup
 						title="Administratorer"
 						type="admin"

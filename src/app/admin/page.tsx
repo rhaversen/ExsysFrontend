@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
 import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
@@ -14,8 +14,22 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
+
+const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
+	href: string
+	icon: React.ElementType
+	text: string
+	bgColor: string
+	hoverBgColor: string
+}): ReactElement => (
+	<Link href={href} className="flex justify-center">
+		<div className={`w-3/4 md:w-full flex flex-row gap-2 md:flex-col items-center justify-center py-3 md:py-6 ${bgColor} ${hoverBgColor} text-white rounded-lg transition transform hover:scale-105 shadow-md h-full`}>
+			<Icon className="w-7 h-7 md:w-12 md:h-12" />
+			<span className="text-lg font-medium text-center">{text}</span>
+		</div>
+	</Link>
+)
 
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -27,17 +41,6 @@ export default function Page (): ReactElement | null {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
-
-	// Process product data
-	const processProductData = (product: ProductType): ProductType => ({
-		...product,
-		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
-	})
-
-	// Process all products data
-	const processProductsData = useCallback((productsData: ProductType[]): ProductType[] => {
-		return productsData.map(processProductData)
-	}, [])
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
 		try {
@@ -93,12 +96,12 @@ export default function Page (): ReactElement | null {
 	const fetchProducts = useCallback(async (): Promise<void> => {
 		try {
 			const response = await axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true })
-			const processedProducts = processProductsData(response.data)
+			const processedProducts = response.data
 			setProducts(processedProducts)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, addError, processProductsData])
+	}, [API_URL, addError])
 
 	useEffect(() => {
 		setHasMounted(true)
@@ -109,7 +112,7 @@ export default function Page (): ReactElement | null {
 	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
 
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) return
+		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) { return }
 		const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL)
 		setSocket(socketInstance)
 		return () => { socketInstance.disconnect() }
@@ -130,16 +133,14 @@ export default function Page (): ReactElement | null {
 		'product',
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				return prev.some(p => p._id === updated._id)
-					? prev.map(p => (p._id === updated._id ? updated : p))
-					: [...prev, updated]
+				return prev.some(p => p._id === item._id)
+					? prev.map(p => (p._id === item._id ? item : p))
+					: [...prev, item]
 			})
 		},
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				return prev.map(p => (p._id === updated._id ? updated : p))
+				return prev.map(p => (p._id === item._id ? item : p))
 			})
 		},
 		id => {
@@ -147,11 +148,11 @@ export default function Page (): ReactElement | null {
 		}
 	)
 
-	if (!hasMounted) return null
+	if (!hasMounted) { return null }
 
 	return (
-		<main className="p-8 flex flex-col items-center">
-			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl xl:max-w-6xl">
+		<main className="p-0 pt-2 md:p-8 flex flex-col items-center">
+			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-3 sm:p-6 w-full max-w-3xl xl:max-w-[90rem]">
 				<p className="text-3xl font-bold text-gray-800">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
@@ -170,24 +171,27 @@ export default function Page (): ReactElement | null {
 						</div>
 						{/* Task selection buttons */}
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-							<Link href="/admin/kitchen" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<GiCookingPot className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Se bestillinger'}</span>
-								</div>
-							</Link>
-							<Link href="/admin/modify" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<FaEdit className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Rediger opsætning'}</span>
-								</div>
-							</Link>
-							<Link href="/admin/statistics" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<FaChartBar className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Se statistik'}</span>
-								</div>
-							</Link>
+							<AdminLinkButton
+								href="/admin/kitchen"
+								icon={GiCookingPot}
+								text="Se bestillinger"
+								bgColor="bg-blue-500"
+								hoverBgColor="hover:bg-blue-600"
+							/>
+							<AdminLinkButton
+								href="/admin/modify"
+								icon={FaEdit}
+								text="Rediger opsætning"
+								bgColor="bg-green-500"
+								hoverBgColor="hover:bg-green-600"
+							/>
+							<AdminLinkButton
+								href="/admin/statistics"
+								icon={FaChartBar}
+								text="Se statistik"
+								bgColor="bg-purple-500"
+								hoverBgColor="hover:bg-purple-600"
+							/>
 						</div>
 						{/* Kiosk Refresh Component */}
 						<KioskRefresh />

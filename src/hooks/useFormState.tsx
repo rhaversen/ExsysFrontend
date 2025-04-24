@@ -2,9 +2,9 @@ import cloneDeep from 'lodash/cloneDeep'
 import set from 'lodash/set'
 import { useCallback, useEffect, useState } from 'react'
 
-const useFormState = <T extends Record<string, any>> (initialState: T, isEditing: boolean): {
+const useFormState = <T extends object>(initialState: T, isEditing: boolean): {
 	formState: T
-	handleFieldChange: (path: string, value: any) => void
+	handleFieldChange: (path: string, value: unknown) => void
 	handleValidationChange: (fieldName: string, isValid: boolean) => void
 	resetFormState: () => void
 	formIsValid: boolean
@@ -24,7 +24,7 @@ const useFormState = <T extends Record<string, any>> (initialState: T, isEditing
 		}
 	}, [initialState, isEditing])
 
-	const handleFieldChange = useCallback((path: string, value: any) => {
+	const handleFieldChange = useCallback((path: string, value: unknown) => {
 		setFormState(prevState => {
 			const newState = cloneDeep(prevState)
 			set(newState, path, value)
