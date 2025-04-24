@@ -48,13 +48,18 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 
 	// Map data to SVG coordinates
 	const points = data.map((d, i) => {
-		const x = paddingLeft + (i * graphWidth) / (data.length - 1)
+		// When there's only one data point, place it in the middle
+		const x = data.length === 1
+			? paddingLeft + graphWidth / 2
+			: paddingLeft + (i * graphWidth) / (data.length - 1)
 		const y = paddingTop + graphHeight - ((d - minY) / yRange) * graphHeight
 		return [x, y]
 	})
 
 	// Build SVG path
-	const path = points.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ')
+	const path = data.length === 1
+		? `M${points[0][0]},${points[0][1]}`
+		: points.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ')
 
 	// Y axis ticks
 	const yTicks = 5
@@ -119,7 +124,10 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 					i !== labels.length - 1 &&
 					(i % xTickInterval !== 0 || i > labels.length - 1 - xTickInterval)
 				) { return null }
-				const x = paddingLeft + (i * graphWidth) / (labels.length - 1)
+				// When there's only one data point, place it in the middle
+				const x = data.length === 1
+					? paddingLeft + graphWidth / 2
+					: paddingLeft + (i * graphWidth) / (labels.length - 1)
 				return (
 					<text key={i} x={x} y={height - paddingBottom / 2} fontSize={11} textAnchor="middle" fill="#6b7280">
 						{lbl}
