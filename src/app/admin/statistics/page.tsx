@@ -32,8 +32,9 @@ function getAllDaysInCurrentMonth (): string[] {
 	const daysInMonth = new Date(year, month + 1, 0).getDate()
 	const arr: string[] = []
 	for (let d = 1; d <= daysInMonth; d++) {
-		const date = new Date(year, month, d)
-		arr.push(date.toISOString().slice(0, 10))
+		const mm = String(month + 1).padStart(2, '0')
+		const dd = String(d).padStart(2, '0')
+		arr.push(`${year}-${mm}-${dd}`)
 	}
 	return arr
 }
