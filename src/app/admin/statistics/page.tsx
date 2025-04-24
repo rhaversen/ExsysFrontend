@@ -12,7 +12,7 @@ import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import type { OrderType, ProductType, OptionType, ActivityType, RoomType } from '@/types/backendDataTypes'
+import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
 
 const getLast30Days = () => {
 	const days: string[] = []
@@ -63,11 +63,12 @@ export default function Page (): ReactElement {
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [loading, setLoading] = useState(true)
 	const [socket, setSocket] = useState<Socket | null>(null)
 	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
 	const [orderSort, setOrderSort] = useState<{
-		field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'products' | 'total',
+		field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'kiosk' | 'products' | 'total',
 		direction: 'asc' | 'desc'
 	}>({ field: 'createdAt', direction: 'desc' })
 
@@ -103,8 +104,7 @@ export default function Page (): ReactElement {
 		item => setOptions(prev => prev.map(o => o._id === item._id ? item : o)),
 		id => setOptions(prev => prev.filter(o => o._id !== id))
 	)
-
-	// Additional socket listeners for activities and rooms
+	// Listen for activity CUD events
 	useEntitySocketListeners<ActivityType>(
 		socket,
 		'activity',
@@ -112,13 +112,21 @@ export default function Page (): ReactElement {
 		item => setActivities(prev => prev.map(a => a._id === item._id ? item : a)),
 		id => setActivities(prev => prev.filter(a => a._id !== id))
 	)
-
+	// Listen for room CUD events
 	useEntitySocketListeners<RoomType>(
 		socket,
 		'room',
 		item => setRooms(prev => prev.some(r => r._id === item._id) ? prev : [...prev, item]),
 		item => setRooms(prev => prev.map(r => r._id === item._id ? item : r)),
 		id => setRooms(prev => prev.filter(r => r._id !== id))
+	)
+	// Listen for kiosk CUD events
+	useEntitySocketListeners<KioskType>(
+		socket,
+		'kiosk',
+		item => setKiosks(prev => prev.some(k => k._id === item._id) ? prev : [...prev, item]),
+		item => setKiosks(prev => prev.map(k => k._id === item._id ? item : k)),
+		id => setKiosks(prev => prev.filter(k => k._id !== id))
 	)
 
 	useEffect(() => {
@@ -137,7 +145,7 @@ export default function Page (): ReactElement {
 				fromDate.setHours(0, 0, 0, 0)
 				toDate.setHours(23, 59, 59, 999)
 
-				const [ordersRes, productsRes, optionsRes, activitiesRes, roomsRes] = await Promise.all([
+				const [ordersRes, productsRes, optionsRes, activitiesRes, roomsRes, kiosksRes] = await Promise.all([
 					axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
 						params: {
 							fromDate: fromDate.toISOString(),
@@ -148,13 +156,15 @@ export default function Page (): ReactElement {
 					axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
 					axios.get<OptionType[]>(`${API_URL}/v1/options`, { withCredentials: true }),
 					axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
-					axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true })
+					axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+					axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true })
 				])
 				setOrders(ordersRes.data)
 				setProducts(productsRes.data)
 				setOptions(optionsRes.data)
 				setActivities(activitiesRes.data)
 				setRooms(roomsRes.data)
+				setKiosks(kiosksRes.data)
 			} catch (error) {
 				addError(error)
 			} finally {
@@ -601,6 +611,22 @@ export default function Page (): ReactElement {
 											<th
 												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
 												onClick={() => setOrderSort({
+													field: 'kiosk',
+													direction: orderSort.field === 'kiosk' && orderSort.direction === 'desc' ? 'asc' : 'desc'
+												})}
+											>
+												<div className="flex items-center gap-1">
+													{'Kiosk'}
+													{orderSort.field === 'kiosk' && (
+														<span className="text-blue-600">
+															{orderSort.direction === 'desc' ? '↓' : '↑'}
+														</span>
+													)}
+												</div>
+											</th>
+											<th
+												className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors"
+												onClick={() => setOrderSort({
 													field: 'room',
 													direction: orderSort.field === 'room' && orderSort.direction === 'desc' ? 'asc' : 'desc'
 												})}
@@ -654,6 +680,12 @@ export default function Page (): ReactElement {
 													return orderSort.direction === 'desc'
 														? roomNameB.localeCompare(roomNameA)
 														: roomNameA.localeCompare(roomNameB)
+												} else if (orderSort.field === 'kiosk') {
+													const kiosNamekA = kiosks.find(k => k._id === a.kioskId)?.name ?? 'Unknown'
+													const kioskNameB = kiosks.find(k => k._id === b.kioskId)?.name ?? 'Unknown'
+													return orderSort.direction === 'desc'
+														? kioskNameB.localeCompare(kiosNamekA)
+														: kiosNamekA.localeCompare(kioskNameB)
 												} else if (orderSort.field === 'total') {
 													const totalA = getOrderTotal(a, products, options)
 													const totalB = getOrderTotal(b, products, options)
@@ -666,6 +698,7 @@ export default function Page (): ReactElement {
 											.map((order, index) => {
 												const total = getOrderTotal(order, products, options)
 												const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
+												const kioskName = kiosks.find(k => k._id === order.kioskId)?.name ?? 'Unknown'
 
 												// Calculate relative time for better understanding
 												const orderTime = new Date(order.createdAt)
@@ -749,6 +782,11 @@ export default function Page (): ReactElement {
 																	{'Leveret'}
 																</span>
 															)}
+														</td>
+														<td className="p-3">
+															<div className="truncate max-w-[100px]" title={kioskName}>
+																{kioskName}
+															</div>
 														</td>
 														<td className="p-3">
 															<div className="truncate max-w-[100px]" title={roomName}>
