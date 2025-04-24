@@ -181,13 +181,57 @@ export default function Page (): ReactElement {
 		return getLast30Days()
 	})()
 
-	const ordersByDay = days.map(day => orders.filter(o => o.createdAt.slice(0, 10) === day))
-	const salesByDay = ordersByDay.map(dayOrders => dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0))
-	const orderCountByDay = ordersByDay.map(dayOrders => dayOrders.length)
-	const avgOrderValueByDay = ordersByDay.map(dayOrders => dayOrders.length ? dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0) / dayOrders.length : 0)
+	// Generate hourly data for today mode
+	const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+	const today = new Date().toISOString().slice(0, 10)
+
+	// Group orders by hour for today
+	const ordersByHourToday = Array(24).fill(0).map((_, hour) => {
+		if (timeRange !== 'today') { return [] }
+
+		return orders.filter(o => {
+			const orderDate = new Date(o.createdAt)
+			return orderDate.toISOString().slice(0, 10) === today &&
+				   orderDate.getHours() === hour
+		})
+	})
+
+	// Generate data for charts based on time range
+	const [chartData, chartLabels] = (() => {
+		if (timeRange === 'today') {
+			// For today: use hourly data
+			const salesByHour = ordersByHourToday.map(hourOrders =>
+				hourOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0)
+			)
+			const orderCountByHour = ordersByHourToday.map(hourOrders => hourOrders.length)
+			const avgOrderValueByHour = ordersByHourToday.map(hourOrders =>
+				hourOrders.length ? hourOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0) / hourOrders.length : 0
+			)
+
+			return [
+				{ sales: salesByHour, orders: orderCountByHour, avgValue: avgOrderValueByHour },
+				hours
+			]
+		} else {
+			// For other views: use daily data
+			const ordersByDay = days.map(day => orders.filter(o => o.createdAt.slice(0, 10) === day))
+			const salesByDay = ordersByDay.map(dayOrders => dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0))
+			const orderCountByDay = ordersByDay.map(dayOrders => dayOrders.length)
+			const avgOrderValueByDay = ordersByDay.map(dayOrders =>
+				dayOrders.length ? dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0) / dayOrders.length : 0
+			)
+
+			return [
+				{ sales: salesByDay, orders: orderCountByDay, avgValue: avgOrderValueByDay },
+				days.map(d => dayjs(d).format('DD/MM'))
+			]
+		}
+	})()
 
 	// Key values
-	const totalSales = salesByDay.reduce((a, b) => a + b, 0)
+	const totalSales = timeRange === 'today'
+		? chartData.sales.reduce((a, b) => a + b, 0)
+		: chartData.sales.reduce((a, b) => a + b, 0)
 	const totalOrders = orders.length
 	const avgOrderValue = totalOrders ? totalSales / totalOrders : 0
 
@@ -405,25 +449,25 @@ export default function Page (): ReactElement {
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 mb-8">
 						<SvgLineGraph
-							data={salesByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Omsætning pr. dag"
+							data={chartData.sales}
+							labels={chartLabels}
+							label={`Omsætning pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 							yLabel="DKK"
 							color="#2563eb"
 							showTodayIndicator={timeRange === 'month'}
 						/>
 						<SvgLineGraph
-							data={orderCountByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Ordrer pr. dag"
+							data={chartData.orders}
+							labels={chartLabels}
+							label={`Ordrer pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 							yLabel="Antal"
 							color="#16a34a"
 							showTodayIndicator={timeRange === 'month'}
 						/>
 						<SvgLineGraph
-							data={avgOrderValueByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Gns. pris pr. ordre"
+							data={chartData.avgValue}
+							labels={chartLabels}
+							label={`Gns. pris pr. ordre ${timeRange === 'today' ? '(time)' : '(dag)'}`}
 							yLabel="DKK"
 							color="#a21caf"
 							showTodayIndicator={timeRange === 'month'}
