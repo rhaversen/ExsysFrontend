@@ -341,25 +341,25 @@ export default function Page (): ReactElement {
 				<div className="inline-flex rounded-md shadow-sm">
 					<button
 						onClick={() => setTimeRange('today')}
-						className={`px-4 py-2 text-sm font-medium rounded-l-lg border ${timeRange === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+						className={`px-4 py-2 text-sm font-medium rounded-l-lg border border-black ${timeRange === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
 					>
 						{'I dag'}
 					</button>
 					<button
 						onClick={() => setTimeRange('7days')}
-						className={`px-4 py-2 text-sm font-medium border-t border-b border-r ${timeRange === '7days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+						className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-black ${timeRange === '7days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
 					>
 						{'7 dage'}
 					</button>
 					<button
 						onClick={() => setTimeRange('30days')}
-						className={`px-4 py-2 text-sm font-medium border-t border-b border-r ${timeRange === '30days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+						className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-black ${timeRange === '30days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
 					>
 						{'30 dage'}
 					</button>
 					<button
 						onClick={() => setTimeRange('month')}
-						className={`px-4 py-2 text-sm font-medium rounded-r-lg border-t border-b border-r ${timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+						className={`px-4 py-2 text-sm font-medium rounded-r-lg border-t border-b border-r border-black ${timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
 					>
 						{'Nuværende måned'}
 					</button>
