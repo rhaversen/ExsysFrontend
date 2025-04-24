@@ -16,6 +16,21 @@ import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 
+const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
+	href: string
+	icon: React.ElementType
+	text: string
+	bgColor: string
+	hoverBgColor: string
+}): ReactElement => (
+	<Link href={href} className="flex justify-center">
+		<div className={`w-3/4 md:w-full flex flex-row gap-2 md:flex-col items-center justify-center py-3 md:py-6 ${bgColor} ${hoverBgColor} text-white rounded-lg transition transform hover:scale-105 shadow-md h-full`}>
+			<Icon className="w-7 h-7 md:w-12 md:h-12" />
+			<span className="text-lg font-medium text-center">{text}</span>
+		</div>
+	</Link>
+)
+
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -136,8 +151,8 @@ export default function Page (): ReactElement | null {
 	if (!hasMounted) { return null }
 
 	return (
-		<main className="p-8 flex flex-col items-center">
-			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-6 w-full max-w-2xl xl:max-w-6xl">
+		<main className="p-0 pt-2 md:p-8 flex flex-col items-center">
+			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-3 sm:p-6 w-full max-w-3xl xl:max-w-[90rem]">
 				<p className="text-3xl font-bold text-gray-800">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
@@ -156,24 +171,27 @@ export default function Page (): ReactElement | null {
 						</div>
 						{/* Task selection buttons */}
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-							<Link href="/admin/kitchen" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<GiCookingPot className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Se bestillinger'}</span>
-								</div>
-							</Link>
-							<Link href="/admin/modify" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<FaEdit className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Rediger opsætning'}</span>
-								</div>
-							</Link>
-							<Link href="/admin/statistics" className="w-full">
-								<div className="flex flex-col items-center justify-center py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition transform hover:scale-105 shadow-md h-full">
-									<FaChartBar className="w-12 h-12 mb-3"/>
-									<span className="text-lg font-medium text-center">{'Se statistik'}</span>
-								</div>
-							</Link>
+							<AdminLinkButton
+								href="/admin/kitchen"
+								icon={GiCookingPot}
+								text="Se bestillinger"
+								bgColor="bg-blue-500"
+								hoverBgColor="hover:bg-blue-600"
+							/>
+							<AdminLinkButton
+								href="/admin/modify"
+								icon={FaEdit}
+								text="Rediger opsætning"
+								bgColor="bg-green-500"
+								hoverBgColor="hover:bg-green-600"
+							/>
+							<AdminLinkButton
+								href="/admin/statistics"
+								icon={FaChartBar}
+								text="Se statistik"
+								bgColor="bg-purple-500"
+								hoverBgColor="hover:bg-purple-600"
+							/>
 						</div>
 						{/* Kiosk Refresh Component */}
 						<KioskRefresh />

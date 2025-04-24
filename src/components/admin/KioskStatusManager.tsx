@@ -179,11 +179,11 @@ const KioskStatusManager = ({
 	}, [API_URL])
 
 	return (
-		<div>
+		<div className='p-4 bg-gray-50 rounded-lg'>
 			<h2 className="text-lg text-gray-800">
 				{'Kiosk status og håndtering'}
 			</h2>
-			<div className="flex flex-col w-full max-w-2xl mx-auto">
+			<div className="flex flex-col w-full mx-auto">
 				{loadingSessions
 					? (
 						<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser sessions...'}</div>
@@ -196,7 +196,7 @@ const KioskStatusManager = ({
 								const statusText = getStatusText(kiosk, base)
 								const warningText = getWarningText(warning)
 								return (
-									<div key={kiosk._id} className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg">
+									<div key={kiosk._id} className="flex items-center gap-4 p-1">
 										<KioskCircle
 											warningStatus={warning}
 											isClosed={base === 'closed'}
