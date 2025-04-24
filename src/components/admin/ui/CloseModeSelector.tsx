@@ -58,7 +58,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 	const optionDetailMinHeight = 70
 
 	return (
-		<div className="flex flex-col gap-2 text-gray-700">
+		<div className="flex flex-col gap-3 text-gray-700">
 			{/* Radio buttons group with always-visible descriptions */}
 			<div className="flex flex-col gap-2">
 				<label className="flex flex-col gap-0.5">
@@ -66,21 +66,21 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 						<input type="radio" checked={mode === 'manual'} onChange={() => { setMode('manual' as Mode); setUntil(null) }} />
 						<span className="font-medium">{'Luk manuelt (indtil genåbnet manuelt)'}</span>
 					</span>
-					<span className="text-xs text-gray-500 pl-6">{modeDescriptions.manual}</span>
+					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.manual}</span>
 				</label>
 				<label className="flex flex-col gap-0.5">
 					<span className="flex items-center gap-2">
 						<input type="radio" checked={mode === 'until'} onChange={() => { setMode('until' as Mode); setUntil(dayjs().add(1, 'minute').toISOString()) }} />
 						<span className="font-medium">{'Luk indtil bestemt dato/tidspunkt'}</span>
 					</span>
-					<span className="text-xs text-gray-500 pl-6">{modeDescriptions.until}</span>
+					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.until}</span>
 				</label>
 				<label className="flex flex-col gap-0.5">
 					<span className="flex items-center gap-2">
 						<input type="radio" checked={mode === 'nextProduct'} onChange={() => { setMode('nextProduct' as Mode); setUntil(null) }} />
 						<span className="font-medium">{'Luk indtil næste produkt bliver tilgængeligt'}</span>
 					</span>
-					<span className="text-xs text-gray-500 pl-6">{modeDescriptions.nextProduct}</span>
+					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.nextProduct}</span>
 				</label>
 				{showOpenOption && (
 					<label className="flex flex-col gap-0.5">
@@ -88,13 +88,13 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 							<input type="radio" checked={mode === 'open'} onChange={() => { setMode('open' as Mode); setUntil(null) }} />
 							<span className="font-medium">{'Åbn alle kiosker'}</span>
 						</span>
-						<span className="text-xs text-gray-500 pl-6">{modeDescriptions.open}</span>
+						<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.open}</span>
 					</label>
 				)}
 			</div>
 
 			{/* Option details below radio group */}
-			<div style={{ minHeight: optionDetailMinHeight }} className="mt-2">
+			<div style={{ minHeight: optionDetailMinHeight }}>
 				{(mode === 'until' || mode === 'nextProduct') && (
 					<div className="bg-gray-50 border border-gray-200 rounded-md p-4 flex flex-col gap-2">
 						{mode === 'until' && (
@@ -137,7 +137,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 				)}
 			</div>
 
-			<div className="flex gap-4 justify-end pt-2">
+			<div className="flex gap-4 justify-end">
 				{(cancelText != null) && onCancel && (
 					<button
 						type="button"
