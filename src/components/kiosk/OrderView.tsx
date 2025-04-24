@@ -14,7 +14,8 @@ import {
 	type OptionType,
 	type OrderType,
 	type PostOrderType,
-	type ProductType
+	type ProductType,
+	PaymentStatus
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 
@@ -174,7 +175,7 @@ const OrderView = ({
 			// Listen for payment status updates related to the order
 			const handlePaymentStatusUpdated = (update: {
 				orderId: string
-				paymentStatus: 'successful' | 'failed' | 'pending'
+				paymentStatus: PaymentStatus
 			}): void => {
 				if (update.orderId === order._id) {
 					switch (update.paymentStatus) {
