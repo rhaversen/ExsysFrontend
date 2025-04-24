@@ -20,6 +20,8 @@
     "ignoreWords": [
         "chunkname",
         "tailwindcss",
-        "geist"
+        "geist",
+        "DDMM",
+        "monday"
     ]
 }
