@@ -479,13 +479,19 @@ export default function Page (): ReactElement {
 							yLabel="Antal"
 							color="#6366f1"
 						/>
-						<SvgBarChart
-							data={ordersByDayOfWeek}
-							labels={dayNames}
-							label="Ordrer fordelt på ugedag"
-							yLabel="Antal"
-							color="#f97316"
-						/>
+
+						{/* Conditionally render weekday chart */}
+						{timeRange !== 'today' && (
+							<SvgBarChart
+								data={ordersByDayOfWeek}
+								labels={dayNames}
+								label="Ordrer fordelt på ugedag"
+								yLabel="Antal"
+								color="#f97316"
+							/>
+						)}
+
+						{/* Remaining charts */}
 						<SvgBarChart
 							data={topProductsByQuantity.map(p => p[1])}
 							labels={topProductsByQuantity.map(p => p[0])}
