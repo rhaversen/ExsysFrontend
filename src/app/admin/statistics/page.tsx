@@ -751,7 +751,7 @@ export default function Page (): ReactElement {
 
 								<div className="bg-gray-50 rounded p-5 flex flex-col justify-center">
 									<h3 className="font-semibold text-lg mb-3">{'Betalingsstatus'}</h3>
-									<div className="flex gap-8">
+									<div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-8">
 										<div className="flex-1">
 											<ul className="space-y-2">
 												<li className="flex items-center justify-between">
