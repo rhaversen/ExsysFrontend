@@ -3,7 +3,7 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
+import { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
@@ -14,7 +14,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertUTCOrderWindowToLocal, getTimeStringFromLocalOrderWindowTime, isCurrentTimeInLocalOrderWindow, isKioskClosed, getNextAvailableProductTimeLocal } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, getTimeStringFromOrderWindowTime, isCurrentTimeInOrderWindow, isKioskClosedBackendState } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -58,7 +58,7 @@ export default function Page (): ReactElement {
 	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Helper function to fetch data with error handling
-	const fetchData = useCallback(async (url: string, config = {}): Promise<any> => {
+	const fetchData = useCallback(async <T,>(url: string, config = {}): Promise<T> => {
 		const response = await axios.get(url, { withCredentials: true, ...config })
 		return response.data
 	}, [])
@@ -70,29 +70,36 @@ export default function Page (): ReactElement {
 		}))
 	}, [])
 
-	// Process product data
-	const processProductData = (product: ProductType): ProductType => ({
-		...product,
-		orderWindow: convertUTCOrderWindowToLocal(product.orderWindow)
-	})
-
-	// Process all products data
-	const processProductsData = useCallback((productsData: ProductType[]): ProductType[] => {
-		return productsData.map(processProductData)
-	}, [])
-
-	const computeIsKioskClosed = useCallback((kioskData: KioskType | null, productsData: ProductType[]) => {
-		if (kioskData == null) return true
-		if (isKioskClosed(kioskData)) return true
+	// Check if the kiosk is closed based on the current time and order windows and if there are any active products
+	function isKioskClosed (
+		kioskData: KioskType | null,
+		productsData: ProductType[]
+	): boolean {
+		if (!kioskData) { return true }
+		if (isKioskClosedBackendState(kioskData)) { return true }
 		const hasAvailable = productsData.some(
-			p => p.isActive && isCurrentTimeInLocalOrderWindow(p.orderWindow)
+			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
 		return !hasAvailable
+	}
+
+	const updateKioskClosedState = useCallback((
+		kioskData: KioskType | null,
+		productsData: ProductType[]
+	) => {
+		const closed = isKioskClosed(kioskData, productsData)
+		setIsKioskClosedState(closed)
+		if (closed) {
+			setSelectedActivity(null)
+			setSelectedRoom(null)
+			setViewState('welcome')
+			setCart({ products: {}, options: {} })
+		}
 	}, [])
 
 	// Load all data
 	const initialSetup = useCallback(async (): Promise<void> => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 
 		try {
 			const [
@@ -101,41 +108,39 @@ export default function Page (): ReactElement {
 				optionsData,
 				activitiesData,
 				roomsData
-			]: [KioskType, ProductType[], OptionType[], ActivityType[], RoomType[]] = await Promise.all([
-				fetchData(`${API_URL}/v1/kiosks/me`),
-				fetchData(`${API_URL}/v1/products`),
-				fetchData(`${API_URL}/v1/options`),
-				fetchData(`${API_URL}/v1/activities`),
-				fetchData(`${API_URL}/v1/rooms`)
+			] = await Promise.all([
+				fetchData<KioskType>(`${API_URL}/v1/kiosks/me`),
+				fetchData<ProductType[]>(`${API_URL}/v1/products`),
+				fetchData<OptionType[]>(`${API_URL}/v1/options`),
+				fetchData<ActivityType[]>(`${API_URL}/v1/activities`),
+				fetchData<RoomType[]>(`${API_URL}/v1/rooms`)
 			])
 
-			const processedProducts = processProductsData(productsData)
-
-			// Process and set data
+			// Set data
 			setKiosk(kioskData)
-			setProducts(processedProducts)
+			setProducts(productsData)
 			setOptions(optionsData)
 			setActivities(activitiesData)
 			setRooms(roomsData)
 
 			// Update if kiosk is open or closed
-			setIsKioskClosedState(computeIsKioskClosed(kioskData, processedProducts))
+			updateKioskClosedState(kioskData, productsData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, processProductsData, updateCheckoutMethods, computeIsKioskClosed, addError])
+	}, [API_URL, fetchData, updateKioskClosedState, updateCheckoutMethods, addError])
 
 	// Check if the current time has any active order windows every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
+			updateKioskClosedState(kiosk, products)
 		}, 1000)
 
 		return () => { clearInterval(interval) }
-	}, [products, computeIsKioskClosed, kiosk])
+	}, [products, kiosk, updateKioskClosedState])
 
 	// Initialize on mount
 	useEffect(() => {
@@ -144,7 +149,7 @@ export default function Page (): ReactElement {
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)
 
@@ -159,24 +164,22 @@ export default function Page (): ReactElement {
 		'product',
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
+				const newProducts = prev.map(p => (p._id === item._id ? item : p))
+				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		item => {
 			setProducts(prev => {
-				const updated = processProductData(item)
-				const newProducts = prev.map(p => (p._id === updated._id ? updated : p))
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, newProducts))
+				const newProducts = prev.map(p => (p._id === item._id ? item : p))
+				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				setIsKioskClosedState(computeIsKioskClosed(kiosk, products))
+				updateKioskClosedState(kiosk, products)
 				return products
 			})
 		}
@@ -197,7 +200,7 @@ export default function Page (): ReactElement {
 		'activity',
 		activity => { setActivities(prev => [...prev, activity]) },
 		activity => {
-			if (kiosk === null) return
+			if (kiosk === null) { return }
 			// If the selected activity is no longer associated with the kiosk, deselect it
 			if (!kiosk.activities.some(a => a._id === activity._id)) {
 				setSelectedActivity(null)
@@ -228,7 +231,7 @@ export default function Page (): ReactElement {
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
-				setIsKioskClosedState(computeIsKioskClosed(kioskUpdate, products))
+				updateKioskClosedState(kioskUpdate, products)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
 				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
@@ -289,7 +292,7 @@ export default function Page (): ReactElement {
 	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
 
 	const handleProgressClick = (clickedView: ViewState): void => {
-		if (clickedView === viewState) return
+		if (clickedView === viewState) { return }
 
 		if (clickedView === 'activity' && canClickActivity) {
 			setViewState('activity')
@@ -346,8 +349,8 @@ export default function Page (): ReactElement {
 		const now = new Date()
 		return (
 			date.getFullYear() === now.getFullYear() &&
-			date.getMonth() === now.getMonth() &&
-			date.getDate() === now.getDate()
+		date.getMonth() === now.getMonth() &&
+		date.getDate() === now.getDate()
 		)
 	}
 
@@ -359,8 +362,8 @@ export default function Page (): ReactElement {
 		tomorrow.setDate(now.getDate() + 1)
 		return (
 			date.getFullYear() === tomorrow.getFullYear() &&
-			date.getMonth() === tomorrow.getMonth() &&
-			date.getDate() === tomorrow.getDate()
+		date.getMonth() === tomorrow.getMonth() &&
+		date.getDate() === tomorrow.getDate()
 		)
 	}
 
@@ -396,17 +399,21 @@ export default function Page (): ReactElement {
 					</div>
 				)
 			case 'activity':
+				if (kiosk == null) {
+					setViewState('welcome')
+					return null
+				}
 				return (
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Vælg den aktivitet du deltager i"
 						items={
 							activities
-								.filter(activity => !(kiosk?.disabledActivities?.includes(activity._id) ?? false))
+								.filter(activity => !(kiosk.disabledActivities?.includes(activity._id) ?? false))
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={activities
-							.filter(activity => kiosk?.activities.some(a => a._id === activity._id))
+							.filter(activity => kiosk.activities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onSelect={handleActivitySelect}
 					/>
@@ -490,9 +497,9 @@ export default function Page (): ReactElement {
 										})()
 										: (() => {
 											// If the kiosk is closed until the next product is available, show that date
-											const next = getNextAvailableProductTimeLocal(products)
+											const next = getNextAvailableProductOrderWindowFrom(products)
 											if (next != null) {
-												const nextProductAvailableTime = getTimeStringFromLocalOrderWindowTime(next.from)
+												const nextProductAvailableTime = getTimeStringFromOrderWindowTime(next.from)
 												return getOpeningMessage(next.date, nextProductAvailableTime)
 											}
 											return null

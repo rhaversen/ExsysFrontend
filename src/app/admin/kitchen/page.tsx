@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import RoomCol from '@/components/admin/kitchen/RoomCol'
@@ -64,7 +64,7 @@ export default function Page (): ReactElement {
 			setRooms(roomsRes.data)
 			setActivities(actsRes.data)
 			setOrders(ordersRes.data)
-		} catch (error: any) {
+		} catch (error) {
 			addError(error)
 		}
 	}, [API_URL, addError])
@@ -79,7 +79,7 @@ export default function Page (): ReactElement {
 
 	// Socket setup
 	useEffect(() => {
-		if (WS_URL == null) return
+		if (WS_URL == null) { return }
 		const s = io(WS_URL)
 		setSocket(s)
 		return () => { s.disconnect() }
@@ -87,7 +87,7 @@ export default function Page (): ReactElement {
 
 	// Listen for new orders
 	useEffect(() => {
-		if (socket == null) return
+		if (socket == null) { return }
 		const onCreated = (o: OrderType): void => { setOrders(prev => [...prev, o]) }
 		socket.on('orderCreated', onCreated)
 		return () => { socket.off('orderCreated', onCreated) }

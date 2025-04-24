@@ -1,7 +1,7 @@
 'use client'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
@@ -54,7 +54,7 @@ export default function AdminAuthProvider ({ children }: Readonly<{ children: Re
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') return
+		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)
 
@@ -67,8 +67,8 @@ export default function AdminAuthProvider ({ children }: Readonly<{ children: Re
 	useEntitySocketListeners<SessionType>(
 		socket,
 		'session',
-		(_newSession) => { /* Do nothing */ },
-		(_updatedSession) => { /* Do nothing */ },
+		() => { /* Do nothing for create */ },
+		() => { /* Do nothing for update */ },
 		(deletedSessionId) => {
 			// If the current session is deleted, log out the user
 			if (deletedSessionId === currentSession) {

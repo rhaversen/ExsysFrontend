@@ -80,7 +80,7 @@ export default function ProgressBar ({
 	}
 
 	const isMarkerActive = (markerState: string): boolean => {
-		if (viewState === 'welcome') return false
+		if (viewState === 'welcome') { return false }
 		const states = ['activity', 'room', 'order']
 		const currentIndex = states.indexOf(viewState)
 		const markerIndex = states.indexOf(markerState)
@@ -137,21 +137,21 @@ export default function ProgressBar ({
 						<ProgressButton
 							isActive={viewState === 'activity'}
 							canClick={canClickActivity}
-							onClick={() => { canClickActivity && onProgressClick('activity') }}
+							onClick={() => { if (canClickActivity) { onProgressClick('activity') } }}
 							selectedName={selectedActivity?.name}
 							label="Aktivitet"
 						/>
 						<ProgressButton
 							isActive={viewState === 'room'}
 							canClick={canClickRoom}
-							onClick={() => { canClickRoom && onProgressClick('room') }}
+							onClick={() => { if (canClickRoom) { onProgressClick('room') } }}
 							selectedName={selectedRoom?.name}
 							label="Spisested"
 						/>
 						<ProgressButton
 							isActive={viewState === 'order'}
 							canClick={canClickOrder}
-							onClick={() => { canClickOrder && onProgressClick('order') }}
+							onClick={() => { if (canClickOrder) { onProgressClick('order') } }}
 							label="Bestilling"
 						/>
 						{/* 'Hjem' on the right */}

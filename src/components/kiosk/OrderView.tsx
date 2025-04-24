@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
 import CartWindow from '@/components/kiosk/cart/CartWindow'
@@ -14,7 +14,8 @@ import {
 	type OptionType,
 	type OrderType,
 	type PostOrderType,
-	type ProductType
+	type ProductType,
+	PaymentStatus
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 
@@ -81,7 +82,8 @@ const OrderView = ({
 		// If the new quantity is less than or equal to zero, remove the item
 		if (newQuantity <= 0) {
 			const newCart = { ...cart }
-			const { [_id]: _, ...updatedItems } = newCart[type]
+			const updatedItems = { ...newCart[type] }
+			delete updatedItems[_id]
 			newCart[type] = updatedItems
 			updateCart(newCart)
 			return
@@ -103,14 +105,13 @@ const OrderView = ({
 		const availableOptionIds = new Set(options.map(o => o._id))
 
 		let updated = false
-		let newProducts = { ...cart.products }
-		let newOptions = { ...cart.options }
+		const newProducts = { ...cart.products }
+		const newOptions = { ...cart.options }
 
 		// Check products
 		Object.keys(newProducts).forEach(id => {
 			if (!availableProductIds.has(id)) {
-				const { [id]: _, ...rest } = newProducts
-				newProducts = rest
+				delete newProducts[id]
 				updated = true
 			}
 		})
@@ -118,8 +119,7 @@ const OrderView = ({
 		// Check options
 		Object.keys(newOptions).forEach(id => {
 			if (!availableOptionIds.has(id)) {
-				const { [id]: _, ...rest } = newOptions
-				newOptions = rest
+				delete newOptions[id]
 				updated = true
 			}
 		})
@@ -162,6 +162,7 @@ const OrderView = ({
 				} else {
 					setOrderStatus('awaitingPayment')
 				}
+				return null
 			})
 			.catch(error => {
 				addError(error)
@@ -174,7 +175,7 @@ const OrderView = ({
 			// Listen for payment status updates related to the order
 			const handlePaymentStatusUpdated = (update: {
 				orderId: string
-				paymentStatus: 'successful' | 'failed' | 'pending'
+				paymentStatus: PaymentStatus
 			}): void => {
 				if (update.orderId === order._id) {
 					switch (update.paymentStatus) {
@@ -205,7 +206,7 @@ const OrderView = ({
 	}, [socket, order, addError])
 
 	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
 		// Initialize WebSocket connection
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)

@@ -26,7 +26,7 @@ export interface InlineValidation {
 
 export interface UpdatedOrderType {
 	_id: OrderType['_id']
-	status: 'pending' | 'confirmed' | 'delivered'
+	status: OrderType['status']
 }
 
 // Order Station

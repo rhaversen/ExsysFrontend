@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import SubmitButton from '@/components/ui/SubmitButton'
@@ -40,7 +40,7 @@ const OrderConfirmationWindow = ({
 	}, [])
 
 	useEffect(() => {
-		if (!canClose || orderStatus === 'awaitingPayment') return
+		if (!canClose || orderStatus === 'awaitingPayment') { return }
 		const timeoutId = setTimeout(() => {
 			onClose()
 		}, autoCloseMs)

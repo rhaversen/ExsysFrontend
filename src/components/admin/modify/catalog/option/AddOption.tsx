@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Image from 'next/image'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import EditableField from '@/components/admin/modify/ui/EditableField'
 import EditableImage from '@/components/admin/modify/ui/EditableImage'
@@ -49,22 +49,22 @@ const AddOption = ({
 		})
 	}, [])
 
-	const postOption = useCallback((option: PostOptionType): void => {
-		axios.post(API_URL + '/v1/options', option, { withCredentials: true }).then((response) => {
+	const postOption = useCallback(async (option: PostOptionType): Promise<void> => {
+		try {
+			const response = await axios.post(API_URL + '/v1/options', option, { withCredentials: true })
 			const optionId = response.data._id
 			// Update each selected product to include the new option
-			Promise.all(selectedProducts.map(async product => {
+			await Promise.all(selectedProducts.map(async product => {
 				const updatedOptions = [...product.options.map(o => o._id), optionId]
 				await axios.patch(API_URL + `/v1/products/${product._id}`, {
 					...product,
 					options: updatedOptions
 				}, { withCredentials: true })
 			}))
-				.then(() => { onClose() })
-				.catch(error => { addError(error) })
-		}).catch((error) => {
+			onClose()
+		} catch (error) {
 			addError(error)
-		})
+		}
 	}, [API_URL, onClose, addError, selectedProducts])
 
 	const handleNameChange = useCallback((v: string): void => {
@@ -102,7 +102,7 @@ const AddOption = ({
 	}, [onClose])
 
 	const handleAdd = useCallback((): void => {
-		if (!formIsValid) return
+		if (!formIsValid) { return }
 		postOption(option)
 	}, [option, postOption, formIsValid])
 

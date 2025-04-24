@@ -22,7 +22,7 @@ const SortingControl = ({
 					{'Sorter efter:\r'}
 				</label>
 				<select
-					className="rounded-md px-3 py-1.5 border bg-white cursor-pointer text-black text-sm"
+					className="rounded-md px-3 py-1.5 border border-gray-300 bg-white cursor-pointer text-black text-sm"
 					onChange={(e) => { onSortFieldChange(e.target.value) }}
 					value={currentField}
 					title="Sorteringsfelt"
@@ -39,7 +39,7 @@ const SortingControl = ({
 					{'Retning:\r'}
 				</label>
 				<select
-					className="rounded-md px-3 py-1.5 border bg-white cursor-pointer text-black text-sm"
+					className="rounded-md px-3 py-1.5 border border-gray-300 bg-white cursor-pointer text-black text-sm"
 					onChange={(e) => { onSortDirectionChange(e.target.value as 'asc' | 'desc') }}
 					value={currentDirection}
 					title="Sorteringsretning"

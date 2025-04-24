@@ -9,7 +9,6 @@ import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { convertUTCOrderWindowToLocal } from '@/lib/timeUtils'
 import {
 	type ActivityType,
 	type AdminType,
@@ -68,12 +67,7 @@ export default function Page (): ReactElement {
 				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
 			])
 
-			const productsData = productsResponse.data
-			// Convert orderWindow to local time for all products
-			productsData.forEach((product) => {
-				product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
-			})
-			setProducts(productsData)
+			setProducts(productsResponse.data)
 			setOptions(optionsResponse.data)
 			setRooms(roomsResponse.data)
 			setActivities(activitiesResponse.data)
@@ -81,7 +75,7 @@ export default function Page (): ReactElement {
 			setAdmins(adminsResponse.data)
 			setReaders(readersResponse.data)
 			setSessions(sessionsResponse.data)
-		} catch (error: any) {
+		} catch (error) {
 			addError(error)
 		}
 	}, [API_URL, addError])
@@ -106,7 +100,7 @@ export default function Page (): ReactElement {
 			(item: T) => {
 				setState((prevItems) => {
 					const index = prevItems.findIndex((i) => i._id === item._id)
-					if (index === -1) return prevItems
+					if (index === -1) { return prevItems }
 					const newItems = [...prevItems]
 					newItems[index] = item
 					return newItems
@@ -236,17 +230,13 @@ export default function Page (): ReactElement {
 		}, [setActivities, setRooms]
 	)
 
-	// Products with preprocessing
+	// Products
 	useEntitySocketListeners<ProductType>(
 		socket,
 		'product',
 		CreateAddHandler<ProductType>(setProducts),
 		CreateUpdateHandler<ProductType>(setProducts),
-		CreateDeleteHandler<ProductType>(setProducts),
-		(product) => {
-			product.orderWindow = convertUTCOrderWindowToLocal(product.orderWindow)
-			return product
-		}
+		CreateDeleteHandler<ProductType>(setProducts)
 	)
 
 	// Options
@@ -314,7 +304,7 @@ export default function Page (): ReactElement {
 
 	// Fetch data on component mount
 	useEffect(() => {
-		if (hasFetchedData.current) return // Prevent double fetching
+		if (hasFetchedData.current) { return } // Prevent double fetching
 		hasFetchedData.current = true
 
 		fetchData().catch(addError)
@@ -322,7 +312,7 @@ export default function Page (): ReactElement {
 
 	// Initialize WebSocket connection
 	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') return
+		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
 		// Initialize WebSocket connection
 		const socketInstance = io(WS_URL)
 		setSocket(socketInstance)

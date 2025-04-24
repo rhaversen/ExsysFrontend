@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 import Option from '@/components/kiosk/select/Option'
 import { type OptionType } from '@/types/backendDataTypes'

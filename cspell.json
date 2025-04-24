@@ -16,5 +16,12 @@
         "package.json",
         "package-lock.json",
         "tsconfig.json"
+    ],
+    "ignoreWords": [
+        "chunkname",
+        "tailwindcss",
+        "geist",
+        "DDMM",
+        "monday"
     ]
 }

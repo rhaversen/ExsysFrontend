@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { FaDivide, FaPlus } from 'react-icons/fa'
 
 interface GenericItem {

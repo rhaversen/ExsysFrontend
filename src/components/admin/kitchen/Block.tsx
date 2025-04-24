@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
@@ -32,8 +32,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 
 	useEffect(() => {
 		const statuses = localOrders.map(o => o.status)
-		if (statuses.every(s => s === 'delivered')) setBlockStatus('delivered')
-		else if (statuses.every(s => s === 'confirmed' || s === 'delivered')) {
+		if (statuses.every(s => s === 'delivered')) { setBlockStatus('delivered') } else if (statuses.every(s => s === 'confirmed' || s === 'delivered')) {
 			setBlockStatus('confirmed')
 		} else {
 			setBlockStatus('pending')
@@ -67,8 +66,8 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 				status
 			}, { withCredentials: true })
 			onUpdatedOrders(response.data)
-		} catch (err: any) {
-			addError(err)
+		} catch (error) {
+			addError(error)
 		}
 	}, [API_URL, localOrders, onUpdatedOrders, addError])
 
