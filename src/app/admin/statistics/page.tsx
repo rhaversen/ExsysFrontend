@@ -414,35 +414,35 @@ export default function Page (): ReactElement {
 			{!loading && (
 				<>
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-						<div className="bg-blue-50 rounded p-3">
+						<div className="bg-blue-50 rounded p-3" title="Total omsætning for den valgte periode">
 							<div className="text-xs text-blue-700">{'Omsætning'}</div>
 							<div className="text-xl font-bold">{totalSalesDisplay}</div>
 						</div>
-						<div className="bg-green-50 rounded p-3">
+						<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
 							<div className="text-xs text-green-700">{'Antal ordrer'}</div>
 							<div className="text-xl font-bold">{totalOrders}</div>
 						</div>
-						<div className="bg-purple-50 rounded p-3">
+						<div className="bg-purple-50 rounded p-3" title="Gennemsnitlig beløb pr. bestilling">
 							<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
 							<div className="text-xl font-bold">{avgOrderValueDisplay}</div>
 						</div>
-						<div className="bg-amber-50 rounded p-3">
+						<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
 							<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
 							<div className="text-xl font-bold">{mostSoldProduct}</div>
 						</div>
-						<div className="bg-indigo-50 rounded p-3">
+						<div className="bg-indigo-50 rounded p-3" title="Gennemsnitligt antal produkter i hver bestilling">
 							<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
 							<div className="text-xl font-bold">{avgProductsDisplay}</div>
 						</div>
-						<div className="bg-rose-50 rounded p-3">
+						<div className="bg-rose-50 rounded p-3" title="Tidspunktet med flest bestillinger (time og ugedag)">
 							<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
 							<div className="text-xl font-bold">{busiestTimeDisplay}</div>
 						</div>
-						<div className="bg-teal-50 rounded p-3">
+						<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
 							<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
 							<div className="text-xl font-bold">{deliveryPercentDisplay}</div>
 						</div>
-						<div className="bg-cyan-50 rounded p-3">
+						<div className="bg-cyan-50 rounded p-3" title="Lokalet med flest bestillinger (med antal)">
 							<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
 							<div className="text-xl font-bold">{busiestRoom}</div>
 						</div>
