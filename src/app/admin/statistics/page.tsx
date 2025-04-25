@@ -1,69 +1,55 @@
 'use client'
 
 import axios from 'axios'
-import dayjs from 'dayjs'
-import { type ReactElement } from 'react'
-import { useEffect, useState } from 'react'
+import { type ReactElement, useState, useEffect, useMemo, useRef } from 'react'
+import { FiClock, FiDollarSign, FiPackage, FiBarChart2, FiCalendar, FiShoppingCart, FiUsers } from 'react-icons/fi'
 import { io, type Socket } from 'socket.io-client'
 
+import OrdersTable from '@/components/admin/statistics/OrdersTable'
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
 import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import type { OrderType, ProductType, OptionType, ActivityType, RoomType } from '@/types/backendDataTypes'
+import useStatisticsData from '@/hooks/useStatisticsData'
+import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
 
-const getLast30Days = () => {
-	const days: string[] = []
-	const today = new Date()
-	for (let i = 29; i >= 0; i--) {
-		const d = new Date(today)
-		d.setDate(today.getDate() - i)
-		days.push(d.toISOString().slice(0, 10))
-	}
-	return days
-}
-
-// Helper to get all days in current month as ISO strings
-function getAllDaysInCurrentMonth (): string[] {
-	const today = new Date()
-	const year = today.getFullYear()
-	const month = today.getMonth()
-	const daysInMonth = new Date(year, month + 1, 0).getDate()
-	const arr: string[] = []
-	for (let d = 1; d <= daysInMonth; d++) {
-		const date = new Date(year, month, d)
-		arr.push(date.toISOString().slice(0, 10))
-	}
-	return arr
-}
-
-// Helper to calculate order total
-function getOrderTotal (order: OrderType, products: ProductType[], options: OptionType[]): number {
-	let total = 0
-	for (const p of order.products) {
-		const prod = products.find(prod => prod._id === p._id)
-		if (prod) { total += prod.price * p.quantity }
-	}
-	for (const o of order.options) {
-		const opt = options.find(opt => opt._id === o._id)
-		if (opt) { total += opt.price * o.quantity }
-	}
-	return total
-}
+type StatSection = 'overview' | 'sales' | 'products' | 'customers' | 'time' | 'orders';
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 	const { addError } = useError()
+
+	const [activeSection, setActiveSection] = useState<StatSection>('overview')
+	const [clickedSection, setClickedSection] = useState<StatSection | null>(null)
+	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
+	const [currentTime, setCurrentTime] = useState<Date>(new Date())
+
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [loading, setLoading] = useState(true)
 	const [socket, setSocket] = useState<Socket | null>(null)
-	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
+
+	// Section refs for scroll/active section logic
+	const overviewRef = useRef<HTMLDivElement>(null)
+	const salesRef = useRef<HTMLDivElement>(null)
+	const productsRef = useRef<HTMLDivElement>(null)
+	const customersRef = useRef<HTMLDivElement>(null)
+	const timeRef = useRef<HTMLDivElement>(null)
+	const ordersRef = useRef<HTMLDivElement>(null)
+	const sectionRefs = useMemo(() => ({
+		overview: overviewRef,
+		sales: salesRef,
+		products: productsRef,
+		customers: customersRef,
+		time: timeRef,
+		orders: ordersRef
+	}), [overviewRef, salesRef, productsRef, customersRef, timeRef, ordersRef])
 
 	// Setup websocket connection
 	useEffect(() => {
@@ -73,7 +59,7 @@ export default function Page (): ReactElement {
 		return () => { socketInstance.disconnect() }
 	}, [WS_URL])
 
-	// Listen for order CUD events
+	// Listen for CUD events
 	useEntitySocketListeners<OrderType>(
 		socket,
 		'order',
@@ -81,7 +67,6 @@ export default function Page (): ReactElement {
 		order => setOrders(prev => prev.map(o => o._id === order._id ? order : o)),
 		id => setOrders(prev => prev.filter(o => o._id !== id))
 	)
-	// Listen for product CUD events
 	useEntitySocketListeners<ProductType>(
 		socket,
 		'product',
@@ -89,7 +74,6 @@ export default function Page (): ReactElement {
 		item => setProducts(prev => prev.map(p => p._id === item._id ? item : p)),
 		id => setProducts(prev => prev.filter(p => p._id !== id))
 	)
-	// Listen for option CUD events
 	useEntitySocketListeners<OptionType>(
 		socket,
 		'option',
@@ -97,8 +81,6 @@ export default function Page (): ReactElement {
 		item => setOptions(prev => prev.map(o => o._id === item._id ? item : o)),
 		id => setOptions(prev => prev.filter(o => o._id !== id))
 	)
-
-	// Additional socket listeners for activities and rooms
 	useEntitySocketListeners<ActivityType>(
 		socket,
 		'activity',
@@ -106,7 +88,6 @@ export default function Page (): ReactElement {
 		item => setActivities(prev => prev.map(a => a._id === item._id ? item : a)),
 		id => setActivities(prev => prev.filter(a => a._id !== id))
 	)
-
 	useEntitySocketListeners<RoomType>(
 		socket,
 		'room',
@@ -114,24 +95,28 @@ export default function Page (): ReactElement {
 		item => setRooms(prev => prev.map(r => r._id === item._id ? item : r)),
 		id => setRooms(prev => prev.filter(r => r._id !== id))
 	)
+	useEntitySocketListeners<KioskType>(
+		socket,
+		'kiosk',
+		item => setKiosks(prev => prev.some(k => k._id === item._id) ? prev : [...prev, item]),
+		item => setKiosks(prev => prev.map(k => k._id === item._id ? item : k)),
+		id => setKiosks(prev => prev.filter(k => k._id !== id))
+	)
 
+	// Fetch all data once on load (last 30 days)
 	useEffect(() => {
 		const fetchData = async () => {
 			setLoading(true)
 			try {
-				let fromDate = new Date()
+				const fromDate = new Date()
 				const toDate = new Date()
-				if (timeRange === '30days') {
-					fromDate.setDate(fromDate.getDate() - 29)
-				} else if (timeRange === '7days') {
-					fromDate.setDate(fromDate.getDate() - 6)
-				} else if (timeRange === 'month') {
-					fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1)
-				}
+
+				// Always fetch full 30 days of data
+				fromDate.setDate(fromDate.getDate() - 29)
 				fromDate.setHours(0, 0, 0, 0)
 				toDate.setHours(23, 59, 59, 999)
 
-				const [ordersRes, productsRes, optionsRes, activitiesRes, roomsRes] = await Promise.all([
+				const [ordersRes, productsRes, optionsRes, activitiesRes, roomsRes, kiosksRes] = await Promise.all([
 					axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
 						params: {
 							fromDate: fromDate.toISOString(),
@@ -142,13 +127,15 @@ export default function Page (): ReactElement {
 					axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
 					axios.get<OptionType[]>(`${API_URL}/v1/options`, { withCredentials: true }),
 					axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
-					axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true })
+					axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+					axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true })
 				])
 				setOrders(ordersRes.data)
 				setProducts(productsRes.data)
 				setOptions(optionsRes.data)
 				setActivities(activitiesRes.data)
 				setRooms(roomsRes.data)
+				setKiosks(kiosksRes.data)
 			} catch (error) {
 				addError(error)
 			} finally {
@@ -156,364 +143,513 @@ export default function Page (): ReactElement {
 			}
 		}
 		if (API_URL != null) { fetchData() }
-	}, [API_URL, addError, timeRange])
+	}, [API_URL, addError])
 
-	// Prepare data for the selected range
-	const days = (() => {
-		if (timeRange === 'month') {
-			return getAllDaysInCurrentMonth()
+	// Update current time every minute
+	useEffect(() => {
+		const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+		return () => clearInterval(timer)
+	}, [])
+
+	// Filter orders based on selected time range
+	const filteredOrders = useMemo(() => {
+		if (orders.length === 0) { return [] }
+		const now = new Date()
+		let fromDate = new Date()
+		if (timeRange === '30days') {
+			fromDate.setDate(fromDate.getDate() - 29)
+		} else if (timeRange === '7days') {
+			fromDate.setDate(fromDate.getDate() - 6)
+		} else if (timeRange === 'month') {
+			fromDate = new Date(now.getFullYear(), now.getMonth(), 1)
+		} else if (timeRange === 'today') {
+			fromDate.setHours(0, 0, 0, 0)
 		}
-		if (timeRange === 'today') {
-			const today = new Date()
-			return [today.toISOString().slice(0, 10)]
+		fromDate.setHours(0, 0, 0, 0)
+		return orders.filter(order => {
+			const orderDate = new Date(order.createdAt)
+			return orderDate >= fromDate && orderDate <= now
+		})
+	}, [orders, timeRange])
+
+	const stats = useStatisticsData({
+		orders: filteredOrders,
+		products,
+		options,
+		activities,
+		rooms,
+		kiosks,
+		timeRange
+	})
+
+	// Scroll offset to account for sticky header height
+	const SCROLL_OFFSET = 100 // set this to your header’s height
+
+	// Scroll to section when navigation item is clicked (grey until scroll lands)
+	const scrollToSection = (section: StatSection) => {
+		setClickedSection(section)
+		const element = sectionRefs[section]?.current
+		if (element != null) {
+			const top = element.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET
+			window.scrollTo({ top, behavior: 'smooth' })
+			setTimeout(() => setClickedSection(null), 500) // clear grey shortly after
 		}
-		if (timeRange === '7days') {
-			const arr: string[] = []
-			const today = new Date()
-			for (let i = 6; i >= 0; i--) {
-				const d = new Date(today)
-				d.setDate(today.getDate() - i)
-				arr.push(d.toISOString().slice(0, 10))
-			}
-			return arr
-		}
-		return getLast30Days()
-	})()
-
-	const ordersByDay = days.map(day => orders.filter(o => o.createdAt.slice(0, 10) === day))
-	const salesByDay = ordersByDay.map(dayOrders => dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0))
-	const orderCountByDay = ordersByDay.map(dayOrders => dayOrders.length)
-	const avgOrderValueByDay = ordersByDay.map(dayOrders => dayOrders.length ? dayOrders.reduce((sum, o) => sum + getOrderTotal(o, products, options), 0) / dayOrders.length : 0)
-
-	// Key values
-	const totalSales = salesByDay.reduce((a, b) => a + b, 0)
-	const totalOrders = orders.length
-	const avgOrderValue = totalOrders ? totalSales / totalOrders : 0
-
-	// Most sold product (show amount)
-	const productSales: Record<string, number> = {}
-	orders.forEach(order => {
-		order.products.forEach(p => {
-			productSales[p.name] = (productSales[p.name] || 0) + p.quantity
-		})
-	})
-	const mostSoldProductEntry = Object.entries(productSales).sort((a, b) => b[1] - a[1])[0]
-	const mostSoldProduct = mostSoldProductEntry !== undefined ? `${mostSoldProductEntry[0]} (${mostSoldProductEntry[1]})` : '-'
-
-	// Missed orders (pending or confirmed, not delivered)
-	const missedOrders = orders.filter(o => o.status === 'pending' || o.status === 'confirmed')
-
-	// Payment status breakdown
-	const paymentStatusCount = orders.reduce((acc, o) => {
-		acc[o.paymentStatus] = (acc[o.paymentStatus] || 0) + 1
-		return acc
-	}, {} as Record<OrderType['paymentStatus'], number>)
-
-	// Checkout method breakdown
-	const checkoutMethodCount = orders.reduce((acc, o) => {
-		acc[o.checkoutMethod] = (acc[o.checkoutMethod] || 0) + 1
-		return acc
-	}, {} as Record<OrderType['checkoutMethod'], number>)
-
-	// Time-based analysis - Orders by hour of day
-	const ordersByHour = Array(24).fill(0)
-	orders.forEach(order => {
-		const hour = new Date(order.createdAt).getHours()
-		ordersByHour[hour]++
-	})
-	const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
-
-	// Weekdays should start with Monday
-	const dayNames = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']
-	const ordersByDayOfWeek = Array(7).fill(0)
-	const salesByDayOfWeek = Array(7).fill(0)
-
-	orders.forEach(order => {
-		const jsDay = new Date(order.createdAt).getDay() // 0=Sunday, 1=Monday, ...
-		const mondayFirst = (jsDay + 6) % 7 // 0=Monday, ..., 6=Sunday
-		ordersByDayOfWeek[mondayFirst]++
-		salesByDayOfWeek[mondayFirst] += getOrderTotal(order, products, options)
-	})
-
-	// Product popularity
-	const productQuantities: Record<string, number> = {}
-	const productRevenue: Record<string, number> = {}
-
-	orders.forEach(order => {
-		order.products.forEach(p => {
-			const product = products.find(prod => prod._id === p._id)
-			if (product) {
-				productQuantities[product.name] = (productQuantities[product.name] || 0) + p.quantity
-				productRevenue[product.name] = (productRevenue[product.name] || 0) + (product.price * p.quantity)
-			}
-		})
-	})
-
-	// Get top 5 products by quantity and revenue
-	const topProductsByQuantity = Object.entries(productQuantities)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-
-	const topProductsByRevenue = Object.entries(productRevenue)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-
-	// Room usage analysis
-	const roomOrderCounts: Record<string, number> = {}
-	orders.forEach(order => {
-		const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
-		roomOrderCounts[roomName] = (roomOrderCounts[roomName] || 0) + 1
-	})
-
-	// Travleste lokale (show amount)
-	const topRooms = Object.entries(roomOrderCounts)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-	const busiestRoom = topRooms.length > 0 ? `${topRooms[0][0]} (${topRooms[0][1]})` : '-'
-
-	// Activity analysis
-	const activityOrderCounts: Record<string, number> = {}
-	orders.forEach(order => {
-		const activityName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
-		activityOrderCounts[activityName] = (activityOrderCounts[activityName] || 0) + 1
-	})
-
-	const topActivities = Object.entries(activityOrderCounts)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-
-	// Option popularity
-	const optionQuantities: Record<string, number> = {}
-	const optionRevenue: Record<string, number> = {}
-
-	orders.forEach(order => {
-		order.options.forEach(o => {
-			const option = options.find(opt => opt._id === o._id)
-			if (option) {
-				optionQuantities[option.name] = (optionQuantities[option.name] || 0) + o.quantity
-				optionRevenue[option.name] = (optionRevenue[option.name] || 0) + (option.price * o.quantity)
-			}
-		})
-	})
-
-	const topOptionsByQuantity = Object.entries(optionQuantities)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-
-	const topOptionsByRevenue = Object.entries(optionRevenue)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5)
-
-	// Calculate additional key metrics
-	const averageProductsPerOrder = orders.length
-		? orders.reduce((sum, order) => sum + order.products.reduce((s, p) => s + p.quantity, 0), 0) / orders.length
-		: 0
-
-	const busiest = {
-		hour: ordersByHour.indexOf(Math.max(...ordersByHour)),
-		day: ordersByDayOfWeek.indexOf(Math.max(...ordersByDayOfWeek))
 	}
 
-	const percentDelivered = orders.length
-		? (orders.filter(o => o.status === 'delivered').length / orders.length) * 100
-		: 0
+	// Update active section based on which section has the largest visible area
+	useEffect(() => {
+		if (loading) { return }
+		const handleScroll = () => {
+			let best: StatSection = 'overview'
+			let maxVis = 0
+			const vh = window.innerHeight
+			Object.entries(sectionRefs).forEach(([sec, ref]) => {
+				const el = ref.current
+				if (!el) { return }
+				const r = el.getBoundingClientRect()
+				const top = Math.max(r.top, 0)
+				const bottom = Math.min(r.bottom, vh)
+				const vis = bottom - top
+				if (vis > maxVis) {
+					maxVis = vis
+					best = sec as StatSection
+				}
+			})
+			if (best !== activeSection) { setActiveSection(best) }
+		}
+		window.addEventListener('scroll', handleScroll)
+		handleScroll()
+		return () => { window.removeEventListener('scroll', handleScroll) }
+	}, [loading, sectionRefs, activeSection])
 
 	return (
-		<main className="bg-white rounded shadow p-6 max-w-6xl mx-auto text-black">
-			<div className="flex justify-between items-center mb-4">
-				<h1 className="text-2xl font-bold">{'Statistik'}</h1>
-				<div className="inline-flex rounded-md shadow-sm">
-					<button
-						onClick={() => setTimeRange('today')}
-						className={`px-4 py-2 text-sm font-medium rounded-l-lg border ${timeRange === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-					>
-						{'I dag'}
-					</button>
-					<button
-						onClick={() => setTimeRange('7days')}
-						className={`px-4 py-2 text-sm font-medium border-t border-b border-r ${timeRange === '7days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-					>
-						{'7 dage'}
-					</button>
-					<button
-						onClick={() => setTimeRange('30days')}
-						className={`px-4 py-2 text-sm font-medium border-t border-b border-r ${timeRange === '30days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-					>
-						{'30 dage'}
-					</button>
-					<button
-						onClick={() => setTimeRange('month')}
-						className={`px-4 py-2 text-sm font-medium rounded-r-lg border-t border-b border-r ${timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-					>
-						{'Nuværende måned'}
-					</button>
+		<div className="flex flex-col md:flex-row max-w-7xl mx-auto text-black">
+			{/* Sidebar navigation */}
+			<div className="w-full md:w-64 bg-gray-100 md:rounded-l shadow-md md:sticky md:top-20 h-fit">
+				<div className="p-6">
+					<h2 className="text-lg font-bold mb-4">{'Statistik'}</h2>
+
+					{/* Time range selector */}
+					<div className="mb-6">
+						<p className="text-sm font-medium text-gray-700 mb-2">{'Tidsperiode'}</p>
+						<div className="flex flex-col space-y-1">
+							<button
+								onClick={() => setTimeRange('today')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiClock className="mr-2" />
+									{'I dag\r'}
+								</div>
+							</button>
+							<button
+								onClick={() => setTimeRange('7days')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === '7days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiCalendar className="mr-2" />
+									{'7 dage\r'}
+								</div>
+							</button>
+							<button
+								onClick={() => setTimeRange('30days')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === '30days' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiCalendar className="mr-2" />
+									{'30 dage\r'}
+								</div>
+							</button>
+							<button
+								onClick={() => setTimeRange('month')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiCalendar className="mr-2" />
+									{'Nuværende måned\r'}
+								</div>
+							</button>
+						</div>
+					</div>
+
+					{/* Navigation sections */}
+					<div className="space-y-1">
+						<p className="text-sm font-medium text-gray-700 mb-2">{'Sektioner'}</p>
+						<button
+							onClick={() => scrollToSection('overview')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'overview'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'overview'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiBarChart2 className="mr-2" />
+								{'Overblik\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('sales')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'sales'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'sales'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiDollarSign className="mr-2" />
+								{'Salg\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('products')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'products'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'products'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiPackage className="mr-2" />
+								{'Produkter\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('customers')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'customers'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'customers'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiUsers className="mr-2" />
+								{'Lokaler og Kiosker\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('time')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'time'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'time'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiClock className="mr-2" />
+								{'Tidsmønstre\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('orders')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'orders'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'orders'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiShoppingCart className="mr-2" />
+								{'Ordrer\r'}
+							</div>
+						</button>
+					</div>
 				</div>
 			</div>
 
-			{loading && <div>{'Henter data...'}</div>}
-			{!loading && (
-				<>
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-						<div className="bg-blue-50 rounded p-3">
-							<div className="text-xs text-blue-700">{'Omsætning'}</div>
-							<div className="text-xl font-bold">{totalSales.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</div>
+			{/* Main content */}
+			<div className="flex-1 p-6 overflow-auto">
+				{loading && <div>{'Henter data...'}</div>}
+				{!loading && (
+					<>
+						{/* OVERVIEW SECTION */}
+						<div ref={overviewRef} className="mb-8">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiBarChart2 className="mr-2 text-blue-600" />
+								{'Overblik\r'}
+							</h2>
+
+							<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+								<div className="bg-blue-50 rounded p-3" title="Total omsætning for den valgte periode">
+									<div className="text-xs text-blue-700">{'Omsætning'}</div>
+									<div className="text-xl font-bold">{stats.totalSalesDisplay}</div>
+								</div>
+								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
+									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
+									<div className="text-xl font-bold">{stats.totalOrders}</div>
+								</div>
+								<div className="bg-purple-50 rounded p-3" title="Gennemsnitlig beløb pr. bestilling">
+									<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
+									<div className="text-xl font-bold">{stats.avgOrderValueDisplay}</div>
+								</div>
+								<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
+									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
+									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
+								</div>
+								<div className="bg-indigo-50 rounded p-3" title="Gennemsnitligt antal produkter i hver bestilling">
+									<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
+									<div className="text-xl font-bold">{stats.avgProductsDisplay}</div>
+								</div>
+								<div className="bg-rose-50 rounded p-3" title="Tidspunktet med flest bestillinger (time og ugedag)">
+									<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
+									<div className="text-xl font-bold">{stats.busiestTimeDisplay}</div>
+								</div>
+								<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
+									<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
+									<div className="text-xl font-bold">{stats.deliveryPercentDisplay}</div>
+								</div>
+								<div className="bg-cyan-50 rounded p-3" title="Lokalet med flest bestillinger (med antal)">
+									<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
+									<div className="text-xl font-bold">{stats.busiestRoom}</div>
+								</div>
+								<div className="bg-orange-50 rounded p-3" title="Kiosken med flest bestillinger (med antal)">
+									<div className="text-xs text-orange-700">{'Travleste kiosk'}</div>
+									<div className="text-xl font-bold">{stats.busiestKiosk}</div>
+								</div>
+							</div>
 						</div>
-						<div className="bg-green-50 rounded p-3">
-							<div className="text-xs text-green-700">{'Antal ordrer'}</div>
-							<div className="text-xl font-bold">{totalOrders}</div>
+
+						{/* SALES SECTION */}
+						<div ref={salesRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiDollarSign className="mr-2 text-blue-600" />
+								{'Salgsanalyse\r'}
+							</h2>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+								<SvgLineGraph
+									data={stats.chartData.sales}
+									labels={stats.chartLabels}
+									label={`Omsætning pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
+									yLabel="DKK"
+									color="#2563eb"
+									showTodayIndicator={timeRange === 'month'}
+								/>
+								<SvgLineGraph
+									data={stats.chartData.orders}
+									labels={stats.chartLabels}
+									label={`Ordrer pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
+									yLabel="Antal"
+									color="#16a34a"
+									showTodayIndicator={timeRange === 'month'}
+								/>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								<SvgLineGraph
+									data={stats.chartData.avgValue}
+									labels={stats.chartLabels}
+									label={`Gns. pris pr. ordre ${timeRange === 'today' ? '(time)' : '(dag)'}`}
+									yLabel="DKK"
+									color="#a21caf"
+									showTodayIndicator={timeRange === 'month'}
+								/>
+
+								<div className="bg-gray-50 rounded p-5 flex flex-col justify-center">
+									<h3 className="font-semibold text-lg mb-3">{'Betalingsstatus'}</h3>
+									<div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-8">
+										<div className="flex-1">
+											<ul className="space-y-2">
+												<li className="flex items-center justify-between">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+														{'Gennemført:\r'}
+													</span>
+													<span className="font-semibold">{stats.paymentStatusCount.successful ?? 0}</span>
+												</li>
+												<li className="flex items-center justify-between">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+														{'Afventer:\r'}
+													</span>
+													<span className="font-semibold">{stats.paymentStatusCount.pending ?? 0}</span>
+												</li>
+												<li className="flex items-center justify-between">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+														{'Fejlet:\r'}
+													</span>
+													<span className="font-semibold">{stats.paymentStatusCount.failed ?? 0}</span>
+												</li>
+											</ul>
+										</div>
+
+										<div className="flex-1">
+											<h3 className="font-semibold mb-3">{'Betalingsmetode'}</h3>
+											<ul className="space-y-2">
+												<li className="flex items-center justify-between">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+														{'SumUp:\r'}
+													</span>
+													<span className="font-semibold">{stats.checkoutMethodCount.sumUp ?? 0}</span>
+												</li>
+												<li className="flex items-center justify-between">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+														{'Senere:\r'}
+													</span>
+													<span className="font-semibold">{stats.checkoutMethodCount.later ?? 0}</span>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<div className="bg-purple-50 rounded p-3">
-							<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
-							<div className="text-xl font-bold">{avgOrderValue.toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</div>
+
+						{/* PRODUCTS SECTION */}
+						<div ref={productsRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiPackage className="mr-2 text-blue-600" />
+								{'Produktanalyse\r'}
+							</h2>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+								<SvgBarChart
+									data={stats.topProductsByQuantity.map(p => p[1])}
+									labels={stats.topProductsByQuantity.map(p => p[0])}
+									label="Top 5 mest solgte produkter"
+									yLabel="Antal"
+									color="#14b8a6"
+								/>
+								<SvgBarChart
+									data={stats.topProductsByRevenue.map(p => p[1])}
+									labels={stats.topProductsByRevenue.map(p => p[0])}
+									label="Top 5 produkter efter omsætning"
+									yLabel="DKK"
+									color="#ec4899"
+								/>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								<SvgBarChart
+									data={stats.topOptionsByQuantity.map(o => o[1])}
+									labels={stats.topOptionsByQuantity.map(o => o[0])}
+									label="Top 5 mest solgte tilvalg"
+									yLabel="Antal"
+									color="#0ea5e9"
+								/>
+								<SvgBarChart
+									data={stats.topOptionsByRevenue.map(o => o[1])}
+									labels={stats.topOptionsByRevenue.map(o => o[0])}
+									label="Top 5 tilvalg efter omsætning"
+									yLabel="DKK"
+									color="#f59e42"
+								/>
+							</div>
 						</div>
-						<div className="bg-amber-50 rounded p-3">
-							<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
-							<div className="text-xl font-bold">{mostSoldProduct}</div>
+
+						{/* CUSTOMERS SECTION (LOCATIONS) */}
+						<div ref={customersRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiUsers className="mr-2 text-blue-600" />
+								{'Lokaler og Kiosker\r'}
+							</h2>
+
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<SvgPieChart
+									data={stats.topRooms.map(r => r[1])}
+									labels={stats.topRooms.map(r => r[0])}
+									label="Ordrevolumen per lokale"
+								/>
+								<SvgPieChart
+									data={stats.topKiosks.map(k => k[1])}
+									labels={stats.topKiosks.map(k => k[0])}
+									label="Ordrevolumen per kiosk"
+								/>
+								<SvgPieChart
+									data={stats.topActivities.map(a => a[1])}
+									labels={stats.topActivities.map(a => a[0])}
+									label="Ordrevolumen per aktivitet"
+								/>
+							</div>
 						</div>
-						<div className="bg-indigo-50 rounded p-3">
-							<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
-							<div className="text-xl font-bold">{averageProductsPerOrder.toFixed(1)}</div>
+
+						{/* TIME PATTERNS SECTION */}
+						<div ref={timeRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiClock className="mr-2 text-blue-600" />
+								{'Tidsmønstre\r'}
+							</h2>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								<SvgBarChart
+									data={stats.ordersByHour}
+									labels={stats.hourLabels}
+									label="Ordrer fordelt på tid"
+									yLabel="Antal"
+									color="#6366f1"
+								/>
+
+								{/* Conditionally render weekday chart */}
+								{timeRange !== 'today' && (
+									<SvgBarChart
+										data={stats.ordersByDayOfWeek}
+										labels={stats.dayNames}
+										label="Ordrer fordelt på ugedag"
+										yLabel="Antal"
+										color="#f97316"
+									/>
+								)}
+
+								{/* If we only have today's data, show something else useful in the second slot */}
+								{timeRange === 'today' && (
+									<SvgBarChart
+										data={stats.salesByDayOfWeek}
+										labels={stats.dayNames}
+										label="Omsætning fordelt på ugedag"
+										yLabel="DKK"
+										color="#f97316"
+									/>
+								)}
+							</div>
 						</div>
-						<div className="bg-rose-50 rounded p-3">
-							<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
-							<div className="text-xl font-bold">{`${busiest.hour}:00 ${dayNames[busiest.day]}`}</div>
+
+						{/* ORDERS SECTION */}
+						<div ref={ordersRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiShoppingCart className="mr-2 text-blue-600" />
+								{'Ordrer\r'}
+							</h2>
+
+							<div className="mb-8">
+								<h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+									<FiPackage className="text-blue-600" />
+									{'Alle ordrer'}
+									{filteredOrders.length > 0 && <span className="text-sm text-gray-500 font-normal">{'('}{filteredOrders.length}{')'}</span>}
+								</h2>
+								{filteredOrders.length === 0 ? (
+									<div className="text-gray-500 p-8 text-center bg-gray-50 rounded border border-gray-200">
+										{'Ingen ordrer i den valgte periode'}
+									</div>
+								) : (
+									<OrdersTable
+										orders={filteredOrders}
+										products={products}
+										options={options}
+										rooms={rooms}
+										kiosks={kiosks}
+										currentTime={currentTime}
+									/>
+								)}
+							</div>
 						</div>
-						<div className="bg-teal-50 rounded p-3">
-							<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
-							<div className="text-xl font-bold">{`${percentDelivered.toFixed(1)}%`}</div>
-						</div>
-						<div className="bg-cyan-50 rounded p-3">
-							<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
-							<div className="text-xl font-bold">{busiestRoom}</div>
-						</div>
-					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 mb-8">
-						<SvgLineGraph
-							data={salesByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Omsætning pr. dag"
-							yLabel="DKK"
-							color="#2563eb"
-							showTodayIndicator={timeRange === 'month'}
-						/>
-						<SvgLineGraph
-							data={orderCountByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Ordrer pr. dag"
-							yLabel="Antal"
-							color="#16a34a"
-							showTodayIndicator={timeRange === 'month'}
-						/>
-						<SvgLineGraph
-							data={avgOrderValueByDay}
-							labels={days.map(d => dayjs(d).format('DD/MM'))}
-							label="Gns. pris pr. ordre"
-							yLabel="DKK"
-							color="#a21caf"
-							showTodayIndicator={timeRange === 'month'}
-						/>
-						<SvgBarChart
-							data={ordersByHour}
-							labels={hourLabels}
-							label="Ordrer fordelt på tid"
-							yLabel="Antal"
-							color="#6366f1"
-						/>
-						<SvgBarChart
-							data={ordersByDayOfWeek}
-							labels={dayNames}
-							label="Ordrer fordelt på ugedag"
-							yLabel="Antal"
-							color="#f97316"
-						/>
-						<SvgBarChart
-							data={topProductsByQuantity.map(p => p[1])}
-							labels={topProductsByQuantity.map(p => p[0])}
-							label="Top 5 mest solgte produkter"
-							yLabel="Antal"
-							color="#14b8a6"
-						/>
-						<SvgBarChart
-							data={topProductsByRevenue.map(p => p[1])}
-							labels={topProductsByRevenue.map(p => p[0])}
-							label="Top 5 produkter efter omsætning"
-							yLabel="DKK"
-							color="#ec4899"
-						/>
-						{/* --- Option stats --- */}
-						<SvgBarChart
-							data={topOptionsByQuantity.map(o => o[1])}
-							labels={topOptionsByQuantity.map(o => o[0])}
-							label="Top 5 mest solgte tilvalg"
-							yLabel="Antal"
-							color="#0ea5e9"
-						/>
-						<SvgBarChart
-							data={topOptionsByRevenue.map(o => o[1])}
-							labels={topOptionsByRevenue.map(o => o[0])}
-							label="Top 5 tilvalg efter omsætning"
-							yLabel="DKK"
-							color="#f59e42"
-						/>
-						<SvgPieChart
-							data={topRooms.map(r => r[1])}
-							labels={topRooms.map(r => r[0])}
-							label="Ordrevolumen per lokale"
-						/>
-						<SvgPieChart
-							data={topActivities.map(a => a[1])}
-							labels={topActivities.map(a => a[0])}
-							label="Ordrevolumen per aktivitet"
-						/>
-					</div>
-					<div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div className="bg-gray-50 rounded p-3">
-							<div className="font-semibold mb-2">{'Betalingsstatus'}</div>
-							<ul className="text-sm">
-								<li>{'Gennemført: '}<b>{paymentStatusCount.successful || 0}</b></li>
-								<li>{'Afventer: '}<b>{paymentStatusCount.pending || 0}</b></li>
-								<li>{'Fejlet: '}<b>{paymentStatusCount.failed || 0}</b></li>
-							</ul>
-						</div>
-						<div className="bg-gray-50 rounded p-3">
-							<div className="font-semibold mb-2">{'Betalingsmetode'}</div>
-							<ul className="text-sm">
-								<li>{'SumUp: '}<b>{checkoutMethodCount.sumUp || 0}</b></li>
-								<li>{'Senere: '}<b>{checkoutMethodCount.later || 0}</b></li>
-							</ul>
-						</div>
-					</div>
-					<div className="mb-8">
-						<h2 className="text-lg font-semibold mb-2">{'Missede ordrer (ikke leveret)'}</h2>
-						{missedOrders.length === 0 ? (
-							<div className="text-gray-500">{'Ingen missede ordrer'}</div>
-						) : (
-							<table className="w-full text-sm border">
-								<thead>
-									<tr className="bg-gray-100">
-										<th className="border px-2 py-1">{'Dato'}</th>
-										<th className="border px-2 py-1">{'Status'}</th>
-										<th className="border px-2 py-1">{'Betaling'}</th>
-										<th className="border px-2 py-1">{'Produkter'}</th>
-										<th className="border px-2 py-1">{'Total'}</th>
-									</tr>
-								</thead>
-								<tbody>
-									{missedOrders.map(order => (
-										<tr key={order._id}>
-											<td className="border px-2 py-1">{dayjs(order.createdAt).format('DD/MM/YYYY HH:mm')}</td>
-											<td className="border px-2 py-1">{order.status}</td>
-											<td className="border px-2 py-1">{order.paymentStatus}</td>
-											<td className="border px-2 py-1">{order.products.map(p => `${p.name} (${p.quantity})`).join(', ')}</td>
-											<td className="border px-2 py-1">{getOrderTotal(order, products, options).toLocaleString('da-DK', { style: 'currency', currency: 'DKK' })}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						)}
-					</div>
-				</>
-			)}
-		</main>
+					</>
+				)}
+			</div>
+		</div>
 	)
 }
