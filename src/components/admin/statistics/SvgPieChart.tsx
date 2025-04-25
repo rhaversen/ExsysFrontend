@@ -22,12 +22,27 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
+	// responsiveness: measure container width
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [chartWidth, setChartWidth] = useState<number>(width)
+
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
 			const bbox = tooltipTextRef.current.getBBox()
 			setTooltipDims({ width: bbox.width, height: bbox.height })
 		}
 	}, [tooltip])
+
+	useLayoutEffect(() => {
+		function updateWidth () {
+			if (containerRef.current) {
+				setChartWidth(containerRef.current.offsetWidth)
+			}
+		}
+		updateWidth()
+		window.addEventListener('resize', updateWidth)
+		return () => window.removeEventListener('resize', updateWidth)
+	}, [width])
 
 	// Early return if no data
 	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
@@ -37,17 +52,10 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 
 	// Adjusted paddings
 	const topPadding = 22
-	const legendItemWidth = 140
-	const legendItemHeight = 18
-	const legendGapX = 12
-	const legendGapY = 6
-	const maxLegendCols = Math.max(1, Math.floor((width - 40) / legendItemWidth))
-	const legendRows = Math.ceil(data.length / maxLegendCols)
-	// Add extra space for legend rows
-	const bottomPadding = 22 + legendRows * (legendItemHeight + legendGapY)
-	const radius = Math.min(width, height - topPadding - bottomPadding) / 2.5
-	const centerX = width / 2
-	const centerY = topPadding + (height - topPadding - bottomPadding) / 2
+	// bottomPadding and legendRows no longer needed; legend will be HTML flex
+	const radius = Math.min(chartWidth, height - topPadding) / 2.5
+	const centerX = chartWidth / 2
+	const centerY = topPadding + (height - topPadding) / 2
 
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
@@ -82,6 +90,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 			labelX,
 			labelY,
 			percentage: percentage.toFixed(1),
+			value,
 			label: labels[i]
 		}
 
@@ -89,102 +98,98 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		return slice
 	})
 
-	// Legend layout: wrap items to multiple rows if needed
-	const legendStartY = height - bottomPadding + 8
-
 	return (
-		<svg
-			width={width}
-			height={height}
-			className="bg-white rounded shadow"
-			style={{ position: 'relative', overflow: 'visible' }}
-			onMouseLeave={() => setTooltip(null)}
-		>
-			{/* Title */}
-			{(label != null) && (
-				<text x={width / 2} y={topPadding - 6} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
-					{label}
-				</text>
-			)}
+		<div ref={containerRef} style={{ width: '100%' }}>
+			<svg
+				viewBox={`0 0 ${chartWidth} ${height}`}
+				preserveAspectRatio="xMidYMid meet"
+				className="bg-white rounded shadow"
+				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
+				onMouseLeave={() => setTooltip(null)}
+			>
+				{/* Title */}
+				{(label != null) && (
+					<text x={chartWidth / 2} y={topPadding - 6} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+						{label}
+					</text>
+				)}
 
-			{/* Pie slices with hover tooltips */}
-			<g>
-				{slices.map((slice, i) => (
-					<g key={i}>
-						<path
-							d={slice.path}
-							fill={slice.color}
-							stroke="white"
-							strokeWidth={1}
-							onMouseMove={e => {
-								setTooltip({
-									x: e.nativeEvent.offsetX,
-									y: e.nativeEvent.offsetY,
-									text: `${slice.label}: ${formatValue(Number(slice.percentage))}%`
-								})
-							}}
-							onMouseLeave={() => setTooltip(null)}
-							style={{ cursor: 'pointer' }}
-						/>
-					</g>
-				))}
-			</g>
-
-			{/* Legend with dynamic wrapping */}
-			<g>
-				{slices.map((slice, i) => {
-					const col = i % maxLegendCols
-					const row = Math.floor(i / maxLegendCols)
-					const x = 20 + col * (legendItemWidth + legendGapX)
-					const y = legendStartY + row * (legendItemHeight + legendGapY)
-					return (
-						<g key={i} transform={`translate(${x}, ${y})`}>
-							<rect width={12} height={12} fill={slice.color} />
-							<text x={16} y={10} fontSize={10} fill="#111827">
-								{`${slice.label} (${slice.percentage}%)`}
-							</text>
+				{/* Pie slices with hover tooltips */}
+				<g>
+					{slices.map((slice, i) => (
+						<g key={i}>
+							<path
+								d={slice.path}
+								fill={slice.color}
+								stroke="white"
+								strokeWidth={1}
+								onMouseMove={e => {
+									setTooltip({
+										x: e.nativeEvent.offsetX,
+										y: e.nativeEvent.offsetY,
+										text: `${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`
+									})
+								}}
+								onMouseLeave={() => setTooltip(null)}
+								style={{ cursor: 'pointer' }}
+							/>
 						</g>
-					)
-				})}
-			</g>
-
-			{/* Tooltip */}
-			{tooltip && (
-				<g pointerEvents="none">
-					<text
-						ref={tooltipTextRef}
-						x={tooltip.x + 18}
-						y={tooltip.y - 6}
-						fontSize={13}
-						fill="#fff"
-						fontWeight={500}
-						style={{ visibility: 'hidden' }}
-					>
-						{tooltip.text}
-					</text>
-					{tooltipDims.width > 0 && (
-						<rect
-							x={tooltip.x + 10}
-							y={tooltip.y - 24}
-							width={tooltipDims.width + 16}
-							height={tooltipDims.height + 10}
-							rx={5}
-							fill="#111827"
-							opacity={0.92}
-						/>
-					)}
-					<text
-						x={tooltip.x + 18}
-						y={tooltip.y - 6}
-						fontSize={13}
-						fill="#fff"
-						fontWeight={500}
-					>
-						{tooltip.text}
-					</text>
+					))}
 				</g>
-			)}
-		</svg>
+
+				{/* Tooltip */}
+				{tooltip && (
+					<g pointerEvents="none">
+						<text
+							ref={tooltipTextRef}
+							x={tooltip.x + 18}
+							y={tooltip.y - 6}
+							fontSize={13}
+							fill="#fff"
+							fontWeight={500}
+							style={{ visibility: 'hidden' }}
+						>
+							{tooltip.text}
+						</text>
+						{tooltipDims.width > 0 && (
+							<rect
+								x={tooltip.x + 10}
+								y={tooltip.y - 24}
+								width={tooltipDims.width + 16}
+								height={tooltipDims.height + 10}
+								rx={5}
+								fill="#111827"
+								opacity={0.92}
+							/>
+						)}
+						<text
+							x={tooltip.x + 18}
+							y={tooltip.y - 6}
+							fontSize={13}
+							fill="#fff"
+							fontWeight={500}
+						>
+							{tooltip.text}
+						</text>
+					</g>
+				)}
+			</svg>
+
+			{/* Legend keys as a flex‑wrap row */}
+			<div className="flex flex-wrap gap-2 justify-center mt-2">
+				{slices.map((slice, i) => (
+					<div key={i} className="flex items-center space-x-1">
+						<span
+							className="w-3 h-3 block"
+							style={{ backgroundColor: slice.color }}
+						/>
+						<span className="text-xs text-gray-900">
+							{`${slice.label} (${slice.percentage}%)`}
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
 	)
 }
 

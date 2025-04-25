@@ -1,5 +1,6 @@
 'use client'
 
+import axios from 'axios'
 import Cookies from 'js-cookie'
 import React, {
 	createContext,
@@ -36,6 +37,28 @@ export default function UserProvider ({ children }: { readonly children: ReactNo
 		}
 		return null
 	})
+
+	// Fetch current user from backend if not set
+	useEffect(() => {
+		if (currentUser === null && typeof window !== 'undefined') {
+			const API_URL = process.env.NEXT_PUBLIC_API_URL
+			const fetchUser = async () => {
+				try {
+					// Try admin endpoint first
+					const adminRes = await axios.get<AdminType>(`${API_URL}/v1/admins/me`, { withCredentials: true })
+					setCurrentUser(adminRes.data)
+					return
+				} catch {}
+				try {
+					// Try kiosk endpoint if not admin
+					const kioskRes = await axios.get<KioskType>(`${API_URL}/v1/kiosks/me`, { withCredentials: true })
+					setCurrentUser(kioskRes.data)
+					return
+				} catch {}
+			}
+			fetchUser()
+		}
+	}, [currentUser])
 
 	useEffect(() => {
 		if (currentUser !== null) {
