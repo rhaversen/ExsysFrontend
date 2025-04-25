@@ -55,9 +55,9 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = height - paddingTop - paddingBottom
 
-	// dynamically throttle X‑axis labels
-	const maxLabels = Math.max(1, Math.floor(graphWidth / 50))
-	const xLabelInterval = Math.ceil(labels.length / maxLabels)
+	// Determine if we need to force vertical labels
+	const maxLabels = Math.max(1, Math.floor(graphWidth/100))
+	const forceVerticalLabels = labels.length > maxLabels
 
 	const maxY = Math.max(...data, 1)
 	const minY = 0
@@ -99,17 +99,22 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 				{/* X axis labels */}
 				{labels.map((lbl, i) => {
 					const x = paddingLeft + barSpacing + i * (barWidth + barSpacing) + barWidth / 2
-					// skip unless it's a tick position or the last label
-					if (i !== labels.length - 1 && (i % xLabelInterval !== 0)) { return null }
+					const y = forceVerticalLabels
+						? height - paddingBottom / 2 - 18 // move up when vertical
+						: height - paddingBottom / 2
 					return (
 						<text
 							key={i}
 							x={x}
-							y={height - paddingBottom / 2}
+							y={y}
 							fontSize={11}
-							textAnchor="middle"
+							textAnchor={forceVerticalLabels ? 'end' : 'middle'}
 							fill="#6b7280"
-							transform={labels.length > maxLabels ? `rotate(-45, ${x}, ${height - paddingBottom / 2})` : undefined}
+							transform={
+								forceVerticalLabels
+									? `rotate(-90, ${x}, ${y})`
+									: undefined
+							}
 						>
 							{lbl}
 						</text>
