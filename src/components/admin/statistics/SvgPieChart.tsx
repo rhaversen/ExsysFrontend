@@ -77,12 +77,24 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		const labelX = centerX + labelRadius * Math.cos(midAngle)
 		const labelY = centerY + labelRadius * Math.sin(midAngle)
 
-		const pathData = [
-			`M ${centerX},${centerY}`,
-			`L ${x1},${y1}`,
-			`A ${radius},${radius} 0 ${largeArcFlag},1 ${x2},${y2}`,
-			'Z'
-		].join(' ')
+		// build pathData; special case for a full circle
+		let pathData: string
+		if (percentage === 100) {
+			// two half‐arcs to draw a full circle
+			pathData = [
+				`M ${centerX},${centerY - radius}`,
+				`A ${radius},${radius} 0 1,1 ${centerX},${centerY + radius}`,
+				`A ${radius},${radius} 0 1,1 ${centerX},${centerY - radius}`,
+				'Z'
+			].join(' ')
+		} else {
+			pathData = [
+				`M ${centerX},${centerY}`,
+				`L ${x1},${y1}`,
+				`A ${radius},${radius} 0 ${largeArcFlag},1 ${x2},${y2}`,
+				'Z'
+			].join(' ')
+		}
 
 		const slice = {
 			path: pathData,
