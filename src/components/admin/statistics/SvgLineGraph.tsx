@@ -169,7 +169,14 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 					</text>
 				)}
 				{/* Line path */}
-				<path d={path} fill="none" stroke={color} strokeWidth={2.5} />
+				<path
+					d={path}
+					fill="none"
+					stroke={color}
+					strokeWidth={2.5}
+					strokeLinejoin="round"
+					strokeLinecap="round"
+				/>
 				{/* Dots with hover tooltips */}
 				{points.map(([x, y], i) => (
 					<g key={i}>
