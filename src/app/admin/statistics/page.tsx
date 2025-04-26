@@ -273,7 +273,7 @@ export default function Page (): ReactElement {
 					</div>
 
 					{/* Navigation sections */}
-					<div className="space-y-1">
+					<div className="hidden md:block space-y-1">
 						<p className="text-sm font-medium text-gray-700 mb-2">{'Sektioner'}</p>
 						<button
 							onClick={() => scrollToSection('overview')}
