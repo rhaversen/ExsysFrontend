@@ -149,7 +149,7 @@ export default function useStatisticsData ({
 	}, {} as Record<OrderType['checkoutMethod'], number>)
 
 	// Time-based analysis - Orders by hour of day
-	const ordersByHour = Array(24).fill(0)
+	const ordersByHour: number[] = Array(24).fill(0)
 	orders.forEach(order => {
 		const hour = new Date(order.createdAt).getHours()
 		ordersByHour[hour]++
@@ -158,8 +158,8 @@ export default function useStatisticsData ({
 
 	// Weekdays should start with Monday
 	const dayNames = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']
-	const ordersByDayOfWeek = Array(7).fill(0)
-	const salesByDayOfWeek = Array(7).fill(0)
+	const ordersByDayOfWeek: number[] = Array(7).fill(0)
+	const salesByDayOfWeek: number[] = Array(7).fill(0)
 	orders.forEach(order => {
 		const jsDay = new Date(order.createdAt).getDay()
 		const mondayFirst = (jsDay + 6) % 7
