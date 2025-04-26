@@ -206,7 +206,30 @@ export default function useStatisticsData ({
 		const activityName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
 		activityOrderCounts[activityName] = (activityOrderCounts[activityName] || 0) + 1
 	})
-	const topActivities = Object.entries(activityOrderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
+	const topActivities = Object.entries(activityOrderCounts)
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 5)
+
+	// Revenue by room, kiosk, and activity
+	const roomRevenueRecord: Record<string, number> = {}
+	const kioskRevenueRecord: Record<string, number> = {}
+	const activityRevenueRecord: Record<string, number> = {}
+
+	orders.forEach(order => {
+		const total = getOrderTotal(order, products, options)
+		const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
+		roomRevenueRecord[roomName] = (roomRevenueRecord[roomName] || 0) + total
+
+		const kioskName = kiosks.find(k => k._id === order.kioskId)?.name ?? 'Unknown'
+		kioskRevenueRecord[kioskName] = (kioskRevenueRecord[kioskName] || 0) + total
+
+		const actName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
+		activityRevenueRecord[actName] = (activityRevenueRecord[actName] || 0) + total
+	})
+
+	const revenueByRoom = topRooms.map(([name]) => roomRevenueRecord[name] || 0)
+	const revenueByKiosk = topKiosks.map(([name]) => kioskRevenueRecord[name] || 0)
+	const revenueByActivity = topActivities.map(([name]) => activityRevenueRecord[name] || 0)
 
 	// Option popularity
 	const optionQuantities: Record<string, number> = {}
@@ -271,6 +294,9 @@ export default function useStatisticsData ({
 		topRooms,
 		topKiosks,
 		topActivities,
+		revenueByRoom,
+		revenueByKiosk,
+		revenueByActivity,
 		ordersByHour,
 		hourLabels,
 		ordersByDayOfWeek,
