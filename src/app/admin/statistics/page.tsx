@@ -375,28 +375,35 @@ export default function Page (): ReactElement {
 				{!loading && (
 					<>
 						{/* OVERVIEW SECTION */}
-						<div ref={overviewRef} className="mb-8">
+						<div ref={overviewRef} className="mb-8 flex flex-col gap-2">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiBarChart2 className="mr-2 text-blue-600" />
-								{'Overblik\r'}
+								{'Overblik'}
 							</h2>
 
-							<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+							{/* Finansielle nøgletal */}
+							<h3 className="text-lg font-semibold">{'Finansielle nøgletal'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div className="bg-blue-50 rounded p-3" title="Total omsætning for den valgte periode">
 									<div className="text-xs text-blue-700">{'Omsætning'}</div>
 									<div className="text-xl font-bold">{stats.totalSalesDisplay}</div>
-								</div>
-								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
-									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
-									<div className="text-xl font-bold">{stats.totalOrders}</div>
 								</div>
 								<div className="bg-purple-50 rounded p-3" title="Gennemsnitlig beløb pr. bestilling">
 									<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
 									<div className="text-xl font-bold">{stats.avgOrderValueDisplay}</div>
 								</div>
-								<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
-									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
-									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
+								<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
+									<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
+									<div className="text-xl font-bold">{stats.deliveryPercentDisplay}</div>
+								</div>
+							</div>
+
+							{/* Ordre statistikker */}
+							<h3 className="text-lg font-semibold">{'Ordre statistikker'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
+									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
+									<div className="text-xl font-bold">{stats.totalOrders}</div>
 								</div>
 								<div className="bg-indigo-50 rounded p-3" title="Gennemsnitligt antal produkter i hver bestilling">
 									<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
@@ -406,9 +413,14 @@ export default function Page (): ReactElement {
 									<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
 									<div className="text-xl font-bold">{stats.busiestTimeDisplay}</div>
 								</div>
-								<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
-									<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
-									<div className="text-xl font-bold">{stats.deliveryPercentDisplay}</div>
+							</div>
+
+							{/* Top elementer */}
+							<h3 className="text-lg font-semibold">{'Top elementer'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
+									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
+									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
 								</div>
 								<div className="bg-cyan-50 rounded p-3" title="Lokalet med flest bestillinger (med antal)">
 									<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
