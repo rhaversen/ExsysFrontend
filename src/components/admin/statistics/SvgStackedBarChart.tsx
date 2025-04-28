@@ -212,8 +212,20 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				<div
 					className="absolute pointer-events-none"
 					style={{
-						left: tooltip.x + 10,
-						top: tooltip.y - (tooltipDims.height || 40),
+						left: Math.max(
+							0,
+							Math.min(
+								tooltip.x + 10,
+								(chartWidth ?? 500) - (tooltipDims.width || 120) - 8
+							)
+						),
+						top: Math.max(
+							0,
+							Math.min(
+								tooltip.y - (tooltipDims.height || 40),
+								height - (tooltipDims.height || 40) - 8
+							)
+						),
 						zIndex: 9999
 					}}
 				>
