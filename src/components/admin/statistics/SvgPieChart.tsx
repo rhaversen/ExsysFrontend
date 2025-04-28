@@ -20,7 +20,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	itemColors // New prop for specific colors
 }) => {
 	// Hooks must be called at the top level
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null) // Changed text to textLines
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
@@ -55,11 +55,11 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	const total = data.reduce((sum, val) => sum + val, 0)
 
 	// Adjusted paddings
-	const topPadding = 22
+	const topPadding = 40 // Increased for consistent title spacing
 	// bottomPadding and legendRows no longer needed; legend will be HTML flex
-	const radius = Math.min(chartWidth, height - topPadding) / 2.5
+	const radius = Math.min(chartWidth, height - topPadding) / 2.5 // Adjusted calculation due to topPadding change
 	const centerX = chartWidth / 2
-	const centerY = topPadding + (height - topPadding) / 2
+	const centerY = topPadding + (height - topPadding) / 2 // Adjusted calculation due to topPadding change
 
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
@@ -113,7 +113,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 			>
 				{/* Title */}
 				{(label != null) && (
-					<text x={chartWidth / 2} y={topPadding - 6} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+					<text x={chartWidth / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}> {/* Standardized y=20 */}
 						{label}
 					</text>
 				)}
@@ -131,7 +131,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 									setTooltip({
 										x: e.nativeEvent.offsetX,
 										y: e.nativeEvent.offsetY,
-										text: `${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`
+										textLines: [`${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`] // Use textLines
 									})
 								}}
 								onMouseLeave={() => setTooltip(null)}
@@ -144,21 +144,22 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 				{/* Tooltip */}
 				{tooltip && (
 					<g pointerEvents="none">
+						{/* Invisible text for measurement - render all lines */}
 						<text
 							ref={tooltipTextRef}
 							x={tooltip.x + 18}
-							y={tooltip.y - 6}
+							y={tooltip.y - 6} // Initial position, adjusted below
 							fontSize={13}
-							fill="#fff"
 							fontWeight={500}
-							style={{ visibility: 'hidden' }}
+							style={{ visibility: 'hidden', whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
+						{/* Tooltip Background */}
 						{tooltipDims.width > 0 && (
 							<rect
 								x={tooltip.x + 10}
-								y={tooltip.y - 24}
+								y={tooltip.y - tooltipDims.height - 5} // Position based on measured height
 								width={tooltipDims.width + 16}
 								height={tooltipDims.height + 10}
 								rx={5}
@@ -166,14 +167,16 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 								opacity={0.92}
 							/>
 						)}
+						{/* Tooltip Text */}
 						<text
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
 							fontSize={13}
 							fill="#fff"
 							fontWeight={500}
+							x={tooltip.x + 18}
+							y={tooltip.y - tooltipDims.height + 12} // Position based on measured height
+							style={{ whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
 					</g>
 				)}
@@ -188,7 +191,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 							style={{ backgroundColor: slice.color }}
 						/>
 						<span className="text-xs text-gray-900">
-							{`${slice.label} (${slice.percentage}%)`}
+							{`${slice.label}`} {/* Removed percentage */}
 						</span>
 					</div>
 				))}

@@ -21,7 +21,7 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	yLabel,
 	showTodayIndicator = false
 }) => {
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null) // Changed text to textLines
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
@@ -54,7 +54,7 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	// Padding for axes
 	const paddingLeft = 64
 	const paddingRight = 32
-	const paddingTop = 32
+	const paddingTop = 40 // Increased for consistent title spacing
 	const paddingBottom = 32
 	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = height - paddingTop - paddingBottom
@@ -132,7 +132,7 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 					return (
 						<g key={i}>
 							<line x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
-							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">{v.toFixed(0)}</text>
+							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">{formatValue(v)}</text> {/* Use formatValue */}
 						</g>
 					)
 				})}
@@ -191,7 +191,7 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 								setTooltip({
 									x: e.nativeEvent.offsetX,
 									y: e.nativeEvent.offsetY,
-									text: `${labels[i]}: ${formatValue(data[i])}`
+									textLines: [`${labels[i]}: ${formatValue(data[i])}`] // Use textLines
 								})
 							}}
 							onMouseLeave={() => setTooltip(null)}
@@ -208,21 +208,22 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 				{/* Tooltip */}
 				{tooltip && (
 					<g pointerEvents="none">
+						{/* Invisible text for measurement - render all lines */}
 						<text
 							ref={tooltipTextRef}
 							x={tooltip.x + 18}
-							y={tooltip.y - 6}
+							y={tooltip.y - 6} // Initial position, adjusted below
 							fontSize={13}
-							fill="#fff"
 							fontWeight={500}
-							style={{ visibility: 'hidden' }}
+							style={{ visibility: 'hidden', whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
+						{/* Tooltip Background */}
 						{tooltipDims.width > 0 && (
 							<rect
 								x={tooltip.x + 10}
-								y={tooltip.y - 24}
+								y={tooltip.y - tooltipDims.height - 5} // Position based on measured height
 								width={tooltipDims.width + 16}
 								height={tooltipDims.height + 10}
 								rx={5}
@@ -230,14 +231,16 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 								opacity={0.92}
 							/>
 						)}
+						{/* Tooltip Text */}
 						<text
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
 							fontSize={13}
 							fill="#fff"
 							fontWeight={500}
+							x={tooltip.x + 18}
+							y={tooltip.y - tooltipDims.height + 12} // Position based on measured height
+							style={{ whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
 					</g>
 				)}

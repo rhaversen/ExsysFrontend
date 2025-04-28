@@ -52,7 +52,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const activeCategories = categories.filter(cat => data.some(d => (d[cat] || 0) > 0))
 
 	if (data.length === 0 || activeCategories.length === 0) {
-		return <div className="text-gray-400 p-4 text-center">{'Ingen data at vise'}</div>
+		return <div className="text-gray-400 p-4 text-center">{'Ingen data'}</div>
 	}
 
 	const paddingLeft = 64
@@ -230,7 +230,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 							fill="#fff"
 							fontWeight={500}
 							x={tooltip.x + 18}
-							y={tooltip.y - tooltipDims.height + 8}
+							y={tooltip.y - tooltipDims.height + 12}
 							style={{ whiteSpace: 'pre' }}
 						>
 							{tooltip.textLines.join('\n')}

@@ -21,7 +21,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	yLabel,
 	itemColors
 }) => {
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null) // Changed text to textLines
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
@@ -161,7 +161,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 									setTooltip({
 										x: e.nativeEvent.offsetX,
 										y: e.nativeEvent.offsetY,
-										text: `${labels[i]}: ${formatValue(value)}`
+										textLines: [`${labels[i]}: ${formatValue(value)}`] // Use textLines
 									})
 								}}
 								onMouseLeave={() => setTooltip(null)}
@@ -197,18 +197,18 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 						<text
 							ref={tooltipTextRef}
 							x={tooltip.x + 18}
-							y={tooltip.y - 6}
+							y={tooltip.y - 6} // Initial position, adjusted below
 							fontSize={13}
 							fontWeight={500}
-							style={{ visibility: 'hidden', whiteSpace: 'pre' }}
+							style={{ visibility: 'hidden', whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
 						{/* Tooltip Background */}
 						{tooltipDims.width > 0 && (
 							<rect
 								x={tooltip.x + 10}
-								y={tooltip.y - tooltipDims.height - 5}
+								y={tooltip.y - tooltipDims.height - 5} // Position based on measured height
 								width={tooltipDims.width + 16}
 								height={tooltipDims.height + 10}
 								rx={5}
@@ -218,13 +218,14 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 						)}
 						{/* Tooltip Text */}
 						<text
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
 							fontSize={13}
 							fill="#fff"
 							fontWeight={500}
+							x={tooltip.x + 18}
+							y={tooltip.y - tooltipDims.height + 12} // Position based on measured height
+							style={{ whiteSpace: 'pre' }} // Added whiteSpace
 						>
-							{tooltip.text}
+							{tooltip.textLines.join('\n')}
 						</text>
 					</g>
 				)}
