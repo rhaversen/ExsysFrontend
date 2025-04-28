@@ -1,14 +1,16 @@
 import React, { useState, useRef, useLayoutEffect } from 'react'
+import { ImParagraphLeft, ImParagraphJustify } from 'react-icons/im'
+import { MdBarChart, MdPercent } from 'react-icons/md'
 
 interface SvgStackedBarChartProps {
-  data: Array<Record<string, number>>; // Array index = bar (e.g., hour), Record maps category to value
-  labels: string[]; // Labels for each bar (e.g., '0:00', '1:00')
-  categories: string[]; // List of all possible categories
-  colors: Record<string, string>; // Map category name to color hex
-  width?: number;
-  height?: number;
-  label?: string;
-  yLabel?: string;
+	data: Array<Record<string, number>>; // Array index = bar (e.g., hour), Record maps category to value
+	labels: string[]; // Labels for each bar (e.g., '0:00', '1:00')
+	categories: string[]; // List of all possible categories
+	colors: Record<string, string>; // Map category name to color hex
+	width?: number;
+	height?: number;
+	label?: string;
+	yLabel?: string;
 }
 
 const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
@@ -25,6 +27,9 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<HTMLDivElement>(null)
 	const svgRef = useRef<SVGSVGElement>(null)
+
+	// Toggle between absolute and relative (100%) mode
+	const [relativeMode, setRelativeMode] = useState(false)
 
 	// responsiveness: measure container width
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -64,12 +69,12 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const graphHeight = height - paddingTop - paddingBottom
 
 	// Determine if we need to force vertical labels
-	const maxLabels = Math.max(1, Math.floor(graphWidth/100))
+	const maxLabels = Math.max(1, Math.floor(graphWidth / 100))
 	const forceVerticalLabels = labels.length > maxLabels
 
 	// Calculate total value for each bar to find maxY
 	const totals = data.map(hourData => activeCategories.reduce((sum, cat) => sum + (hourData[cat] || 0), 0))
-	const maxY = Math.max(...totals, 1)
+	const maxY = relativeMode ? 1 : Math.max(...totals, 1)
 	const minY = 0
 	const yRange = maxY - minY || 1
 
@@ -79,13 +84,50 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 	// Y axis ticks
 	const yTicks = 5
-	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => minY + (i * yRange) / yTicks)
+	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) =>
+		relativeMode
+			? minY + (i * 1) / yTicks
+			: minY + (i * yRange) / yTicks
+	)
 
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
 	return (
 		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
+			{/* Toggle button group - above chart, not overlayed */}
+			<div className="flex justify-end mb-3 gap-2">
+				<button
+					type="button"
+					aria-label="Absolut"
+					onClick={() => setRelativeMode(false)}
+					className={`flex items-center justify-center w-8 h-8 rounded-full border transition
+						${!relativeMode
+			? 'bg-blue-600 text-white border-blue-600 shadow'
+			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'}
+					`}
+					style={{ outline: 'none' }}
+				>
+					<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
+						<ImParagraphLeft size={18} />
+					</span>
+				</button>
+				<button
+					type="button"
+					aria-label="Relativ (100%)"
+					onClick={() => setRelativeMode(true)}
+					className={`flex items-center justify-center w-8 h-8 rounded-full border transition
+						${relativeMode
+			? 'bg-blue-600 text-white border-blue-600 shadow'
+			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'}
+					`}
+					style={{ outline: 'none' }}
+				>
+					<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
+						<ImParagraphJustify size={18} />
+					</span>
+				</button>
+			</div>
 			<svg
 				ref={svgRef}
 				viewBox={`0 0 ${chartWidth} ${height}`}
@@ -96,12 +138,15 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 			>
 				{/* Y axis grid and labels */}
 				{yTickVals.map((v, i) => {
-					const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
+					const y = paddingTop + graphHeight - ((v - minY) / (relativeMode ? 1 : yRange)) * graphHeight
 					return (
 						<g key={i}>
 							<line x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
 							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">
-								{typeof v === 'number' && v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}
+								{relativeMode
+									? `${Math.round(v * 100)}%`
+									: (typeof v === 'number' && v % 1 === 0 ? v.toFixed(0) : v.toFixed(1))
+								}
 							</text>
 						</g>
 					)
@@ -142,7 +187,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 						fill="#6b7280"
 						transform={`rotate(-90 ${paddingLeft / 2},${height / 2})`}
 					>
-						{yLabel}
+						{relativeMode ? 'Procent' : yLabel}
 					</text>
 				)}
 
@@ -158,11 +203,13 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 							{sortedCategories.map(cat => {
 								const value = hourData[cat] || 0
 								if (value === 0) { return null }
-								const barHeight = Math.max(0, (value / maxY) * graphHeight) // Ensure height is not negative
-								const segmentY = currentY - barHeight
-								currentY = segmentY // Move up for the next segment
 								const total = totals[i] || 1
-								const percent = ((value / total) * 100)
+								const percent = total === 0 ? 0 : (value / total)
+								const barHeight = relativeMode
+									? (percent * graphHeight)
+									: Math.max(0, (value / maxY) * graphHeight)
+								const segmentY = currentY - barHeight
+								currentY = segmentY
 
 								return (
 									<rect
@@ -183,9 +230,9 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 													x,
 													y,
 													textLines: [
-														`${labels[i]}`,
-														`${cat}: ${formatValue(value)} ${yLabel}`,
-														`${percent.toFixed(1)}%`
+														`kl. ${labels[i]}`,
+														`${cat}`,
+														`${formatValue(value)} ${yLabel} (${((value / total) * 100).toFixed(1)}%)`
 													]
 												})
 											}
