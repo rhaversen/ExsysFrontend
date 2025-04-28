@@ -156,6 +156,41 @@ export default function useStatisticsData ({
 	})
 	const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
+	// Time-based analysis - Sales by Product Name per Hour
+	const { salesByProductByHour, productNames } = useMemo(() => {
+		const uniqueProductNamesSet = new Set<string>()
+		products.forEach(p => uniqueProductNamesSet.add(p.name))
+		const productNameList = Array.from(uniqueProductNamesSet)
+
+		const hourlySales: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			productNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			order.products.forEach(p => {
+				const product = products.find(prod => prod._id === p._id)
+				if (product) {
+					const productName = product.name
+					const value = product.price * p.quantity
+					// Ensure product name exists in the map for that hour
+					if (hourlySales[hour]?.[productName] !== undefined) {
+						hourlySales[hour][productName] += value
+					} else {
+						// This case should ideally not happen if all products are pre-scanned
+						console.warn(`Product "${productName}" not found in initial scan for hour ${hour}.`)
+					}
+				}
+			})
+			// Note: Options are not included in this breakdown.
+		})
+
+		return { salesByProductByHour: hourlySales, productNames: productNameList }
+	}, [orders, products])
+
 	// Weekdays should start with Monday
 	const dayNames = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']
 	const ordersByDayOfWeek: number[] = Array(7).fill(0)
@@ -299,6 +334,8 @@ export default function useStatisticsData ({
 		revenueByActivity,
 		ordersByHour,
 		hourLabels,
+		salesByProductByHour,
+		productNames,
 		ordersByDayOfWeek,
 		salesByDayOfWeek,
 		dayNames

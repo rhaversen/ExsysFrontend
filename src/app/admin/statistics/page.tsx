@@ -9,6 +9,7 @@ import OrdersTable from '@/components/admin/statistics/OrdersTable'
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
 import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
+import SvgStackedBarChart from '@/components/admin/statistics/SvgStackedBarChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import useStatisticsData from '@/hooks/useStatisticsData'
@@ -181,6 +182,27 @@ export default function Page (): ReactElement {
 		kiosks,
 		timeRange
 	})
+
+	// Define colors for product names (using rotating scheme)
+	const productColors = useMemo(() => {
+		const baseColors = [
+			'#3b82f6', // blue-500
+			'#10b981', // emerald-500
+			'#f97316', // orange-500
+			'#ec4899', // pink-500
+			'#8b5cf6', // violet-500
+			'#6366f1', // indigo-500
+			'#14b8a6', // teal-500
+			'#f59e0b', // amber-500
+			'#ef4444', // red-500
+			'#0ea5e9' // sky-500
+		]
+		const mapping: Record<string, string> = {}
+		;(stats.productNames ?? []).forEach((name: string, index: number) => {
+			mapping[name] = baseColors[index % baseColors.length]
+		})
+		return mapping
+	}, [stats.productNames])
 
 	// Scroll offset to account for sticky header height
 	const SCROLL_OFFSET = 100 // set this to your header’s height
@@ -609,13 +631,23 @@ export default function Page (): ReactElement {
 						</div>
 
 						{/* TIME PATTERNS SECTION */}
-						<div ref={timeRef} className="mb-12">
+						<div ref={timeRef} className="mb-12 flex flex-col gap-2">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiClock className="mr-2 text-blue-600" />
 								{'Tidsmønstre\r'}
 							</h2>
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								{/* Use sales by product name for the stacked bar chart */}
+								<SvgStackedBarChart
+									data={stats.salesByProductByHour} // Use data grouped by product name
+									labels={stats.hourLabels}
+									categories={stats.productNames ?? []} // Use product names as categories
+									colors={productColors} // Use colors mapped to product names
+									label="Omsætning fordelt på produkt pr. time" // Update label
+									yLabel="DKK"
+								/>
+
 								<SvgBarChart
 									data={stats.ordersByHour}
 									labels={stats.hourLabels}
@@ -623,27 +655,28 @@ export default function Page (): ReactElement {
 									yLabel="Antal"
 									color="#6366f1"
 								/>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
 								{/* Conditionally render weekday chart */}
 								{timeRange !== 'today' && (
-									<SvgBarChart
-										data={stats.ordersByDayOfWeek}
-										labels={stats.dayNames}
-										label="Ordrer fordelt på ugedag"
-										yLabel="Antal"
-										color="#f97316"
-									/>
-								)}
-
-								{/* If we only have today's data, show something else useful in the second slot */}
-								{timeRange === 'today' && (
-									<SvgBarChart
-										data={stats.salesByDayOfWeek}
-										labels={stats.dayNames}
-										label="Omsætning fordelt på ugedag"
-										yLabel="DKK"
-										color="#f97316"
-									/>
+									<>
+										<SvgBarChart
+											data={stats.ordersByDayOfWeek}
+											labels={stats.dayNames}
+											label="Ordrer fordelt på ugedag"
+											yLabel="Antal"
+											color="#f97316"
+										/>
+										<SvgBarChart
+											data={stats.salesByDayOfWeek}
+											labels={stats.dayNames}
+											label="Omsætning fordelt på ugedag"
+											yLabel="DKK"
+											color="#f97316"
+										/>
+									</>
 								)}
 							</div>
 						</div>
