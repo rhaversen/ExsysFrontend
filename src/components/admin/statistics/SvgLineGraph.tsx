@@ -1,14 +1,14 @@
 import React, { useState, useRef, useLayoutEffect } from 'react'
 
 interface SvgLineGraphProps {
-  data: number[]
-  labels: string[]
-  width?: number
-  height?: number
-  color?: string
-  label?: string
-  yLabel?: string
-  showTodayIndicator?: boolean
+	data: number[]
+	labels: string[]
+	width?: number
+	height?: number
+	color?: string
+	label?: string
+	yLabel?: string
+	showTodayIndicator?: boolean
 }
 
 const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
