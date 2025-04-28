@@ -47,7 +47,9 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 		return () => window.removeEventListener('resize', updateWidth)
 	}, [width])
 
-	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
+	if (data.length === 0 || data.every(d => d === 0)) {
+	  return <div className="text-gray-400 p-4 text-center">{'Ingen data'}</div>
+	}
 
 	// Padding for axes
 	const paddingLeft = 64

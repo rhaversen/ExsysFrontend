@@ -47,7 +47,9 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	}, [width])
 
 	// Early return if no data
-	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
+	if (data.length === 0 || data.every(d => d === 0)) {
+		return <div className="text-gray-400 p-4 text-center">{'Ingen data'}</div>
+	}
 
 	// Calculations (can stay after the early return check)
 	const total = data.reduce((sum, val) => sum + val, 0)
