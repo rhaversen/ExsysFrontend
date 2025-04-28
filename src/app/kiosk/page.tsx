@@ -70,32 +70,20 @@ export default function Page (): ReactElement {
 		}))
 	}, [])
 
-	// Check if the kiosk is closed based on the current time and order windows and if there are any active products
-	function isKioskClosed (
-		kioskData: KioskType | null,
-		productsData: ProductType[]
-	): boolean {
-		if (!kioskData) { return true }
-		if (isKioskClosedBackendState(kioskData)) { return true }
-		const hasAvailable = productsData.some(
+	const updateKioskClosedState = useCallback(() => {
+		const kioskIsClosedBackend = kiosk != null && isKioskClosedBackendState(kiosk)
+		const hasAvailableProducts = products.length !== 0 && products.some(
 			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
-		return !hasAvailable
-	}
-
-	const updateKioskClosedState = useCallback((
-		kioskData: KioskType | null,
-		productsData: ProductType[]
-	) => {
-		const closed = isKioskClosed(kioskData, productsData)
-		setIsKioskClosedState(closed)
-		if (closed) {
+		const kioskClosed = kioskIsClosedBackend || !hasAvailableProducts
+		setIsKioskClosedState(kioskClosed)
+		if (kioskClosed) {
 			setSelectedActivity(null)
 			setSelectedRoom(null)
 			setViewState('welcome')
 			setCart({ products: {}, options: {} })
 		}
-	}, [])
+	}, [kiosk, products])
 
 	// Load all data
 	const initialSetup = useCallback(async (): Promise<void> => {
@@ -123,20 +111,17 @@ export default function Page (): ReactElement {
 			setActivities(activitiesData)
 			setRooms(roomsData)
 
-			// Update if kiosk is open or closed
-			updateKioskClosedState(kioskData, productsData)
-
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, fetchData, updateKioskClosedState, updateCheckoutMethods, addError])
+	}, [API_URL, fetchData, updateCheckoutMethods, addError])
 
-	// Check if the current time has any active order windows every second
+	// Check if kiosk is closed every second
 	useEffect(() => {
 		const interval = setInterval(() => {
-			updateKioskClosedState(kiosk, products)
+			updateKioskClosedState()
 		}, 1000)
 
 		return () => { clearInterval(interval) }
@@ -165,21 +150,18 @@ export default function Page (): ReactElement {
 		item => {
 			setProducts(prev => {
 				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		item => {
 			setProducts(prev => {
 				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				updateKioskClosedState(kiosk, newProducts)
 				return newProducts
 			})
 		},
 		id => {
 			setProducts(prev => {
 				const products = prev.filter(p => p._id !== id)
-				updateKioskClosedState(kiosk, products)
 				return products
 			})
 		}
@@ -231,7 +213,6 @@ export default function Page (): ReactElement {
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
-				updateKioskClosedState(kioskUpdate, products)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
 				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
