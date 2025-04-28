@@ -6,7 +6,9 @@ interface SvgPieChartProps {
   width?: number
   height?: number
   label?: string
-  colors?: string[]
+  yLabel?: string
+  colors?: string[] // Default rotating colors
+  itemColors?: string[] // Specific colors per slice
 }
 
 const SvgPieChart: React.FC<SvgPieChartProps> = ({
@@ -15,12 +17,15 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	width = 500,
 	height = 250,
 	label,
-	colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#8b5cf6']
+	yLabel,
+	colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#8b5cf6'],
+	itemColors // New prop for specific colors
 }) => {
 	// Hooks must be called at the top level
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null) // Changed text to textLines
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
-	const tooltipTextRef = useRef<SVGTextElement>(null)
+	const tooltipTextRef = useRef<HTMLDivElement>(null)
+	const svgRef = useRef<SVGSVGElement>(null)
 
 	// responsiveness: measure container width
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -28,8 +33,8 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
-			const bbox = tooltipTextRef.current.getBBox()
-			setTooltipDims({ width: bbox.width, height: bbox.height })
+			const rect = tooltipTextRef.current.getBoundingClientRect()
+			setTooltipDims({ width: rect.width, height: rect.height })
 		}
 	}, [tooltip])
 
@@ -45,17 +50,19 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	}, [width])
 
 	// Early return if no data
-	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
+	if (data.length === 0 || data.every(d => d === 0)) {
+		return <div className="text-gray-400 p-4 text-center">{'Ingen data'}</div>
+	}
 
 	// Calculations (can stay after the early return check)
 	const total = data.reduce((sum, val) => sum + val, 0)
 
 	// Adjusted paddings
-	const topPadding = 22
+	const topPadding = 40 // Increased for consistent title spacing
 	// bottomPadding and legendRows no longer needed; legend will be HTML flex
-	const radius = Math.min(chartWidth, height - topPadding) / 2.5
+	const radius = Math.min(chartWidth, height - topPadding) / 2.5 // Adjusted calculation due to topPadding change
 	const centerX = chartWidth / 2
-	const centerY = topPadding + (height - topPadding) / 2
+	const centerY = topPadding + (height - topPadding) / 2 // Adjusted calculation due to topPadding change
 
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
@@ -72,23 +79,23 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		const x2 = centerX + radius * Math.cos(endAngle)
 		const y2 = centerY + radius * Math.sin(endAngle)
 
-		const midAngle = startAngle + angle / 2
-		const labelRadius = radius * 0.75
-		const labelX = centerX + labelRadius * Math.cos(midAngle)
-		const labelY = centerY + labelRadius * Math.sin(midAngle)
+		// build pathData; special case for a full circle
+		let pathData: string
+		if (Math.abs(angle - 2 * Math.PI) < 0.001) { // Check for nearly full circle
+			// Draw two half circles to make a full one
+			const midX1 = centerX + radius * Math.cos(startAngle + Math.PI)
+			const midY1 = centerY + radius * Math.sin(startAngle + Math.PI)
+			pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${midX1} ${midY1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`
+		} else {
+			pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`
+		}
 
-		const pathData = [
-			`M ${centerX},${centerY}`,
-			`L ${x1},${y1}`,
-			`A ${radius},${radius} 0 ${largeArcFlag},1 ${x2},${y2}`,
-			'Z'
-		].join(' ')
+		// Use itemColors if available, otherwise fall back to rotating colors
+		const sliceColor = itemColors?.[i] ?? colors[i % colors.length]
 
 		const slice = {
 			path: pathData,
-			color: colors[i % colors.length],
-			labelX,
-			labelY,
+			color: sliceColor,
 			percentage: percentage.toFixed(1),
 			value,
 			label: labels[i]
@@ -99,8 +106,9 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	})
 
 	return (
-		<div ref={containerRef} style={{ width: '100%' }}>
+		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
 			<svg
+				ref={svgRef}
 				viewBox={`0 0 ${chartWidth} ${height}`}
 				preserveAspectRatio="xMidYMid meet"
 				className="bg-white rounded shadow"
@@ -109,7 +117,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 			>
 				{/* Title */}
 				{(label != null) && (
-					<text x={chartWidth / 2} y={topPadding - 6} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+					<text x={chartWidth / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}> {/* Standardized y=20 */}
 						{label}
 					</text>
 				)}
@@ -124,11 +132,17 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 								stroke="white"
 								strokeWidth={1}
 								onMouseMove={e => {
-									setTooltip({
-										x: e.nativeEvent.offsetX,
-										y: e.nativeEvent.offsetY,
-										text: `${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`
-									})
+									// Calculate position relative to container
+									const svgRect = svgRef.current?.getBoundingClientRect()
+									if (svgRect) {
+										const x = e.clientX - svgRect.left
+										const y = e.clientY - svgRect.top
+										setTooltip({
+											x,
+											y,
+											textLines: [`${slice.label}: ${formatValue(slice.value)} ${yLabel} (${formatValue(Number(slice.percentage))}%)`]
+										})
+									}
 								}}
 								onMouseLeave={() => setTooltip(null)}
 								style={{ cursor: 'pointer' }}
@@ -136,44 +150,46 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 						</g>
 					))}
 				</g>
-
-				{/* Tooltip */}
-				{tooltip && (
-					<g pointerEvents="none">
-						<text
-							ref={tooltipTextRef}
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
-							fontSize={13}
-							fill="#fff"
-							fontWeight={500}
-							style={{ visibility: 'hidden' }}
-						>
-							{tooltip.text}
-						</text>
-						{tooltipDims.width > 0 && (
-							<rect
-								x={tooltip.x + 10}
-								y={tooltip.y - 24}
-								width={tooltipDims.width + 16}
-								height={tooltipDims.height + 10}
-								rx={5}
-								fill="#111827"
-								opacity={0.92}
-							/>
-						)}
-						<text
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
-							fontSize={13}
-							fill="#fff"
-							fontWeight={500}
-						>
-							{tooltip.text}
-						</text>
-					</g>
-				)}
 			</svg>
+
+			{/* HTML-based tooltip overlay */}
+			{tooltip && (
+				<div
+					className="absolute pointer-events-none"
+					style={{
+						left: Math.max(
+							0,
+							Math.min(
+								tooltip.x + 10,
+								(chartWidth ?? 500) - (tooltipDims.width || 120) - 8
+							)
+						),
+						top: Math.max(
+							0,
+							Math.min(
+								tooltip.y - (tooltipDims.height || 40),
+								height - (tooltipDims.height || 40) - 8
+							)
+						),
+						zIndex: 9999
+					}}
+				>
+					{/* Hidden div for measuring tooltip dimensions */}
+					<div
+						ref={tooltipTextRef}
+						className="opacity-0 absolute whitespace-pre bg-gray-900 text-white p-2 rounded text-sm font-medium"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+
+					{/* Actual visible tooltip */}
+					<div
+						className="bg-gray-900 bg-opacity-90 text-white p-2 rounded text-sm font-medium whitespace-pre"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+				</div>
+			)}
 
 			{/* Legend keys as a flex‑wrap row */}
 			<div className="flex flex-wrap gap-2 justify-center mt-2">
@@ -184,7 +200,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 							style={{ backgroundColor: slice.color }}
 						/>
 						<span className="text-xs text-gray-900">
-							{`${slice.label} (${slice.percentage}%)`}
+							{`${slice.label}`} {/* Removed percentage */}
 						</span>
 					</div>
 				))}

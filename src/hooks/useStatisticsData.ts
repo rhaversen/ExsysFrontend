@@ -149,17 +149,84 @@ export default function useStatisticsData ({
 	}, {} as Record<OrderType['checkoutMethod'], number>)
 
 	// Time-based analysis - Orders by hour of day
-	const ordersByHour = Array(24).fill(0)
+	const ordersByHour: number[] = Array(24).fill(0)
+	// Sales by hour of day
+	const salesByHour: number[] = Array(24).fill(0)
 	orders.forEach(order => {
 		const hour = new Date(order.createdAt).getHours()
 		ordersByHour[hour]++
+		salesByHour[hour] += getOrderTotal(order, products, options)
 	})
 	const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
+	// Time-based analysis - Sales by Product Name per Hour
+	const { salesByProductByHour, productNames } = useMemo(() => {
+		const uniqueProductNamesSet = new Set<string>()
+		products.forEach(p => uniqueProductNamesSet.add(p.name))
+		const productNameList = Array.from(uniqueProductNamesSet)
+
+		const hourlySales: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			productNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			order.products.forEach(p => {
+				const product = products.find(prod => prod._id === p._id)
+				if (product) {
+					const productName = product.name
+					const value = product.price * p.quantity
+					// Ensure product name exists in the map for that hour
+					if (hourlySales[hour]?.[productName] !== undefined) {
+						hourlySales[hour][productName] += value
+					} else {
+						// This case should ideally not happen if all products are pre-scanned
+						console.warn(`Product "${productName}" not found in initial scan for hour ${hour}.`)
+					}
+				}
+			})
+			// Note: Options are not included in this breakdown.
+		})
+
+		return { salesByProductByHour: hourlySales, productNames: productNameList }
+	}, [orders, products])
+
+	// Time-based analysis - Orders by Product Name per Hour (total product count per hour)
+	const ordersByProductByHour = useMemo(() => {
+		const uniqueProductNamesSet = new Set<string>()
+		products.forEach(p => uniqueProductNamesSet.add(p.name))
+		const productNameList = Array.from(uniqueProductNamesSet)
+
+		const hourlyCounts: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			productNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			order.products.forEach(p => {
+				const product = products.find(prod => prod._id === p._id)
+				if (product) {
+					const productName = product.name
+					if (hourlyCounts[hour]?.[productName] !== undefined) {
+						hourlyCounts[hour][productName] += p.quantity
+					}
+				}
+			})
+		})
+
+		return hourlyCounts
+	}, [orders, products])
+
 	// Weekdays should start with Monday
 	const dayNames = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']
-	const ordersByDayOfWeek = Array(7).fill(0)
-	const salesByDayOfWeek = Array(7).fill(0)
+	const ordersByDayOfWeek: number[] = Array(7).fill(0)
+	const salesByDayOfWeek: number[] = Array(7).fill(0)
 	orders.forEach(order => {
 		const jsDay = new Date(order.createdAt).getDay()
 		const mondayFirst = (jsDay + 6) % 7
@@ -206,7 +273,30 @@ export default function useStatisticsData ({
 		const activityName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
 		activityOrderCounts[activityName] = (activityOrderCounts[activityName] || 0) + 1
 	})
-	const topActivities = Object.entries(activityOrderCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
+	const topActivities = Object.entries(activityOrderCounts)
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 5)
+
+	// Revenue by room, kiosk, and activity
+	const roomRevenueRecord: Record<string, number> = {}
+	const kioskRevenueRecord: Record<string, number> = {}
+	const activityRevenueRecord: Record<string, number> = {}
+
+	orders.forEach(order => {
+		const total = getOrderTotal(order, products, options)
+		const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
+		roomRevenueRecord[roomName] = (roomRevenueRecord[roomName] || 0) + total
+
+		const kioskName = kiosks.find(k => k._id === order.kioskId)?.name ?? 'Unknown'
+		kioskRevenueRecord[kioskName] = (kioskRevenueRecord[kioskName] || 0) + total
+
+		const actName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
+		activityRevenueRecord[actName] = (activityRevenueRecord[actName] || 0) + total
+	})
+
+	const revenueByRoom = topRooms.map(([name]) => roomRevenueRecord[name] || 0)
+	const revenueByKiosk = topKiosks.map(([name]) => kioskRevenueRecord[name] || 0)
+	const revenueByActivity = topActivities.map(([name]) => activityRevenueRecord[name] || 0)
 
 	// Option popularity
 	const optionQuantities: Record<string, number> = {}
@@ -271,8 +361,15 @@ export default function useStatisticsData ({
 		topRooms,
 		topKiosks,
 		topActivities,
+		revenueByRoom,
+		revenueByKiosk,
+		revenueByActivity,
 		ordersByHour,
+		salesByHour,
 		hourLabels,
+		salesByProductByHour,
+		ordersByProductByHour,
+		productNames,
 		ordersByDayOfWeek,
 		salesByDayOfWeek,
 		dayNames
