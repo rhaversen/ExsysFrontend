@@ -148,7 +148,6 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				{data.map((hourData, i) => {
 					const barX = paddingLeft + (i * graphWidth) / data.length + (graphWidth / data.length - barWidth) / 2
 					let currentY = paddingTop + graphHeight
-					const tooltipLines: string[] = [`${labels[i]}: Total ${formatValue(totals[i])} DKK`]
 					// Sort categories by value descending for consistent tooltip order
 					const sortedCategories = [...activeCategories].sort((a, b) => (hourData[b] || 0) - (hourData[a] || 0))
 
@@ -160,7 +159,8 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 								const barHeight = Math.max(0, (value / maxY) * graphHeight) // Ensure height is not negative
 								const segmentY = currentY - barHeight
 								currentY = segmentY // Move up for the next segment
-								tooltipLines.push(`${cat}: ${formatValue(value)} DKK`)
+								const total = totals[i] || 1
+								const percent = ((value / total) * 100)
 
 								return (
 									<rect
@@ -175,7 +175,11 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 											setTooltip({
 												x: e.nativeEvent.offsetX,
 												y: e.nativeEvent.offsetY,
-												textLines: tooltipLines // Use pre-calculated lines for this bar
+												textLines: [
+													`${labels[i]}`,
+													`${cat}: ${formatValue(value)} DKK`,
+													`${percent.toFixed(1)}%`
+												]
 											})
 										}}
 										// onMouseLeave is handled by the main SVG element
