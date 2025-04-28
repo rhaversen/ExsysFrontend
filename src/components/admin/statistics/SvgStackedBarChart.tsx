@@ -17,7 +17,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	categories,
 	colors,
 	width = 500,
-	height = 300, // Increased default height slightly for legend
+	height = 180,
 	label,
 	yLabel
 }) => {
@@ -181,6 +181,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 										width={barWidth}
 										height={barHeight}
 										fill={colors[cat] || '#cccccc'}
+										rx={2}
 										onMouseMove={e => {
 											setTooltip({
 												x: e.nativeEvent.offsetX,
@@ -201,18 +202,26 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				{tooltip && (
 					<g pointerEvents="none">
 						{/* Invisible text for measurement - render all lines */}
-						<text ref={tooltipTextRef} x={-9999} y={-9999} fontSize={13} fontWeight={500} style={{ whiteSpace: 'pre' }}>
+						<text
+							ref={tooltipTextRef}
+							x={tooltip.x + 18}
+							y={tooltip.y - 6}
+							fontSize={13}
+							fontWeight={500}
+							style={{ visibility: 'hidden', whiteSpace: 'pre' }}
+						>
 							{tooltip.textLines.join('\n')}
 						</text>
 						{/* Tooltip Background */}
 						{tooltipDims.width > 0 && (
 							<rect
 								x={tooltip.x + 10}
-								y={tooltip.y - tooltipDims.height - 5} // Position above cursor
+								y={tooltip.y - tooltipDims.height - 5}
 								width={tooltipDims.width + 16}
 								height={tooltipDims.height + 10}
 								rx={5}
-								fill="rgba(17, 24, 39, 0.92)" // #111827 with opacity
+								fill="#111827"
+								opacity={0.92}
 							/>
 						)}
 						{/* Tooltip Text */}
@@ -221,7 +230,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 							fill="#fff"
 							fontWeight={500}
 							x={tooltip.x + 18}
-							y={tooltip.y - tooltipDims.height + 8} // Adjust based on background
+							y={tooltip.y - tooltipDims.height + 8}
 							style={{ whiteSpace: 'pre' }}
 						>
 							{tooltip.textLines.join('\n')}
