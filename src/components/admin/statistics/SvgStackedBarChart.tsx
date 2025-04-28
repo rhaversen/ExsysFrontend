@@ -25,6 +25,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
 	const tooltipTextRef = useRef<SVGTextElement>(null)
 
+	// responsiveness: measure container width
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [chartWidth, setChartWidth] = useState<number>(width)
 
@@ -56,17 +57,10 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 	const paddingLeft = 64
 	const paddingRight = 32
-	const paddingTop = 40 // Space for title
-	const paddingBottom = 28 // More space for labels
-	const legendItemHeight = 20
-	const itemsPerRow = Math.max(1, Math.floor((chartWidth - paddingLeft - paddingRight) / 100)) // Dynamic items per row
-	const numLegendRows = Math.ceil(activeCategories.length / itemsPerRow)
-	const legendHeight = numLegendRows * legendItemHeight // Total legend height + padding
-	const totalHeight = height + legendHeight // Include legend in SVG total height
-
-	const effectiveHeight = height - legendHeight // Adjust height for legend
+	const paddingTop = 40
+	const paddingBottom = 48 // More space for labels
 	const graphWidth = chartWidth - paddingLeft - paddingRight
-	const graphHeight = effectiveHeight - paddingTop - paddingBottom
+	const graphHeight = height - paddingTop - paddingBottom
 
 	// Determine if we need to force vertical labels
 	const maxLabels = Math.max(1, Math.floor(graphWidth/100))
@@ -84,7 +78,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 	// Y axis ticks
 	const yTicks = 5
-	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => (i * maxY) / yTicks)
+	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => minY + (i * yRange) / yTicks)
 
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
@@ -92,42 +86,21 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	return (
 		<div ref={containerRef} style={{ width: '100%' }}>
 			<svg
-				viewBox={`0 0 ${chartWidth} ${totalHeight}`}
+				viewBox={`0 0 ${chartWidth} ${height}`}
 				preserveAspectRatio="xMidYMid meet"
 				className="bg-white rounded shadow"
 				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
 				onMouseLeave={() => setTooltip(null)}
 			>
-				{/* Title */}
-				{(label != null) && (
-					<text x={chartWidth / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
-						{label}
-					</text>
-				)}
-
-				{/* Legend */}
-				<g transform={`translate(${paddingLeft}, ${paddingTop + graphHeight + paddingBottom + 32})`}> {/* Move legend further below chart */}
-					{activeCategories.map((cat, i) => {
-						const colIndex = i % itemsPerRow
-						const rowIndex = Math.floor(i / itemsPerRow)
-						const xOffset = colIndex * ((graphWidth) / itemsPerRow)
-						const yOffset = rowIndex * legendItemHeight
-						return (
-							<g key={cat} transform={`translate(${xOffset}, ${yOffset})`}>
-								<rect x={0} y={-8} width={10} height={10} fill={colors[cat] || '#cccccc'} rx={2} />
-								<text x={15} y={0} fontSize={10} fill="#6b7280">{cat}</text>
-							</g>
-						)
-					})}
-				</g>
-
 				{/* Y axis grid and labels */}
 				{yTickVals.map((v, i) => {
 					const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
 					return (
 						<g key={i}>
 							<line x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
-							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">{formatValue(v)}</text>
+							<text x={paddingLeft - 6} y={y + 4} fontSize={11} textAnchor="end" fill="#6b7280">
+								{typeof v === 'number' && v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}
+							</text>
 						</g>
 					)
 				})}
@@ -136,8 +109,8 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				{labels.map((lbl, i) => {
 					const x = paddingLeft + barSpacing + i * (barWidth + barSpacing) + barWidth / 2
 					const y = forceVerticalLabels
-						? height - paddingBottom / 2 - 28 // match SvgBarChart.tsx for vertical
-						: height - paddingBottom / 2 // match SvgBarChart.tsx for horizontal
+						? height - paddingBottom / 2 - 18 // move up when vertical
+						: height - paddingBottom / 2
 					return (
 						<text
 							key={i}
@@ -160,12 +133,12 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				{/* Y axis label */}
 				{(yLabel != null) && (
 					<text
-						x={paddingLeft / 2 - 10} // Adjust position
-						y={(paddingTop + effectiveHeight - paddingBottom) / 2}
+						x={paddingLeft / 2}
+						y={height / 2}
 						fontSize={12}
 						textAnchor="middle"
 						fill="#6b7280"
-						transform={`rotate(-90 ${paddingLeft / 2 - 10},${(paddingTop + effectiveHeight - paddingBottom) / 2})`}
+						transform={`rotate(-90 ${paddingLeft / 2},${height / 2})`}
 					>
 						{yLabel}
 					</text>
@@ -214,7 +187,14 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 					)
 				})}
 
-				{/* Tooltip - Render last so it's on top */}
+				{/* Title */}
+				{(label != null) && (
+					<text x={chartWidth / 2} y={20} fontSize={15} textAnchor="middle" fill="#111827" fontWeight={600}>
+						{label}
+					</text>
+				)}
+
+				{/* Tooltip */}
 				{tooltip && (
 					<g pointerEvents="none">
 						{/* Invisible text for measurement - render all lines */}
@@ -254,6 +234,21 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 					</g>
 				)}
 			</svg>
+
+			{/* Legend keys as a flex‑wrap row */}
+			<div className="flex flex-wrap gap-2 justify-center mt-2">
+				{activeCategories.map((cat) => (
+					<div key={cat} className="flex items-center space-x-1">
+						<span
+							className="w-3 h-3 block"
+							style={{ backgroundColor: colors[cat] || '#cccccc' }}
+						/>
+						<span className="text-xs text-gray-900">
+							{cat}
+						</span>
+					</div>
+				))}
+			</div>
 		</div>
 	)
 }
