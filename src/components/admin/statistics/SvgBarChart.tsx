@@ -5,9 +5,10 @@ interface SvgBarChartProps {
   labels: string[]
   width?: number
   height?: number
-  color?: string
+  color?: string // Default color if itemColors not provided
   label?: string
   yLabel?: string
+  itemColors?: string[] // Specific colors per bar
 }
 
 const SvgBarChart: React.FC<SvgBarChartProps> = ({
@@ -15,13 +16,15 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	labels,
 	width = 500,
 	height = 180,
-	color = '#6366f1', // Tailwind indigo-500
+	color = '#6366f1', // Tailwind indigo-500 (fallback)
 	label,
-	yLabel
+	yLabel,
+	itemColors
 }) => {
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null)
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
-	const tooltipTextRef = useRef<SVGTextElement>(null)
+	const tooltipTextRef = useRef<HTMLDivElement>(null)
+	const svgRef = useRef<SVGSVGElement>(null)
 
 	// responsiveness: measure container width
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -29,8 +32,8 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
-			const bbox = tooltipTextRef.current.getBBox()
-			setTooltipDims({ width: bbox.width, height: bbox.height })
+			const rect = tooltipTextRef.current.getBoundingClientRect()
+			setTooltipDims({ width: rect.width, height: rect.height })
 		}
 	}, [tooltip])
 
@@ -45,12 +48,14 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 		return () => window.removeEventListener('resize', updateWidth)
 	}, [width])
 
-	if (data.length === 0) { return <div className="text-gray-400">{'Ingen data'}</div> }
+	if (data.length === 0 || data.every(d => d === 0)) {
+	  return <div className="text-gray-400 p-4 text-center">{'Ingen data'}</div>
+	}
 
 	// Padding for axes
 	const paddingLeft = 64
 	const paddingRight = 32
-	const paddingTop = 32
+	const paddingTop = 40
 	const paddingBottom = 48 // More space for labels
 	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = height - paddingTop - paddingBottom
@@ -75,8 +80,9 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
 	return (
-		<div ref={containerRef} style={{ width: '100%' }}>
+		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
 			<svg
+				ref={svgRef}
 				viewBox={`0 0 ${chartWidth} ${height}`}
 				preserveAspectRatio="xMidYMid meet"
 				className="bg-white rounded shadow"
@@ -140,6 +146,9 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 					const x = paddingLeft + barSpacing + i * (barWidth + barSpacing)
 					const barHeight = (value / yRange) * graphHeight
 					const y = paddingTop + graphHeight - barHeight
+					// Use itemColors if available, otherwise fall back to single color
+					const barColor = itemColors?.[i] ?? color
+
 					return (
 						<g key={i}>
 							<rect
@@ -147,14 +156,20 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 								y={y}
 								width={barWidth}
 								height={barHeight}
-								fill={color}
+								fill={barColor}
 								rx={2}
 								onMouseMove={e => {
-									setTooltip({
-										x: e.nativeEvent.offsetX,
-										y: e.nativeEvent.offsetY,
-										text: `${labels[i]}: ${formatValue(value)}`
-									})
+									// Calculate position relative to container
+									const svgRect = svgRef.current?.getBoundingClientRect()
+									if (svgRect) {
+										const x = e.clientX - svgRect.left
+										const y = e.clientY - svgRect.top
+										setTooltip({
+											x,
+											y,
+											textLines: [`${labels[i]}: ${formatValue(value)} ${yLabel}`]
+										})
+									}
 								}}
 								onMouseLeave={() => setTooltip(null)}
 								style={{ cursor: 'pointer' }}
@@ -181,44 +196,46 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 						{label}
 					</text>
 				)}
-
-				{/* Tooltip */}
-				{tooltip && (
-					<g pointerEvents="none">
-						<text
-							ref={tooltipTextRef}
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
-							fontSize={13}
-							fill="#fff"
-							fontWeight={500}
-							style={{ visibility: 'hidden' }}
-						>
-							{tooltip.text}
-						</text>
-						{tooltipDims.width > 0 && (
-							<rect
-								x={tooltip.x + 10}
-								y={tooltip.y - 24}
-								width={tooltipDims.width + 16}
-								height={tooltipDims.height + 10}
-								rx={5}
-								fill="#111827"
-								opacity={0.92}
-							/>
-						)}
-						<text
-							x={tooltip.x + 18}
-							y={tooltip.y - 6}
-							fontSize={13}
-							fill="#fff"
-							fontWeight={500}
-						>
-							{tooltip.text}
-						</text>
-					</g>
-				)}
 			</svg>
+
+			{/* HTML-based tooltip overlay */}
+			{tooltip && (
+				<div
+					className="absolute pointer-events-none"
+					style={{
+						left: (() => {
+							const tooltipW = tooltipDims.width || 120
+							const offset = 10
+							const chartW = chartWidth ?? 500
+							if (tooltip.x + offset + tooltipW + 8 < chartW) {
+								return tooltip.x + offset
+							} else {
+								return Math.max(0, tooltip.x - tooltipW - offset)
+							}
+						})(),
+						top: Math.max(
+							0,
+							tooltip.y - (tooltipDims.height || 40)/2
+						),
+						zIndex: 9999
+					}}
+				>
+					{/* Hidden div for measuring tooltip dimensions */}
+					<div
+						ref={tooltipTextRef}
+						className="opacity-0 absolute whitespace-pre bg-gray-900 text-white p-2 rounded text-sm font-medium"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+
+					{/* Actual visible tooltip */}
+					<div
+						className="bg-gray-900 bg-opacity-90 text-white p-2 rounded text-sm font-medium whitespace-pre"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
