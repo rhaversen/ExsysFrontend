@@ -150,9 +150,12 @@ export default function useStatisticsData ({
 
 	// Time-based analysis - Orders by hour of day
 	const ordersByHour: number[] = Array(24).fill(0)
+	// Sales by hour of day
+	const salesByHour: number[] = Array(24).fill(0)
 	orders.forEach(order => {
 		const hour = new Date(order.createdAt).getHours()
 		ordersByHour[hour]++
+		salesByHour[hour] += getOrderTotal(order, products, options)
 	})
 	const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
@@ -189,6 +192,35 @@ export default function useStatisticsData ({
 		})
 
 		return { salesByProductByHour: hourlySales, productNames: productNameList }
+	}, [orders, products])
+
+	// Time-based analysis - Orders by Product Name per Hour (total product count per hour)
+	const ordersByProductByHour = useMemo(() => {
+		const uniqueProductNamesSet = new Set<string>()
+		products.forEach(p => uniqueProductNamesSet.add(p.name))
+		const productNameList = Array.from(uniqueProductNamesSet)
+
+		const hourlyCounts: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			productNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			order.products.forEach(p => {
+				const product = products.find(prod => prod._id === p._id)
+				if (product) {
+					const productName = product.name
+					if (hourlyCounts[hour]?.[productName] !== undefined) {
+						hourlyCounts[hour][productName] += p.quantity
+					}
+				}
+			})
+		})
+
+		return hourlyCounts
 	}, [orders, products])
 
 	// Weekdays should start with Monday
@@ -333,8 +365,10 @@ export default function useStatisticsData ({
 		revenueByKiosk,
 		revenueByActivity,
 		ordersByHour,
+		salesByHour,
 		hourLabels,
 		salesByProductByHour,
+		ordersByProductByHour,
 		productNames,
 		ordersByDayOfWeek,
 		salesByDayOfWeek,

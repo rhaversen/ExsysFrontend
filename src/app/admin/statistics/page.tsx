@@ -596,6 +596,20 @@ export default function Page (): ReactElement {
 							)}
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								{/* Use orders by product name for the stacked bar chart */}
+								<SvgStackedBarChart
+									data={stats.ordersByProductByHour}
+									labels={stats.hourLabels}
+									categories={stats.productNames ?? []}
+									colors={(() => {
+										const names = stats.productNames ?? []
+										const cols = getColorsForNames(names)
+										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
+									})()}
+									label="Totale bestillinger fordelt på produkt pr. time"
+									yLabel="Antal"
+								/>
+
 								{/* Use sales by product name for the stacked bar chart */}
 								<SvgStackedBarChart
 									data={stats.salesByProductByHour} // Use data grouped by product name
@@ -609,13 +623,23 @@ export default function Page (): ReactElement {
 									label="Omsætning fordelt på produkt pr. time" // Update label
 									yLabel="DKK"
 								/>
+							</div>
 
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 								<SvgBarChart
 									data={stats.ordersByHour}
 									labels={stats.hourLabels}
 									label="Ordrer fordelt på tid"
 									yLabel="Antal"
 									color="#6366f1"
+								/>
+
+								<SvgBarChart
+									data={stats.salesByHour}
+									labels={stats.hourLabels}
+									label="Omsætning fordelt på tid"
+									yLabel="DKK"
+									color="#0ea5e9"
 								/>
 							</div>
 						</div>
