@@ -371,7 +371,7 @@ export default function Page (): ReactElement {
 
 			{/* Main content */}
 			<div className="flex-1 p-6 overflow-auto">
-				{loading && <div>{'Henter data...'}</div>}
+				{loading && <div className="text-center p-8">{'Henter data...'}</div>}
 				{!loading && (
 					<>
 						{/* OVERVIEW SECTION */}
