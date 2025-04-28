@@ -57,36 +57,42 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const paddingLeft = 64
 	const paddingRight = 32
 	const paddingTop = 40 // Space for title
-	const paddingBottom = 32 // Space for x-axis labels
-	const legendItemHeight = 18
+	const paddingBottom = 28 // More space for labels
+	const legendItemHeight = 20
 	const itemsPerRow = Math.max(1, Math.floor((chartWidth - paddingLeft - paddingRight) / 100)) // Dynamic items per row
 	const numLegendRows = Math.ceil(activeCategories.length / itemsPerRow)
-	const legendHeight = numLegendRows * legendItemHeight + 10 // Total legend height + padding
+	const legendHeight = numLegendRows * legendItemHeight // Total legend height + padding
+	const totalHeight = height + legendHeight // Include legend in SVG total height
 
 	const effectiveHeight = height - legendHeight // Adjust height for legend
 	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = effectiveHeight - paddingTop - paddingBottom
 
-	const barWidth = Math.max(5, graphWidth / data.length * 0.7) // 70% width bars
+	// Determine if we need to force vertical labels
+	const maxLabels = Math.max(1, Math.floor(graphWidth/100))
+	const forceVerticalLabels = labels.length > maxLabels
 
 	// Calculate total value for each bar to find maxY
 	const totals = data.map(hourData => activeCategories.reduce((sum, cat) => sum + (hourData[cat] || 0), 0))
-	const maxY = Math.max(...totals, 1) // Ensure maxY is at least 1
+	const maxY = Math.max(...totals, 1)
+	const minY = 0
+	const yRange = maxY - minY || 1
+
+	// Bar width calculation
+	const barWidth = Math.min(30, (graphWidth / data.length) * 0.7)
+	const barSpacing = (graphWidth - (barWidth * data.length)) / (data.length + 1)
 
 	// Y axis ticks
 	const yTicks = 5
 	const yTickVals = Array.from({ length: yTicks + 1 }, (_, i) => (i * maxY) / yTicks)
 
-	// Dynamically throttle X‑axis labels
-	const maxLabels = Math.max(1, Math.floor(graphWidth / 40)) // Allow more labels if space permits
-	const xTickInterval = Math.ceil(labels.length / maxLabels)
-
-	const formatValue = (val: number) => val.toLocaleString('da-DK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+	// Helper for formatting numbers: 1 decimal if needed, else integer
+	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
 	return (
 		<div ref={containerRef} style={{ width: '100%' }}>
 			<svg
-				viewBox={`0 0 ${chartWidth} ${height}`}
+				viewBox={`0 0 ${chartWidth} ${totalHeight}`}
 				preserveAspectRatio="xMidYMid meet"
 				className="bg-white rounded shadow"
 				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
@@ -100,7 +106,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				)}
 
 				{/* Legend */}
-				<g transform={`translate(${paddingLeft}, ${paddingTop + graphHeight + paddingBottom + 15})`}> {/* Position legend below chart */}
+				<g transform={`translate(${paddingLeft}, ${paddingTop + graphHeight + paddingBottom + 32})`}> {/* Move legend further below chart */}
 					{activeCategories.map((cat, i) => {
 						const colIndex = i % itemsPerRow
 						const rowIndex = Math.floor(i / itemsPerRow)
@@ -117,7 +123,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 				{/* Y axis grid and labels */}
 				{yTickVals.map((v, i) => {
-					const y = paddingTop + graphHeight - (v / maxY) * graphHeight
+					const y = paddingTop + graphHeight - ((v - minY) / yRange) * graphHeight
 					return (
 						<g key={i}>
 							<line x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y} stroke="#e5e7eb" strokeWidth={1} />
@@ -128,16 +134,23 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 				{/* X axis labels */}
 				{labels.map((lbl, i) => {
-					if (i % xTickInterval !== 0 && i !== labels.length - 1 && labels.length > maxLabels) { return null }
-					const x = paddingLeft + (i * graphWidth) / data.length + (graphWidth / data.length) / 2
+					const x = paddingLeft + barSpacing + i * (barWidth + barSpacing) + barWidth / 2
+					const y = forceVerticalLabels
+						? height - paddingBottom / 2 - 28 // match SvgBarChart.tsx for vertical
+						: height - paddingBottom / 2 // match SvgBarChart.tsx for horizontal
 					return (
 						<text
 							key={i}
 							x={x}
-							y={paddingTop + graphHeight + paddingBottom / 1.5} // Position below graph
+							y={y}
 							fontSize={11}
-							textAnchor="middle"
+							textAnchor={forceVerticalLabels ? 'end' : 'middle'}
 							fill="#6b7280"
+							transform={
+								forceVerticalLabels
+									? `rotate(-90, ${x}, ${y})`
+									: undefined
+							}
 						>
 							{lbl}
 						</text>
