@@ -323,21 +323,6 @@ export default function Page (): ReactElement {
 							</div>
 						</button>
 						<button
-							onClick={() => scrollToSection('customers')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
-								clickedSection === 'customers'
-									? 'bg-gray-300 text-gray-800'
-									: activeSection === 'customers'
-										? 'bg-blue-600 text-white'
-										: 'bg-white text-gray-700 hover:bg-gray-200'
-							}`}
-						>
-							<div className="flex items-center">
-								<FiUsers className="mr-2" />
-								{'Lokaler, Kiosker og Aktiviteter\r'}
-							</div>
-						</button>
-						<button
 							onClick={() => scrollToSection('time')}
 							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
 								clickedSection === 'time'
@@ -350,6 +335,21 @@ export default function Page (): ReactElement {
 							<div className="flex items-center">
 								<FiClock className="mr-2" />
 								{'Tidsmønstre\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('customers')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'customers'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'customers'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiUsers className="mr-2" />
+								{'Lokaler, Kiosker og Aktiviteter\r'}
 							</div>
 						</button>
 						<button
@@ -566,56 +566,6 @@ export default function Page (): ReactElement {
 							</div>
 						</div>
 
-						{/* CUSTOMERS SECTION (LOCATIONS) */}
-						<div ref={customersRef} className="mb-12">
-							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
-								<FiUsers className="mr-2 text-blue-600" />
-								{'Lokaler, Kiosker og Aktiviteter\r'}
-							</h2>
-
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-								<SvgPieChart
-									data={stats.topRooms.map(r => r[1])}
-									labels={stats.topRooms.map(r => r[0])}
-									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
-									label="Ordrevolumen per lokale"
-								/>
-								<SvgPieChart
-									data={stats.topKiosks.map(k => k[1])}
-									labels={stats.topKiosks.map(k => k[0])}
-									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
-									label="Ordrevolumen per kiosk"
-								/>
-								<SvgPieChart
-									data={stats.topActivities.map(a => a[1])}
-									labels={stats.topActivities.map(a => a[0])}
-									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
-									label="Ordrevolumen per aktivitet"
-								/>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-								<SvgPieChart
-									data={stats.revenueByRoom}
-									labels={stats.topRooms.map(r => r[0])}
-									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
-									label="Omsætning per lokale"
-								/>
-								<SvgPieChart
-									data={stats.revenueByKiosk}
-									labels={stats.topKiosks.map(k => k[0])}
-									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
-									label="Omsætning per kiosk"
-								/>
-								<SvgPieChart
-									data={stats.revenueByActivity}
-									labels={stats.topActivities.map(a => a[0])}
-									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
-									label="Omsætning per aktivitet"
-								/>
-							</div>
-						</div>
-
 						{/* TIME PATTERNS SECTION */}
 						<div ref={timeRef} className="mb-12 flex flex-col gap-2">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
@@ -668,6 +618,56 @@ export default function Page (): ReactElement {
 										/>
 									</>
 								)}
+							</div>
+						</div>
+
+						{/* CUSTOMERS SECTION (LOCATIONS) */}
+						<div ref={customersRef} className="mb-12">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiUsers className="mr-2 text-blue-600" />
+								{'Lokaler, Kiosker og Aktiviteter\r'}
+							</h2>
+
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+								<SvgPieChart
+									data={stats.topRooms.map(r => r[1])}
+									labels={stats.topRooms.map(r => r[0])}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
+									label="Ordrevolumen per lokale"
+								/>
+								<SvgPieChart
+									data={stats.topKiosks.map(k => k[1])}
+									labels={stats.topKiosks.map(k => k[0])}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
+									label="Ordrevolumen per kiosk"
+								/>
+								<SvgPieChart
+									data={stats.topActivities.map(a => a[1])}
+									labels={stats.topActivities.map(a => a[0])}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
+									label="Ordrevolumen per aktivitet"
+								/>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<SvgPieChart
+									data={stats.revenueByRoom}
+									labels={stats.topRooms.map(r => r[0])}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
+									label="Omsætning per lokale"
+								/>
+								<SvgPieChart
+									data={stats.revenueByKiosk}
+									labels={stats.topKiosks.map(k => k[0])}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
+									label="Omsætning per kiosk"
+								/>
+								<SvgPieChart
+									data={stats.revenueByActivity}
+									labels={stats.topActivities.map(a => a[0])}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
+									label="Omsætning per aktivitet"
+								/>
 							</div>
 						</div>
 
