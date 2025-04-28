@@ -259,20 +259,26 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				<div
 					className="absolute pointer-events-none"
 					style={{
-						left: Math.max(
-							0,
-							Math.min(
-								tooltip.x + 10,
-								(chartWidth ?? 500) - (tooltipDims.width || 120) - 8
+						left: (() => {
+							const tooltipW = tooltipDims.width || 120
+							const offset = 10
+							const chartW = chartWidth ?? 500
+							// Prefer right, but if not enough space, place to the left of cursor
+							if (tooltip.x + offset + tooltipW + 8 < chartW) {
+								return tooltip.x + offset
+							} else {
+								return Math.max(0, tooltip.x - tooltipW - offset)
+							}
+						})(),
+						top: (() => {
+							const tooltipH = tooltipDims.height || 40
+							const offset = 8
+							 // Prefer below, but clamp to chart bottom if not enough space
+							return Math.min(
+								tooltip.y + offset,
+								height - tooltipH - offset
 							)
-						),
-						top: Math.max(
-							0,
-							Math.min(
-								tooltip.y - (tooltipDims.height || 40),
-								height - (tooltipDims.height || 40) - 8
-							)
-						),
+						})(),
 						zIndex: 9999
 					}}
 				>
