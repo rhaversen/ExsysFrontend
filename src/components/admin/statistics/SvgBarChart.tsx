@@ -5,9 +5,10 @@ interface SvgBarChartProps {
   labels: string[]
   width?: number
   height?: number
-  color?: string
+  color?: string // Default color if itemColors not provided
   label?: string
   yLabel?: string
+  itemColors?: string[] // Specific colors per bar
 }
 
 const SvgBarChart: React.FC<SvgBarChartProps> = ({
@@ -15,9 +16,10 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	labels,
 	width = 500,
 	height = 180,
-	color = '#6366f1', // Tailwind indigo-500
+	color = '#6366f1', // Tailwind indigo-500 (fallback)
 	label,
-	yLabel
+	yLabel,
+	itemColors
 }) => {
 	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
@@ -140,6 +142,9 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 					const x = paddingLeft + barSpacing + i * (barWidth + barSpacing)
 					const barHeight = (value / yRange) * graphHeight
 					const y = paddingTop + graphHeight - barHeight
+					// Use itemColors if available, otherwise fall back to single color
+					const barColor = itemColors?.[i] ?? color
+
 					return (
 						<g key={i}>
 							<rect
@@ -147,7 +152,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 								y={y}
 								width={barWidth}
 								height={barHeight}
-								fill={color}
+								fill={barColor}
 								rx={2}
 								onMouseMove={e => {
 									setTooltip({

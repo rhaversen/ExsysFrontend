@@ -6,7 +6,8 @@ interface SvgPieChartProps {
   width?: number
   height?: number
   label?: string
-  colors?: string[]
+  colors?: string[] // Default rotating colors
+  itemColors?: string[] // Specific colors per slice
 }
 
 const SvgPieChart: React.FC<SvgPieChartProps> = ({
@@ -15,7 +16,8 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	width = 500,
 	height = 250,
 	label,
-	colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#8b5cf6']
+	colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#8b5cf6'],
+	itemColors // New prop for specific colors
 }) => {
 	// Hooks must be called at the top level
 	const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null)
@@ -72,35 +74,23 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		const x2 = centerX + radius * Math.cos(endAngle)
 		const y2 = centerY + radius * Math.sin(endAngle)
 
-		const midAngle = startAngle + angle / 2
-		const labelRadius = radius * 0.75
-		const labelX = centerX + labelRadius * Math.cos(midAngle)
-		const labelY = centerY + labelRadius * Math.sin(midAngle)
-
 		// build pathData; special case for a full circle
 		let pathData: string
-		if (percentage === 100) {
-			// two half‐arcs to draw a full circle
-			pathData = [
-				`M ${centerX},${centerY - radius}`,
-				`A ${radius},${radius} 0 1,1 ${centerX},${centerY + radius}`,
-				`A ${radius},${radius} 0 1,1 ${centerX},${centerY - radius}`,
-				'Z'
-			].join(' ')
+		if (Math.abs(angle - 2 * Math.PI) < 0.001) { // Check for nearly full circle
+			// Draw two half circles to make a full one
+			const midX1 = centerX + radius * Math.cos(startAngle + Math.PI)
+			const midY1 = centerY + radius * Math.sin(startAngle + Math.PI)
+			pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${midX1} ${midY1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`
 		} else {
-			pathData = [
-				`M ${centerX},${centerY}`,
-				`L ${x1},${y1}`,
-				`A ${radius},${radius} 0 ${largeArcFlag},1 ${x2},${y2}`,
-				'Z'
-			].join(' ')
+			pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`
 		}
+
+		// Use itemColors if available, otherwise fall back to rotating colors
+		const sliceColor = itemColors?.[i] ?? colors[i % colors.length]
 
 		const slice = {
 			path: pathData,
-			color: colors[i % colors.length],
-			labelX,
-			labelY,
+			color: sliceColor,
 			percentage: percentage.toFixed(1),
 			value,
 			label: labels[i]
