@@ -198,7 +198,7 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 									setTooltip({
 										x,
 										y,
-										textLines: [`${labels[i]}: ${formatValue(data[i])}`]
+										textLines: [`${labels[i]}: ${formatValue(data[i])} ${yLabel}`]
 									})
 								}
 							}}

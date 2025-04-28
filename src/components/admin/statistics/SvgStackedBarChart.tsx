@@ -184,7 +184,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 													y,
 													textLines: [
 														`${labels[i]}`,
-														`${cat}: ${formatValue(value)} DKK`,
+														`${cat}: ${formatValue(value)} ${yLabel}`,
 														`${percent.toFixed(1)}%`
 													]
 												})

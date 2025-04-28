@@ -167,7 +167,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 										setTooltip({
 											x,
 											y,
-											textLines: [`${labels[i]}: ${formatValue(value)}`]
+											textLines: [`${labels[i]}: ${formatValue(value)} ${yLabel}`]
 										})
 									}
 								}}

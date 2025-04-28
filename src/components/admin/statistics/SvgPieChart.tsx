@@ -6,6 +6,7 @@ interface SvgPieChartProps {
   width?: number
   height?: number
   label?: string
+  yLabel?: string
   colors?: string[] // Default rotating colors
   itemColors?: string[] // Specific colors per slice
 }
@@ -16,6 +17,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	width = 500,
 	height = 250,
 	label,
+	yLabel,
 	colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#8b5cf6'],
 	itemColors // New prop for specific colors
 }) => {
@@ -138,7 +140,7 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 										setTooltip({
 											x,
 											y,
-											textLines: [`${slice.label}: ${formatValue(slice.value)} (${formatValue(Number(slice.percentage))}%)`]
+											textLines: [`${slice.label}: ${formatValue(slice.value)} ${yLabel} (${formatValue(Number(slice.percentage))}%)`]
 										})
 									}
 								}}
