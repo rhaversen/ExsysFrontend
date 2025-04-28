@@ -31,6 +31,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
+			// Get bounding box of the invisible text to measure width/height
 			const bbox = tooltipTextRef.current.getBBox()
 			setTooltipDims({ width: bbox.width, height: bbox.height })
 		}
@@ -192,21 +193,22 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 				{/* Tooltip */}
 				{tooltip && (
 					<g pointerEvents="none">
+						{/* Invisible text for measurement - render all lines */}
 						<text
 							ref={tooltipTextRef}
 							x={tooltip.x + 18}
 							y={tooltip.y - 6}
 							fontSize={13}
-							fill="#fff"
 							fontWeight={500}
-							style={{ visibility: 'hidden' }}
+							style={{ visibility: 'hidden', whiteSpace: 'pre' }}
 						>
 							{tooltip.text}
 						</text>
+						{/* Tooltip Background */}
 						{tooltipDims.width > 0 && (
 							<rect
 								x={tooltip.x + 10}
-								y={tooltip.y - 24}
+								y={tooltip.y - tooltipDims.height - 5}
 								width={tooltipDims.width + 16}
 								height={tooltipDims.height + 10}
 								rx={5}
@@ -214,6 +216,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 								opacity={0.92}
 							/>
 						)}
+						{/* Tooltip Text */}
 						<text
 							x={tooltip.x + 18}
 							y={tooltip.y - 6}
