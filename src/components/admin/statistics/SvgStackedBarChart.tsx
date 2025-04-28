@@ -1,6 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from 'react'
 import { ImParagraphLeft, ImParagraphJustify } from 'react-icons/im'
-import { MdBarChart, MdPercent } from 'react-icons/md'
 
 interface SvgStackedBarChartProps {
 	data: Array<Record<string, number>>; // Array index = bar (e.g., hour), Record maps category to value
@@ -95,7 +94,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 	return (
 		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
-			{/* Toggle button group - above chart, not overlayed */}
+			{/* Toggle button group - above chart, not overlaid */}
 			<div className="flex justify-end mb-3 gap-2">
 				<button
 					type="button"
