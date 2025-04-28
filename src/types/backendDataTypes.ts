@@ -230,6 +230,7 @@ export interface ConfigsType {
 		kioskInactivityTimeoutMs: number
 		kioskInactivityTimeoutWarningMs: number
 		kioskOrderConfirmationTimeoutMs: number
+		disabledWeekdays: number[]
 	}
 	createdAt: Date
 	updatedAt: Date

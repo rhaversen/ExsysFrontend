@@ -8,13 +8,14 @@ import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
+import ConfigWeekdaysEditor from '@/components/admin/ConfigWeekdaysEditor'
 import EntitiesTimelineOverview from '@/components/admin/EntitiesTimelineOverview'
 import KioskRefresh from '@/components/admin/KioskRefresh'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
+import type { OrderType, KioskType, ProductType, ConfigsType } from '@/types/backendDataTypes'
 
 const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
 	href: string
@@ -40,6 +41,7 @@ export default function Page (): ReactElement | null {
 	const [hasMounted, setHasMounted] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
+	const [configs, setConfigs] = useState<ConfigsType | null>(null)
 	const [socket, setSocket] = useState<Socket | null>(null)
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
@@ -103,13 +105,23 @@ export default function Page (): ReactElement | null {
 		}
 	}, [API_URL, addError])
 
+	const fetchConfigs = useCallback(async (): Promise<void> => {
+		try {
+			const response = await axios.get<ConfigsType>(`${API_URL}/v1/configs`, { withCredentials: true })
+			setConfigs(response.data)
+		} catch (error) {
+			addError(error)
+		}
+	}, [API_URL, addError])
+
 	useEffect(() => {
 		setHasMounted(true)
 		fetchPendingOrders().catch(() => { setPendingOrders(0) })
 		fetchTotalOrdersToday().catch(() => { setTotalOrdersToday(0) })
 		fetchKiosks().catch(() => { setKiosks([]) })
 		fetchProducts().catch(() => { setProducts([]) })
-	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
+		fetchConfigs().catch(() => { setConfigs(null) })
+	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts, fetchConfigs])
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) { return }
@@ -146,6 +158,15 @@ export default function Page (): ReactElement | null {
 		id => {
 			setProducts(prev => prev.filter(p => p._id !== id))
 		}
+	)
+
+	// Listen for config CUD events
+	useEntitySocketListeners<ConfigsType>(
+		socket,
+		'configsUpdated',
+		config => setConfigs(config),
+		config => setConfigs(config),
+		() => {}
 	)
 
 	if (!hasMounted) { return null }
@@ -197,6 +218,8 @@ export default function Page (): ReactElement | null {
 						<KioskRefresh />
 						{/* All Kiosks Status Manager */}
 						<AllKiosksStatusManager kiosks={kiosks} products={products} />
+						{/* Config Weekdays Editor */}
+						<ConfigWeekdaysEditor configs={configs} />
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}
