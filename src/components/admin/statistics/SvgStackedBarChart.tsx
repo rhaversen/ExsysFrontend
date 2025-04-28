@@ -47,7 +47,10 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 		return () => window.removeEventListener('resize', updateWidth)
 	}, [width])
 
-	if (data.length === 0 || categories.length === 0) {
+	// Filter categories with sales only
+	const activeCategories = categories.filter(cat => data.some(d => (d[cat] || 0) > 0))
+
+	if (data.length === 0 || activeCategories.length === 0) {
 		return <div className="text-gray-400 p-4 text-center">{'Ingen data at vise'}</div>
 	}
 
@@ -57,7 +60,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const paddingBottom = 32 // Space for x-axis labels
 	const legendItemHeight = 18
 	const itemsPerRow = Math.max(1, Math.floor((chartWidth - paddingLeft - paddingRight) / 100)) // Dynamic items per row
-	const numLegendRows = Math.ceil(categories.length / itemsPerRow)
+	const numLegendRows = Math.ceil(activeCategories.length / itemsPerRow)
 	const legendHeight = numLegendRows * legendItemHeight + 10 // Total legend height + padding
 
 	const effectiveHeight = height - legendHeight // Adjust height for legend
@@ -67,7 +70,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 	const barWidth = Math.max(5, graphWidth / data.length * 0.7) // 70% width bars
 
 	// Calculate total value for each bar to find maxY
-	const totals = data.map(hourData => categories.reduce((sum, cat) => sum + (hourData[cat] || 0), 0))
+	const totals = data.map(hourData => activeCategories.reduce((sum, cat) => sum + (hourData[cat] || 0), 0))
 	const maxY = Math.max(...totals, 1) // Ensure maxY is at least 1
 
 	// Y axis ticks
@@ -98,7 +101,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 				{/* Legend */}
 				<g transform={`translate(${paddingLeft}, ${paddingTop + graphHeight + paddingBottom + 15})`}> {/* Position legend below chart */}
-					{categories.map((cat, i) => {
+					{activeCategories.map((cat, i) => {
 						const colIndex = i % itemsPerRow
 						const rowIndex = Math.floor(i / itemsPerRow)
 						const xOffset = colIndex * ((graphWidth) / itemsPerRow)
@@ -161,7 +164,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 					let currentY = paddingTop + graphHeight
 					const tooltipLines: string[] = [`${labels[i]}: Total ${formatValue(totals[i])} DKK`]
 					// Sort categories by value descending for consistent tooltip order
-					const sortedCategories = [...categories].sort((a, b) => (hourData[b] || 0) - (hourData[a] || 0))
+					const sortedCategories = [...activeCategories].sort((a, b) => (hourData[b] || 0) - (hourData[a] || 0))
 
 					return (
 						<g key={i} className="bar-group">
