@@ -94,39 +94,6 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 
 	return (
 		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
-			{/* Toggle button group - above chart, not overlaid */}
-			<div className="flex justify-end mb-3 gap-2">
-				<button
-					type="button"
-					aria-label="Absolut"
-					onClick={() => setRelativeMode(false)}
-					className={`flex items-center justify-center w-8 h-8 rounded-full border transition
-						${!relativeMode
-			? 'bg-blue-600 text-white border-blue-600 shadow'
-			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'}
-					`}
-					style={{ outline: 'none' }}
-				>
-					<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
-						<ImParagraphLeft size={18} />
-					</span>
-				</button>
-				<button
-					type="button"
-					aria-label="Relativ (100%)"
-					onClick={() => setRelativeMode(true)}
-					className={`flex items-center justify-center w-8 h-8 rounded-full border transition
-						${relativeMode
-			? 'bg-blue-600 text-white border-blue-600 shadow'
-			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'}
-					`}
-					style={{ outline: 'none' }}
-				>
-					<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
-						<ImParagraphJustify size={18} />
-					</span>
-				</button>
-			</div>
 			<svg
 				ref={svgRef}
 				viewBox={`0 0 ${chartWidth} ${height}`}
@@ -135,6 +102,63 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
 				onMouseLeave={() => setTooltip(null)}
 			>
+				{/* Toggle buttons in SVG, top-right */}
+				<foreignObject
+					x={chartWidth - paddingRight - 15}
+					y={5}
+					width={44}
+					height={24}
+					style={{ pointerEvents: 'none' }}
+				>
+					<div style={{ display: 'flex', gap: 2, pointerEvents: 'auto' }}>
+						<button
+							type="button"
+							aria-label="Absolut"
+							onClick={() => setRelativeMode(false)}
+							className={`flex items-center justify-center w-5 h-5 rounded border transition
+								${!relativeMode
+			? 'bg-blue-600 text-white border-blue-600 shadow'
+			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'
+		}`}
+							style={{
+								outline: 'none',
+								padding: 0,
+								minWidth: 0,
+								minHeight: 0,
+								borderRadius: 3,
+								fontSize: 0,
+								margin: 0
+							}}
+						>
+							<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
+								<ImParagraphLeft size={13} />
+							</span>
+						</button>
+						<button
+							type="button"
+							aria-label="Relativ (100%)"
+							onClick={() => setRelativeMode(true)}
+							className={`flex items-center justify-center w-5 h-5 rounded border transition
+								${relativeMode
+			? 'bg-blue-600 text-white border-blue-600 shadow'
+			: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'
+		}`}
+							style={{
+								outline: 'none',
+								padding: 0,
+								minWidth: 0,
+								minHeight: 0,
+								borderRadius: 3,
+								fontSize: 0,
+								margin: 0
+							}}
+						>
+							<span style={{ display: 'inline-block', transform: 'rotate(-90deg)' }}>
+								<ImParagraphJustify size={13} />
+							</span>
+						</button>
+					</div>
+				</foreignObject>
 				{/* Y axis grid and labels */}
 				{yTickVals.map((v, i) => {
 					const y = paddingTop + graphHeight - ((v - minY) / (relativeMode ? 1 : yRange)) * graphHeight
