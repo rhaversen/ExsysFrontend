@@ -9,9 +9,11 @@ import OrdersTable from '@/components/admin/statistics/OrdersTable'
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
 import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
+import SvgStackedBarChart from '@/components/admin/statistics/SvgStackedBarChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import useStatisticsData from '@/hooks/useStatisticsData'
+import { getColorsForNames } from '@/lib/colorUtils'
 import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
 
 type StatSection = 'overview' | 'sales' | 'products' | 'customers' | 'time' | 'orders';
@@ -273,7 +275,7 @@ export default function Page (): ReactElement {
 					</div>
 
 					{/* Navigation sections */}
-					<div className="space-y-1">
+					<div className="hidden md:block space-y-1">
 						<p className="text-sm font-medium text-gray-700 mb-2">{'Sektioner'}</p>
 						<button
 							onClick={() => scrollToSection('overview')}
@@ -321,21 +323,6 @@ export default function Page (): ReactElement {
 							</div>
 						</button>
 						<button
-							onClick={() => scrollToSection('customers')}
-							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
-								clickedSection === 'customers'
-									? 'bg-gray-300 text-gray-800'
-									: activeSection === 'customers'
-										? 'bg-blue-600 text-white'
-										: 'bg-white text-gray-700 hover:bg-gray-200'
-							}`}
-						>
-							<div className="flex items-center">
-								<FiUsers className="mr-2" />
-								{'Lokaler og Kiosker\r'}
-							</div>
-						</button>
-						<button
 							onClick={() => scrollToSection('time')}
 							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
 								clickedSection === 'time'
@@ -348,6 +335,21 @@ export default function Page (): ReactElement {
 							<div className="flex items-center">
 								<FiClock className="mr-2" />
 								{'Tidsmønstre\r'}
+							</div>
+						</button>
+						<button
+							onClick={() => scrollToSection('customers')}
+							className={`px-4 py-2 text-sm font-medium rounded w-full text-left ${
+								clickedSection === 'customers'
+									? 'bg-gray-300 text-gray-800'
+									: activeSection === 'customers'
+										? 'bg-blue-600 text-white'
+										: 'bg-white text-gray-700 hover:bg-gray-200'
+							}`}
+						>
+							<div className="flex items-center">
+								<FiUsers className="mr-2" />
+								{'Lokaler, Kiosker og Aktiviteter\r'}
 							</div>
 						</button>
 						<button
@@ -371,32 +373,39 @@ export default function Page (): ReactElement {
 
 			{/* Main content */}
 			<div className="flex-1 p-6 overflow-auto">
-				{loading && <div>{'Henter data...'}</div>}
+				{loading && <div className="text-center p-8">{'Henter data...'}</div>}
 				{!loading && (
 					<>
 						{/* OVERVIEW SECTION */}
-						<div ref={overviewRef} className="mb-8">
+						<div ref={overviewRef} className="mb-8 flex flex-col gap-2">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiBarChart2 className="mr-2 text-blue-600" />
-								{'Overblik\r'}
+								{'Overblik'}
 							</h2>
 
-							<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+							{/* Finansielle nøgletal */}
+							<h3 className="text-lg font-semibold">{'Finansielle nøgletal'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div className="bg-blue-50 rounded p-3" title="Total omsætning for den valgte periode">
 									<div className="text-xs text-blue-700">{'Omsætning'}</div>
 									<div className="text-xl font-bold">{stats.totalSalesDisplay}</div>
-								</div>
-								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
-									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
-									<div className="text-xl font-bold">{stats.totalOrders}</div>
 								</div>
 								<div className="bg-purple-50 rounded p-3" title="Gennemsnitlig beløb pr. bestilling">
 									<div className="text-xs text-purple-700">{'Gns. pris/ordre'}</div>
 									<div className="text-xl font-bold">{stats.avgOrderValueDisplay}</div>
 								</div>
-								<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
-									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
-									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
+								<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
+									<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
+									<div className="text-xl font-bold">{stats.deliveryPercentDisplay}</div>
+								</div>
+							</div>
+
+							{/* Ordre statistikker */}
+							<h3 className="text-lg font-semibold">{'Ordre statistikker'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
+									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
+									<div className="text-xl font-bold">{stats.totalOrders}</div>
 								</div>
 								<div className="bg-indigo-50 rounded p-3" title="Gennemsnitligt antal produkter i hver bestilling">
 									<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
@@ -406,9 +415,14 @@ export default function Page (): ReactElement {
 									<div className="text-xs text-rose-700">{'Travleste tidspunkt'}</div>
 									<div className="text-xl font-bold">{stats.busiestTimeDisplay}</div>
 								</div>
-								<div className="bg-teal-50 rounded p-3" title="Procentdel af ordrer der er markeret som leveret">
-									<div className="text-xs text-teal-700">{'Leveringsprocent'}</div>
-									<div className="text-xl font-bold">{stats.deliveryPercentDisplay}</div>
+							</div>
+
+							{/* Top elementer */}
+							<h3 className="text-lg font-semibold">{'Top elementer'}</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div className="bg-amber-50 rounded p-3" title="Det produkt der er solgt flest af (med antal)">
+									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
+									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
 								</div>
 								<div className="bg-cyan-50 rounded p-3" title="Lokalet med flest bestillinger (med antal)">
 									<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
@@ -433,7 +447,7 @@ export default function Page (): ReactElement {
 									data={stats.chartData.sales}
 									labels={stats.chartLabels}
 									label={`Omsætning pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
-									yLabel="DKK"
+									yLabel="kr."
 									color="#2563eb"
 									showTodayIndicator={timeRange === 'month'}
 								/>
@@ -441,7 +455,7 @@ export default function Page (): ReactElement {
 									data={stats.chartData.orders}
 									labels={stats.chartLabels}
 									label={`Ordrer pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
-									yLabel="Antal"
+									yLabel="stk."
 									color="#16a34a"
 									showTodayIndicator={timeRange === 'month'}
 								/>
@@ -452,7 +466,7 @@ export default function Page (): ReactElement {
 									data={stats.chartData.avgValue}
 									labels={stats.chartLabels}
 									label={`Gns. pris pr. ordre ${timeRange === 'today' ? '(time)' : '(dag)'}`}
-									yLabel="DKK"
+									yLabel="kr."
 									color="#a21caf"
 									showTodayIndicator={timeRange === 'month'}
 								/>
@@ -521,16 +535,16 @@ export default function Page (): ReactElement {
 								<SvgBarChart
 									data={stats.topProductsByQuantity.map(p => p[1])}
 									labels={stats.topProductsByQuantity.map(p => p[0])}
+									itemColors={getColorsForNames(stats.topProductsByQuantity.map(p => p[0]))}
 									label="Top 5 mest solgte produkter"
-									yLabel="Antal"
-									color="#14b8a6"
+									yLabel="stk."
 								/>
 								<SvgBarChart
 									data={stats.topProductsByRevenue.map(p => p[1])}
 									labels={stats.topProductsByRevenue.map(p => p[0])}
+									itemColors={getColorsForNames(stats.topProductsByRevenue.map(p => p[0]))}
 									label="Top 5 produkter efter omsætning"
-									yLabel="DKK"
-									color="#ec4899"
+									yLabel="kr."
 								/>
 							</div>
 
@@ -538,16 +552,94 @@ export default function Page (): ReactElement {
 								<SvgBarChart
 									data={stats.topOptionsByQuantity.map(o => o[1])}
 									labels={stats.topOptionsByQuantity.map(o => o[0])}
+									itemColors={getColorsForNames(stats.topOptionsByQuantity.map(o => o[0]))}
 									label="Top 5 mest solgte tilvalg"
-									yLabel="Antal"
-									color="#0ea5e9"
+									yLabel="stk."
 								/>
 								<SvgBarChart
 									data={stats.topOptionsByRevenue.map(o => o[1])}
 									labels={stats.topOptionsByRevenue.map(o => o[0])}
+									itemColors={getColorsForNames(stats.topOptionsByRevenue.map(o => o[0]))}
 									label="Top 5 tilvalg efter omsætning"
-									yLabel="DKK"
-									color="#f59e42"
+									yLabel="kr."
+								/>
+							</div>
+						</div>
+
+						{/* TIME PATTERNS SECTION */}
+						<div ref={timeRef} className="mb-12 flex flex-col gap-2">
+							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
+								<FiClock className="mr-2 text-blue-600" />
+								{'Tidsmønstre\r'}
+							</h2>
+
+							{/* Conditionally render weekday chart */}
+							{timeRange !== 'today' && (
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+									<>
+										<SvgBarChart
+											data={stats.ordersByDayOfWeek}
+											labels={stats.dayNames}
+											label="Ordrer fordelt på ugedag"
+											yLabel="stk."
+											color="#f97316"
+										/>
+										<SvgBarChart
+											data={stats.salesByDayOfWeek}
+											labels={stats.dayNames}
+											label="Omsætning fordelt på ugedag"
+											yLabel="kr."
+											color="#f59e0b"
+										/>
+									</>
+								</div>
+							)}
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								{/* Use orders by product name for the stacked bar chart */}
+								<SvgStackedBarChart
+									data={stats.ordersByProductByHour}
+									labels={stats.hourLabels}
+									categories={stats.productNames ?? []}
+									colors={(() => {
+										const names = stats.productNames ?? []
+										const cols = getColorsForNames(names)
+										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
+									})()}
+									label="Totale bestillinger fordelt på produkt pr. time"
+									yLabel="stk."
+								/>
+
+								{/* Use sales by product name for the stacked bar chart */}
+								<SvgStackedBarChart
+									data={stats.salesByProductByHour} // Use data grouped by product name
+									labels={stats.hourLabels}
+									categories={stats.productNames ?? []} // Use product names as categories
+									colors={(() => {
+										const names = stats.productNames ?? []
+										const cols = getColorsForNames(names)
+										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
+									})()} // Map product names to their colors
+									label="Omsætning fordelt på produkt pr. time" // Update label
+									yLabel="kr."
+								/>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+								<SvgBarChart
+									data={stats.ordersByHour}
+									labels={stats.hourLabels}
+									label="Ordrer fordelt på tid"
+									yLabel="stk."
+									color="#6366f1"
+								/>
+
+								<SvgBarChart
+									data={stats.salesByHour}
+									labels={stats.hourLabels}
+									label="Omsætning fordelt på tid"
+									yLabel="kr."
+									color="#0ea5e9"
 								/>
 							</div>
 						</div>
@@ -556,65 +648,55 @@ export default function Page (): ReactElement {
 						<div ref={customersRef} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiUsers className="mr-2 text-blue-600" />
-								{'Lokaler og Kiosker\r'}
+								{'Lokaler, Kiosker og Aktiviteter\r'}
 							</h2>
 
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
 								<SvgPieChart
 									data={stats.topRooms.map(r => r[1])}
 									labels={stats.topRooms.map(r => r[0])}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
 									label="Ordrevolumen per lokale"
+									yLabel='stk.'
 								/>
 								<SvgPieChart
 									data={stats.topKiosks.map(k => k[1])}
 									labels={stats.topKiosks.map(k => k[0])}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
 									label="Ordrevolumen per kiosk"
+									yLabel='stk.'
 								/>
 								<SvgPieChart
 									data={stats.topActivities.map(a => a[1])}
 									labels={stats.topActivities.map(a => a[0])}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
 									label="Ordrevolumen per aktivitet"
+									yLabel='stk.'
 								/>
 							</div>
-						</div>
 
-						{/* TIME PATTERNS SECTION */}
-						<div ref={timeRef} className="mb-12">
-							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
-								<FiClock className="mr-2 text-blue-600" />
-								{'Tidsmønstre\r'}
-							</h2>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<SvgBarChart
-									data={stats.ordersByHour}
-									labels={stats.hourLabels}
-									label="Ordrer fordelt på tid"
-									yLabel="Antal"
-									color="#6366f1"
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<SvgPieChart
+									data={stats.revenueByRoom}
+									labels={stats.topRooms.map(r => r[0])}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
+									label="Omsætning per lokale"
+									yLabel='kr.'
 								/>
-
-								{/* Conditionally render weekday chart */}
-								{timeRange !== 'today' && (
-									<SvgBarChart
-										data={stats.ordersByDayOfWeek}
-										labels={stats.dayNames}
-										label="Ordrer fordelt på ugedag"
-										yLabel="Antal"
-										color="#f97316"
-									/>
-								)}
-
-								{/* If we only have today's data, show something else useful in the second slot */}
-								{timeRange === 'today' && (
-									<SvgBarChart
-										data={stats.salesByDayOfWeek}
-										labels={stats.dayNames}
-										label="Omsætning fordelt på ugedag"
-										yLabel="DKK"
-										color="#f97316"
-									/>
-								)}
+								<SvgPieChart
+									data={stats.revenueByKiosk}
+									labels={stats.topKiosks.map(k => k[0])}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
+									label="Omsætning per kiosk"
+									yLabel='kr.'
+								/>
+								<SvgPieChart
+									data={stats.revenueByActivity}
+									labels={stats.topActivities.map(a => a[0])}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
+									label="Omsætning per aktivitet"
+									yLabel='kr.'
+								/>
 							</div>
 						</div>
 
