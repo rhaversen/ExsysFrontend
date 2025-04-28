@@ -237,7 +237,7 @@ const SvgStackedBarChart: React.FC<SvgStackedBarChartProps> = ({
 												})
 											}
 										}}
-										// onMouseLeave is handled by the main SVG element
+										onMouseLeave={() => setTooltip(null)}
 										style={{ cursor: 'pointer' }}
 									/>
 								)
