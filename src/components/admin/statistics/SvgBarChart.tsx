@@ -52,7 +52,7 @@ const SvgBarChart: React.FC<SvgBarChartProps> = ({
 	// Padding for axes
 	const paddingLeft = 64
 	const paddingRight = 32
-	const paddingTop = 32
+	const paddingTop = 40
 	const paddingBottom = 48 // More space for labels
 	const graphWidth = chartWidth - paddingLeft - paddingRight
 	const graphHeight = height - paddingTop - paddingBottom
