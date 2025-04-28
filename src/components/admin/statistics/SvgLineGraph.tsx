@@ -21,9 +21,10 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	yLabel,
 	showTodayIndicator = false
 }) => {
-	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null) // Changed text to textLines
+	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null)
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
-	const tooltipTextRef = useRef<SVGTextElement>(null)
+	const tooltipTextRef = useRef<HTMLDivElement>(null)
+	const svgRef = useRef<SVGSVGElement>(null)
 
 	// responsiveness: measure container width
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -31,8 +32,8 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 
 	useLayoutEffect(() => {
 		if (tooltip && tooltipTextRef.current) {
-			const bbox = tooltipTextRef.current.getBBox()
-			setTooltipDims({ width: bbox.width, height: bbox.height })
+			const rect = tooltipTextRef.current.getBoundingClientRect()
+			setTooltipDims({ width: rect.width, height: rect.height })
 		}
 	}, [tooltip])
 
@@ -106,8 +107,9 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
 	return (
-		<div ref={containerRef} style={{ width: '100%' }}>
+		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
 			<svg
+				ref={svgRef}
 				viewBox={`0 0 ${chartWidth} ${height}`}
 				preserveAspectRatio="xMidYMid meet"
 				className="bg-white rounded shadow"
@@ -188,11 +190,17 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 							r={2.5}
 							fill={color}
 							onMouseMove={e => {
-								setTooltip({
-									x: e.nativeEvent.offsetX,
-									y: e.nativeEvent.offsetY,
-									textLines: [`${labels[i]}: ${formatValue(data[i])}`] // Use textLines
-								})
+								// Calculate position relative to container
+								const svgRect = svgRef.current?.getBoundingClientRect()
+								if (svgRect) {
+									const x = e.clientX - svgRect.left
+									const y = e.clientY - svgRect.top
+									setTooltip({
+										x,
+										y,
+										textLines: [`${labels[i]}: ${formatValue(data[i])}`]
+									})
+								}
 							}}
 							onMouseLeave={() => setTooltip(null)}
 							style={{ cursor: 'pointer' }}
@@ -205,46 +213,34 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 						{label}
 					</text>
 				)}
-				{/* Tooltip */}
-				{tooltip && (
-					<g pointerEvents="none">
-						{/* Invisible text for measurement - render all lines */}
-						<text
-							ref={tooltipTextRef}
-							x={tooltip.x + 18}
-							y={tooltip.y - 6} // Initial position, adjusted below
-							fontSize={13}
-							fontWeight={500}
-							style={{ visibility: 'hidden', whiteSpace: 'pre' }} // Added whiteSpace
-						>
-							{tooltip.textLines.join('\n')}
-						</text>
-						{/* Tooltip Background */}
-						{tooltipDims.width > 0 && (
-							<rect
-								x={tooltip.x + 10}
-								y={tooltip.y - tooltipDims.height - 5} // Position based on measured height
-								width={tooltipDims.width + 16}
-								height={tooltipDims.height + 10}
-								rx={5}
-								fill="#111827"
-								opacity={0.92}
-							/>
-						)}
-						{/* Tooltip Text */}
-						<text
-							fontSize={13}
-							fill="#fff"
-							fontWeight={500}
-							x={tooltip.x + 18}
-							y={tooltip.y - tooltipDims.height + 12} // Position based on measured height
-							style={{ whiteSpace: 'pre' }} // Added whiteSpace
-						>
-							{tooltip.textLines.join('\n')}
-						</text>
-					</g>
-				)}
 			</svg>
+
+			{/* HTML-based tooltip overlay */}
+			{tooltip && (
+				<div
+					className="absolute pointer-events-none"
+					style={{
+						left: tooltip.x + 10,
+						top: tooltip.y - (tooltipDims.height || 40),
+						zIndex: 9999
+					}}
+				>
+					{/* Hidden div for measuring tooltip dimensions */}
+					<div
+						ref={tooltipTextRef}
+						className="opacity-0 absolute whitespace-pre bg-gray-900 text-white p-2 rounded text-sm font-medium"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+
+					{/* Actual visible tooltip */}
+					<div
+						className="bg-gray-900 bg-opacity-90 text-white p-2 rounded text-sm font-medium whitespace-pre"
+					>
+						{tooltip.textLines.join('\n')}
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
