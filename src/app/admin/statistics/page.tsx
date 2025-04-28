@@ -573,6 +573,28 @@ export default function Page (): ReactElement {
 								{'Tidsmønstre\r'}
 							</h2>
 
+							{/* Conditionally render weekday chart */}
+							{timeRange !== 'today' && (
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+									<>
+										<SvgBarChart
+											data={stats.ordersByDayOfWeek}
+											labels={stats.dayNames}
+											label="Ordrer fordelt på ugedag"
+											yLabel="Antal"
+											color="#f97316"
+										/>
+										<SvgBarChart
+											data={stats.salesByDayOfWeek}
+											labels={stats.dayNames}
+											label="Omsætning fordelt på ugedag"
+											yLabel="DKK"
+											color="#f59e0b"
+										/>
+									</>
+								</div>
+							)}
+
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								{/* Use sales by product name for the stacked bar chart */}
 								<SvgStackedBarChart
@@ -595,29 +617,6 @@ export default function Page (): ReactElement {
 									yLabel="Antal"
 									color="#6366f1"
 								/>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-								{/* Conditionally render weekday chart */}
-								{timeRange !== 'today' && (
-									<>
-										<SvgBarChart
-											data={stats.ordersByDayOfWeek}
-											labels={stats.dayNames}
-											label="Ordrer fordelt på ugedag"
-											yLabel="Antal"
-											color="#f97316"
-										/>
-										<SvgBarChart
-											data={stats.salesByDayOfWeek}
-											labels={stats.dayNames}
-											label="Omsætning fordelt på ugedag"
-											yLabel="DKK"
-											color="#f59e0b"
-										/>
-									</>
-								)}
 							</div>
 						</div>
 
