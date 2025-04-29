@@ -286,8 +286,8 @@ function isDateToday (date: Date): boolean {
 	const now = new Date()
 	return (
 		date.getFullYear() === now.getFullYear() &&
-			date.getMonth() === now.getMonth() &&
-			date.getDate() === now.getDate()
+		date.getMonth() === now.getMonth() &&
+		date.getDate() === now.getDate()
 	)
 }
 
@@ -299,8 +299,8 @@ function isDateTomorrow (date: Date): boolean {
 	tomorrow.setDate(now.getDate() + 1)
 	return (
 		date.getFullYear() === tomorrow.getFullYear() &&
-			date.getMonth() === tomorrow.getMonth() &&
-			date.getDate() === tomorrow.getDate()
+		date.getMonth() === tomorrow.getMonth() &&
+		date.getDate() === tomorrow.getDate()
 	)
 }
 
