@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useLayoutEffect, useMemo, useCallback, useEffect } from 'react'
 
 import type { ProductType, Time } from '@/types/backendDataTypes'
 
@@ -184,6 +184,13 @@ interface Props { products: ProductType[] }
 
 const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [hovered, setHovered] = useState<null | { name: string, from: number, to: number, y: number, x: number }>(null)
+	const [currentTime, setCurrentTime] = useState<Date>(new Date())
+
+	useEffect(() => {
+		const id = setInterval(() => setCurrentTime(new Date()), 60000)
+		return () => clearInterval(id)
+	}, [])
+
 	const labelFont = '500 15px Inter, Arial, sans-serif'
 	const maxLabelWidth = useMemo(() => {
 		if (typeof window === 'undefined') { return 120 }
@@ -192,6 +199,9 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [timelineWidth, setTimelineWidth] = useState(600)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const height = products.length * ROW_HEIGHT + 2 * PADDING
+
+	const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
+	const nowX = maxLabelWidth + (nowMinutes / 1440) * timelineWidth
 
 	useLayoutEffect(() => {
 		function updateWidth (): void {
@@ -241,6 +251,17 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 						timelineWidth={timelineWidth} rowCount={products.length}
 					/>
 				</g>
+
+				{/* current time indicator */}
+				<line
+					x1={nowX}
+					y1={PADDING}
+					x2={nowX}
+					y2={PADDING + products.length * ROW_HEIGHT}
+					stroke="#ef4444"
+					strokeDasharray="4 2"
+					strokeWidth={2}
+				/>
 
 				{/* rows with rounded corners using clipPath */}
 				<g clipPath="url(#rowsClip)">
