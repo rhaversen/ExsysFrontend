@@ -435,7 +435,7 @@ export default function Page (): ReactElement {
 				<div className="flex-1">
 					<div className="fixed inset-0 flex items-center justify-center bg-black">
 						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
-							<h1 className="text-2xl text-center">{'Kiosken er lukket'}</h1>
+							<h1 className="text-2xl text-center">{'Lukket'}</h1>
 							{!nextOpen && (
 								<p className="text-center">
 									{'Kiosken er lukket for bestillinger'}

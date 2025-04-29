@@ -304,11 +304,11 @@ function isDateTomorrow (date: Date): boolean {
 export function getOpeningMessage (date: Date): string {
 	const timeStr = dayjs(date).format('HH:mm')
 	if (isDateToday(date)) {
-		return `Vi åbner igen kl. ${timeStr}`
+		return `Kiosken åbner igen kl. ${timeStr}`
 	} else if (isDateTomorrow(date)) {
-		return `Vi åbner igen i morgen kl. ${timeStr}`
+		return `Kiosken åbner igen i morgen kl. ${timeStr}`
 	} else {
 		const formatted = dayjs(date).format('dddd [d.] DD/MM').charAt(0).toUpperCase() + dayjs(date).format('dddd [d.] DD/MM').slice(1)
-		return `Vi åbner igen ${formatted} kl. ${timeStr}`
+		return `Kiosken åbner igen ${formatted} kl. ${timeStr}`
 	}
 }
