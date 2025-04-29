@@ -54,9 +54,6 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 		open: 'Aktiver alle kiosker med det samme.'
 	}
 
-	// Reserve space for option details to avoid layout shift
-	const optionDetailMinHeight = 70
-
 	return (
 		<div className="flex flex-col gap-3 text-gray-700">
 			{/* Radio buttons group with always-visible descriptions */}
@@ -94,7 +91,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 			</div>
 
 			{/* Option details below radio group */}
-			<div style={{ minHeight: optionDetailMinHeight }}>
+			<div>
 				{(mode === 'until' || mode === 'nextProduct') && (
 					<div className="bg-gray-50 border border-gray-200 rounded-md p-4 flex flex-col gap-2">
 						{mode === 'until' && (
