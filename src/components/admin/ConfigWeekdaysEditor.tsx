@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import 'dayjs/locale/da'
 import { FaBan, FaCalendarAlt } from 'react-icons/fa'
 
@@ -22,9 +22,13 @@ const ConfigWeekdaysEditor = ({
 		'/v1/configs'
 	)
 
+	// Simplify nested configs access
+	const configData = configs?.configs
+	const disabledWeekdays = useMemo(() => configData?.disabledWeekdays ?? [], [configData])
+
 	const handleToggle = useCallback(async (weekday: number) => {
-		if (!configs) { return }
-		const current = configs.configs.disabledWeekdays
+		if (!configData) { return }
+		const current = disabledWeekdays
 		const next = current.includes(weekday)
 			? current.filter(w => w !== weekday)
 			: [...current, weekday].sort()
@@ -34,9 +38,9 @@ const ConfigWeekdaysEditor = ({
 		} catch (e) {
 			addError(e)
 		}
-	}, [configs, updateEntityAsync, addError])
+	}, [configData, updateEntityAsync, addError, disabledWeekdays])
 
-	if (!configs) { return null }
+	if (!configData) { return null }
 
 	return (
 		<div className="p-4 bg-gray-50 rounded-lg w-full flex flex-col gap-2">
@@ -55,7 +59,7 @@ const ConfigWeekdaysEditor = ({
 			{/* Weekday Buttons */}
 			<div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
 				{weekdayNumbers.map((n, idx) => {
-					const isDisabled = configs.configs.disabledWeekdays.includes(n)
+					const isDisabled = disabledWeekdays.includes(n)
 					return (
 						<button
 							key={n}
