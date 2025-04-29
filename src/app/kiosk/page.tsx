@@ -378,7 +378,7 @@ export default function Page (): ReactElement {
 	}
 
 	// compute next opening
-	function getNextOpen (): Date | null {
+	function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | null, products: ProductType[]): Date | null {
 		// 1. Guard Clauses & Initial Setup
 		if (configs == null || kiosk == null || products.length === 0) {
 			return null // No kiosk or products, can't determine opening time
@@ -555,7 +555,7 @@ export default function Page (): ReactElement {
 	}
 
 	if (isKioskClosedState) {
-		const nextOpen = getNextOpen()
+		const nextOpen = getNextOpen(configs, kiosk, products)
 
 		return (
 			<div className="flex flex-col h-screen">
