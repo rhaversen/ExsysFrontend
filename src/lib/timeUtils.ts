@@ -97,11 +97,11 @@ export function timeUntil (dateString: string | number): string {
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
 
-export function isKioskClosedBackendState (kiosk: KioskType): boolean {
-	if (kiosk.manualClosed) { return true }
-	if (kiosk.closedUntil != null) {
-		const closedUntilDate = new Date(kiosk.closedUntil)
-		return closedUntilDate > new Date()
+export function isKioskDeactivated (kiosk: KioskType): boolean {
+	if (kiosk.deactivated) { return true }
+	if (kiosk.deactivatedUntil != null) {
+		const deactivatedUntilDate = new Date(kiosk.deactivatedUntil)
+		return deactivatedUntilDate > new Date()
 	}
 	return false
 }
@@ -163,7 +163,7 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 	if (configs == null || kiosk == null || products.length === 0) {
 		return null // No kiosk or products, can't determine opening time
 	}
-	if (kiosk.manualClosed === true) {
+	if (kiosk.deactivated === true) {
 		return null // Manually closed, no predictable opening
 	}
 	const disabledWeekdays = configs.configs.disabledWeekdays
@@ -181,12 +181,12 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 	const originalSearchStartDay = new Date(searchStartTime) // Keep track of the initial day
 	originalSearchStartDay.setHours(0, 0, 0, 0)
 
-	// Factor in kiosk.closedUntil if it's in the future
-	if (kiosk.closedUntil != null) {
-		const closedUntilDate = new Date(kiosk.closedUntil)
-		if (closedUntilDate > searchStartTime) {
-			searchStartTime = closedUntilDate
-			// Update originalSearchStartDay if closedUntil pushes it to a new day
+	// Factor in kiosk.deactivatedUntil if it's in the future
+	if (kiosk.deactivatedUntil != null) {
+		const deactivatedUntilDate = new Date(kiosk.deactivatedUntil)
+		if (deactivatedUntilDate > searchStartTime) {
+			searchStartTime = deactivatedUntilDate
+			// Update originalSearchStartDay if deactivatedUntil pushes it to a new day
 			if (searchStartTime.getDate() !== originalSearchStartDay.getDate() ||
 				searchStartTime.getMonth() !== originalSearchStartDay.getMonth() ||
 				searchStartTime.getFullYear() !== originalSearchStartDay.getFullYear()) {
@@ -234,7 +234,7 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 			} else {
 				// D. Potential opening is *before* searchStartTime.
 				//    Check if searchStartTime falls *within* the order window of any product starting at this time.
-				//    This handles the case where closedUntil is later than the nominal product start time.
+				//    This handles the case where deactivatedUntil is later than the nominal product start time.
 				//    Only do this check if we are still on the *original* search start day.
 				const isSameDayAsOriginalSearch =
 					checkDate.getFullYear() === originalSearchStartDay.getFullYear() &&
@@ -267,7 +267,7 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 		//    Advance to the start of the next day.
 		checkDate.setDate(checkDate.getDate() + 1)
 		// Reset searchStartTime to the beginning of the next valid day if we advance
-		// This prevents the closedUntil time from incorrectly affecting future days.
+		// This prevents the deactivatedUntil time from incorrectly affecting future days.
 		if (checkDate > searchStartTime) {
 			searchStartTime = new Date(checkDate) // Start search from 00:00 on the next day
 		}

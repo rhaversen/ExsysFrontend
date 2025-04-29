@@ -6,7 +6,7 @@ import 'dayjs/locale/da'
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductOrderWindowFrom, isKioskClosedBackendState } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, isKioskDeactivated } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -25,7 +25,7 @@ export interface KioskStatus {
  * Returns the current status and warning for a kiosk based on its sessions and closed state.
  */
 function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus {
-	const closed = isKioskClosedBackendState(kiosk)
+	const closed = isKioskDeactivated(kiosk)
 	if (sessions.length === 0) { return { base: closed ? 'closed' : 'open', warning: 'noSession' } }
 	if (sessions.length > 1) { return { base: closed ? 'closed' : 'open', warning: 'multiSession' } }
 	const lastActivity = new Date(sessions[0].lastActivity)
@@ -40,8 +40,8 @@ function getKioskStatus (kiosk: KioskType, sessions: SessionType[]): KioskStatus
  */
 function getStatusText (kiosk: KioskType, base: KioskBaseStatus): string {
 	if (base === 'open') { return 'Åben' }
-	if (kiosk.manualClosed) { return 'Lukket manuelt' }
-	if (kiosk.closedUntil != null) { return `Lukket indtil ${dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}` }
+	if (kiosk.deactivated) { return 'Lukket manuelt' }
+	if (kiosk.deactivatedUntil != null) { return `Lukket indtil ${dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}` }
 	return 'Lukket'
 }
 
@@ -78,19 +78,19 @@ function KioskStatusModalContent ({
 }): React.ReactElement {
 	dayjs.locale('da')
 	// Prepare mode/initial values for selector
-	const isClosed = isKioskClosedBackendState(kiosk)
-	const closedUntilValid = (kiosk.closedUntil != null) && new Date(kiosk.closedUntil) > new Date()
-	const initialMode = !kiosk.manualClosed && closedUntilValid ? 'until' : 'manual'
-	const initialUntil = closedUntilValid ? (kiosk.closedUntil as string) : undefined
+	const isClosed = isKioskDeactivated(kiosk)
+	const deactivatedUntilValid = (kiosk.deactivatedUntil != null) && new Date(kiosk.deactivatedUntil) > new Date()
+	const initialMode = !kiosk.deactivated && deactivatedUntilValid ? 'until' : 'manual'
+	const initialUntil = deactivatedUntilValid ? (kiosk.deactivatedUntil as string) : undefined
 
 	// Handles closing via selector confirm
 	const handleConfirmClose = (mode: 'manual' | 'until' | 'nextProduct', until: string | null) => {
-		if (mode === 'manual') { onPatch({ manualClosed: true, closedUntil: null }) } else if (mode === 'until') { onPatch({ manualClosed: false, closedUntil: until }) } else { onPatch({ manualClosed: false, closedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
+		if (mode === 'manual') { onPatch({ deactivated: true, deactivatedUntil: null }) } else if (mode === 'until') { onPatch({ deactivated: false, deactivatedUntil: until }) } else { onPatch({ deactivated: false, deactivatedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
 	}
 
 	// Handles opening the kiosk
 	const handleOpenKiosk = useCallback(() => {
-		onPatch({ manualClosed: false, closedUntil: null })
+		onPatch({ deactivated: false, deactivatedUntil: null })
 	}, [onPatch])
 
 	return (
@@ -104,11 +104,11 @@ function KioskStatusModalContent ({
 				<h2 className="text-2xl font-bold text-gray-800">{kiosk.name}</h2>
 				{isClosed ? (
 					<>
-						{kiosk.manualClosed && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
-						{(kiosk.closedUntil != null) && !kiosk.manualClosed && (
+						{kiosk.deactivated && <p className="text-red-700 font-semibold mt-2">{'Kiosken er lukket manuelt.'}</p>}
+						{(kiosk.deactivatedUntil != null) && !kiosk.deactivated && (
 							<p className="text-red-700 font-semibold mt-2">
 								{'Kiosken er lukket indtil: '}
-								{dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.closedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
+								{dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
 							</p>
 						)}
 						<div className="flex gap-4 justify-center pt-2">

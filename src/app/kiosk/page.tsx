@@ -14,7 +14,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { getNextOpen, getOpeningMessage, isCurrentTimeInOrderWindow, isKioskClosedBackendState } from '@/lib/timeUtils'
+import { getNextOpen, getOpeningMessage, isCurrentTimeInOrderWindow, isKioskDeactivated } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -72,12 +72,12 @@ export default function Page (): ReactElement {
 
 	const updateKioskClosedState = useCallback(() => {
 		if (!kiosk || !config) { return }
-		const kioskIsOpenBackend = kiosk != null && !isKioskClosedBackendState(kiosk)
+		const kioskIsDeactivated = kiosk != null && isKioskDeactivated(kiosk)
 		const dayEnabled = !config.configs.disabledWeekdays.includes(new Date().getDay())
 		const hasAvailableProducts = products.length !== 0 && products.some(
 			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
-		const kioskOpen = kioskIsOpenBackend && hasAvailableProducts && dayEnabled
+		const kioskOpen = !kioskIsDeactivated && hasAvailableProducts && dayEnabled
 
 		setIsKioskClosedState(!kioskOpen)
 		if (!kioskOpen) {

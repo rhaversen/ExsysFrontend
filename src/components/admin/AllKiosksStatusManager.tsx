@@ -28,7 +28,7 @@ const AllKiosksStatusManager = ({
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
-							{ manualClosed: true, closedUntil: null },
+							{ deactivated: true, deactivatedUntil: null },
 							{ withCredentials: true }
 						)
 					)
@@ -38,7 +38,7 @@ const AllKiosksStatusManager = ({
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
-							{ manualClosed: false, closedUntil: until },
+							{ deactivated: false, deactivatedUntil: until },
 							{ withCredentials: true }
 						)
 					)
@@ -49,7 +49,7 @@ const AllKiosksStatusManager = ({
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
-							{ manualClosed: false, closedUntil: nextUntil },
+							{ deactivated: false, deactivatedUntil: nextUntil },
 							{ withCredentials: true }
 						)
 					)
@@ -58,7 +58,7 @@ const AllKiosksStatusManager = ({
 				await Promise.all(
 					kiosks.map(async kiosk =>
 						await axios.patch(`${API_URL}/v1/kiosks/${kiosk._id}`,
-							{ manualClosed: false, closedUntil: null },
+							{ deactivated: false, deactivatedUntil: null },
 							{ withCredentials: true }
 						)
 					)
@@ -81,10 +81,10 @@ const AllKiosksStatusManager = ({
 					<div className="flex flex-col">
 						<div className="text-lg text-gray-800">{'Administrer alle kioskers status på en gang'}</div>
 						<div className="text-sm text-gray-600">
-							<div>{'Luk eller åbn alle kiosker for bestillinger.'}</div>
-							<div>{'Kiosker kan åbnes og lukkes for bestillinger når nødvendigt.'}</div>
-							<div>{'Kioskerne forbliver funktionelle og logget ind, så de nemt kan åbnes igen.'}</div>
-							<div>{'Kioskerne kan også åbnes og lukkes individuelt i kiosk status og håndtering.'}</div>
+							<div>{'Deaktiver eller aktiver alle kiosker for bestillinger.'}</div>
+							<div>{'Kiosker kan aktiveres og deaktiveres for bestillinger når nødvendigt.'}</div>
+							<div>{'Kioskerne forbliver funktionelle og logget ind, så de nemt kan aktiveres igen.'}</div>
+							<div>{'Kioskerne kan også aktiveres og deaktiveres individuelt i kiosk status og håndtering.'}</div>
 						</div>
 					</div>
 				</div>
@@ -106,7 +106,7 @@ const AllKiosksStatusManager = ({
 						isPatching={isProcessing}
 						onConfirm={(mode, until) => { void handleAllKiosksAction(mode, until) }}
 						onCancel={() => setShowOptions(false)}
-						confirmLabelMap={{ open: 'Åbn alle', manual: 'Luk alle', until: 'Luk alle', nextProduct: 'Luk alle' }}
+						confirmLabelMap={{ open: 'Aktiver alle', manual: 'Deaktiver alle', until: 'Deaktiver alle', nextProduct: 'Deaktiver alle' }}
 						cancelText="Annuller"
 					/>
 				</>
