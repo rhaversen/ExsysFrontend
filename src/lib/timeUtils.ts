@@ -1,4 +1,6 @@
-import { type ProductType, type OrderWindow, type Time, type KioskType } from '@/types/backendDataTypes'
+import dayjs from 'dayjs'
+
+import { type ProductType, type OrderWindow, type Time, type KioskType, ConfigsType } from '@/types/backendDataTypes'
 
 export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 	const now = new Date()
@@ -95,11 +97,15 @@ export function timeUntil (dateString: string | number): string {
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
 
-export function isKioskClosedBackendState (kiosk: KioskType): boolean {
-	if (kiosk.manualClosed) { return true }
-	if (kiosk.closedUntil != null) {
-		const closedUntilDate = new Date(kiosk.closedUntil)
-		return closedUntilDate > new Date()
+/**
+ * Checks if a kiosk is currently deactivated based on the admin-controlled settings
+ * (either manually deactivated or deactivated until a future time).
+ */
+export function isKioskDeactivated (kiosk: KioskType): boolean {
+	if (kiosk.deactivated) { return true }
+	if (kiosk.deactivatedUntil != null) {
+		const deactivatedUntilDate = new Date(kiosk.deactivatedUntil)
+		return deactivatedUntilDate > new Date()
 	}
 	return false
 }
@@ -154,4 +160,159 @@ export function getNextAvailableProductOrderWindowFrom (products: ProductType[])
 		}
 	}
 	return soonest
+}
+
+export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | null, products: ProductType[]): Date | null {
+	// 1. Guard Clauses & Initial Setup
+	if (configs == null || kiosk == null || products.length === 0) {
+		return null // No kiosk or products, can't determine opening time
+	}
+	if (kiosk.deactivated === true) {
+		return null // Manually closed, no predictable opening
+	}
+	const disabledWeekdays = configs.configs.disabledWeekdays
+	if (disabledWeekdays.length === 7) {
+		return null // Closed every day
+	}
+	const activeProducts = products.filter(p => p.isActive)
+	if (activeProducts.length === 0) {
+		return null // No products available to be sold
+	}
+
+	// 2. Determine the Earliest Possible Start Point
+	const now = new Date()
+	let searchStartTime = new Date(now) // Start checking from now
+	const originalSearchStartDay = new Date(searchStartTime) // Keep track of the initial day
+	originalSearchStartDay.setHours(0, 0, 0, 0)
+
+	// Factor in kiosk.deactivatedUntil if it's in the future
+	if (kiosk.deactivatedUntil != null) {
+		const deactivatedUntilDate = new Date(kiosk.deactivatedUntil)
+		if (deactivatedUntilDate > searchStartTime) {
+			searchStartTime = deactivatedUntilDate
+			// Update originalSearchStartDay if deactivatedUntil pushes it to a new day
+			if (searchStartTime.getDate() !== originalSearchStartDay.getDate() ||
+				searchStartTime.getMonth() !== originalSearchStartDay.getMonth() ||
+				searchStartTime.getFullYear() !== originalSearchStartDay.getFullYear()) {
+				originalSearchStartDay.setFullYear(searchStartTime.getFullYear(), searchStartTime.getMonth(), searchStartTime.getDate())
+			}
+		}
+	}
+
+	// Get all unique product opening times, sorted
+	const uniqueOpeningTimes = [...new Map(
+		activeProducts.map(p => [`${p.orderWindow.from.hour}:${p.orderWindow.from.minute}`, p.orderWindow.from])
+	).values()].sort((a, b) => {
+		if (a.hour !== b.hour) { return a.hour - b.hour }
+		return a.minute - b.minute
+	})
+
+	if (uniqueOpeningTimes.length === 0) {
+		// Should be caught by activeProducts check, but as a safeguard
+		return null
+	}
+
+	// 3. Iterate Forward Day by Day to Find the First Valid Opening Slot
+	const checkDate = new Date(searchStartTime) // Start checking from the day of the earliest possible start
+	checkDate.setHours(0, 0, 0, 0) // Normalize to the start of the day for iteration
+
+	for (let i = 0; i < 365; i++) { // Limit search to 1 year ahead
+		const currentDayOfWeek = checkDate.getDay()
+
+		// A. Check if the current day is disabled
+		if (disabledWeekdays.includes(currentDayOfWeek)) {
+			// Advance to the start of the next day
+			checkDate.setDate(checkDate.getDate() + 1)
+			continue // Check the new day
+		}
+
+		// B. Day is enabled. Check all potential opening times for this day.
+		for (const openingTime of uniqueOpeningTimes) {
+			const potentialOpeningDateTime = new Date(checkDate)
+			potentialOpeningDateTime.setHours(openingTime.hour, openingTime.minute, 0, 0)
+
+			// C. Check if this potential opening time is on or after our search start time.
+			if (potentialOpeningDateTime >= searchStartTime) {
+				// Found the next valid opening time based on product window start
+				return potentialOpeningDateTime
+			} else {
+				// D. Potential opening is *before* searchStartTime.
+				//    Check if searchStartTime falls *within* the order window of any product starting at this time.
+				//    This handles the case where deactivatedUntil is later than the nominal product start time.
+				//    Only do this check if we are still on the *original* search start day.
+				const isSameDayAsOriginalSearch =
+					checkDate.getFullYear() === originalSearchStartDay.getFullYear() &&
+					checkDate.getMonth() === originalSearchStartDay.getMonth() &&
+					checkDate.getDate() === originalSearchStartDay.getDate()
+
+				if (isSameDayAsOriginalSearch) {
+					const relevantProducts = activeProducts.filter(p =>
+						p.orderWindow.from.hour === openingTime.hour &&
+						p.orderWindow.from.minute === openingTime.minute
+					)
+
+					for (const product of relevantProducts) {
+						const orderWindowEndDate = new Date(checkDate)
+						orderWindowEndDate.setHours(product.orderWindow.to.hour, product.orderWindow.to.minute, 59, 999)
+
+						// If the search start time is within this product's window (even if the window started earlier)
+						if (searchStartTime < orderWindowEndDate) {
+							// The effective opening time is the searchStartTime itself
+							return searchStartTime
+						}
+					}
+				}
+			}
+		}
+
+		// E. If we reach here, no opening time on the *current* enabled day was valid
+		//    (either all openings were before searchStartTime and searchStartTime wasn't within their window,
+		//     or the day was disabled).
+		//    Advance to the start of the next day.
+		checkDate.setDate(checkDate.getDate() + 1)
+		// Reset searchStartTime to the beginning of the next valid day if we advance
+		// This prevents the deactivatedUntil time from incorrectly affecting future days.
+		if (checkDate > searchStartTime) {
+			searchStartTime = new Date(checkDate) // Start search from 00:00 on the next day
+		}
+	}
+
+	// 4. If loop completes without finding an opening (highly unlikely with guards)
+	return null
+}
+
+// Helper to check if a date is today (local time)
+function isDateToday (date: Date): boolean {
+	const now = new Date()
+	return (
+		date.getFullYear() === now.getFullYear() &&
+			date.getMonth() === now.getMonth() &&
+			date.getDate() === now.getDate()
+	)
+}
+
+// Helper to check if a date is tomorrow (local time)
+function isDateTomorrow (date: Date): boolean {
+	const now = new Date()
+	const tomorrow = new Date(now)
+	tomorrow.setHours(0, 0, 0, 0)
+	tomorrow.setDate(now.getDate() + 1)
+	return (
+		date.getFullYear() === tomorrow.getFullYear() &&
+			date.getMonth() === tomorrow.getMonth() &&
+			date.getDate() === tomorrow.getDate()
+	)
+}
+
+// Helper to format opening message
+export function getOpeningMessage (date: Date): string {
+	const timeStr = dayjs(date).format('HH:mm')
+	if (isDateToday(date)) {
+		return `Kiosken åbner igen kl. ${timeStr}`
+	} else if (isDateTomorrow(date)) {
+		return `Kiosken åbner igen i morgen kl. ${timeStr}`
+	} else {
+		const formatted = dayjs(date).format('dddd [d.] DD/MM').charAt(0).toUpperCase() + dayjs(date).format('dddd [d.] DD/MM').slice(1)
+		return `Kiosken åbner igen ${formatted} kl. ${timeStr}`
+	}
 }
