@@ -15,7 +15,7 @@ import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import { getNextOpen, getOpeningMessage, isCurrentTimeInOrderWindow, isKioskClosedBackendState } from '@/lib/timeUtils'
-import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType, type ConfigsType } from '@/types/backendDataTypes'
+import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
 import 'dayjs/locale/da'
