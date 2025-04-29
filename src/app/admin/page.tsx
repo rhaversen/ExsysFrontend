@@ -205,7 +205,7 @@ export default function Page (): ReactElement | null {
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}
-						<KioskStatusManager kiosks={kiosks} products={products} />
+						<KioskStatusManager kiosks={kiosks} products={products} configs={config} />
 						{/* Entities Timeline Overview */}
 						<EntitiesTimelineOverview products={products} />
 					</div>
