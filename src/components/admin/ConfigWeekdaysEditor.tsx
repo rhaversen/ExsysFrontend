@@ -63,8 +63,11 @@ const ConfigWeekdaysEditor = ({
 				<h2 className="text-lg text-gray-800">
 					<span>{'Deaktiver ugedage for bestilling'}</span>
 				</h2>
-				<div className="text-gray-500 text-sm mb-2">
+				<div className="text-gray-500 text-sm">
 					{'Deaktiverede dage vil ikke være tilgængelige for bestilling.'}
+				</div>
+				<div className="text-gray-500 text-sm mb-2">
+					{'Tryk på en dag for at aktivere/deaktivere den.'}
 				</div>
 			</div>
 			<div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
