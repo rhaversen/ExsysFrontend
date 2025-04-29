@@ -398,12 +398,20 @@ export default function Page (): ReactElement {
 		// 2. Determine the Earliest Possible Start Point
 		const now = new Date()
 		let searchStartTime = new Date(now) // Start checking from now
+		const originalSearchStartDay = new Date(searchStartTime) // Keep track of the initial day
+		originalSearchStartDay.setHours(0, 0, 0, 0)
 
 		// Factor in kiosk.closedUntil if it's in the future
 		if (kiosk.closedUntil != null) {
 			const closedUntilDate = new Date(kiosk.closedUntil)
 			if (closedUntilDate > searchStartTime) {
 				searchStartTime = closedUntilDate
+				// Update originalSearchStartDay if closedUntil pushes it to a new day
+				if (searchStartTime.getDate() !== originalSearchStartDay.getDate() ||
+					searchStartTime.getMonth() !== originalSearchStartDay.getMonth() ||
+					searchStartTime.getFullYear() !== originalSearchStartDay.getFullYear()) {
+					originalSearchStartDay.setFullYear(searchStartTime.getFullYear(), searchStartTime.getMonth(), searchStartTime.getDate())
+				}
 			}
 		}
 
@@ -441,15 +449,47 @@ export default function Page (): ReactElement {
 
 				// C. Check if this potential opening time is on or after our search start time.
 				if (potentialOpeningDateTime >= searchStartTime) {
-					// Found the next valid opening time
+					// Found the next valid opening time based on product window start
 					return potentialOpeningDateTime
+				} else {
+					// D. Potential opening is *before* searchStartTime.
+					//    Check if searchStartTime falls *within* the order window of any product starting at this time.
+					//    This handles the case where closedUntil is later than the nominal product start time.
+					//    Only do this check if we are still on the *original* search start day.
+					const isSameDayAsOriginalSearch = checkDate.getFullYear() === originalSearchStartDay.getFullYear() &&
+													  checkDate.getMonth() === originalSearchStartDay.getMonth() &&
+													  checkDate.getDate() === originalSearchStartDay.getDate()
+
+					if (isSameDayAsOriginalSearch) {
+						const relevantProducts = activeProducts.filter(p =>
+							p.orderWindow.from.hour === openingTime.hour &&
+							p.orderWindow.from.minute === openingTime.minute
+						)
+
+						for (const product of relevantProducts) {
+							const orderWindowEndDate = new Date(checkDate)
+							orderWindowEndDate.setHours(product.orderWindow.to.hour, product.orderWindow.to.minute, 59, 999)
+
+							// If the search start time is within this product's window (even if the window started earlier)
+							if (searchStartTime < orderWindowEndDate) {
+								// The effective opening time is the searchStartTime itself
+								return searchStartTime
+							}
+						}
+					}
 				}
 			}
 
-			// D. If we reach here, no opening time on the *current* enabled day was valid
-			//    (i.e., all openings today happened before searchStartTime).
+			// E. If we reach here, no opening time on the *current* enabled day was valid
+			//    (either all openings were before searchStartTime and searchStartTime wasn't within their window,
+			//     or the day was disabled).
 			//    Advance to the start of the next day.
 			checkDate.setDate(checkDate.getDate() + 1)
+			// Reset searchStartTime to the beginning of the next valid day if we advance
+			// This prevents the closedUntil time from incorrectly affecting future days.
+			if (checkDate > searchStartTime) {
+				searchStartTime = new Date(checkDate) // Start search from 00:00 on the next day
+			}
 		}
 
 		// 4. If loop completes without finding an opening (highly unlikely with guards)
