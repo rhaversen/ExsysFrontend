@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import { type ProductType, type OrderWindow, type Time, type KioskType, ConfigsType } from '@/types/backendDataTypes'
 
 export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
@@ -273,4 +275,40 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 
 	// 4. If loop completes without finding an opening (highly unlikely with guards)
 	return null
+}
+
+// Helper to check if a date is today (local time)
+function isDateToday (date: Date): boolean {
+	const now = new Date()
+	return (
+		date.getFullYear() === now.getFullYear() &&
+			date.getMonth() === now.getMonth() &&
+			date.getDate() === now.getDate()
+	)
+}
+
+// Helper to check if a date is tomorrow (local time)
+function isDateTomorrow (date: Date): boolean {
+	const now = new Date()
+	const tomorrow = new Date(now)
+	tomorrow.setHours(0, 0, 0, 0)
+	tomorrow.setDate(now.getDate() + 1)
+	return (
+		date.getFullYear() === tomorrow.getFullYear() &&
+			date.getMonth() === tomorrow.getMonth() &&
+			date.getDate() === tomorrow.getDate()
+	)
+}
+
+// Helper to format opening message
+export function getOpeningMessage (date: Date): string {
+	const timeStr = dayjs(date).format('HH:mm')
+	if (isDateToday(date)) {
+		return `Vi åbner igen kl. ${timeStr}`
+	} else if (isDateTomorrow(date)) {
+		return `Vi åbner igen i morgen kl. ${timeStr}`
+	} else {
+		const formatted = dayjs(date).format('dddd [d.] DD/MM').charAt(0).toUpperCase() + dayjs(date).format('dddd [d.] DD/MM').slice(1)
+		return `Vi åbner igen ${formatted} kl. ${timeStr}`
+	}
 }
