@@ -248,7 +248,7 @@ const KioskStatusManager = ({
 
 	return (
 		<div className='p-4 bg-gray-50 rounded-lg'>
-			<h2 className="text-lg font-semibold text-gray-800 mb-3">
+			<h2 className="mb-3 text-lg text-gray-800">
 				{'Kiosk status og håndtering'}
 			</h2>
 			<div className="flex flex-col w-full mx-auto">

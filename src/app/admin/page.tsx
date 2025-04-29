@@ -154,9 +154,9 @@ export default function Page (): ReactElement | null {
 	if (!hasMounted) { return null }
 
 	return (
-		<main className="p-0 pt-2 md:p-8 flex flex-col items-center">
-			<div className="bg-white shadow-lg rounded-lg flex flex-col gap-8 p-3 sm:p-6 w-full max-w-3xl xl:max-w-[90rem]">
-				<p className="text-3xl font-bold text-gray-800">
+		<main className="flex flex-col items-center">
+			<div className="flex flex-col pt-8 gap-8 w-full max-w-3xl xl:max-w-full px-4">
+				<p className="text-3xl font-bold text-gray-800 text-center">
 					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
 				</p>
 				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
