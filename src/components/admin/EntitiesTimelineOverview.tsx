@@ -1,5 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, useMemo, useCallback, useEffect } from 'react'
 
+import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import type { ProductType, Time } from '@/types/backendDataTypes'
 
 // --- Utility Functions ---
@@ -136,6 +137,7 @@ const ProductTimelineRow: React.FC<ProductTimelineRowProps> = ({
 	const to = toMinutes(product.orderWindow.to)
 	const segments = getBarSegments(from, to)
 	const y = PADDING + idx * ROW_HEIGHT
+	const isActiveNow = isCurrentTimeInOrderWindow(product.orderWindow)
 
 	return (
 		<g className="select-none">
@@ -168,7 +170,8 @@ const ProductTimelineRow: React.FC<ProductTimelineRowProps> = ({
 				const path = buildSegmentPath(x, w, y0, BAR_HEIGHT, rxL, rxR)
 				return (
 					<path
-						key={i} d={path} fill="#3b82f6"
+						key={i} d={path}
+						fill={isActiveNow ? '#3b82f6' : '#9ca3af'}
 						className="cursor-pointer transition-colors duration-200"
 						onMouseEnter={() => { onBarHover({ name: product.name, from, to, y: y0, x }) }}
 						onMouseLeave={() => { onBarHover(null) }}
