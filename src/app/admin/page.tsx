@@ -196,12 +196,12 @@ export default function Page (): ReactElement | null {
 								hoverBgColor="hover:bg-purple-600"
 							/>
 						</div>
-						{/* Kiosk Refresh Component */}
-						<KioskRefresh />
-						{/* All Kiosks Status Manager */}
-						<AllKiosksStatusManager kiosks={kiosks} products={products} />
 						{/* Config Weekdays Editor */}
 						<ConfigWeekdaysEditor configs={config} />
+						{/* All Kiosks Status Manager */}
+						<AllKiosksStatusManager kiosks={kiosks} products={products} />
+						{/* Kiosk Refresh Component */}
+						<KioskRefresh />
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
 import 'dayjs/locale/da'
-import { FaBan } from 'react-icons/fa'
+import { FaBan, FaCalendarAlt } from 'react-icons/fa'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
@@ -39,18 +39,20 @@ const ConfigWeekdaysEditor = ({
 	if (!configs) { return null }
 
 	return (
-		<div className="p-4 bg-gray-50 rounded-lg w-full">
-			<div>
-				<h2 className="text-lg text-gray-800">
-					<span>{'Deaktiver ugedage for bestilling'}</span>
-				</h2>
-				<div className="text-gray-500 text-sm">
-					{'Deaktiverede dage vil ikke være tilgængelige for bestilling.'}
-				</div>
-				<div className="text-gray-500 text-sm mb-2">
-					{'Tryk på en dag for at aktivere/deaktivere den.'}
-				</div>
+		<div className="p-4 bg-gray-50 rounded-lg w-full flex flex-col gap-2">
+			{/* Header Section */}
+			<div className="flex items-center gap-3">
+				<FaCalendarAlt className="text-blue-500 text-2xl flex-shrink-0" />
+				<h2 className="text-lg text-gray-800">{'Deaktiver ugedage for bestilling'}</h2>
 			</div>
+
+			{/* Description Section */}
+			<div className="text-gray-500 text-sm">
+				<div>{'Deaktiverede dage vil ikke være tilgængelige for bestilling.'}</div>
+				<div>{'Tryk på en dag for at aktivere/deaktivere den.'}</div>
+			</div>
+
+			{/* Weekday Buttons */}
 			<div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
 				{weekdayNumbers.map((n, idx) => {
 					const isDisabled = configs.configs.disabledWeekdays.includes(n)
