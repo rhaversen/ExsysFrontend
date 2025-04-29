@@ -126,7 +126,7 @@ export default function Page (): ReactElement {
 		updateKioskClosedState()
 		const interval = setInterval(() => {
 			updateKioskClosedState()
-		}, 1000) // Check every second
+		}, 1000 * 60) // Check every minute
 
 		return () => { clearInterval(interval) }
 	}, [products, kiosk, config, updateKioskClosedState])
