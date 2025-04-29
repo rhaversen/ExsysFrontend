@@ -31,7 +31,7 @@ export const useSaveFeedback = (): { showSuccess: boolean, showSuccessMessage: (
 
 const SaveFeedback = ({ show }: { show: boolean }): ReactElement => {
 	return (
-		<div className="h-6">
+		<div className="h-6 items-center">
 			{show && (
 				<div className="text-green-600 text-sm">
 					{'✓ Indstillinger gemt'}

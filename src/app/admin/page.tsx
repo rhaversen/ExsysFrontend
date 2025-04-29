@@ -8,9 +8,11 @@ import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
+import ConfigWeekdaysEditor from '@/components/admin/ConfigWeekdaysEditor'
 import EntitiesTimelineOverview from '@/components/admin/EntitiesTimelineOverview'
 import KioskRefresh from '@/components/admin/KioskRefresh'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
+import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
@@ -34,6 +36,7 @@ const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
 export default function Page (): ReactElement | null {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
+	const { config } = useConfig()
 	const { currentUser } = useUser()
 	const [pendingOrders, setPendingOrders] = useState<number>(0)
 	const [totalOrdersToday, setTotalOrdersToday] = useState<number>(0)
@@ -193,14 +196,16 @@ export default function Page (): ReactElement | null {
 								hoverBgColor="hover:bg-purple-600"
 							/>
 						</div>
-						{/* Kiosk Refresh Component */}
-						<KioskRefresh />
+						{/* Config Weekdays Editor */}
+						<ConfigWeekdaysEditor configs={config} />
 						{/* All Kiosks Status Manager */}
 						<AllKiosksStatusManager kiosks={kiosks} products={products} />
+						{/* Kiosk Refresh Component */}
+						<KioskRefresh />
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}
-						<KioskStatusManager kiosks={kiosks} products={products} />
+						<KioskStatusManager kiosks={kiosks} products={products} configs={config} />
 						{/* Entities Timeline Overview */}
 						<EntitiesTimelineOverview products={products} />
 					</div>

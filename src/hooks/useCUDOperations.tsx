@@ -25,11 +25,13 @@ const useCUDOperations = <PostType, PatchType, ReturnType = void> (
 	}, [API_URL, entityPath])
 
 	const updateEntity = useCallback((id: string, data: PatchType) => {
-		axios.patch(`${API_URL}${entityPath}/${id}`, data, { withCredentials: true }).catch(addError)
+		const url = id ? `${API_URL}${entityPath}/${id}` : `${API_URL}${entityPath}`
+		axios.patch(url, data, { withCredentials: true }).catch(addError)
 	}, [API_URL, entityPath, addError])
 
 	const updateEntityAsync = useCallback(async (id: string, data: PatchType) => {
-		const response = await axios.patch<ReturnType>(`${API_URL}${entityPath}/${id}`, data, { withCredentials: true })
+		const url = id ? `${API_URL}${entityPath}/${id}` : `${API_URL}${entityPath}`
+		const response = await axios.patch<ReturnType>(url, data, { withCredentials: true })
 		return response.data
 	}, [API_URL, entityPath])
 
