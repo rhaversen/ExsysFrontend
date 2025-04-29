@@ -247,7 +247,7 @@ const KioskStatusManager = ({
 	const isLoading = loadingSessions || configs === null
 
 	return (
-		<div className='p-4 bg-gray-50 rounded-lg shadow-sm'>
+		<div className='p-4 bg-gray-50 rounded-lg'>
 			<h2 className="text-lg font-semibold text-gray-800 mb-3">
 				{'Kiosk status og håndtering'}
 			</h2>

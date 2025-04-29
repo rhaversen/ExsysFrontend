@@ -27,7 +27,7 @@ export default function KioskRefresh (): React.ReactElement {
 		<>
 			<div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
 				{/* Header Section */}
-				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
 					<div className="flex items-center gap-3 flex-grow">
 						<FaSyncAlt className="text-blue-500 text-2xl flex-shrink-0" />
 						<h2 className="text-lg text-gray-800">{'Genindlæs kiosker'}</h2>
@@ -35,7 +35,7 @@ export default function KioskRefresh (): React.ReactElement {
 					<button
 						type="button"
 						onClick={() => { setShowRefreshModal(true) }}
-						className="px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md mt-4 sm:mt-0"
+						className="px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md mt-0"
 					>
 						{'Genindlæs\r'}
 					</button>
