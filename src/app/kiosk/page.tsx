@@ -42,7 +42,6 @@ export default function Page (): ReactElement {
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
-	const [configs, setConfigs] = useState<ConfigsType | null>(null)
 	const [viewState, setViewState] = useState<ViewState>('welcome')
 	const [cart, setCart] = useState<CartType>({
 		products: {},
@@ -72,9 +71,9 @@ export default function Page (): ReactElement {
 	}, [])
 
 	const updateKioskClosedState = useCallback(() => {
-		if (!kiosk || !configs) { return }
+		if (!kiosk || !config) { return }
 		const kioskIsOpenBackend = kiosk != null && !isKioskClosedBackendState(kiosk)
-		const dayEnabled = !configs.configs.disabledWeekdays.includes(new Date().getDay())
+		const dayEnabled = !config.configs.disabledWeekdays.includes(new Date().getDay())
 		const hasAvailableProducts = products.length !== 0 && products.some(
 			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
 		)
@@ -87,9 +86,9 @@ export default function Page (): ReactElement {
 			setViewState('welcome')
 			setCart({ products: {}, options: {} })
 		}
-	}, [configs, kiosk, products])
+	}, [config, kiosk, products])
 
-	// Load all data
+	// Load initial data
 	const initialSetup = useCallback(async (): Promise<void> => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
 
@@ -99,15 +98,13 @@ export default function Page (): ReactElement {
 				productsData,
 				optionsData,
 				activitiesData,
-				roomsData,
-				configsData
+				roomsData
 			] = await Promise.all([
 				fetchData<KioskType>(`${API_URL}/v1/kiosks/me`),
 				fetchData<ProductType[]>(`${API_URL}/v1/products`),
 				fetchData<OptionType[]>(`${API_URL}/v1/options`),
 				fetchData<ActivityType[]>(`${API_URL}/v1/activities`),
-				fetchData<RoomType[]>(`${API_URL}/v1/rooms`),
-				fetchData<ConfigsType>(`${API_URL}/v1/configs`)
+				fetchData<RoomType[]>(`${API_URL}/v1/rooms`)
 			])
 
 			// Set data
@@ -116,7 +113,6 @@ export default function Page (): ReactElement {
 			setOptions(optionsData)
 			setActivities(activitiesData)
 			setRooms(roomsData)
-			setConfigs(configsData)
 
 			// Update checkout methods based on kiosk data
 			updateCheckoutMethods(kioskData)
@@ -125,14 +121,15 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL, fetchData, updateCheckoutMethods, addError])
 
-	// Check if kiosk is closed every second
+	// Check kiosk closed state periodically and when dependencies change
 	useEffect(() => {
+		updateKioskClosedState()
 		const interval = setInterval(() => {
 			updateKioskClosedState()
-		}, 1000)
+		}, 1000) // Check every second
 
 		return () => { clearInterval(interval) }
-	}, [products, kiosk, updateKioskClosedState])
+	}, [products, kiosk, config, updateKioskClosedState])
 
 	// Initialize on mount
 	useEffect(() => {
@@ -255,15 +252,6 @@ export default function Page (): ReactElement {
 				setSelectedRoom(null)
 			}
 		}
-	)
-
-	// Configs
-	useEntitySocketListeners<ConfigsType>(
-		socket,
-		'configs',
-		configItem => { setConfigs(configItem) },
-		configItem => { setConfigs(configItem) },
-		() => { setConfigs(null) }
 	)
 
 	const updateCart = useCallback((newCart: CartType) => {
@@ -595,7 +583,7 @@ export default function Page (): ReactElement {
 	}
 
 	if (isKioskClosedState) {
-		const nextOpen = getNextOpen(configs, kiosk, products)
+		const nextOpen = getNextOpen(config, kiosk, products)
 
 		return (
 			<div className="flex flex-col h-screen">
