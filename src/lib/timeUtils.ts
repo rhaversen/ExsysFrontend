@@ -97,6 +97,10 @@ export function timeUntil (dateString: string | number): string {
 	return `om ${seconds} sekund${seconds !== 1 ? 'er' : ''}`
 }
 
+/**
+ * Checks if a kiosk is currently deactivated based on the admin-controlled settings
+ * (either manually deactivated or deactivated until a future time).
+ */
 export function isKioskDeactivated (kiosk: KioskType): boolean {
 	if (kiosk.deactivated) { return true }
 	if (kiosk.deactivatedUntil != null) {
