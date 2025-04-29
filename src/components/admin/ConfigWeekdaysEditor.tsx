@@ -1,11 +1,9 @@
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import 'dayjs/locale/da'
 import { FaBan } from 'react-icons/fa'
 
-import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import type { ConfigsType } from '@/types/backendDataTypes'
 
@@ -19,43 +17,26 @@ const ConfigWeekdaysEditor = ({
 }: {
     configs: ConfigsType | null
 }) => {
-	const [localConfigs, setLocalConfigs] = useState<ConfigsType | null>(configs)
-	const { showSuccess, showSuccessMessage } = useSaveFeedback()
 	const { addError } = useError()
 	const { updateEntityAsync } = useCUDOperations<Partial<ConfigsType['configs']>, Partial<ConfigsType['configs']>, ConfigsType>(
 		'/v1/configs'
 	)
 
-	// Listen for config updates
-	useEntitySocketListeners<ConfigsType>(
-		null,
-		'configsUpdated',
-		config => setLocalConfigs(config),
-		config => setLocalConfigs(config),
-		() => {}
-	)
-
-	useEffect(() => {
-		setLocalConfigs(configs)
-	}, [configs])
-
 	const handleToggle = useCallback(async (weekday: number) => {
-		if (!localConfigs) { return }
-		const current = localConfigs.configs.disabledWeekdays
+		if (!configs) { return }
+		const current = configs.configs.disabledWeekdays
 		const next = current.includes(weekday)
 			? current.filter(w => w !== weekday)
 			: [...current, weekday].sort()
 		try {
 			// For configs, PATCH is sent to /v1/configs (no id)
-			const updated = await updateEntityAsync('', { ...localConfigs.configs, disabledWeekdays: next })
-			setLocalConfigs(updated)
-			showSuccessMessage()
+			await updateEntityAsync('', { disabledWeekdays: next })
 		} catch (e) {
 			addError(e)
 		}
-	}, [localConfigs, updateEntityAsync, addError, showSuccessMessage])
+	}, [configs, updateEntityAsync, addError])
 
-	if (!localConfigs) { return null }
+	if (!configs) { return null }
 
 	return (
 		<div className="p-4 bg-gray-50 rounded-lg w-full">
@@ -72,7 +53,7 @@ const ConfigWeekdaysEditor = ({
 			</div>
 			<div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
 				{weekdayNumbers.map((n, idx) => {
-					const isDisabled = localConfigs.configs.disabledWeekdays.includes(n)
+					const isDisabled = configs.configs.disabledWeekdays.includes(n)
 					return (
 						<button
 							key={n}
@@ -101,7 +82,6 @@ const ConfigWeekdaysEditor = ({
 					)
 				})}
 			</div>
-			<SaveFeedback show={showSuccess} />
 		</div>
 	)
 }
