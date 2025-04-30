@@ -5,7 +5,7 @@ import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ConfigsType } from '@/types/backendDataTypes'
 
-const ConfigsView = ({
+const ConfigItem = ({
 	label,
 	value, // value is in milliseconds
 	readableLabel,
@@ -98,4 +98,4 @@ const ConfigsView = ({
 	)
 }
 
-export default ConfigsView
+export default ConfigItem

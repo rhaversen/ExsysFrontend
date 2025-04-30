@@ -4,7 +4,7 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ConfigsType } from '@/types/backendDataTypes'
 
-import Config from './Config'
+import ConfigItem from './ConfigItem'
 
 const ConfigsView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -53,7 +53,7 @@ const ConfigsView = (): ReactElement => {
 				: (
 					<div className="w-full max-w-4xl space-y-4">
 						{shownConfigs.map((label) => (
-							<Config
+							<ConfigItem
 								key={label}
 								label={label}
 								value={configs[label]}
