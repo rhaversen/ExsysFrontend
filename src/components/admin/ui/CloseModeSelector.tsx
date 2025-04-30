@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import React, { useState } from 'react'
 import 'dayjs/locale/da'
 
-import { getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
+import { formatRelativeDateLabel, getNextAvailableProductOrderWindowFrom } from '@/lib/timeUtils'
 import type { ProductType } from '@/types/backendDataTypes'
 
 interface CloseModeSelectorProps<Mode extends string = 'manual' | 'until' | 'nextProduct' | 'open'> {
@@ -108,7 +108,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 								<div className="text-xs text-gray-500 mt-1">
 									{(until != null) && (
 										<span>
-											{dayjs(until).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(until).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
+											{formatRelativeDateLabel(until)}
 										</span>
 									)}
 								</div>
@@ -125,7 +125,7 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 								<div className="font-semibold text-gray-700 text-base bg-blue-50 rounded px-2 py-1 inline-block mt-1">
 									{(() => {
 										const t = getNextAvailableProductOrderWindowFrom(products)?.date
-										return t ? (dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(t).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)) : 'Ingen produkter tilgængelige'
+										return t ? formatRelativeDateLabel(t) : 'Ingen produkter tilgængelige'
 									})()}
 								</div>
 							</>
