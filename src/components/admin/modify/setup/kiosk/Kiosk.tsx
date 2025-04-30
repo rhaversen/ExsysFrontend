@@ -119,19 +119,13 @@ const Kiosk = ({
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kortlæser'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
-							options={
-								readers.filter((reader) =>
-								// Include reader if NOT assigned to any kiosk
-									!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id) ||
-										// OR if the reader is the one currently assigned to newKiosk
-										reader._id === newKiosk.readerId?._id ||
-										// OR if the reader is the one currently assigned to kiosk
-										reader._id === kiosk.readerId?._id
-								).map((reader) => ({
-									value: reader._id,
-									label: reader.readerTag
-								}))
-							}
+							options={readers.map(reader => ({
+								value: reader._id,
+								label: reader.readerTag,
+								disabled: kiosks.some(k => k.readerId?._id === reader._id)
+									&& reader._id !== newKiosk.readerId?._id
+									&& reader._id !== kiosk.readerId?._id
+							}))}
 							initialValue={newKiosk.readerId?._id ?? 'null-option'}
 							onChange={(value) => { handleFieldChange('readerId', value === 'null-option' ? null : readers.find(reader => reader._id === value) ?? null) }}
 							editable={isEditing}

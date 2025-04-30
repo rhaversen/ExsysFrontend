@@ -178,12 +178,10 @@ const AddKiosk = ({
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableDropdown
 								options={
-									readers.filter((reader) =>
-										// Include reader if NOT assigned to any kiosk
-										!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id)
-									).map((reader) => ({
+									readers.map((reader) => ({
 										value: reader._id,
-										label: reader.readerTag
+										label: reader.readerTag,
+										disabled: kiosks.some((k) => k.readerId?._id === reader._id)
 									}))
 								}
 								initialValue={kiosk.readerId ?? 'null-option'}
