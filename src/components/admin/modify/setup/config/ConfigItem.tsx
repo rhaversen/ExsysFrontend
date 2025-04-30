@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useState } from 'react'
+import React, { type ReactElement, useCallback, useState, useEffect } from 'react'
 
 import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -13,35 +13,42 @@ const ConfigItem = ({
 	onSave
 }: {
 	label: keyof ConfigsType['configs']
-	value: number
+	value: number | string
 	readableLabel: string
 	description: string
-	onSave: (label: string, value: number) => void
+	onSave: (label: string, value: number | string) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
-	const [newValue, setNewValue] = useState(value / 1000) // Convert ms to seconds for display
-	const {
-		showSuccess,
-		showSuccessMessage
-	} = useSaveFeedback()
+	const isString = typeof value === 'string'
+	// convert ms to seconds string or passthrough string
+	const toDisplay = useCallback(
+		(val: string | number) => isString ? val.toString() : (Number(val) / 1000).toString(),
+		[isString]
+	)
+	const toPatch = useCallback(
+		(input: string) => isString ? input : Number(input) * 1000,
+		[isString]
+	)
+	const [rawValue, setRawValue] = useState<string>(toDisplay(value))
+	// sync when prop value changes
+	useEffect(() => { setRawValue(toDisplay(value)) }, [toDisplay, value])
+	const hasChanged = rawValue !== toDisplay(value)
+	const { showSuccess, showSuccessMessage } = useSaveFeedback()
 
-	const patchConfig = useCallback((secondsValue: number): void => {
-		const msValue = secondsValue * 1000 // Convert seconds to ms for backend
-		const patch = { [label]: msValue }
-		axios.patch<ConfigsType>(API_URL + '/v1/configs', patch, { withCredentials: true }).then((response) => {
-			onSave(label, Number(response.data.configs[label])) // Value from backend is in ms
+	const patchConfig = useCallback(async () => {
+		const patch = { [label]: toPatch(rawValue) }
+		try {
+			const response = await axios.patch<ConfigsType>(API_URL + '/v1/configs', patch, { withCredentials: true })
+			onSave(label, response.data.configs[label] as number | string)
 			showSuccessMessage()
-			return null
-		}).catch((error) => {
+		} catch (error) {
 			addError(error)
-		})
-	}, [API_URL, label, addError, onSave, showSuccessMessage])
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-		if (e.key === 'Enter' && newValue !== value / 1000) {
-			patchConfig(newValue)
 		}
+	}, [API_URL, label, rawValue, toPatch, onSave, showSuccessMessage, addError])
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter' && hasChanged) { patchConfig() }
 	}
 
 	return (
@@ -53,16 +60,16 @@ const ConfigItem = ({
 					</div>
 					<div className="flex items-center">
 						<input
-							type="number"
-							value={newValue} // Display in seconds
+							type={isString ? 'text' : 'number'}
+							value={rawValue}
 							aria-label={readableLabel}
-							placeholder={(value / 1000).toString()} // Convert placeholder to seconds
+							placeholder={toDisplay(value)}
 							title={readableLabel}
-							onChange={(e) => { setNewValue(Number(e.target.value)) }}
-							onKeyDown={handleKeyDown} // Listen for Enter key
+							onChange={(e) => setRawValue(e.target.value)}
+							onKeyDown={handleKeyDown}
 							className="w-full px-3 py-2 border border-gray-300 rounded-md"
 						/>
-						<span className="ml-2 text-gray-700">{'Sekunder'}</span>
+						{!isString && <span className="ml-2 text-gray-700">{'Sekunder'}</span>}
 					</div>
 				</div>
 				<div className="w-full sm:w-2/3 text-sm text-gray-600">
@@ -71,22 +78,18 @@ const ConfigItem = ({
 			</div>
 			<div className="flex justify-between items-center gap-2">
 				<SaveFeedback show={showSuccess} />
-				{newValue !== value / 1000 && ( // Only show cancel if value changed
+				{hasChanged && (
 					<div className="flex gap-2">
 						<button
 							type="button"
-							onClick={() => {
-								patchConfig(newValue)
-							}}
+							onClick={patchConfig}
 							className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
 						>
 							{'Gem'}
 						</button>
 						<button
 							type="button"
-							onClick={() => {
-								setNewValue(value / 1000) // Reset to original value in seconds
-							}}
+							onClick={() => setRawValue(toDisplay(value))}
 							className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
 						>
 							{'Annuller'}
