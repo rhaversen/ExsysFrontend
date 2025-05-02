@@ -9,43 +9,65 @@ interface PropDefinition {
 	message: string
 }
 
-const info: Record<string, string[]> = {
+const info: Record<string, ReactElement[]> = {
 	Aktiviteter: [
-		'Grupper, der spiser i et eller flere spisesteder. Tillader at have separate bestillinger for forskellige grupper der spiser i samme lokale.',
-		'Tilknyttet en eller flere kiosker, hvor aktiviteten vises som en fremhævet valgmulighed.',
-		'Brugere kan altid vælge mellem alle oprettede aktiviteter (ikke deaktiveret).'
+		<>{'Grupper, der spiser i et eller flere spisesteder. Tillader at have separate bestillinger for forskellige grupper der spiser i samme lokale.'}</>,
+		<>{'Tilknyttet en eller flere kiosker, hvor aktiviteten vises som en fremhævet valgmulighed.'}</>,
+		<>{'Brugere kan altid vælge mellem alle oprettede aktiviteter (ikke deaktiveret).'}</>
 	],
 	Spisesteder: [
-		'Lokationer, hvor bestillinger kan leveres til.',
-		'Tilknyttet en eller flere aktiviteter, hvor spisestedet vises som en fremhævet valgmulighed.',
-		'Brugere kan altid vælge mellem alle oprettede spisesteder (ikke deaktiveret).'
+		<>{'Lokationer, hvor bestillinger kan leveres til.'}</>,
+		<>{'Tilknyttet en eller flere aktiviteter, hvor spisestedet vises som en fremhævet valgmulighed.'}</>,
+		<>{'Brugere kan altid vælge mellem alle oprettede spisesteder (ikke deaktiveret).'}</>
 	],
 	Kiosker: [
-		'Repræsenterer de fysiske touch-enheder, hvor brugere laver bestillinger. Fungerer som login til den fysiske enhed.',
-		'Tilknyttet en eller flere aktiviteter, som vises som en fremhævet valgmulighed. Hvis ingen aktiviteter er tilknyttet, vises alle aktiviteter ligeligt.',
-		'Kan tilknyttes en SumUp kortlæser for at muliggøre kortbetaling. Hvis ingen kortlæser er tilknyttet, vil kiosken kun kunne modtage kontantbetalinger.',
-		'Kioskens navn og nummer (#) vises i bunden af kioskens skærm når den er logget ind.'
+		<>{'Repræsenterer de fysiske touch-enheder, hvor brugere laver bestillinger. Fungerer som login til den fysiske enhed.'}</>,
+		<>{'Tilknyttet en eller flere aktiviteter, som vises som en fremhævet valgmulighed. Hvis ingen aktiviteter er tilknyttet, vises alle aktiviteter ligeligt.'}</>,
+		<>{'Kan tilknyttes en SumUp kortlæser for at muliggøre kortbetaling. Hvis ingen kortlæser er tilknyttet, vil kiosken kun kunne modtage kontantbetalinger.'}</>,
+		<>{'Kioskens navn og nummer (#) vises i bunden af kioskens skærm når den er logget ind.'}</>
 	],
 	Admins: [
-		'Brugere med adgang til at ændre systemets konfigurationer.',
-		'Admins kan oprette og redigere alle indstillinger, samt administrere andre admins brugernavne og adgangskoder.',
-		'Adgangskoder kan ikke gendannes og er skjult for andre admins.'
+		<>{'Brugere med adgang til at ændre systemets konfigurationer.'}</>,
+		<>{'Admins kan oprette og redigere alle indstillinger, samt administrere andre admins brugernavne og adgangskoder.'}</>,
+		<>{'Adgangskoder kan ikke gendannes og er skjult for andre admins.'}</>
 	],
 	Kortlæsere: [
-		'Repræsenterer systemets SumUp-kortlæsere, hvortil kortbetalinger tilsendes.',
-		'Kan knyttes til en kiosk for at muliggøre kortbetaling.',
-		'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes i systemet. Hvis enheden har et nummer trykt på den, indtastes det også i systemet. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.',
-		'Ved fjernelse af en enhed skal kortlæseren slettes i systemet, og derefter frakobles API\'en på SumUp-enheden',
-		'Kortlæserens nummer (#) er printet på den fysiske enhed.'
+		<>{'Repræsenterer systemets SumUp-kortlæsere, hvortil kortbetalinger tilsendes.'}</>,
+		<>{'Kan knyttes til en kiosk for at muliggøre kortbetaling.'}</>,
+		<>
+			{'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes her på siden.'}{' '}
+			<a
+				href="https://developer.sumup.com/terminal-payments/guides/pairing-solo#generating-the-pairing-code"
+				target="_blank"
+				rel="noopener noreferrer"
+				className="text-blue-600 hover:underline"
+			>
+				{'Se SumUp vejledning her\r'}
+			</a>
+			{'. Hvis enheden har et nummer trykt på den, indtastes det også her på siden. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.\r'}
+		</>,
+		<>
+			{'Ved fjernelse af en enhed skal kortlæseren slettes her på siden, og derefter frakobles API\'en på SumUp-enheden.'}{' '}
+			<a
+				href="https://developer.sumup.com/terminal-payments/guides/pairing-solo#diconnect-reader"
+				target="_blank"
+				rel="noopener noreferrer"
+				className="text-blue-600 hover:underline"
+			>
+				{'Se SumUp vejledning her\r'}
+			</a>
+			{'.\r'}
+		</>,
+		<>{'Kortlæserens nummer (#) er printet på den fysiske enhed.'}</>
 	],
 	Produkter: [
-		'Primære bestillingsmuligheder, der vises efter valg af aktivitet og spisested.',
-		'Kan have tilvalg knyttet til sig, som vises når produktet vælges.',
-		'Bestillingsvinduet styrer, hvornår produkter er til salg. Kiosken går i dvale, når ingen produkter er tilgængelige.'
+		<>{'Primære bestillingsmuligheder, der vises efter valg af aktivitet og spisested.'}</>,
+		<>{'Kan have tilvalg knyttet til sig, som vises når produktet vælges.'}</>,
+		<>{'Bestillingsvinduet styrer, hvornår produkter er til salg. Kiosken går i dvale, når ingen produkter er tilgængelige.'}</>
 	],
 	Tilvalg: [
-		'Sekundære bestillingsmuligheder, der vises efter produktvalg.',
-		'Knyttes til et eller flere produkter, og vises kun, når mindst ét tilknyttet produkt er valgt.'
+		<>{'Sekundære bestillingsmuligheder, der vises efter produktvalg.'}</>,
+		<>{'Knyttes til et eller flere produkter, og vises kun, når mindst ét tilknyttet produkt er valgt.'}</>
 	]
 }
 
@@ -102,7 +124,7 @@ const ResourceInfo = ({ viewName }: ResourceInfoProps): ReactElement | null => {
 	const details = info[viewName]
 	const propDefs = propInfo[viewName] ?? []
 
-	if ((details?.length) === 0 && propDefs.length === 0) { return null }
+	if ((details?.length ?? 0) === 0 && propDefs.length === 0) { return null }
 
 	return (
 		<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
