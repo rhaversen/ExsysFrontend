@@ -39,7 +39,7 @@ const SelectionWindow = <T extends Item> ({
 			<h2 className="text-lg font-bold text-gray-800 text-center">
 				{title}
 			</h2>
-			<div className="bg-white p-2 rounded flex flex-col flex-wrap max-h-96">
+			<div className="bg-white p-2 rounded flex flex-col flex-wrap max-h-96 content-start">
 				{items.sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
 					<div
 						key={item._id}
