@@ -289,7 +289,11 @@ const AddActivity = ({
 			{showRooms && (
 				<SelectionWindow
 					title={`Tilføj Fremhævede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={rooms}
+					items={rooms.map(r => ({
+						...r,
+						// Disable if already in disabledRooms
+						disabled: (activity.disabledRooms ?? []).includes(r._id)
+					}))}
 					selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
 					onAddItem={handleAddRoom}
 					onDeleteItem={handleDeleteRoom}
@@ -300,7 +304,11 @@ const AddActivity = ({
 			{showDisabledRooms && (
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={rooms}
+					items={rooms.map(r => ({
+						...r,
+						// Disable if already in rooms
+						disabled: (activity.rooms ?? []).includes(r._id)
+					}))}
 					selectedItems={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
 					onAddItem={handleAddDisabledRoom}
 					onDeleteItem={handleDeleteDisabledRoom}
@@ -322,7 +330,11 @@ const AddActivity = ({
 			{showKiosks && (
 				<SelectionWindow
 					title={`Tilføj Fremhævende Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={kiosks}
+					items={kiosks.map(k => ({
+						...k,
+						// Disable if already in disabledKiosks
+						disabled: disabledKiosks.some(dk => dk._id === k._id)
+					}))}
 					selectedItems={selectedKiosks}
 					onAddItem={handleAddKiosk}
 					onDeleteItem={handleDeleteKiosk}
@@ -333,7 +345,11 @@ const AddActivity = ({
 			{showDisabledKiosks && (
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={kiosks}
+					items={kiosks.map(k => ({
+						...k,
+						// Disable if already in selectedKiosks
+						disabled: selectedKiosks.some(pk => pk._id === k._id)
+					}))}
 					selectedItems={disabledKiosks}
 					onAddItem={handleAddDisabledKiosk}
 					onDeleteItem={handleDeleteDisabledKiosk}

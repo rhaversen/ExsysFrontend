@@ -251,8 +251,12 @@ const AddKiosk = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities}
+					title={`Tilføj Fremhævede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: kiosk.disabledActivities.includes(a._id)
+					}))}
 					selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
@@ -262,8 +266,12 @@ const AddKiosk = ({
 
 			{showDisabledActivities && (
 				<SelectionWindow
-					title={`Tilføj deaktiverede aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities}
+					title={`Tilføj Deaktiverede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in selectedActivities
+						disabled: kiosk.activities.includes(a._id)
+					}))}
 					selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
 					onAddItem={handleAddDisabledActivity}
 					onDeleteItem={handleDeleteDisabledActivity}

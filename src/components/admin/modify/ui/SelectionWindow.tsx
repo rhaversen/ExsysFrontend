@@ -5,6 +5,7 @@ import CloseableModal from '@/components/ui/CloseableModal'
 interface Item {
 	_id: string
 	name: string
+	disabled?: boolean // Add optional disabled property
 }
 
 const SelectionWindow = <T extends Item> ({
@@ -23,6 +24,10 @@ const SelectionWindow = <T extends Item> ({
 	onClose: () => void
 }): ReactElement => {
 	const handleToggle = useCallback((item: T): void => {
+		// Prevent toggling if the item is disabled
+		if (item.disabled === true) {
+			return
+		}
 		if (selectedItems.map((i) => i._id).includes(item._id)) {
 			onDeleteItem(item)
 		} else {
@@ -43,16 +48,24 @@ const SelectionWindow = <T extends Item> ({
 				{items.sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
 					<div
 						key={item._id}
-						className="flex items-center p-1 mb-2 text-gray-800"
+						// Add styling for disabled items
+						className={`flex items-center p-1 mb-2 text-gray-800 ${
+							item.disabled === true ? 'opacity-50 cursor-not-allowed' : ''
+						}`}
 					>
 						<input
-							title="Tilføj"
+							title={item.disabled === true ? 'Utilgængelig' : 'Tilføj'}
 							type="checkbox"
-							className="cursor-pointer w-5 h-5"
+							// Disable checkbox and adjust cursor for disabled items
+							className={`w-5 h-5 ${
+								item.disabled === true ? 'cursor-not-allowed' : 'cursor-pointer'
+							}`}
 							checked={selectedItems.map((i) => i._id).includes(item._id)}
 							onChange={() => {
 								handleToggle(item)
 							}}
+							// Disable the checkbox input if item is disabled
+							disabled={item.disabled}
 						/>
 						<span className="ml-2">{item.name}</span>
 					</div>

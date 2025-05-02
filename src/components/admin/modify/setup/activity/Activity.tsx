@@ -262,7 +262,11 @@ const Activity = ({
 			{showRooms &&
 				<SelectionWindow
 					title={`Tilføj Fremhævede Spisesteder til ${newActivity.name}`}
-					items={rooms}
+					items={rooms.map(r => ({
+						...r,
+						// Disable if already in disabledRooms
+						disabled: newActivity.disabledRooms.some(dr => dr === r._id)
+					}))}
 					selectedItems={newActivity.rooms}
 					onAddItem={(v) => { handleFieldChange('rooms', [...newActivity.rooms, { ...v, _id: v._id }]) }}
 					onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
@@ -274,7 +278,11 @@ const Activity = ({
 			{showDisabledRooms &&
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Spisesteder til ${newActivity.name}`}
-					items={rooms}
+					items={rooms.map(r => ({
+						...r,
+						// Disable if already in prioritizedRooms
+						disabled: newActivity.rooms.some(pr => pr._id === r._id)
+					}))}
 					selectedItems={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
 					onAddItem={(v) => { handleFieldChange('disabledRooms', [...newActivity.disabledRooms, v._id]) }}
 					onDeleteItem={(v) => { handleFieldChange('disabledRooms', newActivity.disabledRooms.filter((room) => room !== v._id)) }}
@@ -298,7 +306,11 @@ const Activity = ({
 			{showKiosks &&
 				<SelectionWindow
 					title={`Tilføj Fremhævende Kiosker til ${newActivity.name}`}
-					items={kiosks}
+					items={kiosks.map(k => ({
+						...k,
+						// Disable if already in disabledKiosks
+						disabled: disabledKiosks.some(dk => dk._id === k._id)
+					}))}
 					selectedItems={linkedKiosks}
 					onAddItem={(v) => { handleKioskChange([...linkedKiosks, v]) }}
 					onDeleteItem={(v) => { handleKioskChange(linkedKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
@@ -310,7 +322,11 @@ const Activity = ({
 			{showDisabledKiosks &&
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Kiosker til ${newActivity.name}`}
-					items={kiosks}
+					items={kiosks.map(k => ({
+						...k,
+						// Disable if already in prioritizedKiosks
+						disabled: linkedKiosks.some(pk => pk._id === k._id)
+					}))}
 					selectedItems={disabledKiosks}
 					onAddItem={(v) => { setDisabledKiosks([...disabledKiosks, v]) }}
 					onDeleteItem={(v) => { setDisabledKiosks(disabledKiosks.filter((kiosk) => kiosk._id !== v._id)) }}

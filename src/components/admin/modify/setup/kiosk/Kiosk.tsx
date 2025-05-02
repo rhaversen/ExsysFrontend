@@ -186,7 +186,11 @@ const Kiosk = ({
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj aktivitet til ${newKiosk.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: newKiosk.disabledActivities.includes(a._id)
+					}))}
 					selectedItems={newKiosk.activities}
 					onAddItem={(v) => {
 						handleFieldChange('activities', [...newKiosk.activities, {
@@ -202,7 +206,11 @@ const Kiosk = ({
 			{showDisabledActivities && (
 				<SelectionWindow
 					title={`Tilføj deaktiverede aktiviteter til ${newKiosk.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in prioritized activities
+						disabled: newKiosk.activities.some(pa => pa._id === a._id)
+					}))}
 					selectedItems={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
 					onAddItem={(v) => {
 						handleFieldChange('disabledActivities', [...newKiosk.disabledActivities, v._id])
