@@ -84,8 +84,8 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Navn', message: 'Navn til intern identificering. Kioskens navn bør gøre det nemt at identificere den, f.eks. ved at angive placering eller funktion.' },
 		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login.' },
 		{ name: 'Tilknyttet Kortlæser', message: 'Kioskens tilknyttede kortlæser.' },
-		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter hvor kiosken vises som foreslået.' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor kiosken ikke kan vælges.' }
+		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter som vises som foreslået.' },
+		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter som ikke kan vælges.' }
 	],
 	Kortlæsere: [
 		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation.' },
