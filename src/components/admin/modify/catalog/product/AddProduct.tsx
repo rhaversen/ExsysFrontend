@@ -136,7 +136,7 @@ const AddProduct = ({
 								maxLength={15}
 								editable={true}
 								validations={[{
-									validate: (v: string) => !products.some((a) => a.name.trim() === v.trim()),
+									validate: (v: string) => !products.some((p) => p.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								onChange={(value) => { handleFieldChange('name', value) }}

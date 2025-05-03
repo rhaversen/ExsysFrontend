@@ -138,7 +138,7 @@ const AddOption = ({
 								minSize={5}
 								maxLength={50}
 								validations={[{
-									validate: (v: string) => !options.some((a) => a.name.trim() === v.trim()),
+									validate: (v: string) => !options.some((o) => o.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								editable={true}

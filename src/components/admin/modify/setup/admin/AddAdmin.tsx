@@ -90,7 +90,7 @@ const AddAdmin = ({
 							onChange={handleNameChange}
 							maxLength={50}
 							validations={[{
-								validate: (v: string) => !admins.some((a) => a.name.trim() === v.trim()),
+								validate: (v: string) => !admins.some((a) => a.name.trim().toLowerCase() === v.trim().toLowerCase()),
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={true}

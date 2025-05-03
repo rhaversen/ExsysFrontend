@@ -171,7 +171,7 @@ const AddActivity = ({
 								minSize={10}
 								required={true}
 								validations={[{
-									validate: (v: string) => !activities.some((a) => a.name.trim() === v.trim()),
+									validate: (v: string) => !activities.some((a) => a.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								onChange={handleNameChange}

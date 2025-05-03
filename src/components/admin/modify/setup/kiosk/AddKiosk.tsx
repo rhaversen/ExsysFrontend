@@ -137,7 +137,7 @@ const AddKiosk = ({
 								minSize={10}
 								required={true}
 								validations={[{
-									validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim()),
+									validate: (v: string) => !kiosks.some((k) => k.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								onChange={handleNameChange}

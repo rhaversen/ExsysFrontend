@@ -81,7 +81,7 @@ const Kiosk = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim() && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.name.trim().toLowerCase() === v.trim().toLowerCase() && k._id !== newKiosk._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}

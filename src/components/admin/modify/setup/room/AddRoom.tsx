@@ -140,7 +140,7 @@ const AddRoom = ({
 								onChange={handleNameChange}
 								maxLength={50}
 								validations={[{
-									validate: (v: string) => !rooms.some((room) => room.name.trim() === v.trim()),
+									validate: (v: string) => !rooms.some((room) => room.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								editable={true}
