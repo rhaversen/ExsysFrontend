@@ -43,8 +43,6 @@ export default function Page (): ReactElement {
 				setShowConflictWarning(false) // Hide warning div and checkbox on other errors
 				addError(error)
 			}
-		} finally {
-			setIsLoading(false)
 		}
 	}, [API_URL, addError, router, setCurrentUser])
 

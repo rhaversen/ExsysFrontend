@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect } from 'react'
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
@@ -13,6 +13,7 @@ export default function Page (): ReactElement {
 	const router = useRouter()
 	const { addError } = useError()
 	const { setCurrentUser } = useUser()
+	const [isLoading, setIsLoading] = useState(false) // Add isLoading state
 
 	const login = useCallback(async (credentials: {
 		name: FormDataEntryValue | null
@@ -20,6 +21,7 @@ export default function Page (): ReactElement {
 		stayLoggedIn: boolean
 	}) => {
 		try {
+			setIsLoading(true) // Set loading true
 			const response = await axios.post<{
 				auth: boolean
 				user: AdminType
@@ -28,6 +30,7 @@ export default function Page (): ReactElement {
 			router.push('/admin')
 		} catch (error) {
 			setCurrentUser(null)
+			setIsLoading(false) // Set loading false only on error
 			// Check if it's an Axios error and has a response
 			if (axios.isAxiosError(error) && error.response) {
 				// Check if the status code is 401
@@ -96,8 +99,11 @@ export default function Page (): ReactElement {
 				</div>
 				<div>
 					<button type="submit"
-						className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-						{'Log ind'}
+						disabled={isLoading} // Disable button when loading
+						className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+							isLoading ? 'opacity-50 cursor-not-allowed' : ''
+						}`}>
+						{isLoading ? 'Logger ind...' : 'Log ind'}
 					</button>
 				</div>
 			</form>
