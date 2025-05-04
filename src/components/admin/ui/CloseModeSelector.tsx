@@ -61,21 +61,21 @@ function CloseModeSelector<Mode extends string = 'manual' | 'until' | 'nextProdu
 				<label className="flex flex-col gap-0.5">
 					<span className="flex items-center gap-2">
 						<input type="radio" checked={mode === 'manual'} onChange={() => { setMode('manual' as Mode); setUntil(null) }} />
-						<span className="font-medium">{'Deaktiver (indtil aktiveret manuelt)'}</span>
+						<span className="font-medium">{'Deaktiver indtil aktiveret manuelt'}</span>
 					</span>
 					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.manual}</span>
 				</label>
 				<label className="flex flex-col gap-0.5">
 					<span className="flex items-center gap-2">
 						<input type="radio" checked={mode === 'until'} onChange={() => { setMode('until' as Mode); setUntil(dayjs().add(1, 'minute').toISOString()) }} />
-						<span className="font-medium">{'Deaktiver indtil bestemt dato/tidspunkt'}</span>
+						<span className="font-medium">{'Deaktiver indtil dato/tidspunkt'}</span>
 					</span>
 					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.until}</span>
 				</label>
 				<label className="flex flex-col gap-0.5">
 					<span className="flex items-center gap-2">
 						<input type="radio" checked={mode === 'nextProduct'} onChange={() => { setMode('nextProduct' as Mode); setUntil(null) }} />
-						<span className="font-medium">{'Deaktiver indtil næste produkt bliver tilgængeligt'}</span>
+						<span className="font-medium">{'Deaktiver indtil næste tilgængelige produkt'}</span>
 					</span>
 					<span className="text-xs text-left text-gray-500 pl-6">{modeDescriptions.nextProduct}</span>
 				</label>
