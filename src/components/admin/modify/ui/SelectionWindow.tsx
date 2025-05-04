@@ -44,7 +44,7 @@ const SelectionWindow = <T extends Item> ({
 			<h2 className="text-lg font-bold text-gray-800 text-center">
 				{title}
 			</h2>
-			<div className="bg-white p-2 rounded flex flex-col flex-wrap max-h-96 content-start">
+			<div className="bg-white p-2 rounded flex flex-col lg:flex-wrap max-h-96 content-start overflow-y-auto">
 				{items.sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
 					<div
 						key={item._id}
@@ -71,7 +71,7 @@ const SelectionWindow = <T extends Item> ({
 					</div>
 				))}
 			</div>
-			<div className="flex justify-center gap-4">
+			<div className="flex justify-center gap-4 pt-2">
 				<button
 					type="button"
 					className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2 px-4"
