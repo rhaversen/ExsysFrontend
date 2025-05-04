@@ -6,7 +6,7 @@ import 'dayjs/locale/da'
 import CloseableModal from '@/components/ui/CloseableModal'
 import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { getNextAvailableProductOrderWindowFrom, isKioskDeactivated, isCurrentTimeInOrderWindow, getNextOpen, getOpeningMessage } from '@/lib/timeUtils'
+import { getNextAvailableProductOrderWindowFrom, isKioskDeactivated, isCurrentTimeInOrderWindow, getNextOpen, formatRelativeDateLabel } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType, ConfigsType } from '@/types/backendDataTypes'
 
 import CloseModeSelector from './ui/CloseModeSelector'
@@ -108,7 +108,7 @@ function getOperationalStatusText (status: OperationalStatus, kiosk: KioskType):
 		case 'closed_deactivated':
 			return 'Ikke operationel (Deaktiveret)'
 		case 'closed_deactivated_until':
-			return `Ikke operationel (Deaktiveret indtil ${dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase()}${dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)})`
+			return `Ikke operationel (Deaktiveret indtil ${formatRelativeDateLabel(kiosk.deactivatedUntil)})`
 		case 'closed_weekday':
 			return 'Ikke operationel (Lukket på denne ugedag)'
 		case 'closed_time_window':
@@ -167,7 +167,7 @@ function KioskControlModalContent ({
 						{(kiosk.deactivatedUntil != null) && !kiosk.deactivated && (
 							<p className="text-red-700 font-semibold mt-2">
 								{'Kiosken er deaktiveret indtil: '}
-								{dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').charAt(0).toUpperCase() + dayjs(kiosk.deactivatedUntil).format('dddd [d.] DD/MM YYYY [kl.] HH:mm').slice(1)}
+								{formatRelativeDateLabel(kiosk.deactivatedUntil)}
 							</p>
 						)}
 						<div className="flex gap-4 justify-center pt-2">
@@ -247,8 +247,8 @@ const KioskStatusManager = ({
 	const isLoading = loadingSessions || configs === null
 
 	return (
-		<div className='p-4 bg-gray-50 rounded-lg shadow-sm'>
-			<h2 className="text-lg font-semibold text-gray-800 mb-3">
+		<div className='p-4 bg-gray-50 rounded-lg'>
+			<h2 className="mb-3 text-lg text-gray-800">
 				{'Kiosk status og håndtering'}
 			</h2>
 			<div className="flex flex-col w-full mx-auto">
@@ -272,7 +272,7 @@ const KioskStatusManager = ({
 								const nextOpenTime = (!operationalStatus.isOpen)
 									? getNextOpen(configs, kiosk, products)
 									: null
-								const openingMessage = nextOpenTime ? getOpeningMessage(nextOpenTime) : null
+								const openingMessage = nextOpenTime ? `Kiosken åbner igen ${formatRelativeDateLabel(nextOpenTime)}` : null
 
 								const buttonLabel = isDeactivated ? 'Aktiver' : 'Deaktiver'
 								const buttonAriaLabel = isDeactivated ? `Aktiver ${kiosk.name}` : `Deaktiver ${kiosk.name}`

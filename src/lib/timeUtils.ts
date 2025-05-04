@@ -282,37 +282,43 @@ export function getNextOpen (configs: ConfigsType | null, kiosk: KioskType | nul
 }
 
 // Helper to check if a date is today (local time)
-function isDateToday (date: Date): boolean {
+function isToday (date: Date): boolean {
 	const now = new Date()
 	return (
 		date.getFullYear() === now.getFullYear() &&
-			date.getMonth() === now.getMonth() &&
-			date.getDate() === now.getDate()
+		date.getMonth() === now.getMonth() &&
+		date.getDate() === now.getDate()
 	)
 }
 
 // Helper to check if a date is tomorrow (local time)
-function isDateTomorrow (date: Date): boolean {
+function isTomorrow (date: Date): boolean {
 	const now = new Date()
 	const tomorrow = new Date(now)
 	tomorrow.setHours(0, 0, 0, 0)
 	tomorrow.setDate(now.getDate() + 1)
 	return (
 		date.getFullYear() === tomorrow.getFullYear() &&
-			date.getMonth() === tomorrow.getMonth() &&
-			date.getDate() === tomorrow.getDate()
+		date.getMonth() === tomorrow.getMonth() &&
+		date.getDate() === tomorrow.getDate()
 	)
 }
 
-// Helper to format opening message
-export function getOpeningMessage (date: Date): string {
-	const timeStr = dayjs(date).format('HH:mm')
-	if (isDateToday(date)) {
-		return `Kiosken åbner igen kl. ${timeStr}`
-	} else if (isDateTomorrow(date)) {
-		return `Kiosken åbner igen i morgen kl. ${timeStr}`
-	} else {
-		const formatted = dayjs(date).format('dddd [d.] DD/MM').charAt(0).toUpperCase() + dayjs(date).format('dddd [d.] DD/MM').slice(1)
-		return `Kiosken åbner igen ${formatted} kl. ${timeStr}`
+export function formatRelativeDateLabel (date: Date | string | null): string {
+	if (date == null) { return 'Ukendt dato' }
+	const timeStr = dayjs(date).format('[kl.] HH:mm')
+	const dateObj = typeof date === 'string' ? dayjs(date).toDate() : date
+	if (isToday(dateObj)) {
+		return `i dag ${timeStr}`
 	}
+	if (isTomorrow(dateObj)) {
+		return `i morgen ${timeStr}`
+	}
+	return formatFullDateLabel(dateObj)
+}
+
+export function formatFullDateLabel (date: Date): string {
+	const formatted = dayjs(date).format('dddd [d.] DD/MM [kl.] HH:mm')
+	// Capitalize first letter of formatted string
+	return `${formatted.charAt(0).toUpperCase()}${formatted.slice(1)}`
 }

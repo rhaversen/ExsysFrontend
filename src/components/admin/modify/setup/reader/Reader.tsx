@@ -130,13 +130,10 @@ const Reader = ({
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
 							options={Array.isArray(kiosks)
-								? kiosks.filter((kiosk) =>
-									((kiosk.readerId?._id) == null) ||
-										kiosk.readerId?._id === reader._id ||
-										kiosk.readerId?._id === newReader._id
-								).map((kiosk) => ({
+								? kiosks.map(kiosk => ({
 									value: kiosk._id,
-									label: kiosk.name
+									label: kiosk.name,
+									disabled: kiosk.readerId?._id != null && kiosk.readerId._id !== reader._id && kiosk._id !== assignedKiosk?._id
 								}))
 								: []
 							}

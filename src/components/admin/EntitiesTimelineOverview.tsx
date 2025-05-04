@@ -1,5 +1,6 @@
-import React, { useState, useRef, useLayoutEffect, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useLayoutEffect, useMemo, useCallback, useEffect } from 'react'
 
+import { isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import type { ProductType, Time } from '@/types/backendDataTypes'
 
 // --- Utility Functions ---
@@ -136,6 +137,7 @@ const ProductTimelineRow: React.FC<ProductTimelineRowProps> = ({
 	const to = toMinutes(product.orderWindow.to)
 	const segments = getBarSegments(from, to)
 	const y = PADDING + idx * ROW_HEIGHT
+	const isActiveNow = isCurrentTimeInOrderWindow(product.orderWindow)
 
 	return (
 		<g className="select-none">
@@ -168,7 +170,8 @@ const ProductTimelineRow: React.FC<ProductTimelineRowProps> = ({
 				const path = buildSegmentPath(x, w, y0, BAR_HEIGHT, rxL, rxR)
 				return (
 					<path
-						key={i} d={path} fill="#3b82f6"
+						key={i} d={path}
+						fill={isActiveNow ? '#3b82f6' : '#9ca3af'}
 						className="cursor-pointer transition-colors duration-200"
 						onMouseEnter={() => { onBarHover({ name: product.name, from, to, y: y0, x }) }}
 						onMouseLeave={() => { onBarHover(null) }}
@@ -184,6 +187,13 @@ interface Props { products: ProductType[] }
 
 const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [hovered, setHovered] = useState<null | { name: string, from: number, to: number, y: number, x: number }>(null)
+	const [currentTime, setCurrentTime] = useState<Date>(new Date())
+
+	useEffect(() => {
+		const id = setInterval(() => setCurrentTime(new Date()), 60000)
+		return () => clearInterval(id)
+	}, [])
+
 	const labelFont = '500 15px Inter, Arial, sans-serif'
 	const maxLabelWidth = useMemo(() => {
 		if (typeof window === 'undefined') { return 120 }
@@ -192,6 +202,9 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	const [timelineWidth, setTimelineWidth] = useState(600)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const height = products.length * ROW_HEIGHT + 2 * PADDING
+
+	const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
+	const nowX = maxLabelWidth + (nowMinutes / 1440) * timelineWidth
 
 	useLayoutEffect(() => {
 		function updateWidth (): void {
@@ -209,7 +222,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	return (
 		<div ref={containerRef} className="p-4 bg-gray-50 rounded-lg overflow-visible mb-5 w-full" style={{ minHeight: height }}>
 			{/* styled title */}
-			<h2 className="mb-5 text-lg text-gray-800">
+			<h2 className="md:mb-5 text-lg text-gray-800">
 				{'Produkter og deres bestillingsvinduer\r'}
 			</h2>
 
@@ -241,6 +254,17 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 						timelineWidth={timelineWidth} rowCount={products.length}
 					/>
 				</g>
+
+				{/* current time indicator */}
+				<line
+					x1={nowX}
+					y1={PADDING}
+					x2={nowX}
+					y2={PADDING + products.length * ROW_HEIGHT}
+					stroke="#ef4444"
+					strokeDasharray="4 2"
+					strokeWidth={2}
+				/>
 
 				{/* rows with rounded corners using clipPath */}
 				<g clipPath="url(#rowsClip)">

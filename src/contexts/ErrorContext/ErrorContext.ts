@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react'
 
 export interface ErrorInfo {
 	id: number
-	error: unknown
+	error: string[]
 }
 
 interface ErrorContextType {

@@ -134,7 +134,7 @@ const Room = ({
 							required={true}
 							maxLength={20}
 							validations={[{
-								validate: (v: string) => !rooms.some((room) => room.name.trim() === v.trim() && room._id !== newRoom._id),
+								validate: (v: string) => !rooms.some((room) => room.name.trim().toLowerCase() === v.trim().toLowerCase() && room._id !== newRoom._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							editable={isEditing}
@@ -209,7 +209,11 @@ const Room = ({
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj Fremhævende Aktiviteter til ${newRoom.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: disabledActivities.some(da => da._id === a._id)
+					}))}
 					selectedItems={linkedActivities}
 					onAddItem={(v) => { handleActivityChange([...linkedActivities, v]) }}
 					onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
@@ -220,7 +224,11 @@ const Room = ({
 			{showDisabledActivities && (
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Aktiviteter til ${newRoom.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in linkedActivities
+						disabled: linkedActivities.some(la => la._id === a._id)
+					}))}
 					selectedItems={disabledActivities}
 					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}
 					onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}

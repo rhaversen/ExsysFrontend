@@ -140,7 +140,7 @@ const AddRoom = ({
 								onChange={handleNameChange}
 								maxLength={50}
 								validations={[{
-									validate: (v: string) => !rooms.some((room) => room.name.trim() === v.trim()),
+									validate: (v: string) => !rooms.some((room) => room.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								editable={true}
@@ -226,7 +226,11 @@ const AddRoom = ({
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj Fremhævende Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: disabledActivities.some(da => da._id === a._id)
+					}))}
 					selectedItems={selectedActivities}
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
@@ -237,7 +241,11 @@ const AddRoom = ({
 			{showDisabledActivities && (
 				<SelectionWindow
 					title={`Tilføj Deaktiverede Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in selectedActivities
+						disabled: selectedActivities.some(sa => sa._id === a._id)
+					}))}
 					selectedItems={disabledActivities}
 					onAddItem={handleAddDisabledActivity}
 					onDeleteItem={handleDeleteDisabledActivity}
