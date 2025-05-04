@@ -222,7 +222,7 @@ const EntitiesTimelineOverview: React.FC<Props> = ({ products }) => {
 	return (
 		<div ref={containerRef} className="p-4 bg-gray-50 rounded-lg overflow-visible mb-5 w-full" style={{ minHeight: height }}>
 			{/* styled title */}
-			<h2 className="mb-5 text-lg text-gray-800">
+			<h2 className="md:mb-5 text-lg text-gray-800">
 				{'Produkter og deres bestillingsvinduer\r'}
 			</h2>
 

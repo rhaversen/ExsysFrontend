@@ -70,7 +70,7 @@ export default function Page (): ReactElement {
 	}, [addError, login])
 
 	return (
-		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
+		<main className="p-5 flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
 			<form className="w-full max-w-sm flex flex-col justify-between space-y-5" onSubmit={handleSubmit}>
 				<div className="space-y-2">
 					<label htmlFor="username" className="block text-sm font-medium text-gray-700">
