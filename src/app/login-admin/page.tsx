@@ -28,7 +28,21 @@ export default function Page (): ReactElement {
 			router.push('/admin')
 		} catch (error) {
 			setCurrentUser(null)
-			addError(error)
+			// Check if it's an Axios error and has a response
+			if (axios.isAxiosError(error) && error.response) {
+				// Check if the status code is 401
+				if (error.response.status === 401) {
+					// Extract message from response data, default to a generic message if not found
+					const message = error.response.data?.error ?? 'Forkert brugernavn eller kodeord.'
+					addError(new Error(message)) // Pass the specific message
+				} else {
+					// Handle other Axios errors
+					addError(error)
+				}
+			} else {
+				// Handle non-Axios errors or errors without a response
+				addError(error)
+			}
 		}
 	}, [API_URL, addError, router, setCurrentUser])
 
