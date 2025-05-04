@@ -8,6 +8,7 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 import { useUser } from '@/contexts/UserProvider'
 import { type AdminType } from '@/types/backendDataTypes'
 
+import CloseableModal from '../../../ui/CloseableModal'
 import LogoutButton from '../LogoutButton'
 
 import PageLink from './PageLink'
@@ -17,6 +18,7 @@ const Header = (): ReactElement | null => {
 	const [isClient, setIsClient] = useState(false)
 	const [dropdownOpen, setDropdownOpen] = useState(false)
 	const [isScrolled, setIsScrolled] = useState(false)
+	const [isLoggingOut, setIsLoggingOut] = useState(false)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 	const pathname = usePathname()
 	const [selectedLink, setSelectedLink] = useState<string>(pathname ?? '')
@@ -107,7 +109,10 @@ const Header = (): ReactElement | null => {
 									? 'opacity-100 scale-100'
 									: 'opacity-0 scale-95 pointer-events-none'}`}
 							>
-								<LogoutButton />
+								<LogoutButton
+									isLoggingOut={isLoggingOut}
+									setIsLoggingOut={setIsLoggingOut}
+								/>
 							</div>
 						</div>
 					</div>
@@ -115,6 +120,15 @@ const Header = (): ReactElement | null => {
 			</header>
 			{/* Add padding to the top of the page content */}
 			<div className="mt-16"></div>
+
+			{/* Conditionally render the modal */}
+			{isLoggingOut && (
+				<CloseableModal canClose={false} onClose={() => {}}>
+					<div className="p-6 text-center">
+						<p className="text-lg font-semibold text-gray-700">{'Logger ud...'}</p>
+					</div>
+				</CloseableModal>
+			)}
 		</>
 	)
 }
