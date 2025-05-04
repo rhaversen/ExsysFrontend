@@ -153,12 +153,10 @@ const AddReader = ({
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
 							options={
-								kiosks.filter(kiosk =>
-									// Filter out kiosks that already have a reader assigned
-									(kiosk.readerId?._id) == null
-								).map(kiosk => ({
+								kiosks.map(kiosk => ({
 									value: kiosk._id,
-									label: kiosk.name
+									label: kiosk.name,
+									disabled: kiosk.readerId?._id != null
 								}))
 							}
 							onChange={handleKioskChange}

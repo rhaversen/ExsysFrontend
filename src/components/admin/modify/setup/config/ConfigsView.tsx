@@ -4,7 +4,7 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ConfigsType } from '@/types/backendDataTypes'
 
-import Config from './Config'
+import ConfigItem from './ConfigItem'
 
 const ConfigsView = (): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -27,7 +27,7 @@ const ConfigsView = (): ReactElement => {
 		})
 	}, [addError, fetchConfigs])
 
-	const shownConfigs = ['kioskInactivityTimeoutMs', 'kioskInactivityTimeoutWarningMs', 'kioskOrderConfirmationTimeoutMs'] as const
+	const shownConfigs = ['kioskPassword', 'kioskInactivityTimeoutMs', 'kioskInactivityTimeoutWarningMs', 'kioskOrderConfirmationTimeoutMs'] as const
 
 	const text = {
 		kioskInactivityTimeoutMs: {
@@ -41,6 +41,10 @@ const ConfigsView = (): ReactElement => {
 		kioskOrderConfirmationTimeoutMs: {
 			readableLabel: 'Kiosk Bestillingsbekræftelse Timeout',
 			description: 'Den tid, kiosken venter, før den automatisk går tilbage til startskærmen efter en færdiggjort bestilling. Brugeren kan også trykke på skærmen for at fortsætte.'
+		},
+		kioskPassword: {
+			readableLabel: 'Kiosk Adgangskode',
+			description: 'Adgangskoden, der bruges til at logge ind på kioskerne. Kiosker forbliver logget ind ved ændring af adgangskoden, men nye kiosker skal bruge den nye adgangskode for at logge ind.'
 		}
 	}
 
@@ -53,7 +57,7 @@ const ConfigsView = (): ReactElement => {
 				: (
 					<div className="w-full max-w-4xl space-y-4">
 						{shownConfigs.map((label) => (
-							<Config
+							<ConfigItem
 								key={label}
 								label={label}
 								value={configs[label]}

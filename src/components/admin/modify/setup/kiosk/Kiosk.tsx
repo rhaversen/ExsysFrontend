@@ -40,7 +40,6 @@ const Kiosk = ({
 		updateEntity,
 		deleteEntity
 	} = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
-	const [newPassword, setNewPassword] = useState('')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
 	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
@@ -51,7 +50,6 @@ const Kiosk = ({
 				isEditing={isEditing}
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
-					setNewPassword('')
 					resetFormState()
 					setIsEditing(false)
 				}}
@@ -59,11 +57,9 @@ const Kiosk = ({
 					updateEntity(kiosk._id, {
 						...newKiosk,
 						readerId: newKiosk.readerId?._id ?? null,
-						password: newPassword.length > 0 ? newPassword : undefined,
 						activities: newKiosk.activities.map(activity => activity._id),
 						disabledActivities: newKiosk.disabledActivities
 					})
-					setNewPassword('')
 					setIsEditing(false)
 				}}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
@@ -85,7 +81,7 @@ const Kiosk = ({
 							maxLength={50}
 							editable={isEditing}
 							validations={[{
-								validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim() && k._id !== newKiosk._id),
+								validate: (v: string) => !kiosks.some((k) => k.name.trim().toLowerCase() === v.trim().toLowerCase() && k._id !== newKiosk._id),
 								message: 'Navn er allerede i brug'
 							}]}
 							onChange={(value) => { handleFieldChange('name', value) }}
@@ -118,52 +114,18 @@ const Kiosk = ({
 					</div>
 				</div>
 
-				{/* Password */}
-				{isEditing && (
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Ny Adgangskode'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="password"
-								initialText={newPassword}
-								placeholder="Ny Adgangskode"
-								minSize={10}
-								minLength={4}
-								maxLength={100}
-								editable={isEditing}
-								onChange={setNewPassword}
-								onValidationChange={handleValidationChange}
-							/>
-						</div>
-					</div>
-				)}
-				{!isEditing && (
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							{'******'}
-						</div>
-					</div>
-				)}
-
 				{/* Reader */}
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kortlæser'}</div>
 					<div className="text-gray-800 flex items-center justify-center text-sm">
 						<EditableDropdown
-							options={
-								readers.filter((reader) =>
-								// Include reader if NOT assigned to any kiosk
-									!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id) ||
-										// OR if the reader is the one currently assigned to newKiosk
-										reader._id === newKiosk.readerId?._id ||
-										// OR if the reader is the one currently assigned to kiosk
-										reader._id === kiosk.readerId?._id
-								).map((reader) => ({
-									value: reader._id,
-									label: reader.readerTag
-								}))
-							}
+							options={readers.map(reader => ({
+								value: reader._id,
+								label: reader.readerTag,
+								disabled: kiosks.some(k => k.readerId?._id === reader._id)
+									&& reader._id !== newKiosk.readerId?._id
+									&& reader._id !== kiosk.readerId?._id
+							}))}
 							initialValue={newKiosk.readerId?._id ?? 'null-option'}
 							onChange={(value) => { handleFieldChange('readerId', value === 'null-option' ? null : readers.find(reader => reader._id === value) ?? null) }}
 							editable={isEditing}
@@ -224,7 +186,11 @@ const Kiosk = ({
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj aktivitet til ${newKiosk.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: newKiosk.disabledActivities.includes(a._id)
+					}))}
 					selectedItems={newKiosk.activities}
 					onAddItem={(v) => {
 						handleFieldChange('activities', [...newKiosk.activities, {
@@ -240,7 +206,11 @@ const Kiosk = ({
 			{showDisabledActivities && (
 				<SelectionWindow
 					title={`Tilføj deaktiverede aktiviteter til ${newKiosk.name}`}
-					items={activities}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in prioritized activities
+						disabled: newKiosk.activities.some(pa => pa._id === a._id)
+					}))}
 					selectedItems={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
 					onAddItem={(v) => {
 						handleFieldChange('disabledActivities', [...newKiosk.disabledActivities, v._id])

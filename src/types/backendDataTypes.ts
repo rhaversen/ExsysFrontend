@@ -191,7 +191,6 @@ export interface KioskType {
 export interface PostKioskType {
 	name: string
 	kioskTag?: string
-	password: string
 	readerId?: ReaderType['_id']
 	activities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
@@ -202,7 +201,6 @@ export interface PostKioskType {
 export interface PatchKioskType {
 	name?: string
 	kioskTag?: string | null
-	password?: string
 	readerId?: ReaderType['_id'] | null
 	activities?: Array<ActivityType['_id']>
 	disabledActivities?: Array<ActivityType['_id']>
@@ -231,6 +229,7 @@ export interface ConfigsType {
 		kioskInactivityTimeoutWarningMs: number
 		kioskOrderConfirmationTimeoutMs: number
 		disabledWeekdays: number[]
+		kioskPassword: string
 	}
 	createdAt: Date
 	updatedAt: Date

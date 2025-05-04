@@ -30,7 +30,6 @@ const AddKiosk = ({
 		readerId: '',
 		name: '',
 		kioskTag: undefined,
-		password: '',
 		activities: [],
 		disabledActivities: []
 	})
@@ -67,13 +66,6 @@ const AddKiosk = ({
 		setKiosk({
 			...kiosk,
 			name: v
-		})
-	}, [kiosk])
-
-	const handlePasswordChange = useCallback((v: string): void => {
-		setKiosk({
-			...kiosk,
-			password: v
 		})
 	}, [kiosk])
 
@@ -145,7 +137,7 @@ const AddKiosk = ({
 								minSize={10}
 								required={true}
 								validations={[{
-									validate: (v: string) => !kiosks.some((k) => k.name.trim() === v.trim()),
+									validate: (v: string) => !kiosks.some((k) => k.name.trim().toLowerCase() === v.trim().toLowerCase()),
 									message: 'Navn er allerede i brug'
 								}]}
 								onChange={handleNameChange}
@@ -180,37 +172,16 @@ const AddKiosk = ({
 						</div>
 					</div>
 
-					{/* 3. Password */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Adgangskode'}</div>
-						<div className="text-gray-800 flex items-center justify-center text-sm">
-							<EditableField
-								fieldName="password"
-								placeholder="Adgangskode"
-								minSize={10}
-								required={true}
-								onChange={handlePasswordChange}
-								minLength={4}
-								maxLength={100}
-								onValidationChange={handleValidationChange}
-								editable={true}
-								initialText=""
-							/>
-						</div>
-					</div>
-
-					{/* 4. Kortlæser */}
+					{/* 3. Kortlæser */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Tilknyttet Kortlæser'}</div>
 						<div className="text-gray-800 flex items-center justify-center text-sm">
 							<EditableDropdown
 								options={
-									readers.filter((reader) =>
-										// Include reader if NOT assigned to any kiosk
-										!kiosks.some((kiosk) => kiosk.readerId?._id === reader._id)
-									).map((reader) => ({
+									readers.map((reader) => ({
 										value: reader._id,
-										label: reader.readerTag
+										label: reader.readerTag,
+										disabled: kiosks.some((k) => k.readerId?._id === reader._id)
 									}))
 								}
 								initialValue={kiosk.readerId ?? 'null-option'}
@@ -223,7 +194,7 @@ const AddKiosk = ({
 						</div>
 					</div>
 
-					{/* 5. Fremhævede Aktiviteter */}
+					{/* 4. Fremhævede Aktiviteter */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
@@ -239,7 +210,7 @@ const AddKiosk = ({
 						</div>
 					</div>
 
-					{/* 6. Deaktiverede Aktiviteter */}
+					{/* 5. Deaktiverede Aktiviteter */}
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
@@ -280,8 +251,12 @@ const AddKiosk = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities}
+					title={`Tilføj Fremhævede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in disabledActivities
+						disabled: kiosk.disabledActivities.includes(a._id)
+					}))}
 					selectedItems={activities.filter((activity) => kiosk.activities.includes(activity._id))}
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
@@ -291,8 +266,12 @@ const AddKiosk = ({
 
 			{showDisabledActivities && (
 				<SelectionWindow
-					title={`Tilføj deaktiverede aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities}
+					title={`Tilføj Deaktiverede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities.map(a => ({
+						...a,
+						// Disable if already in selectedActivities
+						disabled: kiosk.activities.includes(a._id)
+					}))}
 					selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
 					onAddItem={handleAddDisabledActivity}
 					onDeleteItem={handleDeleteDisabledActivity}
