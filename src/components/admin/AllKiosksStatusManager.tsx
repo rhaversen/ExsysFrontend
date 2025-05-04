@@ -76,7 +76,7 @@ const AllKiosksStatusManager = ({
 	return (
 		<div className="relative flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
 			{/* Header Section */}
-			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
 				<div className="flex items-center gap-3 flex-grow">
 					<FaStore className="text-blue-500 text-2xl flex-shrink-0" />
 					<h2 className="text-lg text-gray-800">{'Administrer alle kioskers status på en gang'}</h2>
@@ -84,7 +84,7 @@ const AllKiosksStatusManager = ({
 				<button
 					type="button"
 					onClick={() => { setShowOptions(prev => !prev) }}
-					className="w-[120px] h-[40px] shadow-md flex items-center justify-center gap-2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition mt-4 sm:mt-0"
+					className="w-[120px] h-[40px] shadow-md flex items-center justify-center gap-2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition mt-0"
 				>
 					{showOptions ? (<><span>{'Skjul'}</span> <FaChevronUp /></>) : (<><span>{'Udvid'}</span> <FaChevronDown /></>)}
 				</button>

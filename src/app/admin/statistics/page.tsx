@@ -349,7 +349,7 @@ export default function Page (): ReactElement {
 						>
 							<div className="flex items-center">
 								<FiUsers className="mr-2" />
-								{'Lokaler, Kiosker og Aktiviteter\r'}
+								{'Spisesteder, Kiosker og Aktiviteter\r'}
 							</div>
 						</button>
 						<button
@@ -424,8 +424,8 @@ export default function Page (): ReactElement {
 									<div className="text-xs text-amber-700">{'Mest solgte produkt'}</div>
 									<div className="text-xl font-bold">{stats.mostSoldProduct}</div>
 								</div>
-								<div className="bg-cyan-50 rounded p-3" title="Lokalet med flest bestillinger (med antal)">
-									<div className="text-xs text-cyan-700">{'Travleste lokale'}</div>
+								<div className="bg-cyan-50 rounded p-3" title="Spisestedet med flest bestillinger (med antal)">
+									<div className="text-xs text-cyan-700">{'Travleste spisested'}</div>
 									<div className="text-xl font-bold">{stats.busiestRoom}</div>
 								</div>
 								<div className="bg-orange-50 rounded p-3" title="Kiosken med flest bestillinger (med antal)">
@@ -648,7 +648,7 @@ export default function Page (): ReactElement {
 						<div ref={customersRef} className="mb-12">
 							<h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800 border-b pb-2">
 								<FiUsers className="mr-2 text-blue-600" />
-								{'Lokaler, Kiosker og Aktiviteter\r'}
+								{'Spisesteder, Kiosker og Aktiviteter\r'}
 							</h2>
 
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
@@ -656,7 +656,7 @@ export default function Page (): ReactElement {
 									data={stats.topRooms.map(r => r[1])}
 									labels={stats.topRooms.map(r => r[0])}
 									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
-									label="Ordrevolumen per lokale"
+									label="Ordrevolumen per spisested"
 									yLabel='stk.'
 								/>
 								<SvgPieChart
@@ -680,7 +680,7 @@ export default function Page (): ReactElement {
 									data={stats.revenueByRoom}
 									labels={stats.topRooms.map(r => r[0])}
 									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
-									label="Omsætning per lokale"
+									label="Omsætning per spisested"
 									yLabel='kr.'
 								/>
 								<SvgPieChart

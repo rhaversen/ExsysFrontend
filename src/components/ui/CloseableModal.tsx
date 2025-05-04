@@ -41,7 +41,7 @@ const CloseableModal = ({
 			>
 				<span className="sr-only">{'Close'}</span>
 			</button>
-			<div className="absolute bg-white rounded-3xl p-10">
+			<div className="absolute bg-white rounded-3xl m-1 p-2 md:p-10">
 				{children}
 			</div>
 		</div>

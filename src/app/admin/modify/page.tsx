@@ -5,6 +5,7 @@ import React, { type ReactElement, useCallback, useEffect, useRef, useState } fr
 import { io, type Socket } from 'socket.io-client'
 
 import AdminView from '@/components/admin/modify/AdminView'
+import ConfigsView from '@/components/admin/modify/setup/config/ConfigsView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -26,7 +27,7 @@ export default function Page (): ReactElement {
 
 	const { addError } = useError()
 
-	const views = ['Rediger Katalog', 'Rediger Opsætning', 'Login Sessioner']
+	const views = ['Rediger Katalog', 'Rediger Opsætning', 'Konfiguration', 'Login Sessioner']
 	const [selectedView, setSelectedView] = useState<string | null>(null)
 
 	const [products, setProducts] = useState<ProductType[]>([])
@@ -343,7 +344,7 @@ export default function Page (): ReactElement {
 					kiosks={kiosks}
 					readers={readers}
 					rooms={rooms}
-					views={selectedView === 'Rediger Katalog' ? ['Produkter', 'Tilvalg'] : ['Kiosker', 'Aktiviteter', 'Spisesteder', 'Kortlæsere', 'Admins', 'Konfiguration']}
+					views={selectedView === 'Rediger Katalog' ? ['Produkter', 'Tilvalg'] : ['Kiosker', 'Aktiviteter', 'Spisesteder', 'Kortlæsere', 'Admins']}
 				/>
 			}
 			{selectedView === 'Login Sessioner' &&
@@ -352,6 +353,9 @@ export default function Page (): ReactElement {
 					kiosks={kiosks}
 					sessions={sessions}
 				/>
+			}
+			{selectedView === 'Konfiguration' &&
+				<ConfigsView/>
 			}
 		</main>
 	)

@@ -3,6 +3,7 @@ import React, { type ReactElement, useCallback, useEffect, useState } from 'reac
 interface Option {
 	value: string
 	label: string
+	disabled?: boolean
 }
 
 const Dropdown = ({
@@ -72,7 +73,7 @@ const Dropdown = ({
 							</option>
 						)}
 						{options.map((option) => (
-							<option key={option.value} value={option.value}>
+							<option key={option.value} value={option.value} disabled={option.disabled}>
 								{option.label}
 							</option>
 						))}

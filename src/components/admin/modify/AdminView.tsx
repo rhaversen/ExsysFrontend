@@ -11,7 +11,6 @@ import Activity from '@/components/admin/modify/setup/activity/Activity'
 import AddActivity from '@/components/admin/modify/setup/activity/AddActivity'
 import AddAdmin from '@/components/admin/modify/setup/admin/AddAdmin'
 import Admin from '@/components/admin/modify/setup/admin/Admin'
-import ConfigsView from '@/components/admin/modify/setup/config/ConfigsView'
 import AddKiosk from '@/components/admin/modify/setup/kiosk/AddKiosk'
 import Kiosk from '@/components/admin/modify/setup/kiosk/Kiosk'
 import AddReader from '@/components/admin/modify/setup/reader/AddReader'
@@ -127,8 +126,6 @@ const AdminView = ({
 						{sortByField(options).map((option) => <Option key={option._id} products={products} option={option} options={options} />)}
 					</div>
 				)
-			case 'Konfiguration':
-				return <ConfigsView />
 			default:
 				return <p className="flex justify-center p-4 font-bold text-gray-800 text-xl">{'Vælg en kategori'}</p>
 		}

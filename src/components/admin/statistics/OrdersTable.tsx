@@ -51,7 +51,7 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 							<div className="flex items-center gap-1">{'Kiosk'}{orderSort.field === 'kiosk' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
 						</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'room', direction: orderSort.field === 'room' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
-							<div className="flex items-center gap-1">{'Lokale'}{orderSort.field === 'room' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
+							<div className="flex items-center gap-1">{'Spisested'}{orderSort.field === 'room' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
 						</th>
 						<th className="p-3 border-b">{'Indhold'}</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors text-right" onClick={() => setOrderSort({ field: 'total', direction: orderSort.field === 'total' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
