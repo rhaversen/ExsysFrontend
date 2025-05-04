@@ -1,8 +1,8 @@
 'use client'
 
-import axios, { AxiosError } from 'axios' // Import AxiosError
+import axios, { AxiosError } from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { type ReactElement, useCallback, useEffect, useState } from 'react' // Import useState
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
@@ -14,14 +14,14 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 	const { setCurrentUser } = useUser()
 	const [isLoading, setIsLoading] = useState(false)
-	const [showConflictWarning, setShowConflictWarning] = useState(false) // Renamed state
+	const [showConflictWarning, setShowConflictWarning] = useState(false)
 	const [overrideLogin, setOverrideLogin] = useState(false)
 
 	const login = useCallback(async (credentials: {
 			kioskTag: FormDataEntryValue | null
 			password: FormDataEntryValue | null
 			stayLoggedIn: boolean
-			override?: boolean // Add optional override parameter
+			override?: boolean
 		}) => {
 		try {
 			setIsLoading(true)
@@ -31,16 +31,28 @@ export default function Page (): ReactElement {
 				user: KioskType
 			}>(`${API_URL}/v1/auth/login-kiosk-local`, credentials, { withCredentials: true })
 			setCurrentUser(response.data.user)
-			// setShowConflictWarning(false) // Already reset above
 			router.replace('/kiosk')
 		} catch (error) {
 			setCurrentUser(null)
-			// Check if it's a 409 conflict error
-			if (error instanceof AxiosError && error.response?.status === 409) {
-				setShowConflictWarning(true) // Show warning div and checkbox on 409
-				// addError('Denne kiosk er allerede logget ind. Sæt flueben for at logge ind alligevel.') // Removed addError call
+			setIsLoading(false) // Set loading false only on error
+			// Check if it's an Axios error and has a response
+			if (error instanceof AxiosError && error.response) {
+				// Check if the status code is 409 (Conflict)
+				if (error.response.status === 409) {
+					setShowConflictWarning(true) // Show warning div and checkbox on 409
+				} else if (error.response.status === 401) {
+					// Handle 401 Unauthorized error
+					setShowConflictWarning(false)
+					const message = error.response.data?.error ?? 'Forkert Kiosk # eller kodeord.'
+					addError(new Error(message))
+				} else {
+					// Handle other Axios errors
+					setShowConflictWarning(false)
+					addError(error)
+				}
 			} else {
-				setShowConflictWarning(false) // Hide warning div and checkbox on other errors
+				// Handle non-Axios errors or errors without a response
+				setShowConflictWarning(false)
 				addError(error)
 			}
 		}
