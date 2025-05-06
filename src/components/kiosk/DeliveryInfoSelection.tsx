@@ -22,7 +22,7 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 	const otherItems = items.filter(item => !priorityItems.some(pi => pi._id === item._id))
 
 	return (
-		<main className="flex flex-col min-h-screen bg-zinc-100">
+		<main className="flex flex-col min-h-screen">
 			<div className="flex flex-col items-center justify-center py-20 pb-5">
 				<header className="mb-8 flex flex-col gap-5 items-center">
 					<h1 className="text-gray-800 text-6xl font-bold">{title}</h1>
