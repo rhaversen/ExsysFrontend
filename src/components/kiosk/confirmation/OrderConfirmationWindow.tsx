@@ -26,24 +26,21 @@ const OrderConfirmationWindow = ({
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
 
 	useEffect(() => {
+		setRemainingSeconds(autoCloseMs / 1000)
 		const timer = setInterval(() => {
 			setRemainingSeconds((prev) => {
-				if (prev <= 1) {
-					clearInterval(timer)
-					return 0
-				}
 				return prev - 1
 			})
 		}, 1000)
 
 		return () => { clearInterval(timer) }
-	}, [])
+	}, [autoCloseMs, canClose, orderStatus])
 
 	useEffect(() => {
 		if (!canClose || orderStatus === 'awaitingPayment') { return }
 		const timeoutId = setTimeout(() => {
 			onClose()
-		}, autoCloseMs)
+		}, autoCloseMs + 1000)
 		return () => { clearTimeout(timeoutId) }
 	}, [autoCloseMs, canClose, orderStatus, onClose])
 
@@ -123,7 +120,7 @@ const OrderConfirmationWindow = ({
 				<div className="text-center text-sm text-gray-800 mt-4">
 					{'Fortsætter om '}
 					<strong>{remainingSeconds}</strong>
-					{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
+					{' sekund'}{remainingSeconds == 1 ? '' : 'er'}
 				</div>
 			)}
 		</CloseableModal>

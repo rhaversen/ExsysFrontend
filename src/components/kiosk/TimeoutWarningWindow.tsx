@@ -15,22 +15,22 @@ const TimeoutWarningWindow = ({
 	const [remainingSeconds, setRemainingSeconds] = useState(timeoutWarningMs / 1000)
 
 	useEffect(() => {
+		setRemainingSeconds(timeoutWarningMs / 1000)
 		const timer = setInterval(() => {
 			setRemainingSeconds(prev => {
-				if (prev < 1) {
-					clearInterval(timer)
-					// Schedule timeout callback for next tick to avoid state updates during render
-					setTimeout(() => {
-						onTimeout()
-					}, 0)
-					return 0
-				}
 				return prev - 1
 			})
 		}, 1000)
 
 		return () => { clearInterval(timer) }
-	}, [onTimeout])
+	}, [onTimeout, timeoutWarningMs])
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			onTimeout()
+		}, timeoutWarningMs + 1000)
+		return () => { clearTimeout(timeoutId) }
+	}, [onTimeout, timeoutWarningMs])
 
 	return (
 		<CloseableModal onClose={onClose}>
