@@ -277,6 +277,7 @@ const OrderView = ({
 			{isSelectPaymentWindowVisible && (
 				<SelectPaymentWindow
 					checkoutMethods={checkoutMethods}
+					sumUpDisabled={(totalPrice > 0 && totalPrice <= 10)}
 					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
 					onSubmit={checkoutMethod => {
 						submitOrder(checkoutMethod)
