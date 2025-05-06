@@ -66,14 +66,12 @@ const OrderConfirmationWindow = ({
 
 	// The order was completed successfully
 	let successMessage: ReactElement = <></>
-	if (checkoutMethod === 'later') {
+	if (checkoutMethod === 'later' && price > 0) {
 		successMessage = <p className="flex items-center justify-center">
 			{'Betal '}
 			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
 			{' ved afhentning'}
 		</p>
-	} else {
-		successMessage = <p>{'Betaling gennemført'}</p>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {

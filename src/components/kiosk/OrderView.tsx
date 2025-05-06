@@ -231,6 +231,14 @@ const OrderView = ({
 		}
 	}, [orderStatus, onClose])
 
+	const handleCartSubmit = useCallback(() => {
+		if (totalPrice === 0) {
+			submitOrder('later')
+		} else {
+			setIsSelectPaymentWindowVisible(true)
+		}
+	}, [totalPrice, submitOrder])
+
 	return (
 		<main className="flex flex-row h-full">
 			{/* Left Column: Selection Window */}
@@ -253,7 +261,7 @@ const OrderView = ({
 					options={options}
 					cart={cart}
 					onCartChange={handleCartChange}
-					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
+					onSubmit={handleCartSubmit}
 					clearCart={() => {
 						updateCart({ products: {}, options: {} })
 						window.dispatchEvent(new Event('resetScroll'))
