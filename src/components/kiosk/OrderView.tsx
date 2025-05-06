@@ -170,6 +170,13 @@ const OrderView = ({
 			})
 	}, [kiosk, activity, room, cart, API_URL, addError, clearInactivityTimeout])
 
+	const cancelPayment = useCallback(() => {
+		if (!order) { return }
+		axios.post(`${API_URL}/v1/orders/${order._id}/cancel`, {}, { withCredentials: true })
+			.then(() => setOrderStatus('paymentFailed'))
+			.catch(addError)
+	}, [order, API_URL, addError])
+
 	useEffect(() => {
 		if (socket !== null && order !== null) {
 			// Listen for payment status updates related to the order
@@ -217,6 +224,13 @@ const OrderView = ({
 		}
 	}, [WS_URL])
 
+	const handleOrderConfirmationClose = useCallback(() => {
+		setIsOrderConfirmationVisible(false)
+		if (orderStatus === 'success') {
+			onClose()
+		}
+	}, [orderStatus, onClose])
+
 	return (
 		<main className="flex flex-row h-full">
 			{/* Left Column: Selection Window */}
@@ -254,7 +268,8 @@ const OrderView = ({
 					price={totalPrice}
 					orderStatus={orderStatus}
 					checkoutMethod={checkoutMethod}
-					onClose={onClose}
+					onClose={handleOrderConfirmationClose}
+					onCancelPayment={cancelPayment}
 				/>
 			)}
 
