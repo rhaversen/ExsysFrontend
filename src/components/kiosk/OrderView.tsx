@@ -51,6 +51,7 @@ const OrderView = ({
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
 	const [order, setOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
+	const [isCancelling, setIsCancelling] = useState(false)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
@@ -172,9 +173,11 @@ const OrderView = ({
 
 	const cancelPayment = useCallback(() => {
 		if (!order) { return }
+		setIsCancelling(true)
 		axios.post(`${API_URL}/v1/orders/${order._id}/cancel`, {}, { withCredentials: true })
 			.then(() => setOrderStatus('paymentFailed'))
-			.catch(addError)
+			.finally(() => setIsCancelling(false))
+			.catch(error => addError(error))
 	}, [order, API_URL, addError])
 
 	useEffect(() => {
@@ -278,6 +281,7 @@ const OrderView = ({
 					checkoutMethod={checkoutMethod}
 					onClose={handleOrderConfirmationClose}
 					onCancelPayment={cancelPayment}
+					isCancelling={isCancelling}
 				/>
 			)}
 
