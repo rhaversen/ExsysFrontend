@@ -88,7 +88,7 @@ export default function ProgressBar ({
 	}
 
 	return (
-		<div className={`w-full flex flex-col relative ${viewState !== 'welcome' ? 'shadow-b-md bg-zinc-100' : ''}`}>
+		<div className={`w-full flex flex-col relative ${viewState !== 'welcome' ? 'shadow-b-md' : ''}`}>
 			{/* Top progress bar container */}
 			<div className="w-full h-3 mt-2 mb-1 rounded-full">
 				{/* Progress bar overlay */}

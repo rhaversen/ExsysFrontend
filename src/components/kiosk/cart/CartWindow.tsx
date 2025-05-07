@@ -86,7 +86,9 @@ const CartWindow = ({
 							onClick={onSubmit}
 							disabled={!formIsValid}
 						>
-							{`Tryk her for at betale ${price} kr`}
+							{price === 0
+								? 'Send Bestilling'
+								: `Tryk her for at betale ${price} kr`}
 						</button>
 					</div>
 				</div>

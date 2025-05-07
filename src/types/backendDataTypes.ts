@@ -115,11 +115,11 @@ export interface OrderType {
 	options: Array<{ _id: OptionType['_id'], name: string, quantity: number }>
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
-	kioskId: KioskType['_id']
+	kioskId: KioskType['_id'] | null
 	status: 'pending' | 'confirmed' | 'delivered'
 	paymentId: string
 	paymentStatus: PaymentStatus
-	checkoutMethod: 'sumUp' | 'later'
+	checkoutMethod: 'sumUp' | 'later' | 'manual'
 	createdAt: string
 	updatedAt: string
 }
@@ -129,8 +129,8 @@ export interface PostOrderType {
 	options?: Array<{ id: OptionType['_id'], quantity: number }>
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
-	kioskId: KioskType['_id']
-	checkoutMethod: 'sumUp' | 'later' | 'mobilePay'
+	kioskId?: KioskType['_id']
+	checkoutMethod: 'sumUp' | 'later' | 'mobilePay' | 'manual'
 }
 
 export interface PatchOrderType {

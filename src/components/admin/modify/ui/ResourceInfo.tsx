@@ -22,6 +22,7 @@ const info: Record<string, ReactElement[]> = {
 	],
 	Kiosker: [
 		<>{'Repræsenterer de fysiske touch-enheder, hvor brugere laver bestillinger. Fungerer som login til den fysiske enhed.'}</>,
+		<>{'Kioskernes adgangskode kan ændres i konfiguration.'}</>,
 		<>{'Tilknyttet en eller flere aktiviteter, som vises som en fremhævet valgmulighed. Hvis ingen aktiviteter er tilknyttet, vises alle aktiviteter ligeligt.'}</>,
 		<>{'Kan tilknyttes en SumUp kortlæser for at muliggøre kortbetaling. Hvis ingen kortlæser er tilknyttet, vil kiosken kun kunne modtage kontantbetalinger.'}</>,
 		<>{'Kioskens navn og nummer (#) vises i bunden af kioskens skærm når den er logget ind.'}</>
