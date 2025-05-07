@@ -457,7 +457,7 @@ export default function Page (): ReactElement {
 	}
 
 	return (
-		<div className="flex flex-col h-screen">
+		<div className="flex flex-col h-screen bg-zinc-100">
 			<ProgressBar
 				viewState={viewState}
 				canClickActivity={canClickActivity}

@@ -170,6 +170,13 @@ const OrderView = ({
 			})
 	}, [kiosk, activity, room, cart, API_URL, addError, clearInactivityTimeout])
 
+	const cancelPayment = useCallback(() => {
+		if (!order) { return }
+		axios.post(`${API_URL}/v1/orders/${order._id}/cancel`, {}, { withCredentials: true })
+			.then(() => setOrderStatus('paymentFailed'))
+			.catch(addError)
+	}, [order, API_URL, addError])
+
 	useEffect(() => {
 		if (socket !== null && order !== null) {
 			// Listen for payment status updates related to the order
@@ -217,8 +224,23 @@ const OrderView = ({
 		}
 	}, [WS_URL])
 
+	const handleOrderConfirmationClose = useCallback(() => {
+		setIsOrderConfirmationVisible(false)
+		if (orderStatus === 'success') {
+			onClose()
+		}
+	}, [orderStatus, onClose])
+
+	const handleCartSubmit = useCallback(() => {
+		if (totalPrice === 0) {
+			submitOrder('later')
+		} else {
+			setIsSelectPaymentWindowVisible(true)
+		}
+	}, [totalPrice, submitOrder])
+
 	return (
-		<main className="flex flex-row bg-zinc-100 h-full">
+		<main className="flex flex-row h-full">
 			{/* Left Column: Selection Window */}
 			<div className="w-full flex flex-col">
 				{/* Selection Window */}
@@ -239,7 +261,7 @@ const OrderView = ({
 					options={options}
 					cart={cart}
 					onCartChange={handleCartChange}
-					onSubmit={() => { setIsSelectPaymentWindowVisible(true) }}
+					onSubmit={handleCartSubmit}
 					clearCart={() => {
 						updateCart({ products: {}, options: {} })
 						window.dispatchEvent(new Event('resetScroll'))
@@ -254,7 +276,8 @@ const OrderView = ({
 					price={totalPrice}
 					orderStatus={orderStatus}
 					checkoutMethod={checkoutMethod}
-					onClose={onClose}
+					onClose={handleOrderConfirmationClose}
+					onCancelPayment={cancelPayment}
 				/>
 			)}
 
@@ -262,6 +285,7 @@ const OrderView = ({
 			{isSelectPaymentWindowVisible && (
 				<SelectPaymentWindow
 					checkoutMethods={checkoutMethods}
+					sumUpDisabled={(totalPrice > 0 && totalPrice <= 10)}
 					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
 					onSubmit={checkoutMethod => {
 						submitOrder(checkoutMethod)
