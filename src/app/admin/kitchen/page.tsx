@@ -4,12 +4,13 @@ import axios from 'axios'
 import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
+import ManualOrderSidebar from '@/components/admin/kitchen/ManualOrderSidebar'
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import { type RoomType, type ActivityType, type OrderType } from '@/types/backendDataTypes'
+import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 
 export default function Page (): ReactElement {
@@ -21,6 +22,8 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [activities, setActivities] = useState<ActivityType[]>([])
 	const [orders, setOrders] = useState<OrderType[]>([])
+	const [products, setProducts] = useState<ProductType[]>([])
+	const [options, setOptions] = useState<OptionType[]>([])
 	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Activity map
@@ -47,7 +50,7 @@ export default function Page (): ReactElement {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const [roomsRes, actsRes, ordersRes] = await Promise.all([
+			const [roomsRes, actsRes, ordersRes, productsRes, optionsRes] = await Promise.all([
 				axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
 				axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
 				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
@@ -58,12 +61,16 @@ export default function Page (): ReactElement {
 						paymentStatus: 'successful'
 					},
 					withCredentials: true
-				})
+				}),
+				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get<OptionType[]>(`${API_URL}/v1/options`, { withCredentials: true })
 			])
 
 			setRooms(roomsRes.data)
 			setActivities(actsRes.data)
 			setOrders(ordersRes.data)
+			setProducts(productsRes.data)
+			setOptions(optionsRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -96,7 +103,7 @@ export default function Page (): ReactElement {
 	// Fetch on mount
 	useEffect(() => { fetchData().catch(addError) }, [fetchData, addError])
 
-	// Rooms & Activities real-time updates
+	// Rooms, activities, products and options socket listeners
 	useEntitySocketListeners<RoomType>(
 		socket,
 		'room',
@@ -111,83 +118,148 @@ export default function Page (): ReactElement {
 		a => { setActivities(prev => prev.map(p => p._id === a._id ? a : p)) },
 		id => { setActivities(prev => prev.filter(a => a._id !== id)) }
 	)
+	useEntitySocketListeners<ProductType>(
+		socket,
+		'product',
+		p => { setProducts(prev => [...prev, p]) },
+		p => { setProducts(prev => prev.map(pr => pr._id === p._id ? p : pr)) },
+		id => { setProducts(prev => prev.filter(p => p._id !== id)) }
+	)
+	useEntitySocketListeners<OptionType>(
+		socket,
+		'option',
+		o => { setOptions(prev => [...prev, o]) },
+		o => { setOptions(prev => prev.map(opt => opt._id === o._id ? o : opt)) },
+		id => { setOptions(prev => prev.filter(o => o._id !== id)) }
+	)
+
 	const [showSoundSettings, setShowSoundSettings] = useState(false)
+	const [showManual, setShowManual] = useState(false)
 
 	// Flatten all orders to check if there's any pending
 	const allActive = Object.values(groupedOrders).flat()
 
 	return (
-		<main>
-			{allActive.length === 0
-				? (
-					<>
+		<main className="flex">
+			{/* Main Content Area */}
+			<div className="flex-grow">
+				{allActive.length === 0
+					? (
+						<>
+							<div className="absolute top-1/2 left-1/2 -translate-x-1/2 sm:-translate-x-80 -translate-y-1/2 flex flex-col justify-center items-center">
+								<div className="text-gray-800 text-2xl">
+									{'Ingen Ordrer 😊'}
+								</div>
+								<div className="text-gray-800 text-center text-lg mt-2">
+									{'Nye ordrer vil automatisk blive vist her'}
+								</div>
+							</div>
+							<div className="min-w-80 h-full"/>
+						</>
 
-						<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col justify-center items-center">
-							<div className="text-gray-800 text-2xl">
-								{'Ingen Ordrer 😊'}
-							</div>
-							<div className="text-gray-800 text-lg mt-2">
-								{'Nye ordrer vil automatisk blive vist her'}
-							</div>
-						</div>
-					</>
-				)
-				: (
-					<div className="p-2 flex flex-wrap justify-start">
-						{groupedOrders['no-room']?.length > 0 && (
-							<RoomCol
-								key="no-room"
-								room={{
-									_id: 'no-room',
-									name: 'Ukendt Spisested',
-									description: '',
-									createdAt: '',
-									updatedAt: ''
-								}}
-								orders={groupedOrders['no-room']}
-								onUpdatedOrders={handleUpdatedOrders}
-								activityMap={activityMap}
-							/>
-						)}
-						{rooms
-							.filter(r => groupedOrders[r.name]?.length > 0)
-							.map(r => (
+					)
+					: (
+						<div className="p-2 flex flex-wrap justify-start mb-96">
+							{groupedOrders['no-room']?.length > 0 && (
 								<RoomCol
-									key={r._id}
-									room={r}
-									orders={groupedOrders[r.name]}
+									key="no-room"
+									room={{
+										_id: 'no-room',
+										name: 'Ukendt Spisested',
+										description: '',
+										createdAt: '',
+										updatedAt: ''
+									}}
+									orders={groupedOrders['no-room']}
 									onUpdatedOrders={handleUpdatedOrders}
 									activityMap={activityMap}
 								/>
-							))}
-					</div>
-				)}
+							)}
+							{rooms
+								.filter(r => groupedOrders[r.name]?.length > 0)
+								.map(r => (
+									<RoomCol
+										key={r._id}
+										room={r}
+										orders={groupedOrders[r.name]}
+										onUpdatedOrders={handleUpdatedOrders}
+										activityMap={activityMap}
+									/>
+								))}
+						</div>
+					)}
 
-			<div className="fixed bottom-4 right-4 z-20 flex">
-				<button
-					type="button"
-					onClick={() => { setIsMuted(!isMuted) }}
-					className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
-					title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
-				>
-					<span>{isMuted ? '🔇' : '🔊'}</span>
-				</button>
-				<button
-					type="button"
-					onClick={() => { setShowSoundSettings(!showSoundSettings) }}
-					className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors ${
-						showSoundSettings
-							? 'bg-blue-500 text-white hover:bg-blue-600'
-							: 'bg-white text-gray-700 hover:bg-gray-50'
-					}`}
-				>
-					{'Lydindstillinger'}
-				</button>
+				<div className="fixed bottom-4 left-4 flex">
+					<button
+						type="button"
+						onClick={() => { setIsMuted(!isMuted) }}
+						className="px-4 py-3 bg-white shadow-md text-gray-700 rounded-l-md hover:bg-gray-50 border-r border-gray-200 text-xl"
+						title={isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
+					>
+						<span>{isMuted ? '🔇' : '🔊'}</span>
+					</button>
+					<button
+						type="button"
+						onClick={() => { setShowSoundSettings(!showSoundSettings) }}
+						className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors ${
+							showSoundSettings
+								? 'bg-blue-500 text-white hover:bg-blue-600'
+								: 'bg-white text-gray-700 hover:bg-gray-50'
+						}`}
+					>
+						{'Lydindstillinger'}
+					</button>
+					<button
+						type="button"
+						onClick={() => setShowManual(!showManual)}
+						className="sm:hidden text-gray-700 px-5 py-3 bg-white shadow-md text-lg font-medium rounded-md ml-2"
+						title="Manual Ordre"
+					>
+						{'Manuel Ordre'}
+					</button>
+				</div>
+
+				{showSoundSettings && (
+					<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
+				)}
 			</div>
 
-			{showSoundSettings && (
-				<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
+			{showManual && (
+				<div className="fixed inset-0 sm:hidden bg-white z-50 overflow-x-auto shadow-lg">
+					{/* more visible close button */}
+					<div className="absolute top-4 right-4">
+						<button
+							type="button"
+							onClick={() => setShowManual(false)}
+							className="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg"
+							aria-label="Close"
+						>
+							&times;
+						</button>
+					</div>
+					<ManualOrderSidebar
+						rooms={rooms}
+						activities={activities}
+						products={products}
+						options={options}
+						recentManualOrders={orders.filter(o => o.checkoutMethod === 'manual')}
+					/>
+				</div>
 			)}
+
+			{/* Spacer for sidebar */}
+			<div className="hidden sm:block min-w-80 h-full"/>
+
+			{/* Manual Order Sidebar */}
+			<div className="hidden sm:block fixed right-0 h-full w-80 overflow-x-auto bg-white shadow-lg">
+				<ManualOrderSidebar
+					rooms={rooms}
+					activities={activities}
+					products={products}
+					options={options}
+					recentManualOrders={orders.filter(o => o.checkoutMethod === 'manual')}
+				/>
+			</div>
 		</main>
 	)
 }

@@ -11,12 +11,14 @@ const OrderConfirmationWindow = ({
 	price,
 	orderStatus,
 	checkoutMethod,
-	onClose
+	onClose,
+	onCancelPayment
 }: {
 	price: number
 	orderStatus: OrderStatus
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
+	onCancelPayment: () => void
 }): ReactElement => {
 	const { config } = useConfig()
 
@@ -26,24 +28,21 @@ const OrderConfirmationWindow = ({
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
 
 	useEffect(() => {
+		setRemainingSeconds(autoCloseMs / 1000)
 		const timer = setInterval(() => {
 			setRemainingSeconds((prev) => {
-				if (prev <= 1) {
-					clearInterval(timer)
-					return 0
-				}
 				return prev - 1
 			})
 		}, 1000)
 
 		return () => { clearInterval(timer) }
-	}, [])
+	}, [autoCloseMs, canClose, orderStatus])
 
 	useEffect(() => {
 		if (!canClose || orderStatus === 'awaitingPayment') { return }
 		const timeoutId = setTimeout(() => {
 			onClose()
-		}, autoCloseMs)
+		}, autoCloseMs + 1000)
 		return () => { clearTimeout(timeoutId) }
 	}, [autoCloseMs, canClose, orderStatus, onClose])
 
@@ -67,14 +66,12 @@ const OrderConfirmationWindow = ({
 
 	// The order was completed successfully
 	let successMessage: ReactElement = <></>
-	if (checkoutMethod === 'later') {
+	if (checkoutMethod === 'later' && price > 0) {
 		successMessage = <p className="flex items-center justify-center">
 			{'Betal '}
 			<span className="font-bold text-xl mx-1 flex items-center">{price}{' kr'}</span>
 			{' ved afhentning'}
 		</p>
-	} else {
-		successMessage = <p>{'Betaling gennemført'}</p>
 	}
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
@@ -111,6 +108,13 @@ const OrderConfirmationWindow = ({
 			</div>
 
 			<div className="flex justify-center">
+				{orderStatus === 'awaitingPayment' && (
+					<SubmitButton
+						text="Annuller"
+						onClick={onCancelPayment}
+						disabled={false}
+					/>
+				)}
 				{showSubmitButton && (
 					<SubmitButton
 						text="OK"
@@ -119,11 +123,11 @@ const OrderConfirmationWindow = ({
 					/>
 				)}
 			</div>
-			{orderStatus !== 'awaitingPayment' && (
+			{orderStatus !== 'awaitingPayment' && orderStatus !== 'loading' && (
 				<div className="text-center text-sm text-gray-800 mt-4">
 					{'Fortsætter om '}
 					<strong>{remainingSeconds}</strong>
-					{' sekund'}{remainingSeconds > 1 ? 'er' : ''}
+					{' sekund'}{remainingSeconds == 1 ? '' : 'er'}
 				</div>
 			)}
 		</CloseableModal>

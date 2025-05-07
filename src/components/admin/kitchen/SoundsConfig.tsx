@@ -1,6 +1,5 @@
 import { type ReactElement, useCallback, useState } from 'react'
 
-import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
 import { AdminSounds } from '@/lib/sounds'
@@ -15,10 +14,6 @@ const SoundsConfig = ({ onClose }: { onClose: () => void }): ReactElement => {
 		setSoundUrl
 	} = useSound()
 	const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
-	const {
-		showSuccess,
-		showSuccessMessage
-	} = useSaveFeedback()
 	const { addError } = useError()
 
 	const handlePlaySound = useCallback((url: string) => {
@@ -33,17 +28,15 @@ const SoundsConfig = ({ onClose }: { onClose: () => void }): ReactElement => {
 
 	const handleSoundSelect = (url: string): void => {
 		setSoundUrl(url)
-		showSuccessMessage()
 	}
 
 	const handleMuteToggle = (): void => {
 		setIsMuted(!isMuted)
-		showSuccessMessage()
 	}
 
 	return (
 		<CloseableModal onClose={onClose} canComplete={true} onComplete={onClose}>
-			<div className="w-[500px] space-y-6">
+			<div className="p-5 space-y-6">
 				<h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
 					{'Lydindstillinger'}
 				</h2>
@@ -101,8 +94,6 @@ const SoundsConfig = ({ onClose }: { onClose: () => void }): ReactElement => {
 						</div>
 					))}
 				</div>
-
-				<SaveFeedback show={showSuccess} />
 
 				<div className="flex justify-end">
 					<button
