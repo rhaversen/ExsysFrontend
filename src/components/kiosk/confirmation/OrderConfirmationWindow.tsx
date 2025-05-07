@@ -12,13 +12,15 @@ const OrderConfirmationWindow = ({
 	orderStatus,
 	checkoutMethod,
 	onClose,
-	onCancelPayment
+	onCancelPayment,
+	isCancelling = false
 }: {
 	price: number
 	orderStatus: OrderStatus
 	checkoutMethod: CheckoutMethod | null
 	onClose: () => void
 	onCancelPayment: () => void
+	isCancelling?: boolean
 }): ReactElement => {
 	const { config } = useConfig()
 
@@ -110,9 +112,9 @@ const OrderConfirmationWindow = ({
 			<div className="flex justify-center">
 				{orderStatus === 'awaitingPayment' && (
 					<SubmitButton
-						text="Annuller"
+						text={isCancelling ? 'Annullerer…' : 'Annuller'}
 						onClick={onCancelPayment}
-						disabled={false}
+						disabled={isCancelling}
 					/>
 				)}
 				{showSubmitButton && (
