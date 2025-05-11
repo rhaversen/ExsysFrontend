@@ -156,7 +156,7 @@ export default function Page (): ReactElement {
 			setKiosks((prevKiosks) =>
 				prevKiosks.map((kiosk) => ({
 					...kiosk,
-					activities: kiosk.activities.filter((activity) => activity._id !== id)
+					activities: kiosk.priorityActivities.filter((activity) => activity._id !== id)
 				}))
 			)
 			setActivities((prevActivities) => prevActivities.filter((activity) => activity._id !== id))
@@ -169,7 +169,7 @@ export default function Page (): ReactElement {
 			setKiosks((prevKiosks) =>
 				prevKiosks.map((kiosk) => ({
 					...kiosk,
-					activities: kiosk.activities.map((a) => (a._id === activity._id ? activity : a))
+					activities: kiosk.priorityActivities.map((a) => (a._id === activity._id ? activity : a))
 				}))
 			)
 			setActivities((prevActivities) => prevActivities.map((a) => (a._id === activity._id ? activity : a))
@@ -210,7 +210,7 @@ export default function Page (): ReactElement {
 			setActivities((prevActivities) =>
 				prevActivities.map((activity) => ({
 					...activity,
-					rooms: activity.rooms.filter((room) => room._id !== id)
+					rooms: activity.priorityRooms.filter((room) => room._id !== id)
 				}))
 			)
 			setRooms((prevRooms) => prevRooms.filter((room) => room._id !== id))
@@ -223,7 +223,7 @@ export default function Page (): ReactElement {
 			setActivities((prevActivities) =>
 				prevActivities.map((activity) => ({
 					...activity,
-					rooms: activity.rooms.map((r) => (r._id === room._id ? room : r))
+					rooms: activity.priorityRooms.map((r) => (r._id === room._id ? room : r))
 				}))
 			)
 			setRooms((prevRooms) => prevRooms.map((r) => (r._id === room._id ? room : r))

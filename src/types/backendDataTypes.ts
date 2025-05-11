@@ -67,7 +67,7 @@ export interface PatchOptionType {
 // Activity types
 export interface ActivityType {
 	_id: string
-	rooms: RoomType[]
+	priorityRooms: RoomType[]
 	disabledProducts: Array<ProductType['_id']>
 	disabledRooms: Array<RoomType['_id']>
 	name: string
@@ -76,14 +76,14 @@ export interface ActivityType {
 }
 
 export interface PostActivityType {
-	rooms?: Array<RoomType['_id']>
+	priorityRooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
 	disabledRooms?: Array<RoomType['_id']>
 	name: string
 }
 
 export interface PatchActivityType {
-	rooms?: Array<RoomType['_id']>
+	priorityRooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
 	disabledRooms?: Array<RoomType['_id']>
 	name?: string
@@ -180,7 +180,7 @@ export interface KioskType {
 	name: string
 	kioskTag: string
 	readerId: ReaderType | null
-	activities: ActivityType[]
+	priorityActivities: ActivityType[]
 	disabledActivities: Array<ActivityType['_id']>
 	deactivatedUntil: string | null
 	deactivated: boolean
@@ -192,7 +192,7 @@ export interface PostKioskType {
 	name: string
 	kioskTag?: string
 	readerId?: ReaderType['_id']
-	activities: Array<ActivityType['_id']>
+	priorityActivities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
 	deactivatedUntil?: string | null
 	deactivated?: boolean
@@ -202,7 +202,7 @@ export interface PatchKioskType {
 	name?: string
 	kioskTag?: string | null
 	readerId?: ReaderType['_id'] | null
-	activities?: Array<ActivityType['_id']>
+	priorityActivities?: Array<ActivityType['_id']>
 	disabledActivities?: Array<ActivityType['_id']>
 	deactivatedUntil?: string | null
 	deactivated?: boolean

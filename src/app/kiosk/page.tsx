@@ -188,7 +188,7 @@ export default function Page (): ReactElement {
 		activity => {
 			if (kiosk === null) { return }
 			// If the selected activity is no longer associated with the kiosk, deselect it
-			if (!kiosk.activities.some(a => a._id === activity._id)) {
+			if (!kiosk.priorityActivities.some(a => a._id === activity._id)) {
 				setSelectedActivity(null)
 			}
 
@@ -219,13 +219,13 @@ export default function Page (): ReactElement {
 				updateCheckoutMethods(kioskUpdate)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
-				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
+				if (!kioskUpdate.priorityActivities.some(a => a._id === selectedActivity?._id)) {
 					setSelectedActivity(null)
 				}
 
 				// If only one activity is available, select it
-				if (kioskUpdate.activities.length === 1) {
-					setSelectedActivity(kioskUpdate.activities[0])
+				if (kioskUpdate.priorityActivities.length === 1) {
+					setSelectedActivity(kioskUpdate.priorityActivities[0])
 				}
 			}
 		},
@@ -363,7 +363,7 @@ export default function Page (): ReactElement {
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={activities
-							.filter(activity => kiosk.activities.some(a => a._id === activity._id))
+							.filter(activity => kiosk.priorityActivities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onSelect={handleActivitySelect}
 					/>
@@ -382,7 +382,7 @@ export default function Page (): ReactElement {
 								.filter(room => !selectedActivity.disabledRooms.includes(room._id))
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
-						priorityItems={selectedActivity?.rooms
+						priorityItems={selectedActivity?.priorityRooms
 							.map(room => rooms.find(r => r._id === room._id) ?? room)
 							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
 						onSelect={handleRoomSelect}

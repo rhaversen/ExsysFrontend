@@ -33,7 +33,7 @@ const Activity = ({
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [linkedKiosks, setLinkedKiosks] = useState(
-		kiosks.filter(k => k.activities.some(a => a._id === activity._id))
+		kiosks.filter(k => k.priorityActivities.some(a => a._id === activity._id))
 	)
 	const [disabledKiosks, setDisabledKiosks] = useState(
 		kiosks.filter(k => k.disabledActivities.includes(activity._id))
@@ -64,7 +64,7 @@ const Activity = ({
 	}
 
 	useEffect(() => {
-		setLinkedKiosks(kiosks.filter(k => k.activities.some(a => a._id === activity._id)))
+		setLinkedKiosks(kiosks.filter(k => k.priorityActivities.some(a => a._id === activity._id)))
 		setDisabledKiosks(kiosks.filter(k => k.disabledActivities.includes(activity._id)))
 	}, [kiosks, activity])
 
@@ -72,14 +72,14 @@ const Activity = ({
 		// Update activity first
 		const activityUpdate: PatchActivityType = {
 			name: newActivity.name,
-			rooms: newActivity.rooms.map(room => room._id),
+			priorityRooms: newActivity.priorityRooms.map(room => room._id),
 			disabledRooms: newActivity.disabledRooms,
 			disabledProducts: newActivity.disabledProducts
 		}
 		updateActivity(newActivity._id, activityUpdate)
 
 		// Get kiosks that need updating for linked kiosks
-		const currentKiosks = kiosks.filter(k => k.activities.some(a => a._id === activity._id))
+		const currentKiosks = kiosks.filter(k => k.priorityActivities.some(a => a._id === activity._id))
 		const addedKiosks = linkedKiosks.filter(k => !currentKiosks.some(ck => ck._id === k._id))
 		const removedKiosks = currentKiosks.filter(ck => !linkedKiosks.some(k => k._id === ck._id))
 
@@ -92,7 +92,7 @@ const Activity = ({
 		for (const kiosk of addedKiosks) {
 			const kioskUpdate: PatchKioskType = {
 				name: kiosk.name,
-				activities: [...kiosk.activities.map(a => a._id), activity._id]
+				priorityActivities: [...kiosk.priorityActivities.map(a => a._id), activity._id]
 			}
 			updateKiosk(kiosk._id, kioskUpdate)
 		}
@@ -100,7 +100,7 @@ const Activity = ({
 		for (const kiosk of removedKiosks) {
 			const kioskUpdate: PatchKioskType = {
 				name: kiosk.name,
-				activities: kiosk.activities.filter(a => a._id !== activity._id).map(a => a._id)
+				priorityActivities: kiosk.priorityActivities.filter(a => a._id !== activity._id).map(a => a._id)
 			}
 			updateKiosk(kiosk._id, kioskUpdate)
 		}
@@ -132,7 +132,7 @@ const Activity = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
-					setLinkedKiosks(kiosks.filter(k => k.activities.some(a => a._id === activity._id)))
+					setLinkedKiosks(kiosks.filter(k => k.priorityActivities.some(a => a._id === activity._id)))
 					setDisabledKiosks(kiosks.filter(k => k.disabledActivities.includes(activity._id)))
 					setIsEditing(false)
 				}}
@@ -185,13 +185,13 @@ const Activity = ({
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 					<div className="flex flex-col items-center justify-center">
-						{newActivity.rooms.length === 0 && (
+						{newActivity.priorityRooms.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
 						)}
 						<ItemsDisplay
-							items={newActivity.rooms}
+							items={newActivity.priorityRooms}
 							editable={isEditing}
-							onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
+							onDeleteItem={(v) => { handleFieldChange('priorityRooms', newActivity.priorityRooms.filter((room) => room._id !== v._id)) }}
 							onShowItems={() => { setShowRooms(true) }}
 						/>
 					</div>
@@ -267,9 +267,9 @@ const Activity = ({
 						// Disable if already in disabledRooms
 						disabled: newActivity.disabledRooms.some(dr => dr === r._id)
 					}))}
-					selectedItems={newActivity.rooms}
-					onAddItem={(v) => { handleFieldChange('rooms', [...newActivity.rooms, { ...v, _id: v._id }]) }}
-					onDeleteItem={(v) => { handleFieldChange('rooms', newActivity.rooms.filter((room) => room._id !== v._id)) }}
+					selectedItems={newActivity.priorityRooms}
+					onAddItem={(v) => { handleFieldChange('priorityRooms', [...newActivity.priorityRooms, { ...v, _id: v._id }]) }}
+					onDeleteItem={(v) => { handleFieldChange('priorityRooms', newActivity.priorityRooms.filter((room) => room._id !== v._id)) }}
 					onClose={() => {
 						setShowRooms(false)
 					}}
@@ -281,7 +281,7 @@ const Activity = ({
 					items={rooms.map(r => ({
 						...r,
 						// Disable if already in prioritizedRooms
-						disabled: newActivity.rooms.some(pr => pr._id === r._id)
+						disabled: newActivity.priorityRooms.some(pr => pr._id === r._id)
 					}))}
 					selectedItems={rooms.filter((r) => newActivity.disabledRooms.includes(r._id))}
 					onAddItem={(v) => { handleFieldChange('disabledRooms', [...newActivity.disabledRooms, v._id]) }}
