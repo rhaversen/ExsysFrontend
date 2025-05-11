@@ -289,7 +289,7 @@ const KioskStatusManager = ({
 											className="mt-1 flex-shrink-0"
 										/>
 										<div className="flex-1 flex flex-col gap-1.5">
-											<div className="text-base font-semibold text-gray-900 line-clamp-1">{kiosk.name}</div>
+											<div title={kiosk.name} className="text-base font-semibold text-gray-900 break-all line-clamp-1">{kiosk.name}</div>
 
 											<div className={`text-sm font-bold ${operationalStatus.isOpen ? 'text-green-700' : 'text-red-700'}`}>
 												{operationalStatusText}
