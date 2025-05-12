@@ -27,7 +27,13 @@ const ConfigsView = (): ReactElement => {
 		})
 	}, [addError, fetchConfigs])
 
-	const shownConfigs = ['kioskPassword', 'kioskInactivityTimeoutMs', 'kioskInactivityTimeoutWarningMs', 'kioskOrderConfirmationTimeoutMs'] as const
+	const shownConfigs = [
+		'kioskPassword',
+		'kioskInactivityTimeoutMs',
+		'kioskInactivityTimeoutWarningMs',
+		'kioskOrderConfirmationTimeoutMs',
+		'kioskFeedbackBannerDelayMs'
+	] as const
 
 	const text = {
 		kioskInactivityTimeoutMs: {
@@ -45,6 +51,10 @@ const ConfigsView = (): ReactElement => {
 		kioskPassword: {
 			readableLabel: 'Kiosk Adgangskode',
 			description: 'Adgangskoden, der bruges til at logge ind på kioskerne. Kiosker forbliver logget ind ved ændring af adgangskoden, men nye kiosker skal bruge den nye adgangskode for at logge ind.'
+		},
+		kioskFeedbackBannerDelayMs: {
+			readableLabel: 'Kiosk Ris og Ros Banner Forsinkelse',
+			description: 'Tiden kiosken venter på velkomstskærmen uden brugerinteraktion, før Ris og Ros banneret vises.'
 		}
 	}
 
