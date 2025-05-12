@@ -134,7 +134,14 @@ export default function Page (): ReactElement {
 	)
 
 	const [showSoundSettings, setShowSoundSettings] = useState(false)
-	const [showManual, setShowManual] = useState(false)
+	const [showManual, setShowManual] = useState(false) // Default to false
+
+	useEffect(() => {
+		const mediaQuery = window.matchMedia('(min-width: 640px)') // Tailwind's sm breakpoint
+		if (mediaQuery.matches) {
+			setShowManual(true)
+		}
+	}, [])
 
 	// Flatten all orders to check if there's any pending
 	const allActive = Object.values(groupedOrders).flat()
@@ -145,21 +152,17 @@ export default function Page (): ReactElement {
 			<div className="flex-grow">
 				{allActive.length === 0
 					? (
-						<>
-							<div className="absolute top-1/2 left-1/2 -translate-x-1/2 sm:-translate-x-80 -translate-y-1/2 flex flex-col justify-center items-center">
-								<div className="text-gray-800 text-2xl">
-									{'Ingen Ordrer 😊'}
-								</div>
-								<div className="text-gray-800 text-center text-lg mt-2">
-									{'Nye ordrer vil automatisk blive vist her'}
-								</div>
+						<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col justify-center items-center">
+							<div className="text-gray-800 text-2xl">
+								{'Ingen Ordrer 😊'}
 							</div>
-							<div className="min-w-80 h-full"/>
-						</>
-
+							<div className="text-gray-800 text-center text-lg mt-2">
+								{'Nye ordrer vil automatisk blive vist her'}
+							</div>
+						</div>
 					)
 					: (
-						<div className="p-2 flex flex-wrap justify-start mb-96">
+						<div className="p-2 pb-20 flex flex-wrap justify-start">
 							{groupedOrders['no-room']?.length > 0 && (
 								<RoomCol
 									key="no-room"
@@ -189,6 +192,7 @@ export default function Page (): ReactElement {
 						</div>
 					)}
 
+				{/* Sound settings and manual order button */}
 				<div className="fixed bottom-4 left-4 flex">
 					<button
 						type="button"
@@ -201,10 +205,9 @@ export default function Page (): ReactElement {
 					<button
 						type="button"
 						onClick={() => { setShowSoundSettings(!showSoundSettings) }}
-						className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors ${
-							showSoundSettings
-								? 'bg-blue-500 text-white hover:bg-blue-600'
-								: 'bg-white text-gray-700 hover:bg-gray-50'
+						className={`px-5 py-3 shadow-md text-lg font-medium rounded-r-md transition-colors ${showSoundSettings
+							? 'bg-blue-500 text-white hover:bg-blue-600'
+							: 'bg-white text-gray-700 hover:bg-gray-50'
 						}`}
 					>
 						{'Lydindstillinger'}
@@ -212,27 +215,31 @@ export default function Page (): ReactElement {
 					<button
 						type="button"
 						onClick={() => setShowManual(!showManual)}
-						className="sm:hidden text-gray-700 px-5 py-3 bg-white shadow-md text-lg font-medium rounded-md ml-2"
-						title="Manual Ordre"
+						className={`px-5 py-3 shadow-md text-lg font-medium rounded-md ml-2 transition-colors ${!showManual // Button is blue when sidebar is hidden
+							? 'bg-blue-500 text-white hover:bg-blue-600'
+							: 'bg-white text-gray-700 hover:bg-gray-50'
+						}`}
+						title={showManual ? 'Skjul Manuel Ordre' : 'Vis Manuel Ordre'}
 					>
 						{'Manuel Ordre'}
 					</button>
 				</div>
-
-				{showSoundSettings && (
-					<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
-				)}
 			</div>
 
+			{/* Sound settings modal */}
+			{showSoundSettings && (
+				<SoundsConfig onClose={() => { setShowSoundSettings(false) }} />
+			)}
+
+			{/* Sidebar for small screens */}
 			{showManual && (
 				<div className="fixed inset-0 sm:hidden bg-white z-50 overflow-x-auto shadow-lg">
-					{/* more visible close button */}
 					<div className="absolute top-4 right-4">
 						<button
 							type="button"
 							onClick={() => setShowManual(false)}
-							className="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg"
-							aria-label="Close"
+							className="w-10 h-10 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md text-lg"
+							aria-label="Skjul manuel ordre"
 						>
 							&times;
 						</button>
@@ -247,19 +254,24 @@ export default function Page (): ReactElement {
 				</div>
 			)}
 
-			{/* Spacer for sidebar */}
-			<div className="hidden sm:block min-w-80 h-full"/>
+			{/* Sidebar for larger screens */}
+			{showManual &&
+			<>
+				{/* Space for the sidebar */}
+				<div className="hidden sm:block min-w-90" />
 
-			{/* Manual Order Sidebar */}
-			<div className="hidden sm:block fixed right-0 h-full w-80 overflow-x-auto bg-white shadow-lg">
-				<ManualOrderSidebar
-					rooms={rooms}
-					activities={activities}
-					products={products}
-					options={options}
-					recentManualOrders={orders.filter(o => o.checkoutMethod === 'manual')}
-				/>
-			</div>
+				{/* Sidebar for larger screens */}
+				<div className="hidden sm:block fixed right-0 h-full overflow-x-auto bg-white shadow-lg">
+					<ManualOrderSidebar
+						rooms={rooms}
+						activities={activities}
+						products={products}
+						options={options}
+						recentManualOrders={orders.filter(o => o.checkoutMethod === 'manual')}
+					/>
+				</div>
+			</>
+			}
 		</main>
 	)
 }
