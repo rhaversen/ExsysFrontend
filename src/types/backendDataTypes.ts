@@ -221,6 +221,27 @@ export interface SessionType {
 	userAgent: string // Agent information
 }
 
+// Feedback types
+export interface FeedbackType {
+	_id: string
+	name?: string // Optional name
+	feedback: string // Required feedback text
+	isRead: boolean // Whether the feedback has been read
+	createdAt: string
+	updatedAt: string
+}
+
+export interface PostFeedbackType {
+	name?: string // Optional name
+	feedback: string // Required feedback text
+}
+
+export interface PatchFeedbackType {
+	name?: string // Optional name
+	feedback?: string // Required feedback text
+	isRead?: boolean // Whether the feedback has been read
+}
+
 // Config types
 export interface ConfigsType {
 	_id: string
