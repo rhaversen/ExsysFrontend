@@ -51,7 +51,7 @@ export default function Page (): ReactElement {
 
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
-	const kiosFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 1000 * 5
+	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 1000 * 5
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 	const [isKioskClosedState, setIsKioskClosedState] = useState<boolean>(true)
@@ -339,7 +339,7 @@ export default function Page (): ReactElement {
 		if (viewState === 'welcome') {
 			feedbackBannerTimerRef.current = setTimeout(() => {
 				setShowFeedbackBanner(true)
-			}, kiosFeedbackBannerDelayMs)
+			}, kioskFeedbackBannerDelayMs)
 		} else {
 			clearTimeout(feedbackBannerTimerRef.current)
 			setShowFeedbackBanner(false)
@@ -348,7 +348,7 @@ export default function Page (): ReactElement {
 		return () => {
 			clearTimeout(feedbackBannerTimerRef.current)
 		}
-	}, [viewState, kiosFeedbackBannerDelayMs])
+	}, [viewState, kioskFeedbackBannerDelayMs])
 
 	const handleFeedbackBannerClick = () => {
 		setShowFeedbackBanner(false) // Hide banner
