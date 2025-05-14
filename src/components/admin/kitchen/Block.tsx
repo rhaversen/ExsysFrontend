@@ -98,7 +98,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 					return (
 						<p key={name}>
 							{totalCount} &times; {name}
-							{diffText}
+							{diff !== totalCount && diffText}
 						</p>
 					)
 				})}
