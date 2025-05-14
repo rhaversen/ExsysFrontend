@@ -7,6 +7,7 @@ import { type ReactElement, useCallback, useEffect, useState, useRef } from 'rea
 import { io, type Socket } from 'socket.io-client'
 
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
+import KioskFeedbackInfo from '@/components/kiosk/KioskFeedbackInfo'
 import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
 import ProgressBar from '@/components/kiosk/ProgressBar'
@@ -49,13 +50,17 @@ export default function Page (): ReactElement {
 	})
 
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
-	const timeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
+	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
+	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 1000 * 5
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 	const [isKioskClosedState, setIsKioskClosedState] = useState<boolean>(true)
 
 	// WebSocket Connection
 	const [socket, setSocket] = useState<Socket | null>(null)
+
+	const [showFeedbackBanner, setShowFeedbackBanner] = useState(false)
+	const feedbackBannerTimerRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
 	// Helper function to fetch data with error handling
 	const fetchData = useCallback(async <T,>(url: string, config = {}): Promise<T> => {
@@ -188,7 +193,7 @@ export default function Page (): ReactElement {
 		activity => {
 			if (kiosk === null) { return }
 			// If the selected activity is no longer associated with the kiosk, deselect it
-			if (!kiosk.activities.some(a => a._id === activity._id)) {
+			if (!kiosk.priorityActivities.some(a => a._id === activity._id)) {
 				setSelectedActivity(null)
 			}
 
@@ -219,13 +224,13 @@ export default function Page (): ReactElement {
 				updateCheckoutMethods(kioskUpdate)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
-				if (!kioskUpdate.activities.some(a => a._id === selectedActivity?._id)) {
+				if (!kioskUpdate.priorityActivities.some(a => a._id === selectedActivity?._id)) {
 					setSelectedActivity(null)
 				}
 
 				// If only one activity is available, select it
-				if (kioskUpdate.activities.length === 1) {
-					setSelectedActivity(kioskUpdate.activities[0])
+				if (kioskUpdate.priorityActivities.length === 1) {
+					setSelectedActivity(kioskUpdate.priorityActivities[0])
 				}
 			}
 		},
@@ -295,13 +300,13 @@ export default function Page (): ReactElement {
 
 	const resetTimer = useCallback(() => {
 		clearTimeout(resetTimerRef.current)
-		// Only start timer if not in activity view and no order in progress
+		// Only start timer if not on welcome screen and no order in progress
 		if (viewState !== 'welcome' && !isOrderInProgress) {
 			resetTimerRef.current = setTimeout(() => {
 				setShowTimeoutWarning(true)
-			}, timeoutMs)
+			}, kioskInactivityTimeoutMs)
 		}
-	}, [timeoutMs, viewState, isOrderInProgress])
+	}, [kioskInactivityTimeoutMs, viewState, isOrderInProgress])
 
 	useEffect(() => {
 		resetTimer()
@@ -328,6 +333,32 @@ export default function Page (): ReactElement {
 			})
 		}
 	}, [resetTimer, showTimeoutWarning, viewState])
+
+	// Effect to manage feedback banner visibility
+	useEffect(() => {
+		if (viewState === 'welcome') {
+			feedbackBannerTimerRef.current = setTimeout(() => {
+				setShowFeedbackBanner(true)
+			}, kioskFeedbackBannerDelayMs)
+		} else {
+			clearTimeout(feedbackBannerTimerRef.current)
+			setShowFeedbackBanner(false)
+		}
+
+		return () => {
+			clearTimeout(feedbackBannerTimerRef.current)
+		}
+	}, [viewState, kioskFeedbackBannerDelayMs])
+
+	const handleFeedbackBannerClick = () => {
+		setShowFeedbackBanner(false) // Hide banner
+		clearTimeout(feedbackBannerTimerRef.current) // Stop banner timer explicitly
+		setViewState('feedback' as ViewState)
+	}
+
+	const handleCloseFeedbackOverlay = () => {
+		setViewState('welcome')
+	}
 
 	// Render current view based on viewState
 	const renderCurrentView = (): ReactElement | null => {
@@ -363,7 +394,7 @@ export default function Page (): ReactElement {
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={activities
-							.filter(activity => kiosk.activities.some(a => a._id === activity._id))
+							.filter(activity => kiosk.priorityActivities.some(a => a._id === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onSelect={handleActivitySelect}
 					/>
@@ -382,7 +413,7 @@ export default function Page (): ReactElement {
 								.filter(room => !selectedActivity.disabledRooms.includes(room._id))
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
-						priorityItems={selectedActivity?.rooms
+						priorityItems={selectedActivity?.priorityRooms
 							.map(room => rooms.find(r => r._id === room._id) ?? room)
 							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
 						onSelect={handleRoomSelect}
@@ -421,6 +452,21 @@ export default function Page (): ReactElement {
 						}}
 					/>
 				)
+			case 'feedback':
+				return (
+					<div className="fixed bg-white inset-0 flex items-center justify-center">
+						<div className="relative">
+							<KioskFeedbackInfo />
+							<button
+								type="button"
+								onClick={handleCloseFeedbackOverlay}
+								className="mt-6 w-full px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+							>
+								{'Tilbage'}
+							</button>
+						</div>
+					</div>
+				)
 			default:
 				setViewState('welcome')
 				return null
@@ -457,7 +503,7 @@ export default function Page (): ReactElement {
 	}
 
 	return (
-		<div className="flex flex-col h-screen bg-zinc-100">
+		<div className="relative flex flex-col h-screen overflow-hidden"> {/* Ensure root is relative and handles overflow */}
 			<ProgressBar
 				viewState={viewState}
 				canClickActivity={canClickActivity}
@@ -492,6 +538,19 @@ export default function Page (): ReactElement {
 						resetTimer()
 					}}
 				/>
+			)}
+
+			{viewState !== 'feedback' && showFeedbackBanner && (
+				<div
+					className="fixed bottom-10 right-6 bg-blue-500 text-white px-5 py-3 rounded-lg shadow-xl z-40"
+					onClick={handleFeedbackBannerClick}
+					role="button"
+					tabIndex={0}
+					aria-label="Giv ris eller ros"
+				>
+					<p className="font-bold text-sm">{'Har du ris eller ros?'}</p>
+					<p className="text-xs">{'Tryk her for at give feedback!'}</p>
+				</div>
 			)}
 
 			<div className="flex-shrink-0">

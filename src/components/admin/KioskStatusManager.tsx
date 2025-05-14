@@ -2,9 +2,10 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import React, { useState, useEffect, useCallback } from 'react'
 import 'dayjs/locale/da'
+import { FaExclamationTriangle, FaUserSlash, FaUsers } from 'react-icons/fa'
+import { FiCheck, FiX } from 'react-icons/fi'
 
 import CloseableModal from '@/components/ui/CloseableModal'
-import KioskCircle from '@/components/ui/KioskCircle'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { getNextAvailableProductOrderWindowFrom, isKioskDeactivated, isCurrentTimeInOrderWindow, getNextOpen, formatRelativeDateLabel } from '@/lib/timeUtils'
 import type { KioskType, ProductType, SessionType, ConfigsType } from '@/types/backendDataTypes'
@@ -17,10 +18,33 @@ export type AdminControlStatus = 'active' | 'deactivated' | 'deactivated_until'
 
 export type SessionWarning = 'inactive' | 'multiSession' | 'noSession'
 
+export type KioskDisplayState = 'error' | 'open' | 'temporarily_closed' | 'disabled'
+
 export type OperationalStatusReason = 'operational' | 'closed_deactivated' | 'closed_deactivated_until' | 'closed_time_window' | 'closed_weekday' | 'closed_no_products' | 'loading_configs'
 export interface OperationalStatus {
 	isOpen: boolean
 	reason: OperationalStatusReason
+}
+
+interface StyleDefinition {
+	ring: string
+	text: string
+	background: string
+	badgeIcon: React.ReactElement
+	tooltip: string
+}
+
+const KIOSK_STYLES: Record<KioskDisplayState, Omit<StyleDefinition, 'badgeIcon' | 'tooltip'>> = {
+	error: { ring: 'ring-2 ring-red-400', text: 'text-red-700', background: 'bg-red-400' },
+	open: { ring: 'ring-2 ring-green-400', text: 'text-green-700', background: 'bg-green-400' },
+	temporarily_closed: { ring: 'ring-2 ring-yellow-400', text: 'text-yellow-700', background: 'bg-yellow-400' },
+	disabled: { ring: 'ring-2 ring-orange-400', text: 'text-orange-700', background: 'bg-orange-400' }
+}
+
+const WARNING_ICONS_TOOLTIPS: Record<SessionWarning, { icon: React.ReactElement, tooltip: string }> = {
+	inactive: { icon: <FaExclamationTriangle className="w-3.5 h-3.5 text-red-700" />, tooltip: 'Fejl: Kiosken er inaktiv (ingen aktivitet i over 24 timer).' },
+	multiSession: { icon: <FaUsers className="w-3.5 h-3.5 text-red-700" />, tooltip: 'Fejl: Kiosken er logget ind på flere enheder.' },
+	noSession: { icon: <FaUserSlash className="w-3.5 h-3.5 text-red-700" />, tooltip: 'Fejl: Kiosken er ikke logget ind.' }
 }
 
 function getAdminControlStatus (kiosk: KioskType): AdminControlStatus {
@@ -101,23 +125,110 @@ function getOperationalStatus (
 }
 
 function getOperationalStatusText (status: OperationalStatus, kiosk: KioskType): string {
-	if (status.isOpen) { return 'Operationel' }
 	switch (status.reason) {
+		case 'operational':
+			return 'Operationel'
 		case 'loading_configs':
-			return 'Indlæser konfiguration...'
-		case 'closed_deactivated':
-			return 'Ikke operationel (Deaktiveret)'
+			return 'Indlæser status...'
 		case 'closed_deactivated_until':
-			return `Ikke operationel (Deaktiveret indtil ${formatRelativeDateLabel(kiosk.deactivatedUntil)})`
+			return `Midlertidigt deaktiveret (Indtil ${formatRelativeDateLabel(kiosk.deactivatedUntil)})`
 		case 'closed_weekday':
-			return 'Ikke operationel (Lukket på denne ugedag)'
+			return 'Midlertidigt lukket (Lukket på denne ugedag)'
 		case 'closed_time_window':
-			return 'Ikke operationel (Ingen varer kan bestilles nu)'
+			return 'Midlertidigt lukket (Ingen varer tilgængelige lige nu)'
+		case 'closed_deactivated':
+			return 'Deaktiveret'
 		case 'closed_no_products':
-			return 'Ikke operationel (Ingen aktive varer)'
+			return 'Deaktiveret (Ingen varer)'
 		default:
-			return 'Ikke operationel'
+			// This should ideally not be reached if all reasons are handled
+			return status.isOpen ? 'Operationel' : 'Status ukendt'
 	}
+}
+
+// --- Kiosk Circle component ---
+
+function getKioskDisplayAttributes (
+	operationalStatus: OperationalStatus,
+	sessionWarning?: SessionWarning
+): { displayState: KioskDisplayState, styles: Omit<StyleDefinition, 'badgeIcon' | 'tooltip'>, badgeIcon: React.ReactElement, tooltip: string } {
+	let displayState: KioskDisplayState
+	let badgeIcon: React.ReactElement
+	let tooltip: string
+
+	if (sessionWarning) {
+		displayState = 'error'
+		badgeIcon = WARNING_ICONS_TOOLTIPS[sessionWarning].icon
+		tooltip = WARNING_ICONS_TOOLTIPS[sessionWarning].tooltip
+	} else if (operationalStatus.isOpen) {
+		displayState = 'open'
+		badgeIcon = <FiCheck className="w-3.5 h-3.5 text-green-600" />
+		tooltip = 'Kiosken er åben og klar til bestillinger.'
+	} else {
+		if (
+			operationalStatus.reason === 'closed_deactivated_until' ||
+			operationalStatus.reason === 'closed_weekday' ||
+			operationalStatus.reason === 'closed_time_window'
+		) {
+			displayState = 'temporarily_closed'
+			badgeIcon = <FiX className="w-3.5 h-3.5 text-yellow-600" />
+			tooltip = 'Kiosken er midlertidigt lukket og åbner automatisk igen.'
+		} else {
+			displayState = 'disabled'
+			badgeIcon = <FiX className="w-3.5 h-3.5 text-orange-600" />
+			tooltip = 'Kiosken er deaktiveret og kræver manuel handling for at åbne.'
+		}
+	}
+
+	return {
+		displayState,
+		styles: KIOSK_STYLES[displayState],
+		badgeIcon,
+		tooltip
+	}
+}
+
+const KioskCircle = ({
+	kioskTag,
+	styles,
+	tooltip,
+	badgeIcon,
+	className = ''
+}: {
+	kioskTag: string
+	styles: {
+		ring: string
+		text: string
+		background: string
+	}
+	tooltip: string
+	badgeIcon: React.ReactElement
+	className?: string
+}): React.ReactElement => {
+	return (
+		<div className={`relative ${className}`}>
+			<div
+				title={tooltip}
+				className={`w-16 h-16 text-xl rounded-full flex items-center justify-center font-semibold shadow-sm bg-white ${styles.ring}`}
+			>
+				<div
+					className={`absolute inset-2 rounded-full opacity-20 ${styles.background}`}
+				></div>
+				<span
+					title={tooltip}
+					className={`relative text-lg ${styles.text}`}
+				>
+					{kioskTag}
+				</span>
+			</div>
+			<div
+				title={tooltip}
+				className="absolute w-6 h-6 -bottom-1 -right-1 rounded-full flex items-center justify-center shadow-sm border border-gray-100 bg-white"
+			>
+				{badgeIcon}
+			</div>
+		</div>
+	)
 }
 
 // --- Modal content component ---
@@ -125,14 +236,12 @@ function getOperationalStatusText (status: OperationalStatus, kiosk: KioskType):
 function KioskControlModalContent ({
 	kiosk,
 	products,
-	configs,
 	isPatching,
 	onPatch,
 	onClose
 }: {
 	kiosk: KioskType
 	products: ProductType[]
-	configs: ConfigsType | null
 	isPatching: boolean
 	onPatch: (patch: Partial<KioskType>) => void
 	onClose: () => void
@@ -142,7 +251,6 @@ function KioskControlModalContent ({
 	const deactivatedUntilValid = (kiosk.deactivatedUntil != null) && new Date(kiosk.deactivatedUntil) > new Date()
 	const initialMode = !kiosk.deactivated && deactivatedUntilValid ? 'until' : 'manual'
 	const initialUntil = deactivatedUntilValid ? (kiosk.deactivatedUntil as string) : undefined
-	const operationalStatus = getOperationalStatus(kiosk, products, configs)
 
 	const handleConfirmDeactivate = (mode: 'manual' | 'until' | 'nextProduct', until: string | null) => {
 		if (mode === 'manual') { onPatch({ deactivated: true, deactivatedUntil: null }) } else if (mode === 'until') { onPatch({ deactivated: false, deactivatedUntil: until }) } else { onPatch({ deactivated: false, deactivatedUntil: getNextAvailableProductOrderWindowFrom(products)?.date.toISOString() ?? null }) }
@@ -151,15 +259,9 @@ function KioskControlModalContent ({
 	const handleActivateKiosk = useCallback(() => {
 		onPatch({ deactivated: false, deactivatedUntil: null })
 	}, [onPatch])
-
 	return (
 		<CloseableModal canClose onClose={onClose}>
 			<div className="text-center flex flex-col gap-4">
-				<KioskCircle
-					isClosed={!operationalStatus.isOpen}
-					kioskTag={kiosk.kioskTag}
-					className="mx-auto mb-2"
-				/>
 				<h2 className="text-2xl font-bold text-gray-800">{kiosk.name}</h2>
 				{isDeactivated ? (
 					<>
@@ -269,7 +371,26 @@ const KioskStatusManager = ({
 								const operationalStatus = getOperationalStatus(kiosk, products, configs)
 								const operationalStatusText = getOperationalStatusText(operationalStatus, kiosk)
 
-								const nextOpenTime = (!operationalStatus.isOpen)
+								const getOperationalStatusTextColor = (status: OperationalStatus): string => {
+									switch (status.reason) {
+										case 'operational':
+											return 'text-green-700'
+										case 'loading_configs':
+											return 'text-gray-500'
+										case 'closed_deactivated_until':
+										case 'closed_weekday':
+										case 'closed_time_window':
+											return 'text-yellow-700'
+										case 'closed_deactivated':
+										case 'closed_no_products':
+											return 'text-orange-700'
+										default:
+											return status.isOpen ? 'text-green-700' : 'text-gray-700' // Fallback
+									}
+								}
+								const statusTextColorClass = getOperationalStatusTextColor(operationalStatus)
+
+								const nextOpenTime = (!operationalStatus.isOpen && operationalStatus.reason !== 'closed_deactivated' && operationalStatus.reason !== 'closed_no_products' && operationalStatus.reason !== 'loading_configs')
 									? getNextOpen(configs, kiosk, products)
 									: null
 								const openingMessage = nextOpenTime ? `Kiosken åbner igen ${formatRelativeDateLabel(nextOpenTime)}` : null
@@ -281,45 +402,50 @@ const KioskStatusManager = ({
 									: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
 
 								return (
-									<div key={kiosk._id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-										<KioskCircle
-											warningStatus={sessionWarning}
-											isClosed={!operationalStatus.isOpen}
-											kioskTag={kiosk.kioskTag}
-											className="mt-1 flex-shrink-0"
-										/>
-										<div className="flex-1 flex flex-col gap-1.5">
-											<div className="text-base font-semibold text-gray-900 line-clamp-1">{kiosk.name}</div>
+									<div key={kiosk._id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">										{(() => {
+										const kioskDisplayAttrs = getKioskDisplayAttributes(operationalStatus, sessionWarning)
+										return (
+											<KioskCircle
+												kioskTag={kiosk.kioskTag}
+												styles={kioskDisplayAttrs.styles}
+												tooltip={kioskDisplayAttrs.tooltip}
+												badgeIcon={kioskDisplayAttrs.badgeIcon}
+												className="mt-1 flex-shrink-0"
+											/>
+										)
+									})()}
+									<div className="flex-1 flex flex-col gap-1.5">
+										<div title={kiosk.name} className="text-base font-semibold text-gray-900 break-all line-clamp-1">{kiosk.name}</div>
 
-											<div className={`text-sm font-bold ${operationalStatus.isOpen ? 'text-green-700' : 'text-red-700'}`}>
-												{operationalStatusText}
-											</div>
-
-											{(openingMessage != null) && (
-												<div className="text-xs text-gray-600">
-													{openingMessage}
-												</div>
-											)}
-
-											<div className="flex items-center gap-2 mt-1">
-												<span className="text-xs text-gray-500">
-													{adminControlStatusText}
-												</span>
-												<button
-													type="button"
-													disabled={isPatching}
-													onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
-													className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${buttonColorClasses} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-													aria-label={buttonAriaLabel}
-												>
-													{buttonLabel}
-												</button>
-											</div>
-
-											{(sessionWarningText.length > 0) && (
-												<div className="text-xs text-orange-700 font-medium mt-1">{`Advarsel: ${sessionWarningText}`}</div>
-											)}
+										<div className={`text-sm font-bold ${statusTextColorClass}`}>
+											{operationalStatusText}
 										</div>
+
+										{(openingMessage != null) && (
+											<div className="text-xs text-gray-600">
+												{openingMessage}
+											</div>
+										)}
+
+										<div className="flex items-center gap-2 mt-1">
+											<span className="text-xs text-gray-500">
+												{adminControlStatusText}
+											</span>
+											<button
+												type="button"
+												disabled={isPatching}
+												onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
+												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${buttonColorClasses} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
+												aria-label={buttonAriaLabel}
+											>
+												{buttonLabel}
+											</button>
+										</div>
+
+										{(sessionWarningText.length > 0) && (
+											<div className="text-xs text-orange-700 font-medium mt-1">{`Advarsel: ${sessionWarningText}`}</div>
+										)}
+									</div>
 									</div>
 								)
 							})}
@@ -331,7 +457,6 @@ const KioskStatusManager = ({
 				<KioskControlModalContent
 					kiosk={selectedKiosk}
 					products={products}
-					configs={configs}
 					isPatching={isPatching}
 					onPatch={patch => {
 						void handlePatchKiosk(selectedKiosk._id, patch)

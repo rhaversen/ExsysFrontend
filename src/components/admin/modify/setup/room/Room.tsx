@@ -22,7 +22,7 @@ const Room = ({
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [linkedActivities, setLinkedActivities] = useState(
-		activities.filter(a => a.rooms.some(r => r._id === room._id))
+		activities.filter(a => a.priorityRooms.some(r => r._id === room._id))
 	)
 	const [disabledActivities, setDisabledActivities] = useState(
 		activities.filter(a => a.disabledRooms.includes(room._id))
@@ -53,7 +53,7 @@ const Room = ({
 	}
 
 	useEffect(() => {
-		setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+		setLinkedActivities(activities.filter(a => a.priorityRooms.some(r => r._id === room._id)))
 		setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
 	}, [activities, room])
 
@@ -62,7 +62,7 @@ const Room = ({
 		updateRoom(newRoom._id, newRoom)
 
 		// Get activities that need updating for linked activities
-		const currentActivities = activities.filter(a => a.rooms.some(r => r._id === room._id))
+		const currentActivities = activities.filter(a => a.priorityRooms.some(r => r._id === room._id))
 		const addedActivities = linkedActivities.filter(a => !currentActivities.some(ca => ca._id === a._id))
 		const removedActivities = currentActivities.filter(ca => !linkedActivities.some(a => a._id === ca._id))
 
@@ -76,13 +76,13 @@ const Room = ({
 			...addedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
-					rooms: [...activity.rooms.map(r => r._id), room._id]
+					priorityRooms: [...activity.priorityRooms.map(r => r._id), room._id]
 				})
 			}),
 			...removedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
-					rooms: activity.rooms.filter(r => r._id !== room._id).map(r => r._id)
+					priorityRooms: activity.priorityRooms.filter(r => r._id !== room._id).map(r => r._id)
 				})
 			}),
 			// Handle disabling/enabling rooms in activities
@@ -111,7 +111,7 @@ const Room = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
-					setLinkedActivities(activities.filter(a => a.rooms.some(r => r._id === room._id)))
+					setLinkedActivities(activities.filter(a => a.priorityRooms.some(r => r._id === room._id)))
 					setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
 					setIsEditing(false)
 				}}

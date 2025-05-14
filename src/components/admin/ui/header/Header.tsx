@@ -26,7 +26,8 @@ const Header = (): ReactElement | null => {
 	const routeTitles = {
 		'/admin/kitchen': 'Køkken',
 		'/admin/modify': 'Modificer',
-		'/admin/statistics': 'Statistik'
+		'/admin/statistics': 'Statistik',
+		'/admin/feedback': 'Feedback'
 	}
 
 	useEffect(() => {

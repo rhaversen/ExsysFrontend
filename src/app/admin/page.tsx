@@ -4,6 +4,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
+import { FiMessageSquare } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 import { io, type Socket } from 'socket.io-client'
 
@@ -173,27 +174,34 @@ export default function Page (): ReactElement | null {
 							</div>
 						</div>
 						{/* Task selection buttons */}
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+						<div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
 							<AdminLinkButton
 								href="/admin/kitchen"
 								icon={GiCookingPot}
-								text="Se bestillinger"
+								text="Bestillinger"
 								bgColor="bg-blue-500"
 								hoverBgColor="hover:bg-blue-600"
 							/>
 							<AdminLinkButton
 								href="/admin/modify"
 								icon={FaEdit}
-								text="Rediger opsætning"
+								text="Opsætning"
 								bgColor="bg-green-500"
 								hoverBgColor="hover:bg-green-600"
 							/>
 							<AdminLinkButton
 								href="/admin/statistics"
 								icon={FaChartBar}
-								text="Se statistik"
+								text="Statistik"
 								bgColor="bg-purple-500"
 								hoverBgColor="hover:bg-purple-600"
+							/>
+							<AdminLinkButton
+								href="/admin/feedback"
+								icon={FiMessageSquare}
+								text="Brugerfeedback"
+								bgColor="bg-teal-500"
+								hoverBgColor="hover:bg-teal-600"
 							/>
 						</div>
 						{/* Config Weekdays Editor */}
