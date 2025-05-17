@@ -7,6 +7,7 @@ import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfir
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useEntitySocketListeners from '@/hooks/CudWebsocket'
 import {
 	type RoomType,
 	type ActivityType,
@@ -49,7 +50,7 @@ const OrderView = ({
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<OrderStatus>('loading')
 	const [isSelectPaymentWindowVisible, setIsSelectPaymentWindowVisible] = useState(false)
-	const [order, setOrder] = useState<OrderType | null>(null)
+	const [currentOrder, setCurrentOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [isCancelling, setIsCancelling] = useState(false)
 
@@ -106,32 +107,51 @@ const OrderView = ({
 		const availableOptionIds = new Set(options.map(o => o._id))
 
 		let updated = false
-		const newProducts = { ...cart.products }
-		const newOptions = { ...cart.options }
+		const newProductsInCart = { ...cart.products }
+		const newOptionsInCart = { ...cart.options }
 
 		// Check products
-		Object.keys(newProducts).forEach(id => {
+		Object.keys(newProductsInCart).forEach(id => {
 			if (!availableProductIds.has(id)) {
-				delete newProducts[id]
+				delete newProductsInCart[id]
 				updated = true
 			}
 		})
 
 		// Check options
-		Object.keys(newOptions).forEach(id => {
+		Object.keys(newOptionsInCart).forEach(id => {
 			if (!availableOptionIds.has(id)) {
-				delete newOptions[id]
+				delete newOptionsInCart[id]
 				updated = true
 			}
 		})
 
 		if (updated) {
 			updateCart({
-				products: newProducts,
-				options: newOptions
+				products: newProductsInCart,
+				options: newOptionsInCart
 			})
 		}
 	}, [products, options, cart, updateCart])
+
+	// Handle Order Status Change
+	const handleOrderStatusChange = useCallback((status: PaymentStatus) => {
+		switch (status) {
+			case 'successful':
+				setOrderStatus('success')
+				break
+			case 'failed':
+				setOrderStatus('paymentFailed')
+				break
+			case 'pending':
+				setOrderStatus('awaitingPayment')
+				break
+			default:
+				addError(new Error('Unknown payment status'))
+				setOrderStatus('error')
+				break
+		}
+	}, [addError])
 
 	// Submit Order Handler
 	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
@@ -157,63 +177,46 @@ const OrderView = ({
 
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
-				setOrder(response.data)
-				if (checkoutMethod === 'later') {
-					setOrderStatus('success')
-				} else {
-					setOrderStatus('awaitingPayment')
-				}
+				console.log('Order posted:', response.data)
+				setCurrentOrder(response.data)
+				handleOrderStatusChange(response.data.paymentStatus)
 				return null
 			})
 			.catch(error => {
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [kiosk, activity, room, cart, API_URL, addError, clearInactivityTimeout])
+	}, [clearInactivityTimeout, kiosk, activity, room, cart, API_URL, handleOrderStatusChange, addError])
 
 	const cancelPayment = useCallback(() => {
-		if (!order) { return }
+		if (!currentOrder) { return }
 		setIsCancelling(true)
-		axios.post(`${API_URL}/v1/orders/${order._id}/cancel`, {}, { withCredentials: true })
-			.then(() => setOrderStatus('paymentFailed'))
+		axios.post(`${API_URL}/v1/orders/${currentOrder._id}/cancel`, {}, { withCredentials: true })
 			.finally(() => setIsCancelling(false))
 			.catch(error => addError(error))
-	}, [order, API_URL, addError])
+	}, [currentOrder, API_URL, addError])
 
-	useEffect(() => {
-		if (socket !== null && order !== null) {
-			// Listen for payment status updates related to the order
-			const handlePaymentStatusUpdated = (update: {
-				orderId: string
-				paymentStatus: PaymentStatus
-			}): void => {
-				if (update.orderId === order._id) {
-					switch (update.paymentStatus) {
-						case 'successful':
-							setOrderStatus('success')
-							break
-						case 'failed':
-							setOrderStatus('paymentFailed')
-							break
-						case 'pending':
-							setOrderStatus('awaitingPayment')
-							break
-						default:
-							addError(new Error('Unknown payment status'))
-							setOrderStatus('error')
-							break
-					}
-				}
+	useEntitySocketListeners<OrderType>(
+		socket,
+		'order',
+		o => {
+			console.log('Order created:', o)
+			if (currentOrder !== null && o._id === currentOrder._id) {
+				handleOrderStatusChange(o.paymentStatus)
 			}
-
-			socket.on('paymentStatusUpdated', handlePaymentStatusUpdated)
-
-			// Cleanup the listener when order or socket changes
-			return () => {
-				socket.off('paymentStatusUpdated', handlePaymentStatusUpdated)
+		},
+		o => {
+			console.log('Order updated:', o)
+			if (currentOrder !== null && o._id === currentOrder._id) {
+				handleOrderStatusChange(o.paymentStatus)
+			}
+		},
+		id => {
+			if (currentOrder !== null && id === currentOrder._id) {
+				setOrderStatus('error')
 			}
 		}
-	}, [socket, order, addError])
+	)
 
 	useEffect(() => {
 		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }

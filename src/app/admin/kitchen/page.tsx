@@ -106,16 +106,29 @@ export default function Page (): ReactElement {
 		return () => { s.disconnect() }
 	}, [WS_URL])
 
-	// Listen for new orders
-	useEffect(() => {
-		if (socket == null) { return }
-		const onCreated = (o: OrderType): void => { setOrders(prev => [...prev, o]) }
-		socket.on('orderCreated', onCreated)
-		return () => { socket.off('orderCreated', onCreated) }
-	}, [socket])
-
 	// Fetch on mount
 	useEffect(() => { fetchData().catch(addError) }, [fetchData, addError])
+
+	useEntitySocketListeners<OrderType>(
+		socket,
+		'order',
+		o => {
+			if (o.paymentStatus === 'successful') {
+				setOrders(prev => [...prev, o])
+			}
+		},
+		o => {
+			if (o.paymentStatus === 'successful') {
+				setOrders(prev => {
+					const existing = prev.find(p => p._id === o._id)
+					return existing != null ? prev : [...prev, o]
+				})
+			}
+		},
+		id => {
+			setOrders(prev => prev.filter(o => o._id !== id))
+		}
+	)
 
 	// Rooms, activities, products and options socket listeners
 	useEntitySocketListeners<RoomType>(

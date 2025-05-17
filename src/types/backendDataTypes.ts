@@ -119,7 +119,6 @@ export interface OrderType {
 	roomId: RoomType['_id']
 	kioskId: KioskType['_id'] | null
 	status: OrderStatus
-	paymentId: string
 	paymentStatus: PaymentStatus
 	checkoutMethod: CheckoutMethod
 	createdAt: string
