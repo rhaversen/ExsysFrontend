@@ -250,10 +250,10 @@ export default function ManualOrderSidebar ({
 									<p className="text-gray-600">{'Oprettet: '}{timeSince(order.createdAt)}</p>
 									<ul className="mt-2 text-xs space-y-1 pl-2 border-l ml-1">
 										{order.products.map(p => (
-											<li key={p._id}>{p.quantity}{' x '}{p.name}</li>
+											<li key={p._id}>{p.quantity}{' x '}{products.find(product => product._id === p._id)?.name}</li>
 										))}
 										{order.options.map(o => (
-											<li key={o._id}>{o.quantity}{' x '}{o.name}</li>
+											<li key={o._id}>{o.quantity}{' x '}{options.find(option => option._id === o._id)?.name}</li>
 										))}
 									</ul>
 									<p className="text-xs text-gray-500 mt-1">{'Status: '}{order.status === 'confirmed' ? 'Læst' : order.status === 'delivered' ? 'Leveret' : 'Afventer'}</p>

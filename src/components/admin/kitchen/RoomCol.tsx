@@ -9,12 +9,16 @@ const RoomCol = ({
 	room,
 	orders,
 	onUpdatedOrders,
-	activityMap
+	activityMap,
+	productMap,
+	optionMap
 }: {
 	room: RoomType
 	orders: OrderType[]
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
 	activityMap: Record<string, string>
+	productMap: Record<string, string>
+	optionMap: Record<string, string>
 }): ReactElement => {
 	const { isMuted, soundUrl } = useSound()
 	const blockCountRef = useRef(-1)
@@ -44,15 +48,17 @@ const RoomCol = ({
 		const productsCount: Record<string, number> = {}
 		const optionsCount: Record<string, number> = {}
 		orders.forEach(({ products, options }) => {
-			products.forEach(({ name, quantity }) => {
+			products.forEach(({ _id, quantity }) => {
+				const name = productMap[_id] ?? _id
 				productsCount[name] = (productsCount[name] ?? 0) + quantity
 			})
-			options.forEach(({ name, quantity }) => {
+			options.forEach(({ _id, quantity }) => {
+				const name = optionMap[_id] ?? _id
 				optionsCount[name] = (optionsCount[name] ?? 0) + quantity
 			})
 		})
 		return { totalProducts: productsCount, totalOptions: optionsCount }
-	}, [orders])
+	}, [orders, productMap, optionMap])
 
 	return (
 		<div className="rounded-lg m-1 p-1 bg-white overflow-y-auto max-w-[650px] h-full shadow-md">
@@ -66,6 +72,8 @@ const RoomCol = ({
 						activityName={activityMap[activityId] ?? 'Ukendt Aktivitet'}
 						orders={ordersByActivity[activityId]}
 						onUpdatedOrders={onUpdatedOrders}
+						productMap={productMap}
+						optionMap={optionMap}
 					/>
 				))}
 			</div>

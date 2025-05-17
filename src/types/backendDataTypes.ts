@@ -10,6 +10,8 @@ export interface OrderWindow {
 }
 
 export type PaymentStatus = 'pending' | 'successful' | 'failed'
+export type OrderStatus = 'pending' | 'confirmed' | 'delivered' // TODO: Add cancelled
+export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay' | 'manual'
 
 // Product types
 export interface ProductType {
@@ -17,7 +19,7 @@ export interface ProductType {
 	name: string
 	price: number
 	orderWindow: OrderWindow
-	options: OptionType[]
+	options: Array<OptionType['_id']>
 	isActive: boolean
 	imageURL?: string
 	createdAt: string
@@ -67,7 +69,7 @@ export interface PatchOptionType {
 // Activity types
 export interface ActivityType {
 	_id: string
-	priorityRooms: RoomType[]
+	priorityRooms: Array<RoomType['_id']>
 	disabledProducts: Array<ProductType['_id']>
 	disabledRooms: Array<RoomType['_id']>
 	name: string
@@ -111,15 +113,15 @@ export interface PatchRoomType {
 // Order types
 export interface OrderType {
 	_id: string
-	products: Array<{ _id: ProductType['_id'], name: string, quantity: number }>
-	options: Array<{ _id: OptionType['_id'], name: string, quantity: number }>
+	products: Array<{ _id: ProductType['_id'], quantity: number }>
+	options: Array<{ _id: OptionType['_id'], quantity: number }>
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
 	kioskId: KioskType['_id'] | null
-	status: 'pending' | 'confirmed' | 'delivered'
+	status: OrderStatus
 	paymentId: string
 	paymentStatus: PaymentStatus
-	checkoutMethod: 'sumUp' | 'later' | 'manual'
+	checkoutMethod: CheckoutMethod
 	createdAt: string
 	updatedAt: string
 }
@@ -130,12 +132,12 @@ export interface PostOrderType {
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
 	kioskId?: KioskType['_id']
-	checkoutMethod: 'sumUp' | 'later' | 'mobilePay' | 'manual'
+	checkoutMethod: CheckoutMethod
 }
 
 export interface PatchOrderType {
 	orderIds: Array<OrderType['_id']>
-	status: 'pending' | 'confirmed' | 'delivered'
+	status: OrderStatus
 }
 
 // Reader types
@@ -179,8 +181,8 @@ export interface KioskType {
 	_id: string
 	name: string
 	kioskTag: string
-	readerId: ReaderType | null
-	priorityActivities: ActivityType[]
+	readerId: ReaderType['_id'] | null
+	priorityActivities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
 	deactivatedUntil: string | null
 	deactivated: boolean

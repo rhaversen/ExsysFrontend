@@ -65,7 +65,7 @@ const AddActivity = ({
 			// Update each selected kiosk to include the new activity
 			await Promise.all(selectedKiosks.map(async kiosk => {
 				await updateKioskAsync(kiosk._id, {
-					priorityActivities: [...kiosk.priorityActivities.map(a => a._id), activityId]
+					priorityActivities: [...kiosk.priorityActivities, activityId]
 				})
 			}))
 			// Update each disabled kiosk to include the activity in disabledActivities

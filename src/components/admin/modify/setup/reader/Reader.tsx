@@ -39,12 +39,12 @@ const Reader = ({
 
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [assignedKiosk, setAssignedKiosk] = useState<KioskType | null>(
-		Array.isArray(kiosks) ? kiosks.find(k => k.readerId?._id != null && k.readerId._id === reader._id) ?? null : null
+		Array.isArray(kiosks) ? kiosks.find(k => k.readerId != null && k.readerId === reader._id) ?? null : null
 	)
 
 	useEffect(() => {
 		if (Array.isArray(kiosks)) {
-			setAssignedKiosk(kiosks.find(k => k.readerId !== null && k.readerId !== undefined && k.readerId._id === reader._id) ?? null)
+			setAssignedKiosk(kiosks.find(k => k.readerId !== null && k.readerId !== undefined && k.readerId === reader._id) ?? null)
 		}
 	}, [kiosks, reader._id])
 
@@ -78,12 +78,12 @@ const Reader = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
-					setAssignedKiosk(kiosks.find(k => k.readerId?._id === reader._id) ?? null)
+					setAssignedKiosk(kiosks.find(k => k.readerId === reader._id) ?? null)
 					setIsEditing(false)
 				}}
 				onHandleCompleteEdit={() => {
 					updateReader(newReader._id, newReader)
-					const prevKiosk = kiosks.find(k => k.readerId?._id === reader._id)
+					const prevKiosk = kiosks.find(k => k.readerId === reader._id)
 					updateKiosksIfNeeded(prevKiosk, assignedKiosk, reader._id).catch(addError)
 					setIsEditing(false)
 				}}
@@ -133,7 +133,7 @@ const Reader = ({
 								? kiosks.map(kiosk => ({
 									value: kiosk._id,
 									label: kiosk.name,
-									disabled: kiosk.readerId?._id != null && kiosk.readerId._id !== reader._id && kiosk._id !== assignedKiosk?._id
+									disabled: kiosk.readerId != null && kiosk.readerId !== reader._id && kiosk._id !== assignedKiosk?._id
 								}))
 								: []
 							}

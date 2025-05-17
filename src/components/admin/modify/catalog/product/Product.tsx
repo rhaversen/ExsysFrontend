@@ -72,7 +72,7 @@ const Product = ({
 		// Update product first
 		updateEntity(product._id, {
 			...newProduct,
-			options: newProduct.options.map(option => option._id)
+			options: newProduct.options
 		})
 
 		// Update disabled activities
@@ -260,9 +260,9 @@ const Product = ({
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
 						)}
 						<ItemsDisplay
-							items={newProduct.options}
+							items={options.filter((option) => newProduct.options.some((o) => o === option._id))}
 							editable={isEditing}
-							onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
+							onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option !== v._id)) }}
 							onShowItems={() => { setShowOptions(true) }}
 						/>
 					</div>
@@ -298,14 +298,11 @@ const Product = ({
 				<SelectionWindow
 					title={`Tilføj tilvalg til ${newProduct.name}`}
 					items={options}
-					selectedItems={newProduct.options}
+					selectedItems={options.filter((option) => newProduct.options.some((o) => o === option._id))}
 					onAddItem={(v) => {
-						handleFieldChange('options', [...newProduct.options, {
-							...v,
-							_id: v._id
-						}])
+						handleFieldChange('options', [...newProduct.options, v._id])
 					}}
-					onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option._id !== v._id)) }}
+					onDeleteItem={(v) => { handleFieldChange('options', newProduct.options.filter((option) => option !== v._id)) }}
 					onClose={() => { setShowOptions(false) }}
 				/>
 			)}

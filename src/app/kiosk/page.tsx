@@ -193,7 +193,7 @@ export default function Page (): ReactElement {
 		activity => {
 			if (kiosk === null) { return }
 			// If the selected activity is no longer associated with the kiosk, deselect it
-			if (!kiosk.priorityActivities.some(a => a._id === activity._id)) {
+			if (!kiosk.priorityActivities.some(a => a === activity._id)) {
 				setSelectedActivity(null)
 			}
 
@@ -224,13 +224,15 @@ export default function Page (): ReactElement {
 				updateCheckoutMethods(kioskUpdate)
 
 				// If the selected activity is no longer associated with the kiosk, deselect it
-				if (!kioskUpdate.priorityActivities.some(a => a._id === selectedActivity?._id)) {
+				if (!kioskUpdate.priorityActivities.some(a => a === selectedActivity?._id)) {
 					setSelectedActivity(null)
 				}
 
 				// If only one activity is available, select it
 				if (kioskUpdate.priorityActivities.length === 1) {
-					setSelectedActivity(kioskUpdate.priorityActivities[0])
+					const activityId = kioskUpdate.priorityActivities[0]
+					const activityObj = activities.find(a => a._id === activityId) || null
+					setSelectedActivity(activityObj)
 				}
 			}
 		},
@@ -394,7 +396,7 @@ export default function Page (): ReactElement {
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={activities
-							.filter(activity => kiosk.priorityActivities.some(a => a._id === activity._id))
+							.filter(activity => kiosk.priorityActivities.some(a => a === activity._id))
 							.sort((a, b) => a.name.localeCompare(b.name))}
 						onSelect={handleActivitySelect}
 					/>
@@ -414,7 +416,8 @@ export default function Page (): ReactElement {
 								.sort((a, b) => a.name.localeCompare(b.name))
 						}
 						priorityItems={selectedActivity?.priorityRooms
-							.map(room => rooms.find(r => r._id === room._id) ?? room)
+							.map(roomId => rooms.find(r => r._id === roomId))
+							.filter(room => room !== undefined)
 							.sort((a, b) => a.name.localeCompare(b.name)) ?? []}
 						onSelect={handleRoomSelect}
 					/>

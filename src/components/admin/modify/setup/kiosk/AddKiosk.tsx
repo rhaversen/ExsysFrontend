@@ -181,7 +181,7 @@ const AddKiosk = ({
 									readers.map((reader) => ({
 										value: reader._id,
 										label: reader.readerTag,
-										disabled: kiosks.some((k) => k.readerId?._id === reader._id)
+										disabled: kiosks.some((k) => k.readerId === reader._id)
 									}))
 								}
 								initialValue={kiosk.readerId ?? 'null-option'}

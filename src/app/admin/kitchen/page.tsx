@@ -34,6 +34,20 @@ export default function Page (): ReactElement {
 		}, {})
 	}, [activities])
 
+	const productMap = useMemo(() => {
+		return products.reduce<Record<string, string>>((acc, prod) => {
+			acc[prod._id] = prod.name
+			return acc
+		}, {})
+	}, [products])
+
+	const optionMap = useMemo(() => {
+		return options.reduce<Record<string, string>>((acc, opt) => {
+			acc[opt._id] = opt.name
+			return acc
+		}, {})
+	}, [options])
+
 	// Group orders by room name
 	const groupedOrders = useMemo(() => {
 		return rooms.reduce<Record<string, OrderType[]>>((acc, room) => {
@@ -176,6 +190,8 @@ export default function Page (): ReactElement {
 									orders={groupedOrders['no-room']}
 									onUpdatedOrders={handleUpdatedOrders}
 									activityMap={activityMap}
+									productMap={productMap}
+									optionMap={optionMap}
 								/>
 							)}
 							{rooms
@@ -187,6 +203,8 @@ export default function Page (): ReactElement {
 										orders={groupedOrders[r.name]}
 										onUpdatedOrders={handleUpdatedOrders}
 										activityMap={activityMap}
+										productMap={productMap}
+										optionMap={optionMap}
 									/>
 								))}
 						</div>

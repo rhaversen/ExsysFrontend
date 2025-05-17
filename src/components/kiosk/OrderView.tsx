@@ -251,6 +251,7 @@ const OrderView = ({
 					<SelectionWindow
 						cart={cart}
 						products={products}
+						options={options}
 						handleCartChange={handleCartChange}
 					/>
 				</div>
