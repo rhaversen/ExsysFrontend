@@ -156,7 +156,7 @@ const AddReader = ({
 								kiosks.map(kiosk => ({
 									value: kiosk._id,
 									label: kiosk.name,
-									disabled: kiosk.readerId?._id != null
+									disabled: kiosk.readerId != null
 								}))
 							}
 							onChange={handleKioskChange}

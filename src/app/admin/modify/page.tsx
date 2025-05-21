@@ -123,114 +123,6 @@ export default function Page (): ReactElement {
 		)
 	}
 
-	// Delete option handler
-	const deleteOption = useCallback(
-		(id: string) => {
-			setProducts((prevProducts) =>
-				prevProducts.map((product) => ({
-					...product,
-					options: product.options.filter((option) => option._id !== id)
-				}))
-			)
-			setOptions((prevOptions) => prevOptions.filter((option) => option._id !== id))
-		}, [setProducts, setOptions]
-	)
-
-	// Update option handler
-	const updateOption = useCallback(
-		(option: OptionType) => {
-			setProducts((prevProducts) =>
-				prevProducts.map((product) => ({
-					...product,
-					options: product.options.map((o) => (o._id === option._id ? option : o))
-				}))
-			)
-			setOptions((prevOptions) => prevOptions.map((o) => (o._id === option._id ? option : o))
-			)
-		}, [setProducts, setOptions]
-	)
-
-	// Delete activity handler
-	const deleteActivity = useCallback(
-		(id: string) => {
-			setKiosks((prevKiosks) =>
-				prevKiosks.map((kiosk) => ({
-					...kiosk,
-					activities: kiosk.activities.filter((activity) => activity._id !== id)
-				}))
-			)
-			setActivities((prevActivities) => prevActivities.filter((activity) => activity._id !== id))
-		}, [setKiosks, setActivities]
-	)
-
-	// Update activity handler
-	const updateActivity = useCallback(
-		(activity: ActivityType) => {
-			setKiosks((prevKiosks) =>
-				prevKiosks.map((kiosk) => ({
-					...kiosk,
-					activities: kiosk.activities.map((a) => (a._id === activity._id ? activity : a))
-				}))
-			)
-			setActivities((prevActivities) => prevActivities.map((a) => (a._id === activity._id ? activity : a))
-			)
-		}, [setKiosks, setActivities]
-	)
-
-	// Delete reader handler
-	const deleteReader = useCallback(
-		(id: string) => {
-			setKiosks((prevKiosks) =>
-				prevKiosks.map((kiosk) => ({
-					...kiosk,
-					readerId: kiosk.readerId?._id === id ? null : kiosk.readerId
-				}))
-			)
-			setReaders((prevReaders) => prevReaders.filter((reader) => reader._id !== id))
-		}, [setKiosks, setReaders]
-	)
-
-	// Update reader handler
-	const updateReader = useCallback(
-		(reader: ReaderType) => {
-			setKiosks((prevKiosks) =>
-				prevKiosks.map((kiosk) => ({
-					...kiosk,
-					readerId: kiosk.readerId?._id === reader._id ? reader : kiosk.readerId
-				}))
-			)
-			setReaders((prevReaders) => prevReaders.map((r) => (r._id === reader._id ? reader : r))
-			)
-		}, [setKiosks, setReaders]
-	)
-
-	// Delete room handler
-	const deleteRoom = useCallback(
-		(id: string) => {
-			setActivities((prevActivities) =>
-				prevActivities.map((activity) => ({
-					...activity,
-					rooms: activity.rooms.filter((room) => room._id !== id)
-				}))
-			)
-			setRooms((prevRooms) => prevRooms.filter((room) => room._id !== id))
-		}, [setActivities, setRooms]
-	)
-
-	// Update room handler
-	const updateRoom = useCallback(
-		(room: RoomType) => {
-			setActivities((prevActivities) =>
-				prevActivities.map((activity) => ({
-					...activity,
-					rooms: activity.rooms.map((r) => (r._id === room._id ? room : r))
-				}))
-			)
-			setRooms((prevRooms) => prevRooms.map((r) => (r._id === room._id ? room : r))
-			)
-		}, [setActivities, setRooms]
-	)
-
 	// Products
 	useEntitySocketListeners<ProductType>(
 		socket,
@@ -245,8 +137,8 @@ export default function Page (): ReactElement {
 		socket,
 		'option',
 		CreateAddHandler<OptionType>(setOptions),
-		updateOption,
-		deleteOption
+		CreateUpdateHandler<OptionType>(setOptions),
+		CreateDeleteHandler<OptionType>(setOptions)
 	)
 
 	// Activities
@@ -254,8 +146,8 @@ export default function Page (): ReactElement {
 		socket,
 		'activity',
 		CreateAddHandler<ActivityType>(setActivities),
-		updateActivity,
-		deleteActivity
+		CreateUpdateHandler<ActivityType>(setActivities),
+		CreateDeleteHandler<ActivityType>(setActivities)
 	)
 
 	// Rooms
@@ -263,8 +155,8 @@ export default function Page (): ReactElement {
 		socket,
 		'room',
 		CreateAddHandler<RoomType>(setRooms),
-		updateRoom,
-		deleteRoom
+		CreateUpdateHandler<RoomType>(setRooms),
+		CreateDeleteHandler<RoomType>(setRooms)
 	)
 
 	// Kiosks
@@ -281,8 +173,8 @@ export default function Page (): ReactElement {
 		socket,
 		'reader',
 		CreateAddHandler<ReaderType>(setReaders),
-		updateReader,
-		deleteReader
+		CreateUpdateHandler<ReaderType>(setReaders),
+		CreateDeleteHandler<ReaderType>(setReaders)
 	)
 
 	// Admins
