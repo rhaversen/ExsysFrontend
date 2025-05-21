@@ -10,6 +10,8 @@ export interface OrderWindow {
 }
 
 export type PaymentStatus = 'pending' | 'successful' | 'failed'
+export type OrderStatus = 'pending' | 'confirmed' | 'delivered' // TODO: Add cancelled
+export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay' | 'manual'
 
 // Product types
 export interface ProductType {
@@ -17,7 +19,7 @@ export interface ProductType {
 	name: string
 	price: number
 	orderWindow: OrderWindow
-	options: OptionType[]
+	options: Array<OptionType['_id']>
 	isActive: boolean
 	imageURL?: string
 	createdAt: string
@@ -67,7 +69,7 @@ export interface PatchOptionType {
 // Activity types
 export interface ActivityType {
 	_id: string
-	rooms: RoomType[]
+	priorityRooms: Array<RoomType['_id']>
 	disabledProducts: Array<ProductType['_id']>
 	disabledRooms: Array<RoomType['_id']>
 	name: string
@@ -76,14 +78,14 @@ export interface ActivityType {
 }
 
 export interface PostActivityType {
-	rooms?: Array<RoomType['_id']>
+	priorityRooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
 	disabledRooms?: Array<RoomType['_id']>
 	name: string
 }
 
 export interface PatchActivityType {
-	rooms?: Array<RoomType['_id']>
+	priorityRooms?: Array<RoomType['_id']>
 	disabledProducts?: Array<ProductType['_id']>
 	disabledRooms?: Array<RoomType['_id']>
 	name?: string
@@ -111,15 +113,14 @@ export interface PatchRoomType {
 // Order types
 export interface OrderType {
 	_id: string
-	products: Array<{ _id: ProductType['_id'], name: string, quantity: number }>
-	options: Array<{ _id: OptionType['_id'], name: string, quantity: number }>
+	products: Array<{ _id: ProductType['_id'], quantity: number }>
+	options: Array<{ _id: OptionType['_id'], quantity: number }>
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
 	kioskId: KioskType['_id'] | null
-	status: 'pending' | 'confirmed' | 'delivered'
-	paymentId: string
+	status: OrderStatus
 	paymentStatus: PaymentStatus
-	checkoutMethod: 'sumUp' | 'later' | 'manual'
+	checkoutMethod: CheckoutMethod
 	createdAt: string
 	updatedAt: string
 }
@@ -130,12 +131,12 @@ export interface PostOrderType {
 	activityId: ActivityType['_id']
 	roomId: RoomType['_id']
 	kioskId?: KioskType['_id']
-	checkoutMethod: 'sumUp' | 'later' | 'mobilePay' | 'manual'
+	checkoutMethod: CheckoutMethod
 }
 
 export interface PatchOrderType {
 	orderIds: Array<OrderType['_id']>
-	status: 'pending' | 'confirmed' | 'delivered'
+	status: OrderStatus
 }
 
 // Reader types
@@ -179,8 +180,8 @@ export interface KioskType {
 	_id: string
 	name: string
 	kioskTag: string
-	readerId: ReaderType | null
-	activities: ActivityType[]
+	readerId: ReaderType['_id'] | null
+	priorityActivities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
 	deactivatedUntil: string | null
 	deactivated: boolean
@@ -192,7 +193,7 @@ export interface PostKioskType {
 	name: string
 	kioskTag?: string
 	readerId?: ReaderType['_id']
-	activities: Array<ActivityType['_id']>
+	priorityActivities: Array<ActivityType['_id']>
 	disabledActivities: Array<ActivityType['_id']>
 	deactivatedUntil?: string | null
 	deactivated?: boolean
@@ -202,7 +203,7 @@ export interface PatchKioskType {
 	name?: string
 	kioskTag?: string | null
 	readerId?: ReaderType['_id'] | null
-	activities?: Array<ActivityType['_id']>
+	priorityActivities?: Array<ActivityType['_id']>
 	disabledActivities?: Array<ActivityType['_id']>
 	deactivatedUntil?: string | null
 	deactivated?: boolean
@@ -211,7 +212,8 @@ export interface PatchKioskType {
 // Session types
 export interface SessionType {
 	_id: string // Used for deletion, determining current session and key in list
-	sessionExpires: string | null // Used to determine if session is expired if stayLoggedIn is true (Uses rolling expiration) (ISO string)
+	docExpires: string // Used to determine when the session document expires (ISO string)
+	sessionExpires: string | null // Used to determine when session is expired if stayLoggedIn is true (Uses rolling expiration) (ISO string)
 	stayLoggedIn: boolean // Used to determine if session is persistent
 	type: 'admin' | 'kiosk' | 'unknown' // Used to infer user information
 	userId: AdminType['_id'] | KioskType['_id'] | null // Used to infer user information
@@ -219,6 +221,27 @@ export interface SessionType {
 	loginTime: string // Time of login (ISO string)
 	lastActivity: string // Time of last activity (ISO string)
 	userAgent: string // Agent information
+}
+
+// Feedback types
+export interface FeedbackType {
+	_id: string
+	name?: string // Optional name
+	feedback: string // Required feedback text
+	isRead: boolean // Whether the feedback has been read
+	createdAt: string
+	updatedAt: string
+}
+
+export interface PostFeedbackType {
+	name?: string // Optional name
+	feedback: string // Required feedback text
+}
+
+export interface PatchFeedbackType {
+	name?: string // Optional name
+	feedback?: string // Required feedback text
+	isRead?: boolean // Whether the feedback has been read
 }
 
 // Config types
@@ -230,6 +253,8 @@ export interface ConfigsType {
 		kioskOrderConfirmationTimeoutMs: number
 		disabledWeekdays: number[]
 		kioskPassword: string
+		kioskFeedbackBannerDelayMs: number
+		kioskWelcomeMessage: string
 	}
 	createdAt: Date
 	updatedAt: Date

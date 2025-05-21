@@ -118,8 +118,8 @@ export default function ManualOrderSidebar ({
 	const getRoomName = useCallback((id: string) => rooms.find(r => r._id === id)?.name ?? 'Ukendt', [rooms])
 
 	return (
-		<div className="pb-25 h-full bg-gray-100 px-4 border-l border-gray-300 flex flex-col">
-			<h2 className="text-lg font-medium text-gray-700 bg-gray-100 py-2">{'Manuel Ordre Indtastning'}</h2>
+		<div className="bg-gray-100 p-4 pb-20 flex flex-col">
+			<h2 className="text-lg font-medium text-gray-700 pb-2 bg-gray-100">{'Manuel Ordre Indtastning'}</h2>
 			<div className="p-3 bg-white rounded shadow">
 				<div>
 					<label className="block text-sm font-medium text-gray-600 mb-1">{'Lokale'}</label>
@@ -165,15 +165,16 @@ export default function ManualOrderSidebar ({
 							{currentOrderItems.map(item => (
 								<li
 									key={`${item.type}-${item.id}`}
-									className={`flex justify-between items-center p-1 rounded overflow-hidden ${item.quantity === 0 ? 'bg-gray-100' : 'bg-gray-50'}`}
+									className={`flex justify-between items-center p-1 rounded overflow-hidden cursor-pointer ${item.quantity === 0 ? 'bg-gray-100' : 'bg-gray-50'}`}
+									onClick={() => { handleQuantityChange(item.id, item.type, 1) }}
 								>
 									<span className={`flex-1 truncate mr-2 ${item.quantity === 0 ? 'text-gray-400' : 'text-gray-700'}`}>
 										{item.name}
 									</span>
-									<div className="flex items-center space-x-1">
+									<div className="flex items-center space-x-2">
 										<button
-											onClick={() => { handleQuantityChange(item.id, item.type, -1) }}
-											className={`text-red-500 px-1 rounded hover:bg-red-100 ${item.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+											onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, -1) }}
+											className={`bg-red-400/50 hover:bg-red-500 text-white w-8 h-8 rounded text-lg flex items-center justify-center ${item.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
 											disabled={item.quantity === 0}
 										>
 											{'-'}
@@ -185,8 +186,9 @@ export default function ManualOrderSidebar ({
 												type="text"
 												inputMode="numeric"
 												pattern="\d*"
-												className="w-8 text-center border rounded"
+												className="w-10 text-center border rounded py-1 text-sm"
 												value={item.quantity.toString()}
+												onClick={(e) => e.stopPropagation()}
 												onChange={e => {
 													const raw = e.currentTarget.value
 													if (/^\d*$/.test(raw)) {
@@ -207,15 +209,15 @@ export default function ManualOrderSidebar ({
 											/>
 										) : (
 											<span
-												className="w-5 text-center text-gray-800"
-												onClick={() => setEditingItem({ id: item.id, type: item.type })}
+												className="w-8 text-center text-gray-800 py-1 text-sm"
+												onClick={(e) => { e.stopPropagation(); setEditingItem({ id: item.id, type: item.type }) }}
 											>
 												{item.quantity}
 											</span>
 										)}
 										<button
-											onClick={() => { handleQuantityChange(item.id, item.type, 1) }}
-											className="text-green-500 px-1 rounded hover:bg-green-100"
+											onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, 1) }}
+											className="bg-green-400/50 hover:bg-green-500 text-white w-8 h-8 rounded text-lg flex items-center justify-center"
 										>
 											{'+'}
 										</button>
@@ -248,10 +250,10 @@ export default function ManualOrderSidebar ({
 									<p className="text-gray-600">{'Oprettet: '}{timeSince(order.createdAt)}</p>
 									<ul className="mt-2 text-xs space-y-1 pl-2 border-l ml-1">
 										{order.products.map(p => (
-											<li key={p._id}>{p.quantity}{' x '}{p.name}</li>
+											<li key={p._id}>{p.quantity}{' x '}{products.find(product => product._id === p._id)?.name}</li>
 										))}
 										{order.options.map(o => (
-											<li key={o._id}>{o.quantity}{' x '}{o.name}</li>
+											<li key={o._id}>{o.quantity}{' x '}{options.find(option => option._id === o._id)?.name}</li>
 										))}
 									</ul>
 									<p className="text-xs text-gray-500 mt-1">{'Status: '}{order.status === 'confirmed' ? 'Læst' : order.status === 'delivered' ? 'Leveret' : 'Afventer'}</p>

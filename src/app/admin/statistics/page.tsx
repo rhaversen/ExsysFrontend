@@ -535,14 +535,14 @@ export default function Page (): ReactElement {
 								<SvgBarChart
 									data={stats.topProductsByQuantity.map(p => p[1])}
 									labels={stats.topProductsByQuantity.map(p => p[0])}
-									itemColors={getColorsForNames(stats.topProductsByQuantity.map(p => p[0]))}
+									itemColors={getColorsForNames(stats.topProductsByQuantity.map(p => p[0]), 'product')}
 									label="Top 5 mest solgte produkter"
 									yLabel="stk."
 								/>
 								<SvgBarChart
 									data={stats.topProductsByRevenue.map(p => p[1])}
 									labels={stats.topProductsByRevenue.map(p => p[0])}
-									itemColors={getColorsForNames(stats.topProductsByRevenue.map(p => p[0]))}
+									itemColors={getColorsForNames(stats.topProductsByRevenue.map(p => p[0]), 'product')}
 									label="Top 5 produkter efter omsætning"
 									yLabel="kr."
 								/>
@@ -552,14 +552,14 @@ export default function Page (): ReactElement {
 								<SvgBarChart
 									data={stats.topOptionsByQuantity.map(o => o[1])}
 									labels={stats.topOptionsByQuantity.map(o => o[0])}
-									itemColors={getColorsForNames(stats.topOptionsByQuantity.map(o => o[0]))}
+									itemColors={getColorsForNames(stats.topOptionsByQuantity.map(o => o[0]), 'option')}
 									label="Top 5 mest solgte tilvalg"
 									yLabel="stk."
 								/>
 								<SvgBarChart
 									data={stats.topOptionsByRevenue.map(o => o[1])}
 									labels={stats.topOptionsByRevenue.map(o => o[0])}
-									itemColors={getColorsForNames(stats.topOptionsByRevenue.map(o => o[0]))}
+									itemColors={getColorsForNames(stats.topOptionsByRevenue.map(o => o[0]), 'option')}
 									label="Top 5 tilvalg efter omsætning"
 									yLabel="kr."
 								/>
@@ -603,7 +603,7 @@ export default function Page (): ReactElement {
 									categories={stats.productNames ?? []}
 									colors={(() => {
 										const names = stats.productNames ?? []
-										const cols = getColorsForNames(names)
+										const cols = getColorsForNames(names, 'product')
 										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
 									})()}
 									label="Totale bestillinger fordelt på produkt pr. time"
@@ -617,7 +617,7 @@ export default function Page (): ReactElement {
 									categories={stats.productNames ?? []} // Use product names as categories
 									colors={(() => {
 										const names = stats.productNames ?? []
-										const cols = getColorsForNames(names)
+										const cols = getColorsForNames(names, 'product')
 										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
 									})()} // Map product names to their colors
 									label="Omsætning fordelt på produkt pr. time" // Update label
@@ -655,21 +655,21 @@ export default function Page (): ReactElement {
 								<SvgPieChart
 									data={stats.topRooms.map(r => r[1])}
 									labels={stats.topRooms.map(r => r[0])}
-									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]), 'room')}
 									label="Ordrevolumen per spisested"
 									yLabel='stk.'
 								/>
 								<SvgPieChart
 									data={stats.topKiosks.map(k => k[1])}
 									labels={stats.topKiosks.map(k => k[0])}
-									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]), 'kiosk')}
 									label="Ordrevolumen per kiosk"
 									yLabel='stk.'
 								/>
 								<SvgPieChart
 									data={stats.topActivities.map(a => a[1])}
 									labels={stats.topActivities.map(a => a[0])}
-									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]), 'activity')}
 									label="Ordrevolumen per aktivitet"
 									yLabel='stk.'
 								/>
@@ -679,21 +679,21 @@ export default function Page (): ReactElement {
 								<SvgPieChart
 									data={stats.revenueByRoom}
 									labels={stats.topRooms.map(r => r[0])}
-									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]))}
+									itemColors={getColorsForNames(stats.topRooms.map(r => r[0]), 'room')}
 									label="Omsætning per spisested"
 									yLabel='kr.'
 								/>
 								<SvgPieChart
 									data={stats.revenueByKiosk}
 									labels={stats.topKiosks.map(k => k[0])}
-									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]))}
+									itemColors={getColorsForNames(stats.topKiosks.map(k => k[0]), 'kiosk')}
 									label="Omsætning per kiosk"
 									yLabel='kr.'
 								/>
 								<SvgPieChart
 									data={stats.revenueByActivity}
 									labels={stats.topActivities.map(a => a[0])}
-									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]))}
+									itemColors={getColorsForNames(stats.topActivities.map(a => a[0]), 'activity')}
 									label="Omsætning per aktivitet"
 									yLabel='kr.'
 								/>

@@ -130,7 +130,7 @@ export default function useStatisticsData ({
 	const productSales: Record<string, number> = {}
 	orders.forEach(order => {
 		order.products.forEach(p => {
-			productSales[p.name] = (productSales[p.name] || 0) + p.quantity
+			productSales[products.find(prod => prod._id === p._id)?.name ?? 'Ukendt'] = (productSales[products.find(prod => prod._id === p._id)?.name ?? 'Ukendt'] || 0) + p.quantity
 		})
 	})
 	const mostSoldProductEntry = Object.entries(productSales).sort((a, b) => b[1] - a[1])[0]

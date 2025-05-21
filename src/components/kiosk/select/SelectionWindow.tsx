@@ -8,10 +8,12 @@ import { type CartType } from '@/types/frontendDataTypes'
 const SelectionWindow = ({
 	cart,
 	products,
+	options,
 	handleCartChange
 }: {
 	cart: CartType
 	products: ProductType[]
+	options: OptionType[]
 	handleCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number) => void
 }): ReactElement => {
 	const [productsOptions, setProductsOptions] = useState<OptionType[]>([])
@@ -33,13 +35,13 @@ const SelectionWindow = ({
 			.forEach(product => {
 				product.options.forEach(option => {
 					// Sets unique options by _id
-					optionsMap.set(option._id, option)
+					optionsMap.set(option, options.find(o => o._id === option) as OptionType)
 				})
 			})
 
 		// Convert Map values to array
 		setProductsOptions(Array.from(optionsMap.values()))
-	}, [products, cart])
+	}, [products, options, cart])
 
 	return (
 		<div className="flex flex-col h-full">

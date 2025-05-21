@@ -29,7 +29,7 @@ const AddActivity = ({
 
 	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
-		rooms: [],
+		priorityRooms: [],
 		disabledRooms: [],
 		disabledProducts: []
 	})
@@ -65,7 +65,7 @@ const AddActivity = ({
 			// Update each selected kiosk to include the new activity
 			await Promise.all(selectedKiosks.map(async kiosk => {
 				await updateKioskAsync(kiosk._id, {
-					activities: [...kiosk.activities.map(a => a._id), activityId]
+					priorityActivities: [...kiosk.priorityActivities, activityId]
 				})
 			}))
 			// Update each disabled kiosk to include the activity in disabledActivities
@@ -90,14 +90,14 @@ const AddActivity = ({
 	const handleAddRoom = useCallback((v: RoomType): void => {
 		setActivity({
 			...activity,
-			rooms: [...(activity.rooms ?? []), v._id]
+			priorityRooms: [...(activity.priorityRooms ?? []), v._id]
 		})
 	}, [activity])
 
 	const handleDeleteRoom = useCallback((v: RoomType): void => {
 		setActivity({
 			...activity,
-			rooms: (activity.rooms ?? []).filter((id) => id !== v._id)
+			priorityRooms: (activity.priorityRooms ?? []).filter((id) => id !== v._id)
 		})
 	}, [activity])
 
@@ -203,11 +203,11 @@ const AddActivity = ({
 					<div className="flex flex-col items-center p-1 flex-1">
 						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
-							{(activity.rooms ?? []).length === 0 && (
+							{(activity.priorityRooms ?? []).length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
-								items={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+								items={rooms.filter((r) => (activity.priorityRooms ?? []).includes(r._id))}
 								editable={true}
 								onDeleteItem={handleDeleteRoom}
 								onShowItems={() => { setShowRooms(true) }}
@@ -294,7 +294,7 @@ const AddActivity = ({
 						// Disable if already in disabledRooms
 						disabled: (activity.disabledRooms ?? []).includes(r._id)
 					}))}
-					selectedItems={rooms.filter((r) => (activity.rooms ?? []).includes(r._id))}
+					selectedItems={rooms.filter((r) => (activity.priorityRooms ?? []).includes(r._id))}
 					onAddItem={handleAddRoom}
 					onDeleteItem={handleDeleteRoom}
 					onClose={() => { setShowRooms(false) }}
@@ -307,7 +307,7 @@ const AddActivity = ({
 					items={rooms.map(r => ({
 						...r,
 						// Disable if already in rooms
-						disabled: (activity.rooms ?? []).includes(r._id)
+						disabled: (activity.priorityRooms ?? []).includes(r._id)
 					}))}
 					selectedItems={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
 					onAddItem={handleAddDisabledRoom}

@@ -58,7 +58,7 @@ const AddRoom = ({
 				selectedActivities.map(async activity =>
 					await updateActivityAsync(activity._id, {
 						...activity,
-						rooms: [...activity.rooms.map(r => r._id), createdRoom._id]
+						priorityRooms: [...activity.priorityRooms, createdRoom._id]
 					})
 				)
 			)
@@ -68,7 +68,6 @@ const AddRoom = ({
 				disabledActivities.map(async activity =>
 					await updateActivityAsync(activity._id, {
 						...activity,
-						rooms: activity.rooms.map(r => typeof r === 'string' ? r : r._id),
 						disabledRooms: [...activity.disabledRooms, createdRoom._id]
 					})
 				)
