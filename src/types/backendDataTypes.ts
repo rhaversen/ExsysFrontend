@@ -212,7 +212,8 @@ export interface PatchKioskType {
 // Session types
 export interface SessionType {
 	_id: string // Used for deletion, determining current session and key in list
-	sessionExpires: string | null // Used to determine if session is expired if stayLoggedIn is true (Uses rolling expiration) (ISO string)
+	docExpires: string // Used to determine when the session document expires (ISO string)
+	sessionExpires: string | null // Used to determine when session is expired if stayLoggedIn is true (Uses rolling expiration) (ISO string)
 	stayLoggedIn: boolean // Used to determine if session is persistent
 	type: 'admin' | 'kiosk' | 'unknown' // Used to infer user information
 	userId: AdminType['_id'] | KioskType['_id'] | null // Used to infer user information
