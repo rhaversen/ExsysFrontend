@@ -9,8 +9,9 @@ import 'dayjs/locale/da' // Import Danish locale for dayjs
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import useCUDOperations from '@/hooks/useCUDOperations'
 import { formatRelativeDateLabel } from '@/lib/timeUtils'
-import type { FeedbackType, PatchFeedbackType } from '@/types/backendDataTypes'
+import type { FeedbackType, PatchFeedbackType, PostFeedbackType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -21,6 +22,10 @@ export default function Page (): ReactElement {
 	const [loading, setLoading] = useState(true)
 	const [socket, setSocket] = useState<Socket | null>(null)
 	const [filter, setFilter] = useState<'all' | 'read' | 'unread'>('unread')
+
+	const { updateEntityAsync } = useCUDOperations<PostFeedbackType, PatchFeedbackType, FeedbackType>(
+		'/v1/feedback'
+	)
 
 	// Setup websocket connection
 	useEffect(() => {
@@ -75,9 +80,7 @@ export default function Page (): ReactElement {
 	const handleToggleReadStatus = async (feedbackItem: FeedbackType): Promise<void> => {
 		try {
 			const updatedFeedbackData: PatchFeedbackType = { isRead: !feedbackItem.isRead }
-			await axios.patch<FeedbackType>(`${API_URL}/v1/feedback/${feedbackItem._id}`, updatedFeedbackData, {
-				withCredentials: true
-			})
+			await updateEntityAsync(feedbackItem._id, updatedFeedbackData)
 		} catch (error) {
 			addError(error)
 		}

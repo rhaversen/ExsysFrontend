@@ -1,13 +1,20 @@
-import axios from 'axios'
 import { type ReactElement, useState, type FormEvent } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useCUDOperations from '@/hooks/useCUDOperations'
+import { FeedbackType, PatchFeedbackType, PostFeedbackType } from '@/types/backendDataTypes'
 
 const FeedbackForm = (): ReactElement => {
-	const apiUrl = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const [isLoading, setIsLoading] = useState(false)
 	const [isSuccess, setIsSuccess] = useState(false)
+
+	const {
+		createEntityAsync
+
+	} = useCUDOperations<PostFeedbackType, PatchFeedbackType, FeedbackType>(
+		'/v1/feedback'
+	)
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
 		event.preventDefault()
@@ -16,7 +23,10 @@ const FeedbackForm = (): ReactElement => {
 		const formData = new FormData(event.currentTarget)
 		const data = Object.fromEntries(formData.entries())
 		try {
-			await axios.post(`${apiUrl}/v1/feedback`, data, { withCredentials: true })
+			await createEntityAsync({
+				name: data.name as string,
+				feedback: data.feedback as string
+			})
 			setIsSuccess(true)
 			;(event.target as HTMLFormElement).reset()
 		} catch (error) {
