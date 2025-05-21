@@ -254,6 +254,7 @@ export interface ConfigsType {
 		disabledWeekdays: number[]
 		kioskPassword: string
 		kioskFeedbackBannerDelayMs: number
+		kioskWelcomeMessage: string
 	}
 	createdAt: Date
 	updatedAt: Date

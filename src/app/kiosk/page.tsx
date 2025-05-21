@@ -52,6 +52,7 @@ export default function Page (): ReactElement {
 	const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 1000 * 60
 	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 1000 * 5
+	const kioskWelcomeMessage = config?.configs.kioskWelcomeMessage ?? 'Bestilling af brød, kaffe og the'
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 	const [isKioskClosedState, setIsKioskClosedState] = useState<boolean>(true)
@@ -368,16 +369,13 @@ export default function Page (): ReactElement {
 			case 'welcome':
 				return (
 					<div className="flex flex-col items-center justify-center h-full">
-						<header className="mb-8 flex flex-col gap-5 items-center">
-							<h1 className="text-gray-800 text-7xl font-bold">{'Bestilling af brød, kaffe og the'}</h1>
-							<p className="text-gray-600 text-3xl">{'Tryk på knappen for at starte din bestilling'}</p>
-						</header>
+						<h1 className="text-gray-800 mb-8 text-7xl font-bold text-center">{kioskWelcomeMessage}</h1>
 
 						<button
 							onClick={() => { setViewState('activity') }}
-							className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
+							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
 						>
-							{'Start bestilling\r'}
+							{'Tryk her for at starte\r'}
 						</button>
 					</div>
 				)

@@ -32,7 +32,8 @@ const ConfigsView = (): ReactElement => {
 		'kioskInactivityTimeoutMs',
 		'kioskInactivityTimeoutWarningMs',
 		'kioskOrderConfirmationTimeoutMs',
-		'kioskFeedbackBannerDelayMs'
+		'kioskFeedbackBannerDelayMs',
+		'kioskWelcomeMessage'
 	] as const
 
 	const text = {
@@ -55,6 +56,10 @@ const ConfigsView = (): ReactElement => {
 		kioskFeedbackBannerDelayMs: {
 			readableLabel: 'Kiosk Ris og Ros Banner Forsinkelse',
 			description: 'Tiden kiosken venter på velkomstskærmen uden brugerinteraktion, før Ris og Ros banneret vises.'
+		},
+		kioskWelcomeMessage: {
+			readableLabel: 'Kiosk Velkomstbesked',
+			description: 'Beskeden der vises øverst på kioskens velkomstskærm.'
 		}
 	}
 
