@@ -52,14 +52,15 @@ const ConfigItem = ({
 	}
 
 	return (
-		<div className="p-4 flex flex-col gap-4 bg-gray-50 rounded-lg shadow-sm">
-			<div className="flex flex-col sm:flex-row gap-4">
-				<div className="w-full sm:w-1/2 text-black">
-					<div className="font-medium text-gray-700 mb-1">
+		<div className="p-4 bg-slate-50 rounded-md border border-slate-200">
+			<div className="flex flex-col gap-3">
+				<div>
+					<label htmlFor={label} className="block font-medium text-slate-800 mb-1">
 						{readableLabel}
-					</div>
+					</label>
 					<div className="flex items-center">
 						<input
+							id={label}
 							type={isString ? 'text' : 'number'}
 							value={rawValue}
 							aria-label={readableLabel}
@@ -67,34 +68,34 @@ const ConfigItem = ({
 							title={readableLabel}
 							onChange={(e) => setRawValue(e.target.value)}
 							onKeyDown={handleKeyDown}
-							className="w-full px-3 py-2 border border-gray-300 rounded-md"
+							className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 						/>
-						{!isString && <span className="ml-2 text-gray-700">{'Sekunder'}</span>}
+						{!isString && <span className="ml-2 text-slate-700">{'sekunder'}</span>}
 					</div>
 				</div>
-				<div className="w-full sm:w-2/3 text-sm text-gray-600">
+				<p className="text-sm text-slate-700 mt-1">
 					{description}
-				</div>
+				</p>
 			</div>
-			<div className="flex justify-between items-center gap-2">
+			<div className="mt-4 flex justify-end items-center gap-3">
 				<SaveFeedback show={showSuccess} />
 				{hasChanged && (
-					<div className="flex gap-2">
-						<button
-							type="button"
-							onClick={patchConfig}
-							className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-						>
-							{'Gem'}
-						</button>
+					<>
 						<button
 							type="button"
 							onClick={() => setRawValue(toDisplay(value))}
-							className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+							className="px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-200 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400"
 						>
 							{'Annuller'}
 						</button>
-					</div>
+						<button
+							type="button"
+							onClick={patchConfig}
+							className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+						>
+							{'Gem'}
+						</button>
+					</>
 				)}
 			</div>
 		</div>

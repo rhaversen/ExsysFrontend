@@ -27,14 +27,24 @@ const ConfigsView = (): ReactElement => {
 		})
 	}, [addError, fetchConfigs])
 
-	const shownConfigs = [
-		'kioskPassword',
-		'kioskInactivityTimeoutMs',
-		'kioskInactivityTimeoutWarningMs',
-		'kioskOrderConfirmationTimeoutMs',
-		'kioskFeedbackBannerDelayMs',
-		'kioskWelcomeMessage'
-	] as const
+	const configSections = [
+		{
+			title: 'Kiosk Timeouts og Forsinkelser',
+			items: [
+				'kioskInactivityTimeoutMs',
+				'kioskInactivityTimeoutWarningMs',
+				'kioskOrderConfirmationTimeoutMs',
+				'kioskFeedbackBannerDelayMs'
+			] as const
+		},
+		{
+			title: 'Kiosk Indhold og Adgang',
+			items: [
+				'kioskWelcomeMessage',
+				'kioskPassword'
+			] as const
+		}
+	]
 
 	const text = {
 		kioskInactivityTimeoutMs: {
@@ -59,7 +69,7 @@ const ConfigsView = (): ReactElement => {
 		},
 		kioskWelcomeMessage: {
 			readableLabel: 'Kiosk Velkomstbesked',
-			description: 'Beskeden der vises øverst på kioskens velkomstskærm.'
+			description: 'Beskeden der vises på kioskens velkomstskærm.'
 		}
 	}
 
@@ -70,21 +80,28 @@ const ConfigsView = (): ReactElement => {
 					<div className="text-black text-xl p-5">{'Henter...'}</div>
 				)
 				: (
-					<div className="w-full max-w-4xl space-y-4">
-						{shownConfigs.map((label) => (
-							<ConfigItem
-								key={label}
-								label={label}
-								value={configs[label]}
-								readableLabel={text[label].readableLabel}
-								description={text[label].description}
-								onSave={(label, value) => {
-									setConfigs({
-										...configs,
-										[label]: value
-									})
-								}}
-							/>
+					<div className="w-full grid grid-cols-1 xl:grid-cols-2 gap-8">
+						{configSections.map((section) => (
+							<section key={section.title} className="bg-white p-4 rounded-lg shadow">
+								<h2 className="text-2xl font-semibold text-gray-800 mb-3">{section.title}</h2>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+									{section.items.map((label) => (
+										<ConfigItem
+											key={label}
+											label={label}
+											value={configs[label]}
+											readableLabel={text[label].readableLabel}
+											description={text[label].description}
+											onSave={(label, value) => {
+												setConfigs({
+													...configs,
+													[label]: value
+												})
+											}}
+										/>
+									))}
+								</div>
+							</section>
 						))}
 					</div>
 				)}
