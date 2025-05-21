@@ -10,9 +10,11 @@ interface BlockProps {
 	orders: OrderType[]
 	activityName: string
 	onUpdatedOrders: (orders: UpdatedOrderType[]) => void
+	productMap: Record<string, string>
+	optionMap: Record<string, string>
 }
 
-const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElement => {
+const Block = ({ orders, activityName, onUpdatedOrders, productMap, optionMap }: BlockProps): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const { isMuted, soundUrl } = useSound()
@@ -50,14 +52,16 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 		const counts: Record<string, number> = {}
 		orders.forEach(order => {
 			order.products.forEach(product => {
-				counts[product.name] = (counts[product.name] ?? 0) + product.quantity
+				const name = productMap[product._id] ?? product._id
+				counts[name] = (counts[name] ?? 0) + product.quantity
 			})
 			order.options.forEach(option => {
-				counts[option.name] = (counts[option.name] ?? 0) + option.quantity
+				const name = optionMap[option._id] ?? option._id
+				counts[name] = (counts[name] ?? 0) + option.quantity
 			})
 		})
 		return counts
-	}, [])
+	}, [productMap, optionMap])
 
 	const patchOrders = useCallback(async (status: OrderType['status']) => {
 		try {
@@ -98,7 +102,7 @@ const Block = ({ orders, activityName, onUpdatedOrders }: BlockProps): ReactElem
 					return (
 						<p key={name}>
 							{totalCount} &times; {name}
-							{diffText}
+							{diff !== totalCount && diffText}
 						</p>
 					)
 				})}

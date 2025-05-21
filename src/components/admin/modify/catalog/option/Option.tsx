@@ -22,12 +22,12 @@ const Option = ({
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [linkedProducts, setLinkedProducts] = useState(
-		products.filter(p => p.options.some(o => o._id === option._id))
+		products.filter(p => p.options.some(o => o === option._id))
 	)
 	const [showProducts, setShowProducts] = useState(false)
 
 	useEffect(() => {
-		setLinkedProducts(products.filter(p => p.options.some(o => o._id === option._id)))
+		setLinkedProducts(products.filter(p => p.options.some(o => o === option._id)))
 	}, [products, option])
 
 	const {
@@ -58,7 +58,7 @@ const Option = ({
 		updateEntity(newOption._id, newOption)
 
 		// Get products that need updating
-		const currentProducts = products.filter(p => p.options.some(o => o._id === option._id))
+		const currentProducts = products.filter(p => p.options.some(o => o === option._id))
 		const addedProducts = linkedProducts.filter(p => !currentProducts.some(cp => cp._id === p._id))
 		const removedProducts = currentProducts.filter(cp => !linkedProducts.some(p => p._id === cp._id))
 
@@ -66,7 +66,7 @@ const Option = ({
 		addedProducts.map(product => {
 			updateProduct(product._id, {
 				...product,
-				options: [...product.options.map(o => o._id), option._id]
+				options: [...product.options, option._id]
 			})
 			return null
 		})
@@ -74,7 +74,7 @@ const Option = ({
 		removedProducts.map(product => {
 			updateProduct(product._id, {
 				...product,
-				options: product.options.filter(o => o._id !== option._id).map(o => o._id)
+				options: product.options.filter(o => o !== option._id)
 			})
 			return null
 		})
@@ -89,7 +89,7 @@ const Option = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
-					setLinkedProducts(products.filter(p => p.options.some(o => o._id === option._id)))
+					setLinkedProducts(products.filter(p => p.options.some(o => o === option._id)))
 					setIsEditing(false)
 				}}
 				onHandleCompleteEdit={handleCompleteEdit}

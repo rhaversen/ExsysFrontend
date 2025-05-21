@@ -66,33 +66,44 @@ function generateColor (index: number): string {
 /**
  * Gets a unique color for a given name, assigning new colors as needed without reuse.
  * Blank names get a default grey.
+ * An optional type can be provided to differentiate entities with the same name but different types.
  */
-export const getColorForName = (name: string): string => {
+export const getColorForName = (name: string, type?: string): string => {
 	if (!name) {
 		return '#808080'
 	}
 
-	if (!nameColorMap[name]) {
-		nameColorMap[name] = generateColor(nextColorIndex++)
+	let key = name
+	if (typeof type === 'string') {
+		const trimmedType = type.trim()
+		if (trimmedType !== '') {
+			key = `${trimmedType}::${name}`
+		}
 	}
 
-	return nameColorMap[name]
+	if (!nameColorMap[key]) {
+		nameColorMap[key] = generateColor(nextColorIndex++)
+	}
+
+	return nameColorMap[key]
 }
 
 /**
  * Generates an array of unique colors corresponding to an array of names.
+ * An optional type can be provided to differentiate entities with the same name but different types.
  */
-export const getColorsForNames = (names: string[]): string[] => {
-	return names.map(name => getColorForName(name))
+export const getColorsForNames = (names: string[], type?: string): string[] => {
+	return names.map(name => getColorForName(name, type))
 }
 
 /**
  * Generates a mapping of unique names to their assigned colors.
+ * An optional type can be provided to differentiate entities with the same name but different types.
  */
-export const getColorMapForNames = (names: string[]): Record<string, string> => {
+export const getColorMapForNames = (names: string[], type?: string): Record<string, string> => {
 	const colorMap: Record<string, string> = {}
 	names.forEach(name => {
-		colorMap[name] = getColorForName(name)
+		colorMap[name] = getColorForName(name, type)
 	})
 
 	return colorMap

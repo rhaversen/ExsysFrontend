@@ -55,7 +55,7 @@ const AddOption = ({
 			const optionId = response.data._id
 			// Update each selected product to include the new option
 			await Promise.all(selectedProducts.map(async product => {
-				const updatedOptions = [...product.options.map(o => o._id), optionId]
+				const updatedOptions = [...product.options, optionId]
 				await axios.patch(API_URL + `/v1/products/${product._id}`, {
 					...product,
 					options: updatedOptions

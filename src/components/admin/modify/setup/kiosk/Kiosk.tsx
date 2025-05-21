@@ -56,9 +56,7 @@ const Kiosk = ({
 				onHandleCompleteEdit={() => {
 					updateEntity(kiosk._id, {
 						...newKiosk,
-						readerId: newKiosk.readerId?._id ?? null,
-						activities: newKiosk.activities.map(activity => activity._id),
-						disabledActivities: newKiosk.disabledActivities
+						readerId: newKiosk.readerId ?? null
 					})
 					setIsEditing(false)
 				}}
@@ -122,12 +120,12 @@ const Kiosk = ({
 							options={readers.map(reader => ({
 								value: reader._id,
 								label: reader.readerTag,
-								disabled: kiosks.some(k => k.readerId?._id === reader._id)
-									&& reader._id !== newKiosk.readerId?._id
-									&& reader._id !== kiosk.readerId?._id
+								disabled: kiosks.some(k => k.readerId === reader._id)
+									&& reader._id !== newKiosk.readerId
+									&& reader._id !== kiosk.readerId
 							}))}
-							initialValue={newKiosk.readerId?._id ?? 'null-option'}
-							onChange={(value) => { handleFieldChange('readerId', value === 'null-option' ? null : readers.find(reader => reader._id === value) ?? null) }}
+							initialValue={newKiosk.readerId ?? 'null-option'}
+							onChange={(value) => { handleFieldChange('readerId', value === 'null-option' ? null : readers.find(reader => reader._id === value)?._id ?? null) }}
 							editable={isEditing}
 							fieldName="readerId"
 							allowNullOption={true}
@@ -140,13 +138,13 @@ const Kiosk = ({
 				<div className="flex flex-col items-center p-1 flex-1">
 					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
-						{newKiosk.activities.length === 0 && (
+						{newKiosk.priorityActivities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
 						)}
 						<ItemsDisplay
-							items={newKiosk.activities}
+							items={activities.filter(activity => newKiosk.priorityActivities?.some(pa => pa === activity._id))}
 							editable={isEditing}
-							onDeleteItem={(v: ActivityType) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity !== v)) }}
+							onDeleteItem={(v: ActivityType) => { handleFieldChange('priorityActivities', newKiosk.priorityActivities.filter((activity) => activity !== v._id)) }}
 							onShowItems={() => { setShowActivities(true) }}
 						/>
 					</div>
@@ -191,14 +189,11 @@ const Kiosk = ({
 						// Disable if already in disabledActivities
 						disabled: newKiosk.disabledActivities.includes(a._id)
 					}))}
-					selectedItems={newKiosk.activities}
+					selectedItems={activities.filter(activity => newKiosk.priorityActivities?.some(pa => pa === activity._id))}
 					onAddItem={(v) => {
-						handleFieldChange('activities', [...newKiosk.activities, {
-							...v,
-							_id: v._id
-						}])
+						handleFieldChange('priorityActivities', [...newKiosk.priorityActivities, v._id])
 					}}
-					onDeleteItem={(v) => { handleFieldChange('activities', newKiosk.activities.filter((activity) => activity._id !== v._id)) }}
+					onDeleteItem={(v) => { handleFieldChange('priorityActivities', newKiosk.priorityActivities.filter((activity) => activity !== v._id)) }}
 					onClose={() => { setShowActivities(false) }}
 				/>
 			)}
@@ -209,7 +204,7 @@ const Kiosk = ({
 					items={activities.map(a => ({
 						...a,
 						// Disable if already in prioritized activities
-						disabled: newKiosk.activities.some(pa => pa._id === a._id)
+						disabled: newKiosk.priorityActivities.some(pa => pa === a._id)
 					}))}
 					selectedItems={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
 					onAddItem={(v) => {
