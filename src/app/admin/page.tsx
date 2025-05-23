@@ -16,7 +16,7 @@ import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import { useSocket } from '@/hooks/CudWebsocket'
-import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
+import type { OrderType, KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
 	href: string
@@ -43,63 +43,46 @@ export default function Page (): ReactElement | null {
 	const [hasMounted, setHasMounted] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
+	const [sessions, setSessions] = useState<SessionType[]>([])
 
-	const fetchPendingOrders = useCallback(async (): Promise<void> => {
+	const fetchData = useCallback(async (): Promise<void> => {
 		try {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const response = await axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-				params: {
-					fromDate: fromDate.toISOString(),
-					toDate: toDate.toISOString(),
-					status: 'pending,confirmed',
-					paymentStatus: 'successful'
-				},
-				withCredentials: true
-			})
-			const uniqueActivities = new Set(response.data.map(order => order.activityId))
-			setPendingOrders(uniqueActivities.size)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
+			const [pendingOrdersRes, totalOrdersRes, kiosksRes, productsRes, sessionsRes] = await Promise.all([
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
+						status: 'pending,confirmed',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				}),
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString(),
+						status: 'pending,confirmed,delivered',
+						paymentStatus: 'successful'
+					},
+					withCredentials: true
+				}),
+				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
+				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
+			])
 
-	const fetchTotalOrdersToday = useCallback(async (): Promise<void> => {
-		try {
-			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
-			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
+			const pendingUniqueActivities = new Set(pendingOrdersRes.data.map(order => order.activityId))
+			setPendingOrders(pendingUniqueActivities.size)
 
-			const response = await axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-				params: {
-					fromDate: fromDate.toISOString(),
-					toDate: toDate.toISOString(),
-					status: 'pending,confirmed,delivered',
-					paymentStatus: 'successful'
-				},
-				withCredentials: true
-			})
-			const uniqueActivities = new Set(response.data.map(order => order.activityId))
-			setTotalOrdersToday(uniqueActivities.size)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
+			const totalUniqueActivities = new Set(totalOrdersRes.data.map(order => order.activityId))
+			setTotalOrdersToday(totalUniqueActivities.size)
 
-	const fetchKiosks = useCallback(async (): Promise<void> => {
-		try {
-			const response = await axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true })
-			setKiosks(response.data)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
-
-	const fetchProducts = useCallback(async (): Promise<void> => {
-		try {
-			const response = await axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true })
-			const processedProducts = response.data
-			setProducts(processedProducts)
+			setKiosks(kiosksRes.data)
+			setProducts(productsRes.data)
+			setSessions(sessionsRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -107,14 +90,18 @@ export default function Page (): ReactElement | null {
 
 	useEffect(() => {
 		setHasMounted(true)
-		fetchPendingOrders().catch(() => { setPendingOrders(0) })
-		fetchTotalOrdersToday().catch(() => { setTotalOrdersToday(0) })
-		fetchKiosks().catch(() => { setKiosks([]) })
-		fetchProducts().catch(() => { setProducts([]) })
-	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
+		fetchData().catch(() => {
+			setPendingOrders(0)
+			setTotalOrdersToday(0)
+			setKiosks([])
+			setProducts([])
+			setSessions([])
+		})
+	}, [fetchData])
 
 	useSocket<KioskType>('kiosk', { setState: setKiosks })
 	useSocket<ProductType>('product', { setState: setProducts })
+	useSocket<SessionType>('session', { setState: setSessions })
 
 	if (!hasMounted) { return null }
 
@@ -177,7 +164,7 @@ export default function Page (): ReactElement | null {
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}
-						<KioskStatusManager kiosks={kiosks} products={products} configs={config} />
+						<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} />
 						{/* Entities Timeline Overview */}
 						<EntitiesTimelineOverview products={products} />
 					</div>
