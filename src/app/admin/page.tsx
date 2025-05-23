@@ -44,45 +44,57 @@ export default function Page (): ReactElement | null {
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [sessions, setSessions] = useState<SessionType[]>([])
+	const [orders, setOrders] = useState<OrderType[]>([])
+
+	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const tomorrow = new Date(today)
+		tomorrow.setDate(tomorrow.getDate() + 1)
+
+		// Filter needed for WebSocket events which can include orders from any date
+		const todayOrders = ordersList.filter(order => {
+			const orderDate = new Date(order.createdAt)
+			return orderDate >= today && orderDate < tomorrow && order.paymentStatus === 'successful'
+		})
+
+		const pendingOrders = todayOrders.filter(order =>
+			order.status === 'pending' || order.status === 'confirmed'
+		)
+		setPendingOrders(pendingOrders.length)
+
+		const allValidOrders = todayOrders.filter(order =>
+			order.status === 'pending' || order.status === 'confirmed' || order.status === 'delivered'
+		)
+		setTotalOrdersToday(allValidOrders.length)
+	}, [])
+
+	useEffect(() => {
+		calculateOrderStats(orders)
+	}, [orders, calculateOrderStats])
 
 	const fetchData = useCallback(async (): Promise<void> => {
 		try {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const [pendingOrdersRes, totalOrdersRes, kiosksRes, productsRes, sessionsRes] = await Promise.all([
-				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-					params: {
-						fromDate: fromDate.toISOString(),
-						toDate: toDate.toISOString(),
-						status: 'pending,confirmed',
-						paymentStatus: 'successful'
-					},
-					withCredentials: true
-				}),
-				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-					params: {
-						fromDate: fromDate.toISOString(),
-						toDate: toDate.toISOString(),
-						status: 'pending,confirmed,delivered',
-						paymentStatus: 'successful'
-					},
-					withCredentials: true
-				}),
+			const [kiosksRes, productsRes, sessionsRes, ordersRes] = await Promise.all([
 				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
 				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
-				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
+				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true }),
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString()
+					},
+					withCredentials: true
+				})
 			])
-
-			const pendingUniqueActivities = new Set(pendingOrdersRes.data.map(order => order.activityId))
-			setPendingOrders(pendingUniqueActivities.size)
-
-			const totalUniqueActivities = new Set(totalOrdersRes.data.map(order => order.activityId))
-			setTotalOrdersToday(totalUniqueActivities.size)
 
 			setKiosks(kiosksRes.data)
 			setProducts(productsRes.data)
 			setSessions(sessionsRes.data)
+			setOrders(ordersRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -96,12 +108,14 @@ export default function Page (): ReactElement | null {
 			setKiosks([])
 			setProducts([])
 			setSessions([])
+			setOrders([])
 		})
 	}, [fetchData])
 
 	useSocket<KioskType>('kiosk', { setState: setKiosks })
 	useSocket<ProductType>('product', { setState: setProducts })
 	useSocket<SessionType>('session', { setState: setSessions })
+	useSocket<OrderType>('order', { setState: setOrders })
 
 	if (!hasMounted) { return null }
 
