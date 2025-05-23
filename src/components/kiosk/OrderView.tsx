@@ -130,7 +130,7 @@ const OrderView = ({
 	}, [products, options, cart, updateCart])
 
 	// Handle Order Status Change
-	const handleOrderStatusChange = useCallback((status: PaymentStatus) => {
+	const handleOrderPaymentStatusChange = useCallback((status: PaymentStatus) => {
 		switch (status) {
 			case 'successful':
 				setOrderStatus('success')
@@ -174,14 +174,14 @@ const OrderView = ({
 			.then(response => {
 				console.log('Order posted:', response.data)
 				setCurrentOrder(response.data)
-				handleOrderStatusChange(response.data.paymentStatus)
+				handleOrderPaymentStatusChange(response.data.paymentStatus)
 				return null
 			})
 			.catch(error => {
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [clearInactivityTimeout, kiosk, activity, room, cart, API_URL, handleOrderStatusChange, addError])
+	}, [clearInactivityTimeout, kiosk, activity, room, cart, API_URL, handleOrderPaymentStatusChange, addError])
 
 	const cancelPayment = useCallback(() => {
 		if (!currentOrder) { return }
@@ -194,12 +194,12 @@ const OrderView = ({
 	useSocket<OrderType>('order', {
 		onCreate: (order) => {
 			if (currentOrder !== null && order._id === currentOrder._id) {
-				handleOrderStatusChange(order.paymentStatus)
+				handleOrderPaymentStatusChange(order.paymentStatus)
 			}
 		},
 		onUpdate: (order) => {
 			if (currentOrder !== null && order._id === currentOrder._id) {
-				handleOrderStatusChange(order.paymentStatus)
+				handleOrderPaymentStatusChange(order.paymentStatus)
 			}
 		},
 		onDelete: (id) => {
