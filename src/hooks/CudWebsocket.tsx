@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { type Socket } from 'socket.io-client'
 
 import { useSharedSocket } from './useSharedSocket'
 
@@ -13,7 +12,7 @@ interface SocketOptions<T extends { _id: string }> {
 export function useEntitySocket<T extends { _id: string }> (
 	entityName: string,
 	options: SocketOptions<T> = {}
-): Socket | null {
+): void {
 	const socket = useSharedSocket()
 	const { setState, onCreate, onUpdate, onDelete } = options
 
@@ -79,6 +78,4 @@ export function useEntitySocket<T extends { _id: string }> (
 			socket.off(`${entityName}Deleted`, handleDelete)
 		}
 	}, [socket, entityName, setState])
-
-	return socket
 }
