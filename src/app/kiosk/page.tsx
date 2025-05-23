@@ -353,7 +353,14 @@ export default function Page (): ReactElement {
 				)
 			case 'order':
 				if (kiosk == null || selectedActivity == null || selectedRoom == null) {
-					setViewState('welcome')
+					if (selectedActivity == null) {
+						setSelectedRoom(null)
+						setViewState('activity')
+					} else if (selectedRoom == null) {
+						setViewState('room')
+					} else {
+						setViewState('activity')
+					}
 					return null
 				}
 				return (
