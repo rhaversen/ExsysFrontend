@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
 import { FiMessageSquare } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
-import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
 import ConfigWeekdaysEditor from '@/components/admin/ConfigWeekdaysEditor'
@@ -16,7 +15,7 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
 
 const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
@@ -44,7 +43,6 @@ export default function Page (): ReactElement | null {
 	const [hasMounted, setHasMounted] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	const fetchPendingOrders = useCallback(async (): Promise<void> => {
 		try {
@@ -115,42 +113,8 @@ export default function Page (): ReactElement | null {
 		fetchProducts().catch(() => { setProducts([]) })
 	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
 
-	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) { return }
-		const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL)
-		setSocket(socketInstance)
-		return () => { socketInstance.disconnect() }
-	}, [API_URL])
-
-	// Listen for kiosk CUD events
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		kiosk => { setKiosks(prev => [...prev, kiosk]) },
-		kiosk => { setKiosks(prev => prev.map(k => k._id === kiosk._id ? kiosk : k)) },
-		id => { setKiosks(prev => prev.filter(k => k._id !== id)) }
-	)
-
-	// Products
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		item => {
-			setProducts(prev => {
-				return prev.some(p => p._id === item._id)
-					? prev.map(p => (p._id === item._id ? item : p))
-					: [...prev, item]
-			})
-		},
-		item => {
-			setProducts(prev => {
-				return prev.map(p => (p._id === item._id ? item : p))
-			})
-		},
-		id => {
-			setProducts(prev => prev.filter(p => p._id !== id))
-		}
-	)
+	useSocket<KioskType>('kiosk', { setState: setKiosks })
+	useSocket<ProductType>('product', { setState: setProducts })
 
 	if (!hasMounted) { return null }
 

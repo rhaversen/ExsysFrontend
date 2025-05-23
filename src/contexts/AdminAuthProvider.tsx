@@ -2,9 +2,8 @@
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import { type SessionType } from '@/types/backendDataTypes'
 
 import { useError } from './ErrorContext/ErrorContext'
@@ -12,14 +11,12 @@ import { useUser } from './UserProvider'
 
 export default function AdminAuthProvider ({ children }: Readonly<{ children: ReactNode }>): ReactNode {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { addError } = useError()
 	const { setCurrentUser } = useUser()
 	const router = useRouter()
 
 	const [currentSession, setCurrentSession] = useState<string | null>(null)
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	const checkAuthentication = useCallback(async (): Promise<void> => {
 		try {
@@ -52,32 +49,16 @@ export default function AdminAuthProvider ({ children }: Readonly<{ children: Re
 		}
 	}, [currentSession, checkAuthentication, checkAuthorization, addError])
 
-	// Initialize WebSocket connection
-	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-
-		return () => {
-			socketInstance.disconnect()
-		}
-	}, [API_URL, WS_URL])
-
 	// Listen for session CUD events
-	useEntitySocketListeners<SessionType>(
-		socket,
-		'session',
-		() => { /* Do nothing for create */ },
-		() => { /* Do nothing for update */ },
-		(deletedSessionId) => {
-			// If the current session is deleted, log out the user
+	useSocket<SessionType>('session', {
+		onDelete: (deletedSessionId) => {
 			if (deletedSessionId === currentSession) {
 				setCurrentUser(null)
 				setCurrentSession(null)
 				router.push('/login-admin')
 			}
 		}
-	)
+	})
 
 	return <>{children}</>
 }

@@ -2,20 +2,18 @@
 
 import axios from 'axios'
 import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 import ManualOrderSidebar from '@/components/admin/kitchen/ManualOrderSidebar'
 import RoomCol from '@/components/admin/kitchen/RoomCol'
 import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 	const { addError } = useError()
 	const { isMuted, setIsMuted } = useSound()
 
@@ -24,7 +22,6 @@ export default function Page (): ReactElement {
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Activity map
 	const activityMap = useMemo(() => {
@@ -51,11 +48,11 @@ export default function Page (): ReactElement {
 	// Group orders by room name
 	const groupedOrders = useMemo(() => {
 		return rooms.reduce<Record<string, OrderType[]>>((acc, room) => {
-			acc[room.name] = orders.filter(o => o.roomId === room._id && o.status !== 'delivered')
+			acc[room.name] = orders.filter(o => o.roomId === room._id && o.status !== 'delivered' && o.paymentStatus === 'successful')
 			return acc
 		}, {
 			// Include "no-room" fallback
-			'no-room': orders.filter(o => !rooms.some(r => r._id === o.roomId) && o.status !== 'delivered')
+			'no-room': orders.filter(o => !rooms.some(r => r._id === o.roomId) && o.status !== 'delivered' && o.paymentStatus === 'successful')
 		})
 	}, [rooms, orders])
 
@@ -98,67 +95,14 @@ export default function Page (): ReactElement {
 		}))
 	}, [])
 
-	// Socket setup
-	useEffect(() => {
-		if (WS_URL == null) { return }
-		const s = io(WS_URL)
-		setSocket(s)
-		return () => { s.disconnect() }
-	}, [WS_URL])
-
 	// Fetch on mount
 	useEffect(() => { fetchData().catch(addError) }, [fetchData, addError])
 
-	useEntitySocketListeners<OrderType>(
-		socket,
-		'order',
-		o => {
-			if (o.paymentStatus === 'successful') {
-				setOrders(prev => [...prev, o])
-			}
-		},
-		o => {
-			if (o.paymentStatus === 'successful') {
-				setOrders(prev => {
-					const existing = prev.find(p => p._id === o._id)
-					return existing != null ? prev : [...prev, o]
-				})
-			}
-		},
-		id => {
-			setOrders(prev => prev.filter(o => o._id !== id))
-		}
-	)
-
-	// Rooms, activities, products and options socket listeners
-	useEntitySocketListeners<RoomType>(
-		socket,
-		'room',
-		r => { setRooms(prev => [...prev, r]) },
-		r => { setRooms(prev => prev.map(p => p._id === r._id ? r : p)) },
-		id => { setRooms(prev => prev.filter(r => r._id !== id)) }
-	)
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		a => { setActivities(prev => [...prev, a]) },
-		a => { setActivities(prev => prev.map(p => p._id === a._id ? a : p)) },
-		id => { setActivities(prev => prev.filter(a => a._id !== id)) }
-	)
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		p => { setProducts(prev => [...prev, p]) },
-		p => { setProducts(prev => prev.map(pr => pr._id === p._id ? p : pr)) },
-		id => { setProducts(prev => prev.filter(p => p._id !== id)) }
-	)
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		o => { setOptions(prev => [...prev, o]) },
-		o => { setOptions(prev => prev.map(opt => opt._id === o._id ? o : opt)) },
-		id => { setOptions(prev => prev.filter(o => o._id !== id)) }
-	)
+	useSocket<OrderType>('order', { setState: setOrders })
+	useSocket<RoomType>('room', { setState: setRooms })
+	useSocket<ActivityType>('activity', { setState: setActivities })
+	useSocket<ProductType>('product', { setState: setProducts })
+	useSocket<OptionType>('option', { setState: setOptions })
 
 	const [showSoundSettings, setShowSoundSettings] = useState(false)
 	const [showManual, setShowManual] = useState(false) // Default to false

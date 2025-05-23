@@ -3,7 +3,6 @@
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useMemo, useRef } from 'react'
 import { FiClock, FiDollarSign, FiPackage, FiBarChart2, FiCalendar, FiShoppingCart, FiUsers } from 'react-icons/fi'
-import { io, type Socket } from 'socket.io-client'
 
 import OrdersTable from '@/components/admin/statistics/OrdersTable'
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
@@ -11,7 +10,7 @@ import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
 import SvgStackedBarChart from '@/components/admin/statistics/SvgStackedBarChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import useStatisticsData from '@/hooks/useStatisticsData'
 import { getColorsForNames } from '@/lib/colorUtils'
 import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
@@ -20,7 +19,6 @@ type StatSection = 'overview' | 'sales' | 'products' | 'customers' | 'time' | 'o
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 	const { addError } = useError()
 
 	const [activeSection, setActiveSection] = useState<StatSection>('overview')
@@ -35,7 +33,6 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [loading, setLoading] = useState(true)
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Section refs for scroll/active section logic
 	const overviewRef = useRef<HTMLDivElement>(null)
@@ -53,57 +50,12 @@ export default function Page (): ReactElement {
 		orders: ordersRef
 	}), [overviewRef, salesRef, productsRef, customersRef, timeRef, ordersRef])
 
-	// Setup websocket connection
-	useEffect(() => {
-		if (WS_URL == null) { return }
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-		return () => { socketInstance.disconnect() }
-	}, [WS_URL])
-
-	// Listen for CUD events
-	useEntitySocketListeners<OrderType>(
-		socket,
-		'order',
-		order => setOrders(prev => prev.some(o => o._id === order._id) ? prev : [...prev, order]),
-		order => setOrders(prev => prev.map(o => o._id === order._id ? order : o)),
-		id => setOrders(prev => prev.filter(o => o._id !== id))
-	)
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		item => setProducts(prev => prev.some(p => p._id === item._id) ? prev : [...prev, item]),
-		item => setProducts(prev => prev.map(p => p._id === item._id ? item : p)),
-		id => setProducts(prev => prev.filter(p => p._id !== id))
-	)
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		item => setOptions(prev => prev.some(o => o._id === item._id) ? prev : [...prev, item]),
-		item => setOptions(prev => prev.map(o => o._id === item._id ? item : o)),
-		id => setOptions(prev => prev.filter(o => o._id !== id))
-	)
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		item => setActivities(prev => prev.some(a => a._id === item._id) ? prev : [...prev, item]),
-		item => setActivities(prev => prev.map(a => a._id === item._id ? item : a)),
-		id => setActivities(prev => prev.filter(a => a._id !== id))
-	)
-	useEntitySocketListeners<RoomType>(
-		socket,
-		'room',
-		item => setRooms(prev => prev.some(r => r._id === item._id) ? prev : [...prev, item]),
-		item => setRooms(prev => prev.map(r => r._id === item._id ? item : r)),
-		id => setRooms(prev => prev.filter(r => r._id !== id))
-	)
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		item => setKiosks(prev => prev.some(k => k._id === item._id) ? prev : [...prev, item]),
-		item => setKiosks(prev => prev.map(k => k._id === item._id ? item : k)),
-		id => setKiosks(prev => prev.filter(k => k._id !== id))
-	)
+	useSocket<OrderType>('order', { setState: setOrders })
+	useSocket<ProductType>('product', { setState: setProducts })
+	useSocket<OptionType>('option', { setState: setOptions })
+	useSocket<ActivityType>('activity', { setState: setActivities })
+	useSocket<RoomType>('room', { setState: setRooms })
+	useSocket<KioskType>('kiosk', { setState: setKiosks })
 
 	// Fetch all data once on load (last 30 days)
 	useEffect(() => {

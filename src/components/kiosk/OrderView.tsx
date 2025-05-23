@@ -1,13 +1,12 @@
 import axios from 'axios'
 import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import {
 	type RoomType,
 	type ActivityType,
@@ -45,7 +44,6 @@ const OrderView = ({
 }): ReactElement => {
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
 	const [orderStatus, setOrderStatus] = useState<OrderStatus>('loading')
@@ -53,9 +51,6 @@ const OrderView = ({
 	const [currentOrder, setCurrentOrder] = useState<OrderType | null>(null)
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [isCancelling, setIsCancelling] = useState(false)
-
-	// WebSocket Connection
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Derived States using useMemo
 	const isFormValid = useMemo(() => {
@@ -196,39 +191,23 @@ const OrderView = ({
 			.catch(error => addError(error))
 	}, [currentOrder, API_URL, addError])
 
-	useEntitySocketListeners<OrderType>(
-		socket,
-		'order',
-		o => {
-			console.log('Order created:', o)
-			if (currentOrder !== null && o._id === currentOrder._id) {
-				handleOrderStatusChange(o.paymentStatus)
+	useSocket<OrderType>('order', {
+		onCreate: (order) => {
+			if (currentOrder !== null && order._id === currentOrder._id) {
+				handleOrderStatusChange(order.paymentStatus)
 			}
 		},
-		o => {
-			console.log('Order updated:', o)
-			if (currentOrder !== null && o._id === currentOrder._id) {
-				handleOrderStatusChange(o.paymentStatus)
+		onUpdate: (order) => {
+			if (currentOrder !== null && order._id === currentOrder._id) {
+				handleOrderStatusChange(order.paymentStatus)
 			}
 		},
-		id => {
+		onDelete: (id) => {
 			if (currentOrder !== null && id === currentOrder._id) {
 				setOrderStatus('error')
 			}
 		}
-	)
-
-	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
-		// Initialize WebSocket connection
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-
-		return () => {
-			// Cleanup WebSocket connection on component unmount
-			socketInstance.disconnect()
-		}
-	}, [WS_URL])
+	})
 
 	const handleOrderConfirmationClose = useCallback(() => {
 		setIsOrderConfirmationVisible(false)

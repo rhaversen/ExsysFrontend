@@ -4,7 +4,6 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import { type ReactElement, useCallback, useEffect, useState, useRef } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
 import DeliveryInfoSelection from '@/components/kiosk/DeliveryInfoSelection'
 import KioskFeedbackInfo from '@/components/kiosk/KioskFeedbackInfo'
@@ -14,7 +13,7 @@ import ProgressBar from '@/components/kiosk/ProgressBar'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useSocket } from '@/hooks/CudWebsocket'
 import { formatRelativeDateLabel, getNextOpen, isCurrentTimeInOrderWindow, isKioskDeactivated } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
@@ -25,7 +24,6 @@ export default function Page (): ReactElement {
 	dayjs.locale('da')
 
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { config } = useConfig()
 	const { addError } = useError()
@@ -56,9 +54,6 @@ export default function Page (): ReactElement {
 	const resetTimerRef = useRef<NodeJS.Timeout>(undefined)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 	const [isKioskClosedState, setIsKioskClosedState] = useState<boolean>(true)
-
-	// WebSocket Connection
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	const [showFeedbackBanner, setShowFeedbackBanner] = useState(false)
 	const feedbackBannerTimerRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -142,125 +137,61 @@ export default function Page (): ReactElement {
 		initialSetup().catch(addError)
 	}, [initialSetup, addError])
 
-	// Initialize WebSocket connection
-	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-
-		return () => {
-			socketInstance.disconnect()
-		}
-	}, [API_URL, WS_URL])
-
-	// Products
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		item => {
-			setProducts(prev => {
-				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				return newProducts
-			})
-		},
-		item => {
-			setProducts(prev => {
-				const newProducts = prev.map(p => (p._id === item._id ? item : p))
-				return newProducts
-			})
-		},
-		id => {
-			setProducts(prev => {
-				const products = prev.filter(p => p._id !== id)
-				return products
-			})
-		}
-	)
-
-	// Options
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		item => { setOptions(prev => [...prev, item]) },
-		item => { setOptions(prev => prev.map(o => (o._id === item._id ? item : o))) },
-		id => { setOptions(prev => prev.filter(o => o._id !== id)) }
-	)
-
-	// Activities
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		activity => { setActivities(prev => [...prev, activity]) },
-		activity => {
-			if (kiosk === null) { return }
-			// If the selected activity is no longer associated with the kiosk, deselect it
-			if (!kiosk.priorityActivities.some(a => a === activity._id)) {
-				setSelectedActivity(null)
+	useSocket<ProductType>('product', { setState: setProducts })
+	useSocket<OptionType>('option', { setState: setOptions })
+	useSocket<ActivityType>('activity', {
+		setState: setActivities,
+		onUpdate: activityUpdate => {
+			// If the selected activity is updated, update the state
+			if (selectedActivity !== null && selectedActivity._id === activityUpdate._id) {
+				setSelectedActivity(activityUpdate)
 			}
 
-			// Update selectedActivity if it's the same activity that was updated
-			if (selectedActivity?._id === activity._id) {
-				setSelectedActivity(activity)
+			// If the selected room is now disabled, reset the selection
+			if (selectedRoom !== null && activityUpdate.disabledRooms.includes(selectedRoom._id)) {
+				setSelectedRoom(null)
 			}
-
-			// Update the activity in the activities list
-			setActivities(prev => prev.map(a => (a._id === activity._id ? activity : a)))
 		},
-		id => {
-			setActivities(prev => prev.filter(a => a._id !== id))
+		onDelete: id => {
+			// If the selected activity is deleted, reset the selection
 			if (selectedActivity?._id === id) {
 				setSelectedActivity(null)
 			}
 		}
-	)
+	})
 
-	// Kiosk WebSocket Listeners
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		() => { }, // No add handler for kiosks
-		kioskUpdate => {
+	useSocket<KioskType>('kiosk', {
+		onUpdate: kioskUpdate => {
+			// Check if the kiosk is closed and update the state
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
 
-				// If the selected activity is no longer associated with the kiosk, deselect it
-				if (!kioskUpdate.priorityActivities.some(a => a === selectedActivity?._id)) {
+				// If the selected activity is disabled, reset the selection
+				if (selectedActivity !== null && kioskUpdate.disabledActivities?.includes(selectedActivity._id)) {
 					setSelectedActivity(null)
 				}
-
-				// If only one activity is available, select it
-				if (kioskUpdate.priorityActivities.length === 1) {
-					const activityId = kioskUpdate.priorityActivities[0]
-					const activityObj = activities.find(a => a._id === activityId) || null
-					setSelectedActivity(activityObj)
-				}
 			}
 		},
-		() => {
-			// If the kiosk is deleted, redirect to login
+		onDelete: () => {
+			// If the kiosk is deleted, redirect to login page
 			router.push('/login-kiosk')
 		}
-	)
+	})
 
-	// Rooms
-	useEntitySocketListeners<RoomType>(
-		socket,
-		'room',
-		room => { setRooms(prev => [...prev, room]) },
-		room => {
-			setRooms(prev => prev.map(r => r._id === room._id ? room : r))
-			if (selectedRoom?._id === room._id) {
-				setSelectedRoom(room)
+	useSocket<RoomType>('room', {
+		setState: setRooms,
+		onUpdate: roomUpdate => {
+			if (selectedRoom !== null && roomUpdate._id === selectedRoom._id) {
+				setSelectedRoom(roomUpdate)
 			}
 		},
-		id => {
-			setRooms(prev => prev.filter(r => r._id !== id))
+		onDelete: id => {
 			if (selectedRoom?._id === id) {
 				setSelectedRoom(null)
 			}
 		}
-	)
+	})
 
 	const updateCart = useCallback((newCart: CartType) => {
 		setCart(newCart)
