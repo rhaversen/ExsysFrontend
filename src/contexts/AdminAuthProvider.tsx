@@ -3,7 +3,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import { type SessionType } from '@/types/backendDataTypes'
 
 import { useError } from './ErrorContext/ErrorContext'
@@ -50,7 +50,7 @@ export default function AdminAuthProvider ({ children }: Readonly<{ children: Re
 	}, [currentSession, checkAuthentication, checkAuthorization, addError])
 
 	// Listen for session CUD events
-	useSocket<SessionType>('session', {
+	useEntitySocket<SessionType>('session', {
 		onDelete: (deletedSessionId) => {
 			if (deletedSessionId === currentSession) {
 				setCurrentUser(null)

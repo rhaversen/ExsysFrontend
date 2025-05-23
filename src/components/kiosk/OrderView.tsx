@@ -6,7 +6,7 @@ import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfir
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import {
 	type RoomType,
 	type ActivityType,
@@ -191,7 +191,7 @@ const OrderView = ({
 			.catch(error => addError(error))
 	}, [currentOrder, API_URL, addError])
 
-	useSocket<OrderType>('order', {
+	useEntitySocket<OrderType>('order', {
 		onCreate: (order) => {
 			if (currentOrder !== null && order._id === currentOrder._id) {
 				handleOrderPaymentStatusChange(order.paymentStatus)

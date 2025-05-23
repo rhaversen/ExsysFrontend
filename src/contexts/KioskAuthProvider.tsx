@@ -3,7 +3,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import { type SessionType } from '@/types/backendDataTypes'
 
 import { useError } from './ErrorContext/ErrorContext'
@@ -49,7 +49,7 @@ export default function KioskAuthProvider ({ children }: Readonly<{ children: Re
 		}
 	}, [currentSession, checkAuthentication, checkAuthorization, addError])
 
-	useSocket<SessionType>('session', {
+	useEntitySocket<SessionType>('session', {
 		onDelete: (deletedSessionId) => {
 			if (deletedSessionId === currentSession) {
 				setCurrentUser(null)

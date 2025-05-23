@@ -13,7 +13,7 @@ import ProgressBar from '@/components/kiosk/ProgressBar'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import { formatRelativeDateLabel, getNextOpen, isCurrentTimeInOrderWindow, isKioskDeactivated } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
@@ -137,9 +137,9 @@ export default function Page (): ReactElement {
 		initialSetup().catch(addError)
 	}, [initialSetup, addError])
 
-	useSocket<ProductType>('product', { setState: setProducts })
-	useSocket<OptionType>('option', { setState: setOptions })
-	useSocket<ActivityType>('activity', {
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<ActivityType>('activity', {
 		setState: setActivities,
 		onUpdate: activityUpdate => {
 			// If the selected activity is updated, update the state
@@ -160,7 +160,7 @@ export default function Page (): ReactElement {
 		}
 	})
 
-	useSocket<KioskType>('kiosk', {
+	useEntitySocket<KioskType>('kiosk', {
 		onUpdate: kioskUpdate => {
 			// Check if the kiosk is closed and update the state
 			if ((kiosk !== null) && kioskUpdate._id === kiosk._id) {
@@ -179,7 +179,7 @@ export default function Page (): ReactElement {
 		}
 	})
 
-	useSocket<RoomType>('room', {
+	useEntitySocket<RoomType>('room', {
 		setState: setRooms,
 		onUpdate: roomUpdate => {
 			if (selectedRoom !== null && roomUpdate._id === selectedRoom._id) {

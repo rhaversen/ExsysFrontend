@@ -8,7 +8,7 @@ import RoomCol from '@/components/admin/kitchen/RoomCol'
 import SoundsConfig from '@/components/admin/kitchen/SoundsConfig'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import { type ActivityType, type OptionType, type OrderType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 import { type UpdatedOrderType } from '@/types/frontendDataTypes'
 
@@ -98,11 +98,11 @@ export default function Page (): ReactElement {
 	// Fetch on mount
 	useEffect(() => { fetchData().catch(addError) }, [fetchData, addError])
 
-	useSocket<OrderType>('order', { setState: setOrders })
-	useSocket<RoomType>('room', { setState: setRooms })
-	useSocket<ActivityType>('activity', { setState: setActivities })
-	useSocket<ProductType>('product', { setState: setProducts })
-	useSocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
 
 	const [showSoundSettings, setShowSoundSettings] = useState(false)
 	const [showManual, setShowManual] = useState(false) // Default to false

@@ -8,7 +8,7 @@ import ConfigsView from '@/components/admin/modify/setup/config/ConfigsView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import {
 	type ActivityType,
 	type AdminType,
@@ -76,14 +76,14 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL, addError])
 
-	useSocket<ProductType>('product', { setState: setProducts })
-	useSocket<OptionType>('option', { setState: setOptions })
-	useSocket<ActivityType>('activity', { setState: setActivities })
-	useSocket<RoomType>('room', { setState: setRooms })
-	useSocket<KioskType>('kiosk', { setState: setKiosks })
-	useSocket<ReaderType>('reader', { setState: setReaders })
-	useSocket<AdminType>('admin', { setState: setAdmins })
-	useSocket<SessionType>('session', { setState: setSessions })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<ReaderType>('reader', { setState: setReaders })
+	useEntitySocket<AdminType>('admin', { setState: setAdmins })
+	useEntitySocket<SessionType>('session', { setState: setSessions })
 
 	// Fetch data on component mount
 	useEffect(() => {

@@ -7,7 +7,7 @@ import { FiMessageSquare, FiMail, FiUser, FiCalendar, FiEye, FiEyeOff, FiRefresh
 import 'dayjs/locale/da'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import { formatRelativeDateLabel } from '@/lib/timeUtils'
 import type { FeedbackType, PatchFeedbackType, PostFeedbackType } from '@/types/backendDataTypes'
@@ -26,7 +26,7 @@ export default function Page (): ReactElement {
 		'/v1/feedback'
 	)
 
-	useSocket<FeedbackType>('feedback', { setState: setFeedbackList })
+	useEntitySocket<FeedbackType>('feedback', { setState: setFeedbackList })
 
 	const fetchFeedback = useCallback(async () => {
 		try {

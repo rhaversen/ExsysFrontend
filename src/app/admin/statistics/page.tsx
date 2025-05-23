@@ -10,7 +10,7 @@ import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
 import SvgStackedBarChart from '@/components/admin/statistics/SvgStackedBarChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import useStatisticsData from '@/hooks/useStatisticsData'
 import { getColorsForNames } from '@/lib/colorUtils'
 import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
@@ -50,12 +50,12 @@ export default function Page (): ReactElement {
 		orders: ordersRef
 	}), [overviewRef, salesRef, productsRef, customersRef, timeRef, ordersRef])
 
-	useSocket<OrderType>('order', { setState: setOrders })
-	useSocket<ProductType>('product', { setState: setProducts })
-	useSocket<OptionType>('option', { setState: setOptions })
-	useSocket<ActivityType>('activity', { setState: setActivities })
-	useSocket<RoomType>('room', { setState: setRooms })
-	useSocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
 
 	// Fetch all data once on load (last 30 days)
 	useEffect(() => {

@@ -15,7 +15,7 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
-import { useSocket } from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import type { OrderType, KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
@@ -112,10 +112,10 @@ export default function Page (): ReactElement | null {
 		})
 	}, [fetchData])
 
-	useSocket<KioskType>('kiosk', { setState: setKiosks })
-	useSocket<ProductType>('product', { setState: setProducts })
-	useSocket<SessionType>('session', { setState: setSessions })
-	useSocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<SessionType>('session', { setState: setSessions })
+	useEntitySocket<OrderType>('order', { setState: setOrders })
 
 	if (!hasMounted) { return null }
 

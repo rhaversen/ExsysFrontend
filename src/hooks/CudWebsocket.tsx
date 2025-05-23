@@ -10,7 +10,7 @@ interface SocketOptions<T extends { _id: string }> {
 	onDelete?: (id: string) => void
 }
 
-export function useSocket<T extends { _id: string }> (
+export function useEntitySocket<T extends { _id: string }> (
 	entityName: string,
 	options: SocketOptions<T> = {}
 ): Socket | null {
