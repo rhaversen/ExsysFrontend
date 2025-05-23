@@ -4,51 +4,29 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { type ReactElement, useState, useEffect, useCallback } from 'react'
 import { FiMessageSquare, FiMail, FiUser, FiCalendar, FiEye, FiEyeOff, FiRefreshCw } from 'react-icons/fi'
-import { io, type Socket } from 'socket.io-client'
-import 'dayjs/locale/da' // Import Danish locale for dayjs
+import 'dayjs/locale/da'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import { formatRelativeDateLabel } from '@/lib/timeUtils'
 import type { FeedbackType, PatchFeedbackType, PostFeedbackType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement {
+	dayjs.locale('da')
+
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 	const { addError } = useError()
 
 	const [feedbackList, setFeedbackList] = useState<FeedbackType[]>([])
 	const [loading, setLoading] = useState(true)
-	const [socket, setSocket] = useState<Socket | null>(null)
 	const [filter, setFilter] = useState<'all' | 'read' | 'unread'>('unread')
 
 	const { updateEntityAsync } = useCUDOperations<PostFeedbackType, PatchFeedbackType, FeedbackType>(
 		'/v1/feedback'
 	)
 
-	// Setup websocket connection
-	useEffect(() => {
-		if (WS_URL == null) { return }
-		dayjs.locale('da')
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-		return () => { socketInstance.disconnect() }
-	}, [WS_URL])
-
-	// Listen for CUD events for feedback
-	useEntitySocketListeners<FeedbackType>(
-		socket,
-		'feedback',
-		(newFeedback) => setFeedbackList(prev => {
-			if (prev.some(f => f._id === newFeedback._id)) { return prev }
-			return [newFeedback, ...prev].sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
-		}),
-		(updatedFeedback) => setFeedbackList(prev =>
-			prev.map(f => f._id === updatedFeedback._id ? updatedFeedback : f)
-		),
-		(id) => setFeedbackList(prev => prev.filter(f => f._id !== id))
-	)
+	useEntitySocket<FeedbackType>('feedback', { setState: setFeedbackList })
 
 	const fetchFeedback = useCallback(async () => {
 		try {
@@ -91,7 +69,7 @@ export default function Page (): ReactElement {
 		if (filter === 'read') { return item.isRead }
 		if (filter === 'unread') { return !item.isRead }
 		return true
-	})
+	}).sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
 
 	return (
 		<div className="max-w-7xl mx-auto p-4 md:p-6 text-black">

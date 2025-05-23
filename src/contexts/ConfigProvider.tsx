@@ -1,8 +1,8 @@
 'use client'
 import axios from 'axios'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
 
+import { useSharedSocket } from '@/hooks/useSharedSocket'
 import { type ConfigsType } from '@/types/backendDataTypes'
 
 import { useError } from './ErrorContext/ErrorContext'
@@ -23,11 +23,10 @@ export function useConfig (): ConfigContextType {
 
 export default function ConfigProvider ({ children }: Readonly<{ children: ReactNode }>): ReactNode {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { addError } = useError()
 	const [config, setConfig] = useState<ConfigsType | null>(null)
-	const [socket, setSocket] = useState<Socket | null>(null)
+	const socket = useSharedSocket()
 
 	useEffect(() => {
 		const fetchConfig = async (): Promise<void> => {
@@ -43,17 +42,6 @@ export default function ConfigProvider ({ children }: Readonly<{ children: React
 			fetchConfig().catch(addError)
 		}
 	}, [API_URL, addError, config])
-
-	// Initialize WebSocket connection
-	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-
-		return () => {
-			socketInstance.disconnect()
-		}
-	}, [WS_URL])
 
 	// Listen for config updates
 	useEffect(() => {
