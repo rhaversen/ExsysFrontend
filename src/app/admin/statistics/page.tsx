@@ -401,7 +401,8 @@ export default function Page (): ReactElement {
 									label={`Omsætning pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 									yLabel="kr."
 									color="#2563eb"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 								<SvgLineGraph
 									data={stats.chartData.orders}
@@ -409,7 +410,8 @@ export default function Page (): ReactElement {
 									label={`Ordrer pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 									yLabel="stk."
 									color="#16a34a"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 							</div>
 
@@ -420,7 +422,8 @@ export default function Page (): ReactElement {
 									label={`Gns. pris pr. ordre ${timeRange === 'today' ? '(time)' : '(dag)'}`}
 									yLabel="kr."
 									color="#a21caf"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 
 								<div className="bg-gray-50 rounded p-5 flex flex-col justify-center">
