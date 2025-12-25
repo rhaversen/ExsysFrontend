@@ -34,7 +34,7 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 						<button
 							key={item._id}
 							onClick={() => { onSelect(item) }}
-							className="w-[400px] p-6 bg-blue-400 rounded-lg shadow-md focus:outline-none"
+							className="w-[400px] p-6 bg-blue-500 rounded-lg shadow-md focus:outline-none"
 						>
 							<h2 className="text-2xl font-bold text-white">
 								{item.name}
@@ -57,7 +57,7 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 								<button
 									key={item._id}
 									onClick={() => { onSelect(item) }}
-									className="w-[300px] p-4 bg-sky-400 rounded-lg shadow-md focus:outline-none"
+									className="w-[300px] p-4 bg-sky-500 rounded-lg shadow-md focus:outline-none"
 								>
 									<div className="flex flex-col">
 										<span className="font-semibold text-lg text-white">
