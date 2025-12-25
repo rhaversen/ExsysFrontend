@@ -21,6 +21,27 @@ const SelectPaymentWindow = ({
 				{'Vælg Betaling'}
 			</h2>
 			<div className="flex gap-4 justify-center">
+				{checkoutMethods.later && (
+					<button
+						onClick={() => { onSubmit('later') }}
+						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
+						type="button"
+					>
+						<div className="text-2xl font-bold text-center text-gray-800">
+							{'Betal Senere'}
+						</div>
+						<AsyncImage
+							src={KioskImages.payLater.src}
+							alt={KioskImages.payLater.alt}
+							className="w-48 h-48"
+							width={200}
+							height={200}
+							quality={100}
+							priority={true}
+							draggable={false}
+						/>
+					</button>
+				)}
 				{checkoutMethods.sumUp && (
 					<div className="flex flex-col items-center">
 						<button
@@ -49,27 +70,6 @@ const SelectPaymentWindow = ({
 							</div>
 						)}
 					</div>
-				)}
-				{checkoutMethods.later && (
-					<button
-						onClick={() => { onSubmit('later') }}
-						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
-						type="button"
-					>
-						<div className="text-2xl font-bold text-center text-gray-800">
-							{'Betal Senere'}
-						</div>
-						<AsyncImage
-							src={KioskImages.payLater.src}
-							alt={KioskImages.payLater.alt}
-							className="w-48 h-48"
-							width={200}
-							height={200}
-							quality={100}
-							priority={true}
-							draggable={false}
-						/>
-					</button>
 				)}
 				{checkoutMethods.mobilePay && (
 					<button
