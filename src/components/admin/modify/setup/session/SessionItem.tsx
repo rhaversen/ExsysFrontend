@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState, useMemo } from 'react'
 import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
 
 import { parseUserAgent } from '@/lib/ParsingUtils'
@@ -23,12 +23,14 @@ const SessionItem = ({
 	const [lastActivityAgo, setLastActivityAgo] = useState<string>('')
 	const [loginTimeAgo, setLoginTimeAgo] = useState<string>('')
 	const [sessionExpiresIn, setSessionExpiresIn] = useState<string | null>('')
+	const [isExpired, setIsExpired] = useState<boolean>(false)
 
 	useEffect(() => {
 		const updateTimes = (): void => {
 			setLastActivityAgo(timeSince(session.lastActivity))
 			setLoginTimeAgo(timeSince(session.loginTime))
 			setSessionExpiresIn(session.stayLoggedIn ? timeUntil(session.sessionExpires ?? '') : null)
+			setIsExpired(!(!session.stayLoggedIn || new Date(session.sessionExpires ?? 0).getTime() > Date.now()))
 		}
 
 		// Initial call to set the times immediately
@@ -41,7 +43,6 @@ const SessionItem = ({
 		return () => { clearInterval(interval) }
 	}, [session])
 
-	const isExpired = !(!session.stayLoggedIn || new Date(session.sessionExpires ?? 0).getTime() > Date.now())
 	const {
 		browser,
 		os,
@@ -52,11 +53,11 @@ const SessionItem = ({
 	const isSameIpAsCurrent = !isLoadingIp && currentPublicIp === session.ipAddress
 
 	// Get appropriate device icon
-	const DeviceIcon = (): ReactElement => {
+	const deviceIcon = useMemo(() => {
 		if (deviceType.includes('mobile')) { return <FaMobile className="text-blue-500" size={16} /> }
 		if (deviceType.includes('tablet')) { return <FaTablet className="text-purple-500" size={16} /> }
 		return <FaDesktop className="text-gray-700" size={16} />
-	}
+	}, [deviceType])
 
 	return (
 		<div className={`border border-gray-300 rounded-lg p-4 w-full ${isCurrentSession ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}>
@@ -88,7 +89,7 @@ const SessionItem = ({
 
 			{/* Device Info Header */}
 			<div className="flex items-center gap-2 mb-3">
-				<DeviceIcon />
+				{deviceIcon}
 				<span className="text-gray-700 font-medium">
 					{os}{', '}{browser}
 				</span>
