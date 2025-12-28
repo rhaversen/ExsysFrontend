@@ -1,7 +1,8 @@
 'use client'
 
 import { type ReactElement, useEffect, useState, useMemo } from 'react'
-import { FaCircle, FaDesktop, FaMobile, FaTablet, FaTrash } from 'react-icons/fa'
+import { FaCircle, FaDesktop, FaTrash } from 'react-icons/fa'
+import { FiSmartphone, FiTablet } from 'react-icons/fi'
 
 import { parseUserAgent } from '@/lib/ParsingUtils'
 import { timeSince, timeUntil } from '@/lib/timeUtils'
@@ -54,8 +55,8 @@ const SessionItem = ({
 
 	// Get appropriate device icon
 	const deviceIcon = useMemo(() => {
-		if (deviceType.includes('mobile')) { return <FaMobile className="text-blue-500" size={16} /> }
-		if (deviceType.includes('tablet')) { return <FaTablet className="text-purple-500" size={16} /> }
+		if (deviceType.includes('mobile')) { return <FiSmartphone className="text-gray-700 scale-x-75" size={16} /> }
+		if (deviceType.includes('tablet')) { return <FiTablet className="text-gray-700 scale-x-125" size={16} /> }
 		return <FaDesktop className="text-gray-700" size={16} />
 	}, [deviceType])
 
