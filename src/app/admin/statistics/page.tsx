@@ -129,11 +129,11 @@ export default function Page (): ReactElement {
 	const filteredOrders = useMemo(() => {
 		if (orders.length === 0) { return [] }
 		const now = new Date()
-		
+
 		if (timeRange === 'allTime') {
 			return orders
 		}
-		
+
 		if (timeRange === 'custom') {
 			if (!customFromDate || !customToDate) { return orders }
 			const fromDate = new Date(customFromDate)
@@ -145,7 +145,7 @@ export default function Page (): ReactElement {
 				return orderDate >= fromDate && orderDate <= toDate
 			})
 		}
-		
+
 		let fromDate = new Date()
 		if (timeRange === '30days') {
 			fromDate.setDate(fromDate.getDate() - 29)
