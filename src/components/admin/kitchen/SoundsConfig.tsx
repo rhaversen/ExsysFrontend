@@ -1,4 +1,4 @@
-import { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useRef } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useSound } from '@/contexts/SoundProvider'
@@ -13,18 +13,18 @@ const SoundsConfig = ({ onClose }: { onClose: () => void }): ReactElement => {
 		soundUrl,
 		setSoundUrl
 	} = useSound()
-	const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+	const audioRef = useRef<HTMLAudioElement | null>(null)
 	const { addError } = useError()
 
 	const handlePlaySound = useCallback((url: string) => {
-		if (audio !== null) {
-			audio.pause()
-			audio.currentTime = 0
+		if (audioRef.current !== null) {
+			audioRef.current.pause()
+			audioRef.current.currentTime = 0
 		}
 		const newAudio = new Audio(url)
 		newAudio.play().catch(addError)
-		setAudio(newAudio)
-	}, [addError, audio])
+		audioRef.current = newAudio
+	}, [addError])
 
 	const handleSoundSelect = (url: string): void => {
 		setSoundUrl(url)
