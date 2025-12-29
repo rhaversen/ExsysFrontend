@@ -67,15 +67,14 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 	// Helper for formatting numbers: 1 decimal if needed, else integer
 	const formatValue = (val: number) => Number(val) % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
 
-	let startAngle = 0
-	const slices = data.map((value, i) => {
+	const slices = data.reduce<{ slices: Array<{ path: string, color: string, percentage: string, value: number, label: string }>, currentAngle: number }>((acc, value, i) => {
 		const percentage = (value / total) * 100
 		const angle = (percentage / 100) * 2 * Math.PI
-		const endAngle = startAngle + angle
+		const endAngle = acc.currentAngle + angle
 		const largeArcFlag = angle > Math.PI ? 1 : 0
 
-		const x1 = centerX + radius * Math.cos(startAngle)
-		const y1 = centerY + radius * Math.sin(startAngle)
+		const x1 = centerX + radius * Math.cos(acc.currentAngle)
+		const y1 = centerY + radius * Math.sin(acc.currentAngle)
 		const x2 = centerX + radius * Math.cos(endAngle)
 		const y2 = centerY + radius * Math.sin(endAngle)
 
@@ -83,8 +82,8 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		let pathData: string
 		if (Math.abs(angle - 2 * Math.PI) < 0.001) { // Check for nearly full circle
 			// Draw two half circles to make a full one
-			const midX1 = centerX + radius * Math.cos(startAngle + Math.PI)
-			const midY1 = centerY + radius * Math.sin(startAngle + Math.PI)
+			const midX1 = centerX + radius * Math.cos(acc.currentAngle + Math.PI)
+			const midY1 = centerY + radius * Math.sin(acc.currentAngle + Math.PI)
 			pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${midX1} ${midY1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`
 		} else {
 			pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`
@@ -93,17 +92,17 @@ const SvgPieChart: React.FC<SvgPieChartProps> = ({
 		// Use itemColors if available, otherwise fall back to rotating colors
 		const sliceColor = itemColors?.[i] ?? colors[i % colors.length]
 
-		const slice = {
+		acc.slices.push({
 			path: pathData,
 			color: sliceColor,
 			percentage: percentage.toFixed(1),
 			value,
 			label: labels[i]
-		}
+		})
+		acc.currentAngle = endAngle
 
-		startAngle = endAngle
-		return slice
-	})
+		return acc
+	}, { slices: [], currentAngle: 0 }).slices
 
 	return (
 		<div ref={containerRef} style={{ width: '100%', position: 'relative' }}>

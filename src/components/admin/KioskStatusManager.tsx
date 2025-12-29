@@ -299,11 +299,13 @@ function KioskControlModalContent ({
 const KioskStatusManager = ({
 	kiosks,
 	products,
-	configs
+	configs,
+	sessions
 }: {
 	kiosks: KioskType[]
 	products: ProductType[]
 	configs: ConfigsType | null
+	sessions: SessionType[]
 }): React.ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -311,28 +313,11 @@ const KioskStatusManager = ({
 	const [showModal, setShowModal] = useState(false)
 	const [isPatching, setIsPatching] = useState(false)
 	const [, setNow] = useState(Date.now())
-	const [sessions, setSessions] = useState<SessionType[]>([])
-	const [loadingSessions, setLoadingSessions] = useState(true)
 
 	useEffect(() => {
 		const interval = setInterval(() => { setNow(Date.now()) }, 1000 * 60)
 		return () => { clearInterval(interval) }
 	}, [])
-
-	useEffect(() => {
-		async function fetchSessions (): Promise<void> {
-			setLoadingSessions(true)
-			try {
-				const sessionsRes = await axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true })
-				setSessions(sessionsRes.data)
-			} catch (error) {
-				addError(error)
-			} finally {
-				setLoadingSessions(false)
-			}
-		}
-		fetchSessions().catch(e => { addError(e) })
-	}, [API_URL, addError])
 
 	const handlePatchKiosk = useCallback(async (kioskId: string, patch: Partial<KioskType>) => {
 		setIsPatching(true)
@@ -346,7 +331,7 @@ const KioskStatusManager = ({
 		}
 	}, [API_URL, addError])
 
-	const isLoading = loadingSessions || configs === null
+	const isLoading = configs === null
 
 	return (
 		<div className='p-4 bg-gray-50 rounded-lg'>
