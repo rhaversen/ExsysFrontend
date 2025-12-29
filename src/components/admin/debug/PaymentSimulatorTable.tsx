@@ -2,7 +2,7 @@
 
 import dayjs from 'dayjs'
 import { type ReactElement, useState } from 'react'
-import { FiCheck, FiX, FiClock, FiDollarSign, FiAlertTriangle, FiLoader, FiCreditCard } from 'react-icons/fi'
+import { FiCheck, FiX, FiClock, FiDollarSign, FiAlertTriangle, FiCreditCard } from 'react-icons/fi'
 
 import type { OrderType } from '@/types/backendDataTypes'
 
@@ -13,7 +13,7 @@ interface PaymentSimulatorTableProps {
 	kioskMap: Record<string, string>
 	productMap: Record<string, string>
 	optionMap: Record<string, string>
-	onSimulatePayment: (orderId: string, status: 'successful' | 'failed') => Promise<boolean>
+	onSimulatePayment: (orderId: string, status: 'successful' | 'failed') => void
 }
 
 type SortField = 'createdAt' | 'paymentStatus' | 'status' | 'checkoutMethod' | 'activity' | 'room' | 'kiosk'
@@ -137,7 +137,6 @@ export default function PaymentSimulatorTable ({
 		field: 'createdAt',
 		direction: 'desc'
 	})
-	const [simulatingOrders, setSimulatingOrders] = useState<Set<string>>(new Set())
 
 	const handleSort = (field: SortField): void => {
 		setSort(prev => ({
@@ -146,25 +145,13 @@ export default function PaymentSimulatorTable ({
 		}))
 	}
 
-	const handleSimulate = async (order: OrderType, status: 'successful' | 'failed'): Promise<void> => {
-		setSimulatingOrders(prev => new Set(prev).add(order._id))
-		await onSimulatePayment(order._id, status)
-		setSimulatingOrders(prev => {
-			const next = new Set(prev)
-			next.delete(order._id)
-			return next
-		})
+	const handleSimulate = (order: OrderType, status: 'successful' | 'failed'): void => {
+		onSimulatePayment(order._id, status)
 	}
 
 	const canSimulate = (order: OrderType): boolean => {
 		return order.checkoutMethod === 'sumUp' &&
-			order.paymentStatus === 'pending' &&
-			!simulatingOrders.has(order._id)
-	}
-
-	const hasTransactionId = (order: OrderType): boolean => {
-		const transactionId = order.clientTransactionId
-		return transactionId !== undefined && transactionId !== null && transactionId !== ''
+			order.paymentStatus === 'pending'
 	}
 
 	const sortedOrders = [...orders].sort((a, b) => {
@@ -204,13 +191,11 @@ export default function PaymentSimulatorTable ({
 						<SortableHeader field="room" currentSort={sort} onSort={handleSort}>{'Spisested'}</SortableHeader>
 						<SortableHeader field="kiosk" currentSort={sort} onSort={handleSort}>{'Kiosk'}</SortableHeader>
 						<th className="p-3 border-b text-left">{'Produkter'}</th>
-						<th className="p-3 border-b text-left">{'Transaction ID'}</th>
 						<th className="p-3 border-b text-center">{'Simuler'}</th>
 					</tr>
 				</thead>
 				<tbody>
 					{sortedOrders.map((order, index) => {
-						const isSimulating = simulatingOrders.has(order._id)
 						const canSimulateOrder = canSimulate(order)
 						const formattedTime = dayjs(order.createdAt).format('HH:mm')
 						const formattedDate = dayjs(order.createdAt).format('DD/MM/YYYY')
@@ -267,36 +252,21 @@ export default function PaymentSimulatorTable ({
 									</div>
 								</td>
 								<td className="p-3">
-									<div className="font-mono text-xs text-gray-500 truncate max-w-24" title={order.clientTransactionId ?? undefined}>
-										{hasTransactionId(order) ? order.clientTransactionId?.slice(-12) : '-'}
-									</div>
-								</td>
-								<td className="p-3">
 									{canSimulateOrder ? (
 										<div className="flex items-center justify-center gap-1">
 											<button
-												onClick={() => { void handleSimulate(order, 'successful') }}
-												disabled={isSimulating}
-												className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+												onClick={() => { handleSimulate(order, 'successful') }}
+												className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
 												title="Marker som gennemført"
 											>
-												{isSimulating ? (
-													<FiLoader className="w-3 h-3 animate-spin" />
-												) : (
-													<FiCheck className="w-3 h-3" />
-												)}
+												<FiCheck className="w-3 h-3" />
 											</button>
 											<button
-												onClick={() => { void handleSimulate(order, 'failed') }}
-												disabled={isSimulating}
-												className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+												onClick={() => { handleSimulate(order, 'failed') }}
+												className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
 												title="Marker som fejlet"
 											>
-												{isSimulating ? (
-													<FiLoader className="w-3 h-3 animate-spin" />
-												) : (
-													<FiX className="w-3 h-3" />
-												)}
+												<FiX className="w-3 h-3" />
 											</button>
 										</div>
 									) : (
@@ -305,10 +275,6 @@ export default function PaymentSimulatorTable ({
 												'Ikke SumUp'
 											) : order.paymentStatus !== 'pending' ? (
 												'Slutstatus'
-											) : !hasTransactionId(order) ? (
-												'Ingen ID'
-											) : isSimulating ? (
-												<FiLoader className="w-4 h-4 animate-spin mx-auto" />
 											) : (
 												'-'
 											)}

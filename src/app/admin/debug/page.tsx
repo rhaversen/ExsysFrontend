@@ -2,10 +2,11 @@
 
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useCallback, useMemo } from 'react'
-import { FiRefreshCw, FiCheck, FiX, FiAlertTriangle, FiFilter, FiZap } from 'react-icons/fi'
+import { FiCheck, FiX, FiAlertTriangle, FiFilter, FiZap } from 'react-icons/fi'
 
 import PaymentSimulatorTable from '@/components/admin/debug/PaymentSimulatorTable'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import useCUDOperations from '@/hooks/useCUDOperations'
 import type { OrderType, ActivityType, RoomType, KioskType, ProductType, OptionType } from '@/types/backendDataTypes'
 
@@ -23,7 +24,6 @@ export default function Page (): ReactElement {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [options, setOptions] = useState<OptionType[]>([])
 	const [loading, setLoading] = useState(true)
-	const [refreshing, setRefreshing] = useState(false)
 
 	const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatusFilter>('pending')
 	const [orderStatusFilter, setOrderStatusFilter] = useState<OrderStatusFilter>('all')
@@ -74,12 +74,6 @@ export default function Page (): ReactElement {
 		setLoading(false)
 	}, [fetchOrders, fetchReferenceData])
 
-	const handleRefresh = useCallback(async () => {
-		setRefreshing(true)
-		await fetchOrders()
-		setRefreshing(false)
-	}, [fetchOrders])
-
 	useEffect(() => {
 		fetchAllData().catch(addError)
 	}, [fetchAllData, addError])
@@ -88,26 +82,21 @@ export default function Page (): ReactElement {
 		fetchOrders().catch(addError)
 	}, [fetchOrders, paymentStatusFilter, orderStatusFilter, addError])
 
+	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+
 	const { createEntity: simulateDebugCallback } = useCUDOperations<{ orderId: string, status: 'successful' | 'failed' }, never>('/service/debug-payment-callback')
 
-	const simulatePaymentCallback = useCallback(async (
+	const simulatePaymentCallback = useCallback((
 		orderId: string,
 		newStatus: 'successful' | 'failed'
-	): Promise<boolean> => {
-		const previousOrders = [...orders]
-		setOrders(prev => prev.map(order =>
-			order._id === orderId ? { ...order, paymentStatus: newStatus } : order
-		))
-
-		try {
-			simulateDebugCallback({ orderId, status: newStatus })
-			return true
-		} catch (error) {
-			setOrders(previousOrders)
-			addError(error)
-			return false
-		}
-	}, [orders, simulateDebugCallback, addError])
+	): void => {
+		simulateDebugCallback({ orderId, status: newStatus })
+	}, [simulateDebugCallback])
 
 	const simulatableOrders = useMemo(() => {
 		return orders.filter(order => {
@@ -116,9 +105,9 @@ export default function Page (): ReactElement {
 		})
 	}, [orders])
 
-	const handleSimulateAll = useCallback(async (status: 'successful' | 'failed') => {
+	const handleSimulateAll = useCallback((status: 'successful' | 'failed') => {
 		for (const order of simulatableOrders) {
-			await simulatePaymentCallback(order._id, status)
+			simulatePaymentCallback(order._id, status)
 		}
 	}, [simulatableOrders, simulatePaymentCallback])
 
@@ -217,23 +206,13 @@ export default function Page (): ReactElement {
 				</div>
 
 				<div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-					<div className="flex items-center gap-4">
-						<button
-							onClick={() => { void handleRefresh() }}
-							disabled={refreshing}
-							className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-						>
-							<FiRefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-							{'Opdater'}
-						</button>
-						<div className="text-sm text-gray-600">
-							{`${orders.length} ordre${orders.length !== 1 ? 'r' : ''} fundet`}
-							{simulatableOrders.length > 0 && (
-								<span className="ml-2 text-amber-600 font-medium">
-									{`(${simulatableOrders.length} kan simuleres)`}
-								</span>
-							)}
-						</div>
+					<div className="text-sm text-gray-600">
+						{`${orders.length} ordre${orders.length !== 1 ? 'r' : ''} fundet`}
+						{simulatableOrders.length > 0 && (
+							<span className="ml-2 text-amber-600 font-medium">
+								{`(${simulatableOrders.length} kan simuleres)`}
+							</span>
+						)}
 					</div>
 					{simulatableOrders.length > 0 && (
 						<div className="flex items-center gap-2">
@@ -266,7 +245,7 @@ export default function Page (): ReactElement {
 					<div className="p-4">
 						{loading ? (
 							<div className="flex items-center justify-center py-12">
-								<FiRefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
+								<div className="w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
 							</div>
 						) : orders.length === 0 ? (
 							<div className="text-center py-12 text-gray-500">
