@@ -192,6 +192,25 @@ const OrderView = ({
 		}
 	})
 
+	// Auto-cancel and reset after 5 minutes of waiting for payment
+	useEffect(() => {
+		if (orderStatus !== 'awaitingPayment' || !currentOrder) {
+			return
+		}
+
+		const timeoutId = setTimeout(() => {
+			// Cancel the payment
+			axios.post(`${API_URL}/v1/orders/${currentOrder._id}/cancel`, {}, { withCredentials: true })
+				.catch(error => addError(error))
+
+			// Reset the entire state
+			setIsOrderConfirmationVisible(false)
+			onClose()
+		}, 5 * 60 * 1000) // 5 minutes
+
+		return () => { clearTimeout(timeoutId) }
+	}, [orderStatus, currentOrder, API_URL, addError, onClose])
+
 	const handleOrderConfirmationClose = useCallback(() => {
 		setIsOrderConfirmationVisible(false)
 		if (orderStatus === 'success') {
