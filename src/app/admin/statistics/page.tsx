@@ -3,7 +3,6 @@
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useMemo, useRef } from 'react'
 import { FiClock, FiDollarSign, FiPackage, FiBarChart2, FiCalendar, FiShoppingCart, FiUsers } from 'react-icons/fi'
-import { io, type Socket } from 'socket.io-client'
 
 import OrdersTable from '@/components/admin/statistics/OrdersTable'
 import SvgBarChart from '@/components/admin/statistics/SvgBarChart'
@@ -11,21 +10,23 @@ import SvgLineGraph from '@/components/admin/statistics/SvgLineGraph'
 import SvgPieChart from '@/components/admin/statistics/SvgPieChart'
 import SvgStackedBarChart from '@/components/admin/statistics/SvgStackedBarChart'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import useStatisticsData from '@/hooks/useStatisticsData'
 import { getColorsForNames } from '@/lib/colorUtils'
 import type { OrderType, ProductType, OptionType, ActivityType, RoomType, KioskType } from '@/types/backendDataTypes'
 
 type StatSection = 'overview' | 'sales' | 'products' | 'customers' | 'time' | 'orders';
+type TimeRange = '30days' | '7days' | 'today' | 'month' | 'allTime' | 'custom';
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 	const { addError } = useError()
 
 	const [activeSection, setActiveSection] = useState<StatSection>('overview')
 	const [clickedSection, setClickedSection] = useState<StatSection | null>(null)
-	const [timeRange, setTimeRange] = useState<'30days' | '7days' | 'today' | 'month'>('30days')
+	const [timeRange, setTimeRange] = useState<TimeRange>('30days')
+	const [customFromDate, setCustomFromDate] = useState<string>('')
+	const [customToDate, setCustomToDate] = useState<string>('')
 	const [currentTime, setCurrentTime] = useState<Date>(new Date())
 
 	const [orders, setOrders] = useState<OrderType[]>([])
@@ -35,7 +36,6 @@ export default function Page (): ReactElement {
 	const [rooms, setRooms] = useState<RoomType[]>([])
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [loading, setLoading] = useState(true)
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Section refs for scroll/active section logic
 	const overviewRef = useRef<HTMLDivElement>(null)
@@ -53,77 +53,47 @@ export default function Page (): ReactElement {
 		orders: ordersRef
 	}), [overviewRef, salesRef, productsRef, customersRef, timeRef, ordersRef])
 
-	// Setup websocket connection
-	useEffect(() => {
-		if (WS_URL == null) { return }
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-		return () => { socketInstance.disconnect() }
-	}, [WS_URL])
+	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
 
-	// Listen for CUD events
-	useEntitySocketListeners<OrderType>(
-		socket,
-		'order',
-		order => setOrders(prev => prev.some(o => o._id === order._id) ? prev : [...prev, order]),
-		order => setOrders(prev => prev.map(o => o._id === order._id ? order : o)),
-		id => setOrders(prev => prev.filter(o => o._id !== id))
-	)
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		item => setProducts(prev => prev.some(p => p._id === item._id) ? prev : [...prev, item]),
-		item => setProducts(prev => prev.map(p => p._id === item._id ? item : p)),
-		id => setProducts(prev => prev.filter(p => p._id !== id))
-	)
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		item => setOptions(prev => prev.some(o => o._id === item._id) ? prev : [...prev, item]),
-		item => setOptions(prev => prev.map(o => o._id === item._id ? item : o)),
-		id => setOptions(prev => prev.filter(o => o._id !== id))
-	)
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		item => setActivities(prev => prev.some(a => a._id === item._id) ? prev : [...prev, item]),
-		item => setActivities(prev => prev.map(a => a._id === item._id ? item : a)),
-		id => setActivities(prev => prev.filter(a => a._id !== id))
-	)
-	useEntitySocketListeners<RoomType>(
-		socket,
-		'room',
-		item => setRooms(prev => prev.some(r => r._id === item._id) ? prev : [...prev, item]),
-		item => setRooms(prev => prev.map(r => r._id === item._id ? item : r)),
-		id => setRooms(prev => prev.filter(r => r._id !== id))
-	)
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		item => setKiosks(prev => prev.some(k => k._id === item._id) ? prev : [...prev, item]),
-		item => setKiosks(prev => prev.map(k => k._id === item._id ? item : k)),
-		id => setKiosks(prev => prev.filter(k => k._id !== id))
-	)
-
-	// Fetch all data once on load (last 30 days)
+	// Fetch all data on load (refetch when timeRange changes to allTime or custom)
 	useEffect(() => {
 		const fetchData = async () => {
 			setLoading(true)
 			try {
-				const fromDate = new Date()
-				const toDate = new Date()
+				let orderParams: { fromDate?: string; toDate?: string } = {}
 
-				// Always fetch full 30 days of data
-				fromDate.setDate(fromDate.getDate() - 29)
-				fromDate.setHours(0, 0, 0, 0)
-				toDate.setHours(23, 59, 59, 999)
+				if (timeRange === 'allTime') {
+					// No date params - fetch all orders
+				} else if (timeRange === 'custom' && customFromDate && customToDate) {
+					const fromDate = new Date(customFromDate)
+					fromDate.setHours(0, 0, 0, 0)
+					const toDate = new Date(customToDate)
+					toDate.setHours(23, 59, 59, 999)
+					orderParams = {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString()
+					}
+				} else {
+					const fromDate = new Date()
+					const toDate = new Date()
+					// Fetch full 30 days of data for non-custom ranges
+					fromDate.setDate(fromDate.getDate() - 29)
+					fromDate.setHours(0, 0, 0, 0)
+					toDate.setHours(23, 59, 59, 999)
+					orderParams = {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString()
+					}
+				}
 
 				const [ordersRes, productsRes, optionsRes, activitiesRes, roomsRes, kiosksRes] = await Promise.all([
 					axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-						params: {
-							fromDate: fromDate.toISOString(),
-							toDate: toDate.toISOString()
-						},
+						params: orderParams,
 						withCredentials: true
 					}),
 					axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
@@ -144,8 +114,10 @@ export default function Page (): ReactElement {
 				setLoading(false)
 			}
 		}
-		if (API_URL != null) { fetchData() }
-	}, [API_URL, addError])
+		if (API_URL != null && (timeRange !== 'custom' || (customFromDate && customToDate))) {
+			fetchData()
+		}
+	}, [API_URL, addError, timeRange, customFromDate, customToDate])
 
 	// Update current time every minute
 	useEffect(() => {
@@ -157,6 +129,23 @@ export default function Page (): ReactElement {
 	const filteredOrders = useMemo(() => {
 		if (orders.length === 0) { return [] }
 		const now = new Date()
+
+		if (timeRange === 'allTime') {
+			return orders
+		}
+
+		if (timeRange === 'custom') {
+			if (!customFromDate || !customToDate) { return orders }
+			const fromDate = new Date(customFromDate)
+			fromDate.setHours(0, 0, 0, 0)
+			const toDate = new Date(customToDate)
+			toDate.setHours(23, 59, 59, 999)
+			return orders.filter(order => {
+				const orderDate = new Date(order.createdAt)
+				return orderDate >= fromDate && orderDate <= toDate
+			})
+		}
+
 		let fromDate = new Date()
 		if (timeRange === '30days') {
 			fromDate.setDate(fromDate.getDate() - 29)
@@ -172,7 +161,7 @@ export default function Page (): ReactElement {
 			const orderDate = new Date(order.createdAt)
 			return orderDate >= fromDate && orderDate <= now
 		})
-	}, [orders, timeRange])
+	}, [orders, timeRange, customFromDate, customToDate])
 
 	const stats = useStatisticsData({
 		orders: filteredOrders,
@@ -271,6 +260,50 @@ export default function Page (): ReactElement {
 									{'Nuværende måned\r'}
 								</div>
 							</button>
+							<button
+								onClick={() => setTimeRange('allTime')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === 'allTime' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiCalendar className="mr-2" />
+									{'Al tid\r'}
+								</div>
+							</button>
+							<button
+								onClick={() => setTimeRange('custom')}
+								className={`px-4 py-2 text-sm font-medium rounded text-left ${timeRange === 'custom' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
+							>
+								<div className="flex items-center">
+									<FiCalendar className="mr-2" />
+									{'Brugerdefineret\r'}
+								</div>
+							</button>
+							{timeRange === 'custom' && (
+								<div className="mt-2 space-y-2 p-2 bg-white rounded border">
+									<div>
+										<label className="block text-xs text-gray-600 mb-1" htmlFor="custom-from-date">{'Fra'}</label>
+										<input
+											id="custom-from-date"
+											type="date"
+											value={customFromDate}
+											onChange={(e) => setCustomFromDate(e.target.value)}
+											className="w-full px-2 py-1 text-sm border rounded"
+											title="Vælg startdato"
+										/>
+									</div>
+									<div>
+										<label className="block text-xs text-gray-600 mb-1" htmlFor="custom-to-date">{'Til'}</label>
+										<input
+											id="custom-to-date"
+											type="date"
+											value={customToDate}
+											onChange={(e) => setCustomToDate(e.target.value)}
+											className="w-full px-2 py-1 text-sm border rounded"
+											title="Vælg slutdato"
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -449,7 +482,8 @@ export default function Page (): ReactElement {
 									label={`Omsætning pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 									yLabel="kr."
 									color="#2563eb"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 								<SvgLineGraph
 									data={stats.chartData.orders}
@@ -457,7 +491,8 @@ export default function Page (): ReactElement {
 									label={`Ordrer pr. ${timeRange === 'today' ? 'time' : 'dag'}`}
 									yLabel="stk."
 									color="#16a34a"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 							</div>
 
@@ -468,7 +503,8 @@ export default function Page (): ReactElement {
 									label={`Gns. pris pr. ordre ${timeRange === 'today' ? '(time)' : '(dag)'}`}
 									yLabel="kr."
 									color="#a21caf"
-									showTodayIndicator={timeRange === 'month'}
+									showTodayIndicator={timeRange === 'month' || timeRange === 'today'}
+									currentHour={timeRange === 'today' ? currentTime.getHours() : undefined}
 								/>
 
 								<div className="bg-gray-50 rounded p-5 flex flex-col justify-center">
@@ -642,6 +678,34 @@ export default function Page (): ReactElement {
 									color="#0ea5e9"
 								/>
 							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+								<SvgStackedBarChart
+									data={stats.ordersByRoomByHour}
+									labels={stats.hourLabels}
+									categories={stats.roomNames ?? []}
+									colors={(() => {
+										const names = stats.roomNames ?? []
+										const cols = getColorsForNames(names, 'room')
+										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
+									})()}
+									label="Ordrer fordelt på spisested pr. time"
+									yLabel="stk."
+								/>
+
+								<SvgStackedBarChart
+									data={stats.ordersByActivityByHour}
+									labels={stats.hourLabels}
+									categories={stats.activityNames ?? []}
+									colors={(() => {
+										const names = stats.activityNames ?? []
+										const cols = getColorsForNames(names, 'activity')
+										return Object.fromEntries(names.map((n, i) => [n, cols[i]]))
+									})()}
+									label="Ordrer fordelt på aktivitet pr. time"
+									yLabel="stk."
+								/>
+							</div>
 						</div>
 
 						{/* CUSTOMERS SECTION (LOCATIONS) */}
@@ -724,6 +788,7 @@ export default function Page (): ReactElement {
 										options={options}
 										rooms={rooms}
 										kiosks={kiosks}
+										activities={activities}
 										currentTime={currentTime}
 									/>
 								)}

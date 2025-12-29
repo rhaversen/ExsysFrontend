@@ -9,6 +9,7 @@ interface SvgLineGraphProps {
 	label?: string
 	yLabel?: string
 	showTodayIndicator?: boolean
+	currentHour?: number
 }
 
 const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
@@ -19,7 +20,8 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	color = '#2563eb',
 	label,
 	yLabel,
-	showTodayIndicator = false
+	showTodayIndicator = false,
+	currentHour
 }) => {
 	const [tooltip, setTooltip] = useState<{ x: number, y: number, textLines: string[] } | null>(null)
 	const [tooltipDims, setTooltipDims] = useState<{ width: number, height: number }>({ width: 0, height: 0 })
@@ -90,16 +92,20 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 	// Find today index for indicator (if enabled)
 	let todayIndex: number | null = null
 	if (showTodayIndicator) {
-		const todayIso = new Date().toISOString().slice(0, 10)
-		todayIndex = labels.findIndex(lbl => {
-			// Accept both DD/MM and ISO for robustness
-			return lbl === todayIso || lbl === new Date().toLocaleDateString('da-DK').replace(/\./g, '/').replace(/\/$/, '')
-		})
-		// Try to match DD/MM
-		if (todayIndex === -1) {
-			const todayDDMM = new Date().toLocaleDateString('da-DK').split('.').map(s => s.trim()).filter(Boolean)
-			const todayLabel = todayDDMM.length >= 2 ? `${todayDDMM[0].padStart(2, '0')}/${todayDDMM[1].padStart(2, '0')}` : ''
-			todayIndex = labels.findIndex(lbl => lbl === todayLabel)
+		if (currentHour !== undefined) {
+			todayIndex = currentHour
+		} else {
+			const todayIso = new Date().toISOString().slice(0, 10)
+			todayIndex = labels.findIndex(lbl => {
+				// Accept both DD/MM and ISO for robustness
+				return lbl === todayIso || lbl === new Date().toLocaleDateString('da-DK').replace(/\./g, '/').replace(/\/$/, '')
+			})
+			// Try to match DD/MM
+			if (todayIndex === -1) {
+				const todayDDMM = new Date().toLocaleDateString('da-DK').split('.').map(s => s.trim()).filter(Boolean)
+				const todayLabel = todayDDMM.length >= 2 ? `${todayDDMM[0].padStart(2, '0')}/${todayDDMM[1].padStart(2, '0')}` : ''
+				todayIndex = labels.findIndex(lbl => lbl === todayLabel)
+			}
 		}
 	}
 
@@ -116,11 +122,17 @@ const SvgLineGraph: React.FC<SvgLineGraphProps> = ({
 				style={{ width: '100%', height: 'auto', position: 'relative', overflow: 'visible' }}
 				onMouseLeave={() => setTooltip(null)}
 			>
-				{/* Today vertical indicator */}
+				{/* Today/Current hour vertical indicator */}
 				{showTodayIndicator && todayIndex !== null && todayIndex >= 0 && (
 					<line
-						x1={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
-						x2={paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)}
+						x1={data.length === 1
+							? paddingLeft + graphWidth / 2
+							: paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)
+						}
+						x2={data.length === 1
+							? paddingLeft + graphWidth / 2
+							: paddingLeft + (todayIndex * graphWidth) / (labels.length - 1)
+						}
 						y1={paddingTop}
 						y2={paddingTop + graphHeight}
 						stroke="#ef4444"

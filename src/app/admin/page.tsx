@@ -4,9 +4,8 @@ import axios from 'axios'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
-import { FiMessageSquare } from 'react-icons/fi'
+import { FiMessageSquare, FiTerminal } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
-import { io, type Socket } from 'socket.io-client'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
 import ConfigWeekdaysEditor from '@/components/admin/ConfigWeekdaysEditor'
@@ -16,8 +15,8 @@ import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
-import type { OrderType, KioskType, ProductType } from '@/types/backendDataTypes'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
+import type { OrderType, KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
 
 const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
 	href: string
@@ -44,64 +43,58 @@ export default function Page (): ReactElement | null {
 	const [hasMounted, setHasMounted] = useState(false)
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [products, setProducts] = useState<ProductType[]>([])
-	const [socket, setSocket] = useState<Socket | null>(null)
+	const [sessions, setSessions] = useState<SessionType[]>([])
+	const [orders, setOrders] = useState<OrderType[]>([])
 
-	const fetchPendingOrders = useCallback(async (): Promise<void> => {
+	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const tomorrow = new Date(today)
+		tomorrow.setDate(tomorrow.getDate() + 1)
+
+		// Filter needed for WebSocket events which can include orders from any date
+		const todayOrders = ordersList.filter(order => {
+			const orderDate = new Date(order.createdAt)
+			return orderDate >= today && orderDate < tomorrow && order.paymentStatus === 'successful'
+		})
+
+		const pendingOrders = todayOrders.filter(order =>
+			order.status === 'pending' || order.status === 'confirmed'
+		)
+		setPendingOrders(pendingOrders.length)
+
+		const allValidOrders = todayOrders.filter(order =>
+			order.status === 'pending' || order.status === 'confirmed' || order.status === 'delivered'
+		)
+		setTotalOrdersToday(allValidOrders.length)
+	}, [])
+
+	useEffect(() => {
+		calculateOrderStats(orders)
+	}, [orders, calculateOrderStats])
+
+	const fetchData = useCallback(async (): Promise<void> => {
 		try {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const response = await axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-				params: {
-					fromDate: fromDate.toISOString(),
-					toDate: toDate.toISOString(),
-					status: 'pending,confirmed',
-					paymentStatus: 'successful'
-				},
-				withCredentials: true
-			})
-			const uniqueActivities = new Set(response.data.map(order => order.activityId))
-			setPendingOrders(uniqueActivities.size)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
+			const [kiosksRes, productsRes, sessionsRes, ordersRes] = await Promise.all([
+				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
+				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
+				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true }),
+				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
+					params: {
+						fromDate: fromDate.toISOString(),
+						toDate: toDate.toISOString()
+					},
+					withCredentials: true
+				})
+			])
 
-	const fetchTotalOrdersToday = useCallback(async (): Promise<void> => {
-		try {
-			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
-			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
-
-			const response = await axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-				params: {
-					fromDate: fromDate.toISOString(),
-					toDate: toDate.toISOString(),
-					status: 'pending,confirmed,delivered',
-					paymentStatus: 'successful'
-				},
-				withCredentials: true
-			})
-			const uniqueActivities = new Set(response.data.map(order => order.activityId))
-			setTotalOrdersToday(uniqueActivities.size)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
-
-	const fetchKiosks = useCallback(async (): Promise<void> => {
-		try {
-			const response = await axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true })
-			setKiosks(response.data)
-		} catch (error) {
-			addError(error)
-		}
-	}, [API_URL, addError])
-
-	const fetchProducts = useCallback(async (): Promise<void> => {
-		try {
-			const response = await axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true })
-			const processedProducts = response.data
-			setProducts(processedProducts)
+			setKiosks(kiosksRes.data)
+			setProducts(productsRes.data)
+			setSessions(sessionsRes.data)
+			setOrders(ordersRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -109,48 +102,20 @@ export default function Page (): ReactElement | null {
 
 	useEffect(() => {
 		setHasMounted(true)
-		fetchPendingOrders().catch(() => { setPendingOrders(0) })
-		fetchTotalOrdersToday().catch(() => { setTotalOrdersToday(0) })
-		fetchKiosks().catch(() => { setKiosks([]) })
-		fetchProducts().catch(() => { setProducts([]) })
-	}, [API_URL, fetchPendingOrders, fetchTotalOrdersToday, fetchKiosks, fetchProducts])
+		fetchData().catch(() => {
+			setPendingOrders(0)
+			setTotalOrdersToday(0)
+			setKiosks([])
+			setProducts([])
+			setSessions([])
+			setOrders([])
+		})
+	}, [fetchData])
 
-	useEffect(() => {
-		if (API_URL === undefined || API_URL === null || API_URL === '' || (process.env.NEXT_PUBLIC_WS_URL == null)) { return }
-		const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL)
-		setSocket(socketInstance)
-		return () => { socketInstance.disconnect() }
-	}, [API_URL])
-
-	// Listen for kiosk CUD events
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		kiosk => { setKiosks(prev => [...prev, kiosk]) },
-		kiosk => { setKiosks(prev => prev.map(k => k._id === kiosk._id ? kiosk : k)) },
-		id => { setKiosks(prev => prev.filter(k => k._id !== id)) }
-	)
-
-	// Products
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		item => {
-			setProducts(prev => {
-				return prev.some(p => p._id === item._id)
-					? prev.map(p => (p._id === item._id ? item : p))
-					: [...prev, item]
-			})
-		},
-		item => {
-			setProducts(prev => {
-				return prev.map(p => (p._id === item._id ? item : p))
-			})
-		},
-		id => {
-			setProducts(prev => prev.filter(p => p._id !== id))
-		}
-	)
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<SessionType>('session', { setState: setSessions })
+	useEntitySocket<OrderType>('order', { setState: setOrders })
 
 	if (!hasMounted) { return null }
 
@@ -204,6 +169,19 @@ export default function Page (): ReactElement | null {
 								hoverBgColor="hover:bg-teal-600"
 							/>
 						</div>
+						{/* Debug tools section */}
+						<div className="border-t border-gray-200 pt-4">
+							<p className="text-sm text-gray-500 mb-2">{'Udviklerværktøjer'}</p>
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+								<AdminLinkButton
+									href="/admin/debug"
+									icon={FiTerminal}
+									text="Betalingssimulator"
+									bgColor="bg-gray-600"
+									hoverBgColor="hover:bg-gray-700"
+								/>
+							</div>
+						</div>
 						{/* Config Weekdays Editor */}
 						<ConfigWeekdaysEditor configs={config} />
 						{/* All Kiosks Status Manager */}
@@ -213,7 +191,7 @@ export default function Page (): ReactElement | null {
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}
-						<KioskStatusManager kiosks={kiosks} products={products} configs={config} />
+						<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} />
 						{/* Entities Timeline Overview */}
 						<EntitiesTimelineOverview products={products} />
 					</div>

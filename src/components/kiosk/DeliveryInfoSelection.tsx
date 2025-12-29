@@ -34,13 +34,13 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 						<button
 							key={item._id}
 							onClick={() => { onSelect(item) }}
-							className="w-[400px] p-6 bg-white rounded-lg shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+							className="w-[400px] p-6 bg-blue-500 rounded-lg shadow-md focus:outline-none"
 						>
-							<h2 className="text-2xl font-bold mb-2 text-gray-800">
+							<h2 className="text-2xl font-bold text-white">
 								{item.name}
 							</h2>
 							{(item.description != null) && (
-								<p className="text-xl text-gray-600">
+								<p className="text-xl text-white">
 									{item.description}
 								</p>
 							)}
@@ -57,14 +57,14 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 								<button
 									key={item._id}
 									onClick={() => { onSelect(item) }}
-									className="w-[300px] p-4 bg-white rounded-lg shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+									className="w-60 p-3 bg-blue-500 rounded-lg shadow-md focus:outline-none"
 								>
 									<div className="flex flex-col">
-										<span className="font-semibold text-lg text-gray-900">
+										<span className="font-semibold text-lg text-white">
 											{item.name}
 										</span>
 										{(item.description != null) && (
-											<span className="text-base text-gray-700">
+											<span className="text-base text-white">
 												{item.description}
 											</span>
 										)}

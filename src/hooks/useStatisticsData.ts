@@ -58,7 +58,7 @@ export default function useStatisticsData ({
   activities: ActivityType[];
   rooms: RoomType[];
   kiosks: KioskType[];
-  timeRange: '30days' | '7days' | 'today' | 'month';
+  timeRange: '30days' | '7days' | 'today' | 'month' | 'allTime' | 'custom';
 }) {
 	// Days for the selected range
 	const days = useMemo(() => {
@@ -79,8 +79,14 @@ export default function useStatisticsData ({
 			}
 			return arr
 		}
+		if (timeRange === 'allTime' || timeRange === 'custom') {
+			if (orders.length === 0) { return [] }
+			const dates = orders.map(o => o.createdAt.slice(0, 10))
+			const uniqueDates = [...new Set(dates)].sort()
+			return uniqueDates
+		}
 		return getLast30Days()
-	}, [timeRange])
+	}, [timeRange, orders])
 
 	// Generate hourly data for today mode
 	const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`)
@@ -222,6 +228,50 @@ export default function useStatisticsData ({
 
 		return hourlyCounts
 	}, [orders, products])
+
+	// Time-based analysis - Orders by Room per Hour
+	const { ordersByRoomByHour, roomNames } = useMemo(() => {
+		const roomNameList = rooms.map(r => r.name)
+
+		const hourlyCounts: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			roomNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			const room = rooms.find(r => r._id === order.roomId)
+			if (room && hourlyCounts[hour]?.[room.name] !== undefined) {
+				hourlyCounts[hour][room.name]++
+			}
+		})
+
+		return { ordersByRoomByHour: hourlyCounts, roomNames: roomNameList }
+	}, [orders, rooms])
+
+	// Time-based analysis - Orders by Activity per Hour
+	const { ordersByActivityByHour, activityNames } = useMemo(() => {
+		const activityNameList = activities.map(a => a.name)
+
+		const hourlyCounts: Array<Record<string, number>> = Array(24).fill(0).map(() =>
+			activityNameList.reduce((acc, name) => {
+				acc[name] = 0
+				return acc
+			}, {} as Record<string, number>)
+		)
+
+		orders.forEach(order => {
+			const hour = new Date(order.createdAt).getHours()
+			const activity = activities.find(a => a._id === order.activityId)
+			if (activity && hourlyCounts[hour]?.[activity.name] !== undefined) {
+				hourlyCounts[hour][activity.name]++
+			}
+		})
+
+		return { ordersByActivityByHour: hourlyCounts, activityNames: activityNameList }
+	}, [orders, activities])
 
 	// Weekdays should start with Monday
 	const dayNames = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']
@@ -370,6 +420,10 @@ export default function useStatisticsData ({
 		salesByProductByHour,
 		ordersByProductByHour,
 		productNames,
+		ordersByRoomByHour,
+		roomNames,
+		ordersByActivityByHour,
+		activityNames,
 		ordersByDayOfWeek,
 		salesByDayOfWeek,
 		dayNames

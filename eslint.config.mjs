@@ -5,10 +5,11 @@ import { FlatCompat } from '@eslint/eslintrc'
 import stylistic from '@stylistic/eslint-plugin'
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 import importPlugin from 'eslint-plugin-import'
 import nPlugin from 'eslint-plugin-n'
 import promisePlugin from 'eslint-plugin-promise'
-import reactPlugin from 'eslint-plugin-react'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -18,28 +19,22 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
-	...compat.extends(
-		'next/core-web-vitals',
-		'next/typescript',
-		'prettier',
-		'plugin:import/typescript',
-		'plugin:import/errors',
-		'plugin:import/warnings',
-		'plugin:import/typescript',
-		'plugin:promise/recommended',
-		'plugin:n/recommended',
-		'plugin:react/recommended',
-		'plugin:react/jsx-runtime',
-		'plugin:react-hooks/recommended'
-	),
+	...nextCoreWebVitals,
+	...nextTypescript,
+	...compat.extends('prettier'),
+	...compat.extends('plugin:import/typescript'),
+	...compat.extends('plugin:import/errors'),
+	...compat.extends('plugin:import/warnings'),
+	...compat.extends('plugin:import/typescript'),
+	...compat.extends('plugin:promise/recommended'),
+	...compat.extends('plugin:n/recommended'),
 	{
 		plugins: {
 			'@stylistic': stylistic,
 			import: importPlugin,
 			n: nPlugin,
 			promise: promisePlugin,
-			'@typescript-eslint': tsEslintPlugin,
-			react: reactPlugin
+			'@typescript-eslint': tsEslintPlugin
 		},
 		languageOptions: {
 			// Only use the TypeScript parser for source files, not for config files
@@ -139,11 +134,26 @@ const eslintConfig = [
 		}
 	},
 	{
-		files: ['eslint.config.mjs'],
+		files: ['eslint.config.mjs', 'postcss.config.mjs', 'tailwind.config.ts'],
 		rules: {
 			'n/no-extraneous-import': 'off',
 			'n/no-unpublished-import': 'off'
 		}
+	},
+	{
+		files: ['postcss.config.mjs'],
+		languageOptions: {
+			parser: undefined,
+			parserOptions: {}
+		}
+	},
+	{
+		rules: {
+			'react-hooks/set-state-in-effect': 'off'
+		}
+	},
+	{
+		ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'postcss.config.mjs']
 	}
 ]
 
