@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { FiCheck, FiClock, FiDollarSign, FiAlertTriangle, FiCoffee } from 'react-icons/fi'
 
-import type { OrderType, ProductType, OptionType, RoomType, KioskType } from '@/types/backendDataTypes'
+import type { OrderType, ProductType, OptionType, RoomType, KioskType, ActivityType } from '@/types/backendDataTypes'
 
 function getOrderTotal (order: OrderType, products: ProductType[], options: OptionType[]): number {
 	let total = 0
@@ -23,12 +23,13 @@ type OrdersTableProps = {
   options: OptionType[];
   rooms: RoomType[];
   kiosks: KioskType[];
+  activities: ActivityType[];
   currentTime: Date;
 };
 
-export default function OrdersTable ({ orders, products, options, rooms, kiosks, currentTime }: OrdersTableProps) {
+export default function OrdersTable ({ orders, products, options, rooms, kiosks, activities, currentTime }: OrdersTableProps) {
 	const [orderSort, setOrderSort] = useState<{
-    field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'kiosk' | 'products' | 'total',
+    field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'kiosk' | 'activity' | 'products' | 'total',
     direction: 'asc' | 'desc';
   }>({ field: 'createdAt', direction: 'desc' })
 
@@ -49,6 +50,9 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 						</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'kiosk', direction: orderSort.field === 'kiosk' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
 							<div className="flex items-center gap-1">{'Kiosk'}{orderSort.field === 'kiosk' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
+						</th>
+						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'activity', direction: orderSort.field === 'activity' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
+							<div className="flex items-center gap-1">{'Aktivitet'}{orderSort.field === 'activity' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
 						</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'room', direction: orderSort.field === 'room' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
 							<div className="flex items-center gap-1">{'Spisested'}{orderSort.field === 'room' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
@@ -86,6 +90,12 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 								return orderSort.direction === 'desc'
 									? kioskNameB.localeCompare(kioskNameA)
 									: kioskNameA.localeCompare(kioskNameB)
+							} else if (orderSort.field === 'activity') {
+								const activityNameA = activities.find(act => act._id === a.activityId)?.name ?? 'Unknown'
+								const activityNameB = activities.find(act => act._id === b.activityId)?.name ?? 'Unknown'
+								return orderSort.direction === 'desc'
+									? activityNameB.localeCompare(activityNameA)
+									: activityNameA.localeCompare(activityNameB)
 							} else if (orderSort.field === 'total') {
 								const totalA = getOrderTotal(a, products, options)
 								const totalB = getOrderTotal(b, products, options)
@@ -99,6 +109,7 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 							const total = getOrderTotal(order, products, options)
 							const roomName = rooms.find(r => r._id === order.roomId)?.name ?? 'Unknown'
 							const kioskName = kiosks.find(k => k._id === order.kioskId)?.name ?? 'Unknown'
+							const activityName = activities.find(a => a._id === order.activityId)?.name ?? 'Unknown'
 							const orderTime = new Date(order.createdAt)
 							const minutesAgo = Math.floor((currentTime.getTime() - orderTime.getTime()) / 60000)
 							const isRecent = minutesAgo < 30
@@ -161,6 +172,9 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 									</td>
 									<td className="p-3">
 										<div className="truncate max-w-[100px]" title={kioskName}>{kioskName}</div>
+									</td>
+									<td className="p-3">
+										<div className="truncate max-w-[100px]" title={activityName}>{activityName}</div>
 									</td>
 									<td className="p-3">
 										<div className="truncate max-w-[100px]" title={roomName}>{roomName}</div>

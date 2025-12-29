@@ -1,15 +1,14 @@
 'use client'
 
 import axios from 'axios'
-import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
+import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 import AdminView from '@/components/admin/modify/AdminView'
 import ConfigsView from '@/components/admin/modify/setup/config/ConfigsView'
 import SessionsView from '@/components/admin/modify/setup/session/SessionsView'
 import ViewSelectionBar from '@/components/admin/ui/ViewSelectionBar'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
-import useEntitySocketListeners from '@/hooks/CudWebsocket'
+import { useEntitySocket } from '@/hooks/CudWebsocket'
 import {
 	type ActivityType,
 	type AdminType,
@@ -23,7 +22,6 @@ import {
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 	const { addError } = useError()
 
@@ -38,9 +36,6 @@ export default function Page (): ReactElement {
 	const [admins, setAdmins] = useState<AdminType[]>([])
 	const [readers, setReaders] = useState<ReaderType[]>([])
 	const [sessions, setSessions] = useState<SessionType[]>([])
-
-	// WebSocket Connection
-	const [socket, setSocket] = useState<Socket | null>(null)
 
 	// Flag to prevent double fetching
 	const hasFetchedData = useRef(false)
@@ -81,119 +76,14 @@ export default function Page (): ReactElement {
 		}
 	}, [API_URL, addError])
 
-	// Generic add handler
-	const CreateAddHandler = <T, > (
-		setState: React.Dispatch<React.SetStateAction<T[]>>
-	): (item: T) => void => {
-		return useCallback(
-			(item: T) => {
-				setState((prevItems) => [...prevItems, item])
-			},
-			[setState]
-		)
-	}
-
-	// Generic update handler
-	const CreateUpdateHandler = <T extends { _id: string }> (
-		setState: React.Dispatch<React.SetStateAction<T[]>>
-	): (item: T) => void => {
-		return useCallback(
-			(item: T) => {
-				setState((prevItems) => {
-					const index = prevItems.findIndex((i) => i._id === item._id)
-					if (index === -1) { return prevItems }
-					const newItems = [...prevItems]
-					newItems[index] = item
-					return newItems
-				})
-			},
-			[setState]
-		)
-	}
-
-	// Generic delete handler
-	const CreateDeleteHandler = <T extends { _id: string }> (
-		setState: React.Dispatch<React.SetStateAction<T[]>>
-	): (id: string) => void => {
-		return useCallback(
-			(id: string) => {
-				setState((prevItems) => prevItems.filter((i) => i._id !== id))
-			},
-			[setState]
-		)
-	}
-
-	// Products
-	useEntitySocketListeners<ProductType>(
-		socket,
-		'product',
-		CreateAddHandler<ProductType>(setProducts),
-		CreateUpdateHandler<ProductType>(setProducts),
-		CreateDeleteHandler<ProductType>(setProducts)
-	)
-
-	// Options
-	useEntitySocketListeners<OptionType>(
-		socket,
-		'option',
-		CreateAddHandler<OptionType>(setOptions),
-		CreateUpdateHandler<OptionType>(setOptions),
-		CreateDeleteHandler<OptionType>(setOptions)
-	)
-
-	// Activities
-	useEntitySocketListeners<ActivityType>(
-		socket,
-		'activity',
-		CreateAddHandler<ActivityType>(setActivities),
-		CreateUpdateHandler<ActivityType>(setActivities),
-		CreateDeleteHandler<ActivityType>(setActivities)
-	)
-
-	// Rooms
-	useEntitySocketListeners<RoomType>(
-		socket,
-		'room',
-		CreateAddHandler<RoomType>(setRooms),
-		CreateUpdateHandler<RoomType>(setRooms),
-		CreateDeleteHandler<RoomType>(setRooms)
-	)
-
-	// Kiosks
-	useEntitySocketListeners<KioskType>(
-		socket,
-		'kiosk',
-		CreateAddHandler<KioskType>(setKiosks),
-		CreateUpdateHandler<KioskType>(setKiosks),
-		CreateDeleteHandler<KioskType>(setKiosks)
-	)
-
-	// Readers
-	useEntitySocketListeners<ReaderType>(
-		socket,
-		'reader',
-		CreateAddHandler<ReaderType>(setReaders),
-		CreateUpdateHandler<ReaderType>(setReaders),
-		CreateDeleteHandler<ReaderType>(setReaders)
-	)
-
-	// Admins
-	useEntitySocketListeners<AdminType>(
-		socket,
-		'admin',
-		CreateAddHandler<AdminType>(setAdmins),
-		CreateUpdateHandler<AdminType>(setAdmins),
-		CreateDeleteHandler<AdminType>(setAdmins)
-	)
-
-	// Sessions
-	useEntitySocketListeners<SessionType>(
-		socket,
-		'session',
-		CreateAddHandler<SessionType>(setSessions),
-		CreateUpdateHandler<SessionType>(setSessions),
-		CreateDeleteHandler<SessionType>(setSessions)
-	)
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
+	useEntitySocket<ReaderType>('reader', { setState: setReaders })
+	useEntitySocket<AdminType>('admin', { setState: setAdmins })
+	useEntitySocket<SessionType>('session', { setState: setSessions })
 
 	// Fetch data on component mount
 	useEffect(() => {
@@ -202,19 +92,6 @@ export default function Page (): ReactElement {
 
 		fetchData().catch(addError)
 	}, [fetchData, addError])
-
-	// Initialize WebSocket connection
-	useEffect(() => {
-		if (WS_URL === undefined || WS_URL === null || WS_URL === '') { return }
-		// Initialize WebSocket connection
-		const socketInstance = io(WS_URL)
-		setSocket(socketInstance)
-
-		return () => {
-			// Cleanup WebSocket connection on component unmount
-			socketInstance.disconnect()
-		}
-	}, [WS_URL])
 
 	return (
 		<main>

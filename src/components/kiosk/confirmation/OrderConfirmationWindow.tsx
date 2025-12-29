@@ -2,7 +2,6 @@ import Image from 'next/image'
 import { type ReactElement, useEffect, useState } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
-import SubmitButton from '@/components/ui/SubmitButton'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
@@ -88,17 +87,17 @@ const OrderConfirmationWindow = ({
 
 	return (
 		<CloseableModal onClose={onClose} canClose={canClose}>
-			<h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+			<h2 className="text-2xl pt-3 px-5 font-bold mb-2 text-center text-gray-800">
 				{headingTexts[orderStatus]}
 			</h2>
 
 			{paragraphContent[orderStatus] !== undefined && (
-				<div className="mb-4 flex justify-center text-center text-gray-800">
+				<div className="mb-4 px-5 flex justify-center text-center text-gray-800">
 					{paragraphContent[orderStatus]}
 				</div>
 			)}
 
-			<div className="flex justify-center">
+			<div className="p-5 flex justify-center">
 				<div className="w-48 h-48 relative">
 					<Image
 						src={imageProps.src}
@@ -109,20 +108,26 @@ const OrderConfirmationWindow = ({
 				</div>
 			</div>
 
-			<div className="flex justify-center">
+			<div className="flex p-5 justify-center items-center h-full">
 				{orderStatus === 'awaitingPayment' && (
-					<SubmitButton
-						text={isCancelling ? 'Annullerer…' : 'Annuller'}
+					<button
 						onClick={onCancelPayment}
+						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
+						type="button"
 						disabled={isCancelling}
-					/>
+					>
+						{isCancelling ? 'Annullerer…' : 'Annuller'}
+					</button>
 				)}
 				{showSubmitButton && (
-					<SubmitButton
-						text="OK"
+					<button
 						onClick={onClose}
+						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
+						type="button"
 						disabled={!canClose}
-					/>
+					>
+						{'OK'}
+					</button>
 				)}
 			</div>
 			{orderStatus !== 'awaitingPayment' && orderStatus !== 'loading' && (
