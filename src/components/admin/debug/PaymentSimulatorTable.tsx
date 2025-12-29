@@ -13,7 +13,7 @@ interface PaymentSimulatorTableProps {
 	kioskMap: Record<string, string>
 	productMap: Record<string, string>
 	optionMap: Record<string, string>
-	onSimulatePayment: (clientTransactionId: string, status: 'successful' | 'failed') => Promise<boolean>
+	onSimulatePayment: (orderId: string, status: 'successful' | 'failed') => Promise<boolean>
 }
 
 type SortField = 'createdAt' | 'paymentStatus' | 'status' | 'checkoutMethod' | 'activity' | 'room' | 'kiosk'
@@ -147,13 +147,8 @@ export default function PaymentSimulatorTable ({
 	}
 
 	const handleSimulate = async (order: OrderType, status: 'successful' | 'failed'): Promise<void> => {
-		const transactionId = order.clientTransactionId
-		if (transactionId === undefined || transactionId === null || transactionId === '') {
-			return
-		}
-
 		setSimulatingOrders(prev => new Set(prev).add(order._id))
-		await onSimulatePayment(transactionId, status)
+		await onSimulatePayment(order._id, status)
 		setSimulatingOrders(prev => {
 			const next = new Set(prev)
 			next.delete(order._id)
@@ -162,10 +157,8 @@ export default function PaymentSimulatorTable ({
 	}
 
 	const canSimulate = (order: OrderType): boolean => {
-		const transactionId = order.clientTransactionId
 		return order.checkoutMethod === 'sumUp' &&
 			order.paymentStatus === 'pending' &&
-			transactionId !== undefined && transactionId !== null && transactionId !== '' &&
 			!simulatingOrders.has(order._id)
 	}
 

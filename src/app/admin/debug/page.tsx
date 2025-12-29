@@ -6,18 +6,11 @@ import { FiRefreshCw, FiCheck, FiX, FiClock, FiDollarSign, FiAlertTriangle, FiFi
 
 import PaymentSimulatorTable from '@/components/admin/debug/PaymentSimulatorTable'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import useCUDOperations from '@/hooks/useCUDOperations'
 import type { OrderType, ActivityType, RoomType, KioskType, ProductType, OptionType } from '@/types/backendDataTypes'
 
 type PaymentStatusFilter = 'all' | 'pending' | 'successful' | 'failed'
 type OrderStatusFilter = 'all' | 'pending' | 'confirmed' | 'delivered'
-
-function generateUUID (): string {
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-		const r = Math.random() * 16 | 0
-		const v = c === 'x' ? r : (r & 0x3 | 0x8)
-		return v.toString(16)
-	})
-}
 
 export default function Page (): ReactElement {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -115,54 +108,37 @@ export default function Page (): ReactElement {
 		fetchOrders().catch(addError)
 	}, [fetchOrders, paymentStatusFilter, orderStatusFilter, fromDate, toDate, addError])
 
+	const { createEntity: simulateDebugCallback } = useCUDOperations<{ orderId: string, status: 'successful' | 'failed' }, never>('/service/debug-payment-callback')
+
 	const simulatePaymentCallback = useCallback(async (
-		clientTransactionId: string,
+		orderId: string,
 		newStatus: 'successful' | 'failed'
 	): Promise<boolean> => {
+		const previousOrders = [...orders]
+		setOrders(prev => prev.map(order =>
+			order._id === orderId ? { ...order, paymentStatus: newStatus } : order
+		))
+
 		try {
-			const response = await fetch(`${API_URL}/v1/reader-callback`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					id: generateUUID(),
-					event_type: 'payment.updated',
-					payload: {
-						client_transaction_id: clientTransactionId,
-						merchant_code: 'DEBUG',
-						status: newStatus,
-						transaction_id: null
-					},
-					timestamp: new Date().toISOString()
-				})
-			})
-
-			if (!response.ok) {
-				throw new Error('Failed to simulate callback')
-			}
-
-			await handleRefresh()
+			simulateDebugCallback({ orderId, status: newStatus })
 			return true
 		} catch (error) {
+			setOrders(previousOrders)
 			addError(error)
 			return false
 		}
-	}, [API_URL, addError, handleRefresh])
+	}, [orders, simulateDebugCallback, addError])
 
 	const simulatableOrders = useMemo(() => {
 		return orders.filter(order => {
-			const transactionId = order.clientTransactionId
 			return order.checkoutMethod === 'sumUp' &&
-				order.paymentStatus === 'pending' &&
-				transactionId !== undefined && transactionId !== null && transactionId !== ''
+				order.paymentStatus === 'pending'
 		})
 	}, [orders])
 
 	const handleSimulateAll = useCallback(async (status: 'successful' | 'failed') => {
 		for (const order of simulatableOrders) {
-			const transactionId = order.clientTransactionId
-			if (transactionId !== undefined && transactionId !== null && transactionId !== '') {
-				await simulatePaymentCallback(transactionId, status)
-			}
+			await simulatePaymentCallback(order._id, status)
 		}
 	}, [simulatableOrders, simulatePaymentCallback])
 
@@ -207,7 +183,7 @@ export default function Page (): ReactElement {
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">{'Betalingssimulator'}</h1>
 					<p className="text-gray-600">
-						{'Debug-værktøj til at simulere SumUp betalingsstatus opdateringer. Dette værktøj kalder reader-callback endpointet for at simulere betalingssvar.'}
+						{'Debug-værktøj til at simulere SumUp betalingsstatusopdateringer. Dette værktøj kalder reader-callback endpointet for at simulere betalingssvar.'}
 					</p>
 				</div>
 
@@ -219,7 +195,6 @@ export default function Page (): ReactElement {
 							<ul className="list-disc list-inside space-y-1">
 								<li>{'Kun ordrer med checkoutMethod "sumUp" og paymentStatus "pending" kan simuleres'}</li>
 								<li>{'Ordrer i slutstatus (successful/failed) kan ikke ændres'}</li>
-								<li>{'WebSocket opdateringer inkluderer ikke clientTransactionId - brug Opdater knappen efter ændringer'}</li>
 							</ul>
 						</div>
 					</div>
