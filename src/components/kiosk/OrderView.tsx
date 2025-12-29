@@ -19,6 +19,20 @@ import {
 } from '@/types/backendDataTypes'
 import { type CartType, type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
 
+interface OrderViewProps {
+	kiosk: KioskType
+	products: ProductType[]
+	options: OptionType[]
+	activity: ActivityType
+	room: RoomType
+	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
+	cart: CartType
+	updateCart: (cart: CartType) => void
+	onClose: () => void
+	onOrderStart: () => void
+	onOrderEnd: () => void
+}
+
 const OrderView = ({
 	kiosk,
 	products,
@@ -29,19 +43,9 @@ const OrderView = ({
 	cart,
 	updateCart,
 	onClose,
-	clearInactivityTimeout
-}: {
-	kiosk: KioskType
-	products: ProductType[]
-	options: OptionType[]
-	activity: ActivityType
-	room: RoomType
-	checkoutMethods: { sumUp: boolean, later: boolean, mobilePay: boolean }
-	cart: CartType
-	updateCart: (cart: CartType) => void
-	onClose: () => void
-	clearInactivityTimeout: () => void
-}): ReactElement => {
+	onOrderStart,
+	onOrderEnd
+}: OrderViewProps): ReactElement => {
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -52,7 +56,6 @@ const OrderView = ({
 	const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod | null>(null)
 	const [isCancelling, setIsCancelling] = useState(false)
 
-	// Derived States using useMemo
 	const isFormValid = useMemo(() => {
 		return Object.values(cart.products).some(quantity => quantity > 0)
 	}, [cart])
@@ -71,32 +74,27 @@ const OrderView = ({
 		return productsTotal + optionsTotal
 	}, [cart, products, options])
 
-	// Handler to change cart items using functional updates
-	const handleCartChange = useCallback((_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number): void => {
+	const handleCartChange = useCallback((
+		_id: ProductType['_id'] | OptionType['_id'],
+		type: 'products' | 'options',
+		change: number
+	): void => {
 		const currentQuantity = cart[type][_id] ?? 0
 		const newQuantity = currentQuantity + change
 
-		// If the new quantity is less than or equal to zero, remove the item
 		if (newQuantity <= 0) {
-			const newCart = { ...cart }
-			const updatedItems = { ...newCart[type] }
+			const updatedItems = { ...cart[type] }
 			delete updatedItems[_id]
-			newCart[type] = updatedItems
-			updateCart(newCart)
+			updateCart({ ...cart, [type]: updatedItems })
 			return
 		}
 
-		// Otherwise, update the quantity of the item
 		updateCart({
 			...cart,
-			[type]: {
-				...cart[type],
-				[_id]: newQuantity
-			}
+			[type]: { ...cart[type], [_id]: newQuantity }
 		})
 	}, [cart, updateCart])
 
-	// Synchronize cart with available products and options
 	useEffect(() => {
 		const availableProductIds = new Set(products.map(p => p._id))
 		const availableOptionIds = new Set(options.map(o => o._id))
@@ -105,7 +103,6 @@ const OrderView = ({
 		const newProductsInCart = { ...cart.products }
 		const newOptionsInCart = { ...cart.options }
 
-		// Check products
 		Object.keys(newProductsInCart).forEach(id => {
 			if (!availableProductIds.has(id)) {
 				delete newProductsInCart[id]
@@ -113,7 +110,6 @@ const OrderView = ({
 			}
 		})
 
-		// Check options
 		Object.keys(newOptionsInCart).forEach(id => {
 			if (!availableOptionIds.has(id)) {
 				delete newOptionsInCart[id]
@@ -122,44 +118,32 @@ const OrderView = ({
 		})
 
 		if (updated) {
-			updateCart({
-				products: newProductsInCart,
-				options: newOptionsInCart
-			})
+			updateCart({ products: newProductsInCart, options: newOptionsInCart })
 		}
 	}, [products, options, cart, updateCart])
 
-	// Handle Order Status Change
-	const handleOrderPaymentStatusChange = useCallback((status: PaymentStatus) => {
+	const mapPaymentStatusToOrderStatus = useCallback((status: PaymentStatus): OrderStatus => {
 		switch (status) {
 			case 'successful':
-				setOrderStatus('success')
-				break
+				return 'success'
 			case 'failed':
-				setOrderStatus('paymentFailed')
-				break
+				return 'paymentFailed'
 			case 'pending':
-				setOrderStatus('awaitingPayment')
-				break
+				return 'awaitingPayment'
 			default:
 				addError(new Error('Unknown payment status'))
-				setOrderStatus('error')
-				break
+				return 'error'
 		}
 	}, [addError])
 
-	// Submit Order Handler
-	const submitOrder = useCallback((checkoutMethod: CheckoutMethod): void => {
-		clearInactivityTimeout()
+	const submitOrder = useCallback((selectedCheckoutMethod: CheckoutMethod): void => {
+		onOrderStart()
 		setOrderStatus('loading')
-		setCheckoutMethod(checkoutMethod)
+		setCheckoutMethod(selectedCheckoutMethod)
 		setIsOrderConfirmationVisible(true)
 
 		const prepareCartItems = (items: Record<string, number>): Array<{ id: string, quantity: number }> =>
-			Object.entries(items).map(([id, quantity]) => ({
-				id,
-				quantity
-			}))
+			Object.entries(items).map(([id, quantity]) => ({ id, quantity }))
 
 		const data: PostOrderType = {
 			kioskId: kiosk._id,
@@ -167,21 +151,20 @@ const OrderView = ({
 			roomId: room._id,
 			products: prepareCartItems(cart.products),
 			options: prepareCartItems(cart.options),
-			checkoutMethod
+			checkoutMethod: selectedCheckoutMethod
 		}
 
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
-				console.log('Order posted:', response.data)
 				setCurrentOrder(response.data)
-				handleOrderPaymentStatusChange(response.data.paymentStatus)
+				setOrderStatus(mapPaymentStatusToOrderStatus(response.data.paymentStatus))
 				return null
 			})
 			.catch(error => {
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [clearInactivityTimeout, kiosk, activity, room, cart, API_URL, handleOrderPaymentStatusChange, addError])
+	}, [onOrderStart, kiosk, activity, room, cart, API_URL, mapPaymentStatusToOrderStatus, addError])
 
 	const cancelPayment = useCallback(() => {
 		if (!currentOrder) { return }
@@ -192,18 +175,18 @@ const OrderView = ({
 	}, [currentOrder, API_URL, addError])
 
 	useEntitySocket<OrderType>('order', {
-		onCreate: (order) => {
-			if (currentOrder !== null && order._id === currentOrder._id) {
-				handleOrderPaymentStatusChange(order.paymentStatus)
+		onCreate: order => {
+			if (currentOrder?._id === order._id) {
+				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus))
 			}
 		},
-		onUpdate: (order) => {
-			if (currentOrder !== null && order._id === currentOrder._id) {
-				handleOrderPaymentStatusChange(order.paymentStatus)
+		onUpdate: order => {
+			if (currentOrder?._id === order._id) {
+				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus))
 			}
 		},
-		onDelete: (id) => {
-			if (currentOrder !== null && id === currentOrder._id) {
+		onDelete: id => {
+			if (currentOrder?._id === id) {
 				setOrderStatus('error')
 			}
 		}
@@ -213,8 +196,10 @@ const OrderView = ({
 		setIsOrderConfirmationVisible(false)
 		if (orderStatus === 'success') {
 			onClose()
+		} else {
+			onOrderEnd()
 		}
-	}, [orderStatus, onClose])
+	}, [orderStatus, onClose, onOrderEnd])
 
 	const handleCartSubmit = useCallback(() => {
 		if (totalPrice === 0) {
@@ -224,11 +209,14 @@ const OrderView = ({
 		}
 	}, [totalPrice, submitOrder])
 
+	const clearCart = useCallback(() => {
+		updateCart({ products: {}, options: {} })
+		window.dispatchEvent(new Event('resetScroll'))
+	}, [updateCart])
+
 	return (
 		<main className="flex flex-row h-full">
-			{/* Left Column: Selection Window */}
 			<div className="w-full flex flex-col">
-				{/* Selection Window */}
 				<div className="flex-1 overflow-y-auto">
 					<SelectionWindow
 						cart={cart}
@@ -239,7 +227,6 @@ const OrderView = ({
 				</div>
 			</div>
 
-			{/* Cart Window */}
 			<div className="w-[400px] shadow-l-md">
 				<CartWindow
 					price={totalPrice}
@@ -248,15 +235,11 @@ const OrderView = ({
 					cart={cart}
 					onCartChange={handleCartChange}
 					onSubmit={handleCartSubmit}
-					clearCart={() => {
-						updateCart({ products: {}, options: {} })
-						window.dispatchEvent(new Event('resetScroll'))
-					}}
+					clearCart={clearCart}
 					formIsValid={isFormValid}
 				/>
 			</div>
 
-			{/* Order Confirmation Modal */}
 			{isOrderConfirmationVisible && (
 				<OrderConfirmationWindow
 					price={totalPrice}
@@ -268,15 +251,13 @@ const OrderView = ({
 				/>
 			)}
 
-			{/* Select Payment Modal */}
 			{isSelectPaymentWindowVisible && (
 				<SelectPaymentWindow
 					checkoutMethods={checkoutMethods}
-					sumUpDisabled={(totalPrice > 0 && totalPrice < 5)}
-					onCancel={() => { setIsSelectPaymentWindowVisible(false) }}
-					onSubmit={checkoutMethod => {
-						submitOrder(checkoutMethod)
-						setIsOrderConfirmationVisible(true)
+					sumUpDisabled={totalPrice > 0 && totalPrice < 5}
+					onCancel={() => setIsSelectPaymentWindowVisible(false)}
+					onSubmit={selectedMethod => {
+						submitOrder(selectedMethod)
 						setIsSelectPaymentWindowVisible(false)
 					}}
 				/>
