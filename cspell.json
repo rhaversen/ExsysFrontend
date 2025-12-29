@@ -15,13 +15,16 @@
         "Dockerfile",
         "package.json",
         "package-lock.json",
-        "tsconfig.json"
+        "tsconfig.json",
+        "**/*.bat"
     ],
     "ignoreWords": [
         "chunkname",
         "tailwindcss",
         "geist",
         "DDMM",
-        "monday"
+        "monday",
+        "simulatable",
+        "endpointet"
     ]
 }
