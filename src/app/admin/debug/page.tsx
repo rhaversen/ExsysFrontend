@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useCallback, useMemo } from 'react'
-import { FiRefreshCw, FiCheck, FiX, FiClock, FiDollarSign, FiAlertTriangle, FiFilter, FiZap } from 'react-icons/fi'
+import { FiRefreshCw, FiCheck, FiX, FiAlertTriangle, FiFilter, FiZap } from 'react-icons/fi'
 
 import PaymentSimulatorTable from '@/components/admin/debug/PaymentSimulatorTable'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -27,31 +27,11 @@ export default function Page (): ReactElement {
 
 	const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatusFilter>('pending')
 	const [orderStatusFilter, setOrderStatusFilter] = useState<OrderStatusFilter>('all')
-	const [fromDate, setFromDate] = useState<string>(() => {
-		const date = new Date()
-		date.setHours(0, 0, 0, 0)
-		return date.toISOString().slice(0, 10)
-	})
-	const [toDate, setToDate] = useState<string>(() => {
-		const date = new Date()
-		date.setHours(23, 59, 59, 999)
-		return date.toISOString().slice(0, 10)
-	})
 
 	const fetchOrders = useCallback(async () => {
 		try {
 			const params: Record<string, string> = {}
 
-			if (fromDate !== '') {
-				const from = new Date(fromDate)
-				from.setHours(0, 0, 0, 0)
-				params.fromDate = from.toISOString()
-			}
-			if (toDate !== '') {
-				const to = new Date(toDate)
-				to.setHours(23, 59, 59, 999)
-				params.toDate = to.toISOString()
-			}
 			if (paymentStatusFilter !== 'all') {
 				params.paymentStatus = paymentStatusFilter
 			}
@@ -67,7 +47,7 @@ export default function Page (): ReactElement {
 		} catch (error) {
 			addError(error)
 		}
-	}, [API_URL, addError, fromDate, toDate, paymentStatusFilter, orderStatusFilter])
+	}, [API_URL, addError, paymentStatusFilter, orderStatusFilter])
 
 	const fetchReferenceData = useCallback(async () => {
 		try {
@@ -106,7 +86,7 @@ export default function Page (): ReactElement {
 
 	useEffect(() => {
 		fetchOrders().catch(addError)
-	}, [fetchOrders, paymentStatusFilter, orderStatusFilter, fromDate, toDate, addError])
+	}, [fetchOrders, paymentStatusFilter, orderStatusFilter, addError])
 
 	const { createEntity: simulateDebugCallback } = useCUDOperations<{ orderId: string, status: 'successful' | 'failed' }, never>('/service/debug-payment-callback')
 
@@ -183,7 +163,7 @@ export default function Page (): ReactElement {
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">{'Betalingssimulator'}</h1>
 					<p className="text-gray-600">
-						{'Debug-værktøj til at simulere SumUp betalingsstatusopdateringer. Dette værktøj kalder reader-callback endpointet for at simulere betalingssvar.'}
+						{'Debug-værktøj til at simulere SumUp betalingsstatusopdateringer. Dette værktøj kalder en debug version af reader-callback endpointet for at simulere betalingssvar.'}
 					</p>
 				</div>
 
@@ -193,8 +173,7 @@ export default function Page (): ReactElement {
 						<div className="text-sm text-amber-800">
 							<p className="font-medium mb-1">{'Vigtig information'}</p>
 							<ul className="list-disc list-inside space-y-1">
-								<li>{'Kun ordrer med checkoutMethod "sumUp" og paymentStatus "pending" kan simuleres'}</li>
-								<li>{'Ordrer i slutstatus (successful/failed) kan ikke ændres'}</li>
+								<li>{'Kun ordrer med checkoutMethod "sumUp" kan simuleres'}</li>
 							</ul>
 						</div>
 					</div>
@@ -205,27 +184,7 @@ export default function Page (): ReactElement {
 						<FiFilter className="w-5 h-5 text-gray-500" />
 						<h2 className="text-lg font-semibold text-gray-700">{'Filtre'}</h2>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-						<div>
-							<label htmlFor="fromDate" className="block text-sm font-medium text-gray-600 mb-1">{'Fra dato'}</label>
-							<input
-								id="fromDate"
-								type="date"
-								value={fromDate}
-								onChange={(e) => setFromDate(e.target.value)}
-								className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-							/>
-						</div>
-						<div>
-							<label htmlFor="toDate" className="block text-sm font-medium text-gray-600 mb-1">{'Til dato'}</label>
-							<input
-								id="toDate"
-								type="date"
-								value={toDate}
-								onChange={(e) => setToDate(e.target.value)}
-								className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-							/>
-						</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label htmlFor="paymentStatus" className="block text-sm font-medium text-gray-600 mb-1">{'Betalingsstatus'}</label>
 							<select
@@ -305,27 +264,6 @@ export default function Page (): ReactElement {
 						</h2>
 					</div>
 					<div className="p-4">
-						<div className="flex flex-wrap gap-3 mb-4">
-							<div className="flex items-center gap-2 text-sm">
-								<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
-									<FiClock className="w-3 h-3" />{'Afventer'}
-								</span>
-								<span className="text-gray-500">{'Kan simuleres'}</span>
-							</div>
-							<div className="flex items-center gap-2 text-sm">
-								<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
-									<FiDollarSign className="w-3 h-3" />{'Gennemført'}
-								</span>
-								<span className="text-gray-500">{'Slutstatus'}</span>
-							</div>
-							<div className="flex items-center gap-2 text-sm">
-								<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-100 text-red-800">
-									<FiAlertTriangle className="w-3 h-3" />{'Fejlet'}
-								</span>
-								<span className="text-gray-500">{'Slutstatus'}</span>
-							</div>
-						</div>
-
 						{loading ? (
 							<div className="flex items-center justify-center py-12">
 								<FiRefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
