@@ -121,6 +121,7 @@ export interface OrderType {
 	status: OrderStatus
 	paymentStatus: PaymentStatus
 	checkoutMethod: CheckoutMethod
+	clientTransactionId?: string // Included if authenticated as admin, and
 	createdAt: string
 	updatedAt: string
 }

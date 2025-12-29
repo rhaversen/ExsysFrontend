@@ -4,7 +4,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, type ReactElement } from 'react'
 import { FaEdit, FaChartBar } from 'react-icons/fa'
-import { FiMessageSquare } from 'react-icons/fi'
+import { FiMessageSquare, FiTerminal } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
@@ -168,6 +168,19 @@ export default function Page (): ReactElement | null {
 								bgColor="bg-teal-500"
 								hoverBgColor="hover:bg-teal-600"
 							/>
+						</div>
+						{/* Debug tools section */}
+						<div className="border-t border-gray-200 pt-4">
+							<p className="text-sm text-gray-500 mb-2">{'Udviklerværktøjer'}</p>
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+								<AdminLinkButton
+									href="/admin/debug"
+									icon={FiTerminal}
+									text="Betalingssimulator"
+									bgColor="bg-gray-600"
+									hoverBgColor="hover:bg-gray-700"
+								/>
+							</div>
 						</div>
 						{/* Config Weekdays Editor */}
 						<ConfigWeekdaysEditor configs={config} />
