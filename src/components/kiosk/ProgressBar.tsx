@@ -20,7 +20,7 @@ const ProgressButton = ({
 	label: string
 }): React.ReactElement => (
 	<button
-		className={`font-bold h-14 rounded-xl flex-1 flex justify-center items-center m-2
+		className={`font-bold h-14 rounded-xl flex-1 flex justify-center items-center m-2 border border-gray-200
                     transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 					transform
                     ${isActive
@@ -122,7 +122,7 @@ export default function ProgressBar ({
 								onReset()
 								setTimeout(() => { setResetPressed(false) }, 300)
 							}}
-							className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
+							className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2 border border-gray-200
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform ${resetPressed ? 'translate-y-0 shadow-none' : '-translate-y-[4px]'}
 									text-gray-800 bg-white`}
@@ -157,7 +157,7 @@ export default function ProgressBar ({
 						<button
 							title="Gå til forside"
 							onClick={() => { onProgressClick('welcome') }}
-							className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2
+							className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2 border border-gray-200
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform text-gray-800 bg-white"
 						>
