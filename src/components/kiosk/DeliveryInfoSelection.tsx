@@ -41,7 +41,7 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 		setClickedId(item._id)
 		timeoutRef.current = setTimeout(() => {
 			onSelect(item)
-		}, 300)
+		}, 150)
 	}
 
 	const getButtonClasses = (itemId: string, baseClasses: string): string => {
