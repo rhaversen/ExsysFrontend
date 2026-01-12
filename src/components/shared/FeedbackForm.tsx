@@ -39,14 +39,14 @@ const FeedbackForm = (): ReactElement => {
 	if (isSuccess) {
 		return (
 			<div className="flex flex-col h-full items-center justify-center text-center p-2 bg-green-100 text-green-700 rounded-md">
-				<h3 className="text-xl font-semibold">{'Tak for din feedback!'}</h3>
+				<h3 className="text-xl font-semibold">{'Tak for dit svar!'}</h3>
 				<p className="text-sm mt-2">{'Vi værdsætter din tid og dine tanker.'}</p>
 				<button
 					type="button"
 					onClick={() => setIsSuccess(false)}
 					className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
 				>
-					{'Send mere feedback'}
+					{'Skriv mere'}
 				</button>
 			</div>
 		)
@@ -71,7 +71,7 @@ const FeedbackForm = (): ReactElement => {
 					id="feedbackFeedbackForm"
 					required
 					rows={4}
-					placeholder="Din feedback her..."
+					placeholder="Skriv her..."
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm resize-none"
 				/>
 			</div>

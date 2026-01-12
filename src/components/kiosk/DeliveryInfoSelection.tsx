@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useState, useRef, useEffect } from 'react'
 
 interface SelectionItem {
 	_id: string
@@ -11,15 +11,43 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 	subtitle,
 	items,
 	priorityItems,
+	currentSelectionId,
 	onSelect
 }: {
 	title: string
 	subtitle: string
 	items: T[]
 	priorityItems: T[]
+	currentSelectionId: string | undefined
 	onSelect: (item: T) => void
 }): ReactElement {
+	const [clickedId, setClickedId] = useState<string | null>(null)
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const otherItems = items.filter(item => !priorityItems.some(pi => pi._id === item._id))
+
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current !== null) { clearTimeout(timeoutRef.current) }
+		}
+	}, [])
+
+	useEffect(() => {
+		if (currentSelectionId === undefined) {
+			setClickedId(null)
+		}
+	}, [currentSelectionId])
+
+	const handleClick = (item: T): void => {
+		setClickedId(item._id)
+		timeoutRef.current = setTimeout(() => {
+			onSelect(item)
+		}, 150)
+	}
+
+	const getButtonClasses = (itemId: string, baseClasses: string): string => {
+		const isSelected = clickedId !== null ? clickedId === itemId : currentSelectionId === itemId
+		return `${baseClasses} transition-all duration-200 ${isSelected ? 'bg-blue-600 scale-105' : 'bg-blue-500'}`
+	}
 
 	return (
 		<main className="flex flex-col min-h-full justify-center items-center gap-6 pt-15">
@@ -33,8 +61,8 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 					{priorityItems.map((item) => (
 						<button
 							key={item._id}
-							onClick={() => { onSelect(item) }}
-							className="w-[400px] p-6 bg-blue-500 rounded-lg shadow-md focus:outline-none"
+							onClick={() => { handleClick(item) }}
+							className={getButtonClasses(item._id, 'w-100 p-6 rounded-lg shadow-md focus:outline-none')}
 						>
 							<h2 className="text-2xl font-bold text-white">
 								{item.name}
@@ -56,8 +84,8 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 							{otherItems.map((item) => (
 								<button
 									key={item._id}
-									onClick={() => { onSelect(item) }}
-									className="w-60 p-3 bg-blue-500 rounded-lg shadow-md focus:outline-none"
+									onClick={() => { handleClick(item) }}
+									className={getButtonClasses(item._id, 'w-60 p-3 rounded-lg shadow-md focus:outline-none')}
 								>
 									<div className="flex flex-col">
 										<span className="font-semibold text-lg text-white">
