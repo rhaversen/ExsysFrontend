@@ -197,6 +197,7 @@ export default function Page (): ReactElement {
 						subtitle="Vælg den aktivitet du deltager i"
 						items={filteredActivities}
 						priorityItems={priorityActivities}
+						currentSelectionId={selectedActivity?._id}
 						onSelect={handleActivitySelect}
 					/>
 				)
@@ -212,6 +213,7 @@ export default function Page (): ReactElement {
 						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
 						items={filteredRooms}
 						priorityItems={priorityRooms}
+						currentSelectionId={selectedRoom?._id}
 						onSelect={handleRoomSelect}
 					/>
 				)
