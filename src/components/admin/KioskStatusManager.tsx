@@ -2,7 +2,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import 'dayjs/locale/da'
-import { FaCodeBranch, FaMoon, FaUsers, FaUserSlash, FaWifi } from 'react-icons/fa'
+import { FaCodeBranch, FaMoon, FaSyncAlt, FaUsers, FaUserSlash, FaWifi } from 'react-icons/fa'
 import { FiCheck, FiX, FiLoader } from 'react-icons/fi'
 
 import CloseableModal from '@/components/ui/CloseableModal'
@@ -178,7 +178,7 @@ function getDescription (status: KioskStatus, adminGitHash: string): string {
 			return 'Kontrollerer forbindelse til kiosk...'
 		case 'healthy':
 			if (status.hasVersionMismatch) {
-				return `Kiosken kører version ${status.kioskGitHash}, men admin kører ${adminGitHash}. Genindlæs kiosken for at opdatere.`
+				return `Kiosken kører en forældet version (${status.kioskGitHash?.slice(0, 7)}). Genindlæs kiosken for at opdatere til version ${adminGitHash.slice(0, 7)}.`
 			}
 			switch (status.operational) {
 				case 'loading':
@@ -328,6 +328,7 @@ const KioskStatusManager = ({
 	const [selectedKiosk, setSelectedKiosk] = useState<KioskType | null>(null)
 	const [showModal, setShowModal] = useState(false)
 	const [isPatching, setIsPatching] = useState(false)
+	const [isRefreshing, setIsRefreshing] = useState<string | null>(null)
 	const [, setNow] = useState(Date.now())
 
 	const kioskIds = useMemo(() => kiosks.map(k => k._id), [kiosks])
@@ -347,6 +348,20 @@ const KioskStatusManager = ({
 		} finally {
 			setIsPatching(false)
 			setShowModal(false)
+		}
+	}, [API_URL, addError])
+
+	const handleRefreshKiosk = useCallback(async (kioskId: string) => {
+		setIsRefreshing(kioskId)
+		try {
+			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
+				params: { kioskId },
+				withCredentials: true
+			})
+		} catch (error) {
+			addError(error)
+		} finally {
+			setIsRefreshing(null)
 		}
 	}, [API_URL, addError])
 
@@ -450,6 +465,21 @@ const KioskStatusManager = ({
 												aria-label={isDeactivated ? `Aktiver ${kiosk.name}` : `Deaktiver ${kiosk.name}`}
 											>
 												{isDeactivated ? 'Aktiver' : 'Deaktiver'}
+											</button>
+											<button
+												type="button"
+												disabled={isRefreshing === kiosk._id || health === 'not_logged_in'}
+												onClick={() => { void handleRefreshKiosk(kiosk._id) }}
+												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 ${
+													isRefreshing === kiosk._id || health === 'not_logged_in' ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'
+												}`}
+												aria-label={`Genindlæs ${kiosk.name}`}
+												title={health === 'not_logged_in' ? 'Kiosk er ikke logget ind' : `Genindlæs ${kiosk.name}`}
+											>
+												<span className="flex items-center gap-1">
+													<FaSyncAlt className={`w-3 h-3 ${isRefreshing === kiosk._id ? 'animate-spin' : ''}`} />
+													{'Genindlæs'}
+												</span>
 											</button>
 										</div>
 									</div>
