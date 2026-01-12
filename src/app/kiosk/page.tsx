@@ -60,7 +60,7 @@ export default function Page (): ReactElement {
 		navigateTo('welcome')
 	}, [setSelectedActivity, setSelectedRoom, navigateTo])
 
-	const isTimerEnabled = currentView !== 'welcome' && currentView !== 'feedback' && !isOrderInProgress
+	const isTimerEnabled = currentView !== 'welcome' && !isOrderInProgress
 
 	const { showWarning: showTimeoutWarning, dismissWarning: dismissTimeoutWarning, handleTimeout } = useInactivityTimeout({
 		timeoutMs: kioskInactivityTimeoutMs,
