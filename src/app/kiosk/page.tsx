@@ -128,6 +128,14 @@ export default function Page (): ReactElement {
 		resetSession()
 	}, [resetSession])
 
+	const handleOrderStart = useCallback(() => {
+		setIsOrderInProgress(true)
+	}, [])
+
+	const handleOrderEnd = useCallback(() => {
+		setIsOrderInProgress(false)
+	}, [])
+
 	const handleStartOver = useCallback(() => {
 		setSelectedActivity(null)
 		setSelectedRoom(null)
@@ -273,8 +281,8 @@ export default function Page (): ReactElement {
 						cart={cart}
 						updateCart={setCart}
 						onClose={handleOrderClose}
-						onOrderStart={() => setIsOrderInProgress(true)}
-						onOrderEnd={() => setIsOrderInProgress(false)}
+						onOrderStart={handleOrderStart}
+						onOrderEnd={handleOrderEnd}
 					/>
 				)
 
