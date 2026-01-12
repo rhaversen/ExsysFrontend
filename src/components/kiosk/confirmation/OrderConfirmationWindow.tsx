@@ -32,9 +32,9 @@ const OrderConfirmationWindow = ({
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
 		success: 'Tak For Din Bestilling',
-		error: 'Der Skete En Fejl',
+		error: 'Noget Gik Galt',
 		loading: 'Sender Bestilling...',
-		paymentFailed: 'Betaling Ikke Gennemført'
+		paymentFailed: 'Betaling Mislykkedes'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
@@ -61,8 +61,8 @@ const OrderConfirmationWindow = ({
 		loading: <p>{'Vent venligst'}</p>,
 		awaitingPayment: <p>{'Betal på skærmen til højre'}</p>,
 		success: successMessage,
-		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
-		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
+		paymentFailed: <p>{'Prøv igen, eller kontakt personalet'}</p>,
+		error: <p>{'Kontakt venligst personalet'}</p>
 	}
 
 	return (
@@ -103,11 +103,11 @@ const OrderConfirmationWindow = ({
 				<div className="flex p-5 justify-center items-center h-full">
 					<button
 						onClick={onCancelPayment}
-						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
+						className="bg-gray-200 hover:bg-gray-300 w-full text-gray-700 rounded-md py-3 px-4 mt-8 transition-colors"
 						type="button"
 						disabled={isCancelling}
 					>
-						{isCancelling ? 'Annullerer…' : 'Annuller'}
+						{isCancelling ? 'Afbryder…' : 'Afbryd betaling'}
 					</button>
 				</div>
 			)}
