@@ -16,16 +16,16 @@ const TimeoutWarningWindow = ({
 
 	return (
 		<CloseableModal onClose={onClose}>
-			<div className="p-10 flex flex-col items-center gap-10 text-black">
-				<h2 className="text-xl font-bold">
+			<div className="p-10 flex flex-col items-center gap-8 text-black">
+				<h2 className="text-2xl font-bold">
 					{'Er du der stadig?'}
 				</h2>
-				<p className="text-center text-lg w-60">
-					{'Din bestilling vil blive annulleret automatisk'}
+				<p className="text-center text-gray-600 text-lg">
+					{'Vi gør klar til næste bestilling, hvis ikke du ønsker at fortsætte'}
 				</p>
-				<div className="flex flex-col gap-4 w-full">
+				<div className="flex flex-col gap-3 w-full mt-2">
 					<button
-						className="bg-blue-500 text-white text-lg px-10 py-7 rounded-md w-full"
+						className="bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold px-8 py-5 rounded-2xl w-full shadow-lg transition-all duration-200 active:scale-[0.98]"
 						type="button"
 						onClick={onClose}
 					>
@@ -34,7 +34,7 @@ const TimeoutWarningWindow = ({
 					<TimeoutButton
 						totalMs={timeoutWarningMs}
 						onClick={onTimeout}
-						className="bg-gray-300 text-gray-700 text-lg px-10 py-7 rounded-md w-full"
+						className="bg-gray-200 hover:bg-gray-200 text-gray-900 text-base font-medium px-8 py-4 rounded-2xl w-full border border-gray-200 transition-all duration-200"
 					>
 						{'Start forfra'}
 					</TimeoutButton>

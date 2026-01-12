@@ -37,7 +37,7 @@ const TimeoutButton = memo(function TimeoutButton ({
 			className={`relative overflow-hidden ${className}`}
 		>
 			<div
-				className="absolute inset-0 bg-black/30 transition-none"
+				className="absolute inset-0 bg-black/20 transition-none"
 				style={{ clipPath: `inset(0 0 0 ${progress * 100}%)` }}
 			/>
 			<span className="relative z-10">
