@@ -259,3 +259,20 @@ export interface ConfigsType {
 	createdAt: Date
 	updatedAt: Date
 }
+
+// Kiosk ping/pong types
+// Request body sent by kiosk to POST /v1/kiosks/pong
+export interface PostKioskPongType {
+	path: string
+	viewState: string
+	gitHash: string
+}
+
+// WebSocket event payload broadcasted by backend (enriched with kioskId and timestamp)
+export interface KioskPongEventType {
+	kioskId: string
+	path: string
+	viewState: string
+	timestamp: string
+	gitHash: string
+}

@@ -12,6 +12,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
+import { useKioskPing } from '@/hooks/useKioskPing'
 import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
@@ -47,6 +48,8 @@ export default function Page (): ReactElement {
 
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
+
+	useKioskPing(currentView)
 
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 60000
 	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 5000
