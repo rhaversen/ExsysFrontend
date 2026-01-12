@@ -1,7 +1,8 @@
 import Image from 'next/image'
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
+import TimeoutButton from '@/components/ui/TimeoutButton'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
@@ -25,27 +26,8 @@ const OrderConfirmationWindow = ({
 
 	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
-	const [remainingSeconds, setRemainingSeconds] = useState(autoCloseMs / 1000)
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
-
-	useEffect(() => {
-		setRemainingSeconds(autoCloseMs / 1000)
-		const timer = setInterval(() => {
-			setRemainingSeconds((prev) => {
-				return prev - 1
-			})
-		}, 1000)
-
-		return () => { clearInterval(timer) }
-	}, [autoCloseMs, canClose, orderStatus])
-
-	useEffect(() => {
-		if (!canClose || orderStatus === 'awaitingPayment') { return }
-		const timeoutId = setTimeout(() => {
-			onClose()
-		}, autoCloseMs + 1000)
-		return () => { clearTimeout(timeoutId) }
-	}, [autoCloseMs, canClose, orderStatus, onClose])
+	const showTimeoutButton = canClose && orderStatus !== 'awaitingPayment'
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
@@ -83,8 +65,6 @@ const OrderConfirmationWindow = ({
 		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
 	}
 
-	const showSubmitButton = orderStatus !== 'loading' && orderStatus !== 'awaitingPayment'
-
 	return (
 		<CloseableModal onClose={onClose} canClose={canClose}>
 			<h2 className="text-2xl pt-3 px-5 font-bold mb-2 text-center text-gray-800">
@@ -119,24 +99,16 @@ const OrderConfirmationWindow = ({
 						{isCancelling ? 'Annullerer…' : 'Annuller'}
 					</button>
 				)}
-				{showSubmitButton && (
-					<button
+				{showTimeoutButton && (
+					<TimeoutButton
+						totalMs={autoCloseMs}
 						onClick={onClose}
 						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
-						type="button"
-						disabled={!canClose}
 					>
 						{'OK'}
-					</button>
+					</TimeoutButton>
 				)}
 			</div>
-			{orderStatus !== 'awaitingPayment' && orderStatus !== 'loading' && (
-				<div className="text-center text-sm text-gray-800 mt-4">
-					{'Fortsætter om '}
-					<strong>{remainingSeconds}</strong>
-					{' sekund'}{remainingSeconds == 1 ? '' : 'er'}
-				</div>
-			)}
 		</CloseableModal>
 	)
 }
