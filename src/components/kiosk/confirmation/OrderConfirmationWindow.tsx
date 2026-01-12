@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { type ReactElement } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
-import TimeoutButton from '@/components/ui/TimeoutButton'
+import TimeoutImage from '@/components/ui/TimeoutImage'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
@@ -27,7 +27,7 @@ const OrderConfirmationWindow = ({
 	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
-	const showTimeoutButton = canClose && orderStatus !== 'awaitingPayment'
+	const showTimeoutImage = canClose && orderStatus !== 'awaitingPayment'
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
@@ -79,17 +79,28 @@ const OrderConfirmationWindow = ({
 
 			<div className="p-5 flex justify-center">
 				<div className="w-48 h-48 relative">
-					<Image
-						src={imageProps.src}
-						alt={imageProps.alt}
-						width={200}
-						height={200}
-					/>
+					{showTimeoutImage ? (
+						<TimeoutImage
+							totalMs={autoCloseMs}
+							onClick={onClose}
+							src={imageProps.src}
+							alt={imageProps.alt}
+							width={200}
+							height={200}
+						/>
+					) : (
+						<Image
+							src={imageProps.src}
+							alt={imageProps.alt}
+							width={200}
+							height={200}
+						/>
+					)}
 				</div>
 			</div>
 
-			<div className="flex p-5 justify-center items-center h-full">
-				{orderStatus === 'awaitingPayment' && (
+			{orderStatus === 'awaitingPayment' && (
+				<div className="flex p-5 justify-center items-center h-full">
 					<button
 						onClick={onCancelPayment}
 						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
@@ -98,17 +109,8 @@ const OrderConfirmationWindow = ({
 					>
 						{isCancelling ? 'Annullerer…' : 'Annuller'}
 					</button>
-				)}
-				{showTimeoutButton && (
-					<TimeoutButton
-						totalMs={autoCloseMs}
-						onClick={onClose}
-						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
-					>
-						{'OK'}
-					</TimeoutButton>
-				)}
-			</div>
+				</div>
+			)}
 		</CloseableModal>
 	)
 }
