@@ -175,6 +175,21 @@ export default function Page (): ReactElement {
 		return options.sort((a, b) => a.name.localeCompare(b.name))
 	}, [options])
 
+	useEffect(() => {
+		if (currentView === 'activity' && !kiosk) {
+			navigateTo('welcome')
+		} else if (currentView === 'room' && !selectedActivity) {
+			navigateTo('activity')
+		} else if (currentView === 'order') {
+			if (!kiosk || !selectedActivity) {
+				setSelectedRoom(null)
+				navigateTo('activity')
+			} else if (!selectedRoom) {
+				navigateTo('room')
+			}
+		}
+	}, [currentView, kiosk, selectedActivity, selectedRoom, navigateTo, setSelectedRoom])
+
 	const renderCurrentView = (): ReactElement | null => {
 		switch (currentView) {
 			case 'welcome':
@@ -194,7 +209,6 @@ export default function Page (): ReactElement {
 
 			case 'activity':
 				if (!kiosk) {
-					navigateTo('welcome')
 					return null
 				}
 				return (
@@ -210,7 +224,6 @@ export default function Page (): ReactElement {
 
 			case 'room':
 				if (!selectedActivity) {
-					navigateTo('activity')
 					return null
 				}
 				return (
@@ -226,14 +239,6 @@ export default function Page (): ReactElement {
 
 			case 'order':
 				if (!kiosk || !selectedActivity || !selectedRoom) {
-					if (!selectedActivity) {
-						setSelectedRoom(null)
-						navigateTo('activity')
-					} else if (!selectedRoom) {
-						navigateTo('room')
-					} else {
-						navigateTo('activity')
-					}
 					return null
 				}
 				return (
