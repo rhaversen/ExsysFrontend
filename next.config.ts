@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
-import type { NextConfig } from 'next'
 import { execSync } from 'child_process'
+
+import type { NextConfig } from 'next'
 
 const getGitHash = (): string => {
 	try {
