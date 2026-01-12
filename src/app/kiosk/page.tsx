@@ -13,6 +13,7 @@ import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
 import { useKioskPing } from '@/hooks/useKioskPing'
+import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
@@ -50,6 +51,7 @@ export default function Page (): ReactElement {
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
 	useKioskPing(currentView)
+	const { isBackendOffline } = useKioskRecovery()
 
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 60000
 	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 5000
@@ -296,6 +298,26 @@ export default function Page (): ReactElement {
 				navigateTo('welcome')
 				return null
 		}
+	}
+
+	if (isBackendOffline === true) {
+		return (
+			<div className="flex flex-col h-screen">
+				<div className="flex-1">
+					<div className="fixed inset-0 flex items-center justify-center bg-black">
+						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
+							<h1 className="text-2xl text-center">{'Ingen forbindelse'}</h1>
+							<p className="text-center">
+								{'Kiosken forsøger at genoprette forbindelsen...'}
+							</p>
+						</div>
+					</div>
+				</div>
+				<div className="shrink-0 z-10 text-gray-400/75">
+					<KioskSessionInfo />
+				</div>
+			</div>
+		)
 	}
 
 	if (isKioskClosed) {
