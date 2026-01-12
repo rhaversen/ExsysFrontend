@@ -287,20 +287,7 @@ export default function Page (): ReactElement {
 				)
 
 			case 'feedback':
-				return (
-					<div className="fixed bg-white inset-0 flex items-center justify-center">
-						<div className="relative">
-							<KioskFeedbackInfo />
-							<button
-								type="button"
-								onClick={() => navigateTo('welcome')}
-								className="mt-6 w-full px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-							>
-								{'Tilbage'}
-							</button>
-						</div>
-					</div>
-				)
+				return <KioskFeedbackInfo onBack={() => navigateTo('welcome')} />
 
 			default:
 				navigateTo('welcome')
@@ -335,16 +322,18 @@ export default function Page (): ReactElement {
 
 	return (
 		<div className="relative flex flex-col h-screen overflow-hidden">
-			<ProgressBar
-				viewState={currentView}
-				canClickActivity={canClickActivity}
-				canClickRoom={canClickRoom}
-				canClickOrder={canClickOrder}
-				onProgressClick={handleProgressClick}
-				onReset={handleStartOver}
-				selectedActivity={selectedActivity}
-				selectedRoom={selectedRoom}
-			/>
+			{currentView !== 'feedback' && (
+				<ProgressBar
+					viewState={currentView}
+					canClickActivity={canClickActivity}
+					canClickRoom={canClickRoom}
+					canClickOrder={canClickOrder}
+					onProgressClick={handleProgressClick}
+					onReset={handleStartOver}
+					selectedActivity={selectedActivity}
+					selectedRoom={selectedRoom}
+				/>
+			)}
 
 			<div
 				key={currentView}
