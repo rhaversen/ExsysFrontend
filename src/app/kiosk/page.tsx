@@ -320,7 +320,7 @@ export default function Page (): ReactElement {
 							<p className="text-center">
 								{nextOpen
 									? <>{'Kiosken åbner igen '}{formatRelativeDateLabel(nextOpen)}</>
-									: 'Kiosken er lukket for bestillinger'
+									: 'Kiosken er lukket for bestilling'
 								}
 							</p>
 						</div>
@@ -373,7 +373,7 @@ export default function Page (): ReactElement {
 					aria-label="Giv ris eller ros"
 				>
 					<p className="font-bold text-sm">{'Har du ris eller ros?'}</p>
-					<p className="text-xs">{'Tryk her for at give feedback!'}</p>
+					<p className="text-xs">{'Tryk her!'}</p>
 				</div>
 			)}
 

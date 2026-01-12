@@ -157,20 +157,23 @@ export default function ProgressBar ({
 						<button
 							title="Gå til forside"
 							onClick={() => { onProgressClick('welcome') }}
-							className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2 border border-gray-200
+							className="font-bold h-14 p-4 rounded-full flex justify-center items-center m-2 border border-gray-200
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
-									transform text-gray-800 bg-white"
+									transform -translate-y-[4px] text-gray-800 bg-white"
 						>
-							<AsyncImage
-								src={KioskImages.home.src}
-								alt={KioskImages.home.alt}
-								className="w-6 h-6"
-								width={24}
-								height={24}
-								quality={75}
-								priority={false}
-								draggable={false}
-							/>
+							<div className="flex flex-row items-center justify-center gap-2">
+								<AsyncImage
+									src={KioskImages.home.src}
+									alt={KioskImages.home.alt}
+									className="w-6 h-6"
+									width={24}
+									height={24}
+									quality={75}
+									priority={false}
+									draggable={false}
+								/>
+								<span className="text-md">{'Hjem'}</span>
+							</div>
 						</button>
 					</div>
 				</div>

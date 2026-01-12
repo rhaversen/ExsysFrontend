@@ -11,8 +11,8 @@ const KioskFeedbackInfo = (): ReactElement => {
 	return (
 		<div className="flex flex-col items-center justify-center text-center">
 			<h1 className="text-4xl font-bold mb-8 text-gray-800">{'Ris og Ros'}</h1>
-			<p className="text-xl mb-6 text-gray-600">{'Har du ris eller ros til bestillingssystemet? Vi vil gerne høre din mening!'}</p>
-			<p className="text-lg mb-10 text-gray-600">{'Det kan du gøre ved at scanne QR-koden, besøge vores hjemmeside, eller skrive din feedback direkte her.'}</p>
+			<p className="text-xl mb-6 text-gray-600">{'Har du ris eller ros? Vi vil gerne høre fra dig!'}</p>
+			<p className="text-lg mb-10 text-gray-600">{'Scan QR-koden, besøg hjemmesiden, eller skriv direkte her.'}</p>
 
 			<div className="flex flex-row flex-wrap justify-around gap-4 w-full">
 				{/* Scan QR Code */}
@@ -41,7 +41,7 @@ const KioskFeedbackInfo = (): ReactElement => {
 
 				{/* Instant Feedback Form */}
 				<div className="flex flex-col items-center justify-start p-6 bg-white rounded-xl shadow-xl w-80">
-					<h2 className="text-2xl font-semibold mb-6 text-gray-700">{'Send Feedback'}</h2>
+					<h2 className="text-2xl font-semibold mb-6 text-gray-700">{'Skriv her'}</h2>
 					<FeedbackForm />
 				</div>
 			</div>

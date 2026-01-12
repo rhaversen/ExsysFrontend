@@ -67,7 +67,7 @@ const CartWindow = ({
 							priority={false}
 							draggable={false}
 						/>
-						{'Slet Bestilling'}
+						{'Ryd kurven'}
 					</button>
 					<div className="flex justify-center p-5">
 						<button

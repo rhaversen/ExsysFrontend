@@ -59,7 +59,7 @@ const OrderConfirmationWindow = ({
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
 		loading: <p>{'Vent venligst'}</p>,
-		awaitingPayment: <p>{'Afventer betaling på terminalen til højre'}</p>,
+		awaitingPayment: <p>{'Betal på skærmen til højre'}</p>,
 		success: successMessage,
 		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
 		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
