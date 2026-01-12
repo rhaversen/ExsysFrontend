@@ -12,6 +12,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
+import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -20,6 +21,7 @@ import 'dayjs/locale/da'
 dayjs.locale('da')
 
 const EMPTY_CART: CartType = { products: {}, options: {} }
+const VIEW_ORDER: ViewState[] = ['welcome', 'activity', 'room', 'order', 'feedback']
 
 export default function Page (): ReactElement {
 	const { config } = useConfig()
@@ -38,7 +40,11 @@ export default function Page (): ReactElement {
 		setSelectedRoom
 	} = useKioskData()
 
-	const [viewState, setViewState] = useState<ViewState>('welcome')
+	const { currentView, isTransitioning, slideDirection, navigateTo } = useViewTransition({
+		initialView: 'welcome' as ViewState,
+		viewOrder: VIEW_ORDER
+	})
+
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
@@ -50,11 +56,11 @@ export default function Page (): ReactElement {
 		setSelectedActivity(null)
 		setSelectedRoom(null)
 		setCart(EMPTY_CART)
-		setViewState('welcome')
 		setIsOrderInProgress(false)
-	}, [setSelectedActivity, setSelectedRoom])
+		navigateTo('welcome')
+	}, [setSelectedActivity, setSelectedRoom, navigateTo])
 
-	const isTimerEnabled = viewState !== 'welcome' && viewState !== 'feedback' && !isOrderInProgress
+	const isTimerEnabled = currentView !== 'welcome' && currentView !== 'feedback' && !isOrderInProgress
 
 	const { showWarning: showTimeoutWarning, dismissWarning: dismissTimeoutWarning, handleTimeout } = useInactivityTimeout({
 		timeoutMs: kioskInactivityTimeoutMs,
@@ -66,7 +72,7 @@ export default function Page (): ReactElement {
 	const feedbackBannerTimerRef = useRef<NodeJS.Timeout>(undefined)
 
 	useEffect(() => {
-		if (viewState === 'welcome') {
+		if (currentView === 'welcome') {
 			feedbackBannerTimerRef.current = setTimeout(() => {
 				setShowFeedbackBanner(true)
 			}, kioskFeedbackBannerDelayMs)
@@ -75,7 +81,7 @@ export default function Page (): ReactElement {
 			setShowFeedbackBanner(false)
 		}
 		return () => clearTimeout(feedbackBannerTimerRef.current)
-	}, [viewState, kioskFeedbackBannerDelayMs])
+	}, [currentView, kioskFeedbackBannerDelayMs])
 
 	useEffect(() => {
 		if (isKioskClosed) {
@@ -86,37 +92,37 @@ export default function Page (): ReactElement {
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
 		setSelectedActivity(activity)
-		setViewState(selectedRoom ? 'order' : 'room')
-	}, [selectedRoom, setSelectedActivity])
+		navigateTo(selectedRoom ? 'order' : 'room')
+	}, [selectedRoom, setSelectedActivity, navigateTo])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
 		setSelectedRoom(room)
-		setViewState('order')
-	}, [setSelectedRoom])
+		navigateTo('order')
+	}, [setSelectedRoom, navigateTo])
 
-	const canClickActivity = viewState !== 'activity'
-	const canClickRoom = viewState !== 'room' && selectedActivity !== null
-	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
+	const canClickActivity = currentView !== 'activity'
+	const canClickRoom = currentView !== 'room' && selectedActivity !== null
+	const canClickOrder = currentView !== 'order' && selectedRoom !== null && selectedActivity !== null
 
 	const handleProgressClick = useCallback((clickedView: ViewState) => {
-		if (clickedView === viewState) { return }
+		if (clickedView === currentView) { return }
 
 		switch (clickedView) {
 			case 'activity':
-				if (canClickActivity) { setViewState('activity') }
+				if (canClickActivity) { navigateTo('activity') }
 				break
 			case 'room':
-				if (canClickRoom) { setViewState('room') }
+				if (canClickRoom) { navigateTo('room') }
 				break
 			case 'order':
-				if (canClickOrder) { setViewState('order') }
+				if (canClickOrder) { navigateTo('order') }
 				break
 			case 'welcome':
 				resetSession()
 				break
 		}
-	}, [viewState, canClickActivity, canClickRoom, canClickOrder, resetSession])
+	}, [currentView, canClickActivity, canClickRoom, canClickOrder, resetSession, navigateTo])
 
 	const handleOrderClose = useCallback(() => {
 		resetSession()
@@ -125,8 +131,8 @@ export default function Page (): ReactElement {
 	const handleFeedbackBannerClick = useCallback(() => {
 		clearTimeout(feedbackBannerTimerRef.current)
 		setShowFeedbackBanner(false)
-		setViewState('feedback')
-	}, [])
+		navigateTo('feedback')
+	}, [navigateTo])
 
 	const filteredActivities = useMemo(() => {
 		if (!kiosk) { return [] }
@@ -170,7 +176,7 @@ export default function Page (): ReactElement {
 	}, [options])
 
 	const renderCurrentView = (): ReactElement | null => {
-		switch (viewState) {
+		switch (currentView) {
 			case 'welcome':
 				return (
 					<div className="flex flex-col items-center justify-center h-full">
@@ -178,7 +184,7 @@ export default function Page (): ReactElement {
 							{kioskWelcomeMessage}
 						</h1>
 						<button
-							onClick={() => setViewState('activity')}
+							onClick={() => navigateTo('activity')}
 							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
 						>
 							{'Tryk her for at starte'}
@@ -188,7 +194,7 @@ export default function Page (): ReactElement {
 
 			case 'activity':
 				if (!kiosk) {
-					setViewState('welcome')
+					navigateTo('welcome')
 					return null
 				}
 				return (
@@ -204,7 +210,7 @@ export default function Page (): ReactElement {
 
 			case 'room':
 				if (!selectedActivity) {
-					setViewState('activity')
+					navigateTo('activity')
 					return null
 				}
 				return (
@@ -222,11 +228,11 @@ export default function Page (): ReactElement {
 				if (!kiosk || !selectedActivity || !selectedRoom) {
 					if (!selectedActivity) {
 						setSelectedRoom(null)
-						setViewState('activity')
+						navigateTo('activity')
 					} else if (!selectedRoom) {
-						setViewState('room')
+						navigateTo('room')
 					} else {
-						setViewState('activity')
+						navigateTo('activity')
 					}
 					return null
 				}
@@ -253,7 +259,7 @@ export default function Page (): ReactElement {
 							<KioskFeedbackInfo />
 							<button
 								type="button"
-								onClick={() => setViewState('welcome')}
+								onClick={() => navigateTo('welcome')}
 								className="mt-6 w-full px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
 							>
 								{'Tilbage'}
@@ -263,7 +269,7 @@ export default function Page (): ReactElement {
 				)
 
 			default:
-				setViewState('welcome')
+				navigateTo('welcome')
 				return null
 		}
 	}
@@ -296,7 +302,7 @@ export default function Page (): ReactElement {
 	return (
 		<div className="relative flex flex-col h-screen overflow-hidden">
 			<ProgressBar
-				viewState={viewState}
+				viewState={currentView}
 				canClickActivity={canClickActivity}
 				canClickRoom={canClickRoom}
 				canClickOrder={canClickOrder}
@@ -305,13 +311,20 @@ export default function Page (): ReactElement {
 					setSelectedActivity(null)
 					setSelectedRoom(null)
 					setCart(EMPTY_CART)
-					setViewState('activity')
+					navigateTo('activity')
 				}}
 				selectedActivity={selectedActivity}
 				selectedRoom={selectedRoom}
 			/>
 
-			<div className="flex-1 overflow-y-auto">
+			<div
+				key={currentView}
+				className={`flex-1 overflow-y-auto ${
+					isTransitioning
+						? (slideDirection === 'right' ? 'animate-slideOutToLeft' : 'animate-slideOutToRight')
+						: (slideDirection === 'right' ? 'animate-slideInFromRight' : 'animate-slideInFromLeft')
+				}`}
+			>
 				{renderCurrentView()}
 			</div>
 
@@ -322,7 +335,7 @@ export default function Page (): ReactElement {
 				/>
 			)}
 
-			{viewState !== 'feedback' && showFeedbackBanner && (
+			{currentView !== 'feedback' && showFeedbackBanner && (
 				<div
 					className="fixed bottom-10 right-6 bg-blue-500 text-white px-5 py-3 rounded-lg shadow-xl z-40"
 					onClick={handleFeedbackBannerClick}
