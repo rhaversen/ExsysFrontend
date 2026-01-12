@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement } from 'react'
 
 import OrderSummary from '@/components/kiosk/cart/OrderSummary'
 import AsyncImage from '@/components/ui/AsyncImage'
@@ -25,12 +25,7 @@ const CartWindow = ({
 	clearCart: () => void
 	formIsValid: boolean
 }): ReactElement => {
-	const [cartIsEmpty, setCartIsEmpty] = useState(false)
-
-	useEffect(() => {
-		const cartIsEmpty = Object.values(cart.products).every(quantity => quantity === 0) && Object.values(cart.options).every(quantity => quantity === 0)
-		setCartIsEmpty(cartIsEmpty)
-	}, [cart])
+	const cartIsEmpty = Object.values(cart.products).every(quantity => quantity === 0) && Object.values(cart.options).every(quantity => quantity === 0)
 
 	return (
 		<div className="h-full flex flex-col">
@@ -72,7 +67,7 @@ const CartWindow = ({
 							priority={false}
 							draggable={false}
 						/>
-						{'Slet Bestilling'}
+						{'Ryd kurven'}
 					</button>
 					<div className="flex justify-center p-5">
 						<button
