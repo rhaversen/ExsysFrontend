@@ -19,11 +19,16 @@ const KioskSessionInfo = (): ReactElement | null => {
 
 	const kioskTag = (currentUser as KioskType)?.kioskTag ?? 'Mangler #'
 	const kioskName = (currentUser as KioskType)?.name ?? 'Mangler Navn'
+	const gitHash = process.env.NEXT_PUBLIC_GIT_HASH ?? 'unknown commit'
+
 	return (
-		<div className="h-5 w-full bg-black flex flex-row items-center">
+		<div className="h-5 w-full bg-black flex flex-row items-center justify-between">
 			<div className="text-xs text-white font-bold px-1 flex gap-6 tracking-wide">
 				<div>{kioskName}</div>
 				<div>{`#${kioskTag}`}</div>
+			</div>
+			<div className="text-xs text-white/50 px-1 tracking-wide">
+				{gitHash}
 			</div>
 		</div>
 	)

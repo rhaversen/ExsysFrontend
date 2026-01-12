@@ -219,12 +219,8 @@ const OrderView = ({
 
 	const handleOrderConfirmationClose = useCallback(() => {
 		setIsOrderConfirmationVisible(false)
-		if (orderStatus === 'success') {
-			onClose()
-		} else {
-			onOrderEnd()
-		}
-	}, [orderStatus, onClose, onOrderEnd])
+		onClose()
+	}, [onClose])
 
 	const handleCartSubmit = useCallback(() => {
 		if (totalPrice === 0) {
