@@ -169,10 +169,16 @@ const OrderView = ({
 	const cancelPayment = useCallback(() => {
 		if (!currentOrder) { return }
 		setIsCancelling(true)
+		setCurrentOrder(null)
+
 		axios.post(`${API_URL}/v1/orders/${currentOrder._id}/cancel`, {}, { withCredentials: true })
-			.finally(() => setIsCancelling(false))
+			.finally(() => {
+				setIsCancelling(false)
+				setIsOrderConfirmationVisible(false)
+				onOrderEnd()
+			})
 			.catch(error => addError(error))
-	}, [currentOrder, API_URL, addError])
+	}, [currentOrder, API_URL, addError, onOrderEnd])
 
 	useEntitySocket<OrderType>('order', {
 		onCreate: order => {

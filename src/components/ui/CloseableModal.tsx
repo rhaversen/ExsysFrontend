@@ -1,4 +1,5 @@
-import { type ReactElement, type ReactNode, useEffect } from 'react'
+import { type ReactElement, type ReactNode, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const CloseableModal = ({
 	canClose = true,
@@ -12,7 +13,13 @@ const CloseableModal = ({
 	onClose: () => void
 	onComplete?: () => void
 	children: ReactNode
-}): ReactElement => {
+}): ReactElement | null => {
+	const [mounted, setMounted] = useState(false)
+
+	useEffect(() => {
+		setMounted(true)
+	}, [])
+
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent): void => {
 			if (event.key === 'Escape' && canClose) {
@@ -31,7 +38,7 @@ const CloseableModal = ({
 		}
 	}, [canClose, canComplete, onClose, onComplete])
 
-	return (
+	const modalContent = (
 		<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-10 backdrop-blur-xs">
 			<button
 				type="button"
@@ -46,6 +53,12 @@ const CloseableModal = ({
 			</div>
 		</div>
 	)
+
+	if (!mounted) {
+		return null
+	}
+
+	return createPortal(modalContent, document.body)
 }
 
 export default CloseableModal

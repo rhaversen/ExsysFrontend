@@ -9,7 +9,7 @@ export interface OrderWindow {
 	to: Time
 }
 
-export type PaymentStatus = 'pending' | 'successful' | 'failed'
+export type PaymentStatus = 'pending' | 'successful' | 'failed' | 'refunded'
 export type OrderStatus = 'pending' | 'confirmed' | 'delivered' // TODO: Add cancelled
 export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay' | 'manual'
 

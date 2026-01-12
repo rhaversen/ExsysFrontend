@@ -19,6 +19,7 @@ export function useSharedSocket (): Socket | null {
 
 		if (sharedSocket === null) {
 			sharedSocket = io(WS_URL, {
+				withCredentials: true,
 				reconnection: true,
 				reconnectionAttempts: 5,
 				reconnectionDelay: 1000,

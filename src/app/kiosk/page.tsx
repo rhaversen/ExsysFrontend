@@ -12,6 +12,7 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
+import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
@@ -20,6 +21,7 @@ import 'dayjs/locale/da'
 dayjs.locale('da')
 
 const EMPTY_CART: CartType = { products: {}, options: {} }
+const VIEW_ORDER: ViewState[] = ['welcome', 'activity', 'room', 'order', 'feedback']
 
 export default function Page (): ReactElement {
 	const { config } = useConfig()
@@ -38,7 +40,11 @@ export default function Page (): ReactElement {
 		setSelectedRoom
 	} = useKioskData()
 
-	const [viewState, setViewState] = useState<ViewState>('welcome')
+	const { currentView, isTransitioning, slideDirection, navigateTo } = useViewTransition({
+		initialView: 'welcome' as ViewState,
+		viewOrder: VIEW_ORDER
+	})
+
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
@@ -50,11 +56,11 @@ export default function Page (): ReactElement {
 		setSelectedActivity(null)
 		setSelectedRoom(null)
 		setCart(EMPTY_CART)
-		setViewState('welcome')
 		setIsOrderInProgress(false)
-	}, [setSelectedActivity, setSelectedRoom])
+		navigateTo('welcome')
+	}, [setSelectedActivity, setSelectedRoom, navigateTo])
 
-	const isTimerEnabled = viewState !== 'welcome' && viewState !== 'feedback' && !isOrderInProgress
+	const isTimerEnabled = currentView !== 'welcome' && !isOrderInProgress
 
 	const { showWarning: showTimeoutWarning, dismissWarning: dismissTimeoutWarning, handleTimeout } = useInactivityTimeout({
 		timeoutMs: kioskInactivityTimeoutMs,
@@ -66,7 +72,7 @@ export default function Page (): ReactElement {
 	const feedbackBannerTimerRef = useRef<NodeJS.Timeout>(undefined)
 
 	useEffect(() => {
-		if (viewState === 'welcome') {
+		if (currentView === 'welcome') {
 			feedbackBannerTimerRef.current = setTimeout(() => {
 				setShowFeedbackBanner(true)
 			}, kioskFeedbackBannerDelayMs)
@@ -75,7 +81,7 @@ export default function Page (): ReactElement {
 			setShowFeedbackBanner(false)
 		}
 		return () => clearTimeout(feedbackBannerTimerRef.current)
-	}, [viewState, kioskFeedbackBannerDelayMs])
+	}, [currentView, kioskFeedbackBannerDelayMs])
 
 	useEffect(() => {
 		if (isKioskClosed) {
@@ -86,47 +92,62 @@ export default function Page (): ReactElement {
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
 		setSelectedActivity(activity)
-		setViewState(selectedRoom ? 'order' : 'room')
-	}, [selectedRoom, setSelectedActivity])
+		navigateTo(selectedRoom ? 'order' : 'room')
+	}, [selectedRoom, setSelectedActivity, navigateTo])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
 		setSelectedRoom(room)
-		setViewState('order')
-	}, [setSelectedRoom])
+		navigateTo('order')
+	}, [setSelectedRoom, navigateTo])
 
-	const canClickActivity = viewState !== 'activity'
-	const canClickRoom = viewState !== 'room' && selectedActivity !== null
-	const canClickOrder = viewState !== 'order' && selectedRoom !== null && selectedActivity !== null
+	const canClickActivity = currentView !== 'activity'
+	const canClickRoom = currentView !== 'room' && selectedActivity !== null
+	const canClickOrder = currentView !== 'order' && selectedRoom !== null && selectedActivity !== null
 
 	const handleProgressClick = useCallback((clickedView: ViewState) => {
-		if (clickedView === viewState) { return }
+		if (clickedView === currentView) { return }
 
 		switch (clickedView) {
 			case 'activity':
-				if (canClickActivity) { setViewState('activity') }
+				if (canClickActivity) { navigateTo('activity') }
 				break
 			case 'room':
-				if (canClickRoom) { setViewState('room') }
+				if (canClickRoom) { navigateTo('room') }
 				break
 			case 'order':
-				if (canClickOrder) { setViewState('order') }
+				if (canClickOrder) { navigateTo('order') }
 				break
 			case 'welcome':
 				resetSession()
 				break
 		}
-	}, [viewState, canClickActivity, canClickRoom, canClickOrder, resetSession])
+	}, [currentView, canClickActivity, canClickRoom, canClickOrder, resetSession, navigateTo])
 
 	const handleOrderClose = useCallback(() => {
 		resetSession()
 	}, [resetSession])
 
+	const handleOrderStart = useCallback(() => {
+		setIsOrderInProgress(true)
+	}, [])
+
+	const handleOrderEnd = useCallback(() => {
+		setIsOrderInProgress(false)
+	}, [])
+
+	const handleStartOver = useCallback(() => {
+		setSelectedActivity(null)
+		setSelectedRoom(null)
+		setCart(EMPTY_CART)
+		navigateTo('activity')
+	}, [setSelectedActivity, setSelectedRoom, navigateTo])
+
 	const handleFeedbackBannerClick = useCallback(() => {
 		clearTimeout(feedbackBannerTimerRef.current)
 		setShowFeedbackBanner(false)
-		setViewState('feedback')
-	}, [])
+		navigateTo('feedback')
+	}, [navigateTo])
 
 	const filteredActivities = useMemo(() => {
 		if (!kiosk) { return [] }
@@ -169,8 +190,37 @@ export default function Page (): ReactElement {
 		return options.sort((a, b) => a.name.localeCompare(b.name))
 	}, [options])
 
+	useEffect(() => {
+		const productUrls = products.map(p => p.imageURL).filter((url): url is string => Boolean(url))
+		const optionUrls = options.map(o => o.imageURL).filter((url): url is string => Boolean(url))
+
+		const preloadNextImage = (url: string, width: number, quality: number): void => {
+			const nextImageUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`
+			const img = new Image()
+			img.src = nextImageUrl
+		}
+
+		productUrls.forEach(url => { preloadNextImage(url, 256, 75) })
+		optionUrls.forEach(url => { preloadNextImage(url, 256, 75) })
+	}, [products, options])
+
+	useEffect(() => {
+		if (currentView === 'activity' && !kiosk) {
+			navigateTo('welcome')
+		} else if (currentView === 'room' && !selectedActivity) {
+			navigateTo('activity')
+		} else if (currentView === 'order') {
+			if (!kiosk || !selectedActivity) {
+				setSelectedRoom(null)
+				navigateTo('activity')
+			} else if (!selectedRoom) {
+				navigateTo('room')
+			}
+		}
+	}, [currentView, kiosk, selectedActivity, selectedRoom, navigateTo, setSelectedRoom])
+
 	const renderCurrentView = (): ReactElement | null => {
-		switch (viewState) {
+		switch (currentView) {
 			case 'welcome':
 				return (
 					<div className="flex flex-col items-center justify-center h-full">
@@ -178,7 +228,7 @@ export default function Page (): ReactElement {
 							{kioskWelcomeMessage}
 						</h1>
 						<button
-							onClick={() => setViewState('activity')}
+							onClick={() => navigateTo('activity')}
 							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
 						>
 							{'Tryk her for at starte'}
@@ -188,7 +238,6 @@ export default function Page (): ReactElement {
 
 			case 'activity':
 				if (!kiosk) {
-					setViewState('welcome')
 					return null
 				}
 				return (
@@ -197,13 +246,13 @@ export default function Page (): ReactElement {
 						subtitle="Vælg den aktivitet du deltager i"
 						items={filteredActivities}
 						priorityItems={priorityActivities}
+						currentSelectionId={selectedActivity?._id}
 						onSelect={handleActivitySelect}
 					/>
 				)
 
 			case 'room':
 				if (!selectedActivity) {
-					setViewState('activity')
 					return null
 				}
 				return (
@@ -212,20 +261,13 @@ export default function Page (): ReactElement {
 						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
 						items={filteredRooms}
 						priorityItems={priorityRooms}
+						currentSelectionId={selectedRoom?._id}
 						onSelect={handleRoomSelect}
 					/>
 				)
 
 			case 'order':
 				if (!kiosk || !selectedActivity || !selectedRoom) {
-					if (!selectedActivity) {
-						setSelectedRoom(null)
-						setViewState('activity')
-					} else if (!selectedRoom) {
-						setViewState('room')
-					} else {
-						setViewState('activity')
-					}
 					return null
 				}
 				return (
@@ -239,29 +281,16 @@ export default function Page (): ReactElement {
 						cart={cart}
 						updateCart={setCart}
 						onClose={handleOrderClose}
-						onOrderStart={() => setIsOrderInProgress(true)}
-						onOrderEnd={() => setIsOrderInProgress(false)}
+						onOrderStart={handleOrderStart}
+						onOrderEnd={handleOrderEnd}
 					/>
 				)
 
 			case 'feedback':
-				return (
-					<div className="fixed bg-white inset-0 flex items-center justify-center">
-						<div className="relative">
-							<KioskFeedbackInfo />
-							<button
-								type="button"
-								onClick={() => setViewState('welcome')}
-								className="mt-6 w-full px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-							>
-								{'Tilbage'}
-							</button>
-						</div>
-					</div>
-				)
+				return <KioskFeedbackInfo onBack={() => navigateTo('welcome')} />
 
 			default:
-				setViewState('welcome')
+				navigateTo('welcome')
 				return null
 		}
 	}
@@ -278,7 +307,7 @@ export default function Page (): ReactElement {
 							<p className="text-center">
 								{nextOpen
 									? <>{'Kiosken åbner igen '}{formatRelativeDateLabel(nextOpen)}</>
-									: 'Kiosken er lukket for bestillinger'
+									: 'Kiosken er lukket for bestilling'
 								}
 							</p>
 						</div>
@@ -293,23 +322,27 @@ export default function Page (): ReactElement {
 
 	return (
 		<div className="relative flex flex-col h-screen overflow-hidden">
-			<ProgressBar
-				viewState={viewState}
-				canClickActivity={canClickActivity}
-				canClickRoom={canClickRoom}
-				canClickOrder={canClickOrder}
-				onProgressClick={handleProgressClick}
-				onReset={() => {
-					setSelectedActivity(null)
-					setSelectedRoom(null)
-					setCart(EMPTY_CART)
-					setViewState('activity')
-				}}
-				selectedActivity={selectedActivity}
-				selectedRoom={selectedRoom}
-			/>
+			{currentView !== 'feedback' && (
+				<ProgressBar
+					viewState={currentView}
+					canClickActivity={canClickActivity}
+					canClickRoom={canClickRoom}
+					canClickOrder={canClickOrder}
+					onProgressClick={handleProgressClick}
+					onReset={handleStartOver}
+					selectedActivity={selectedActivity}
+					selectedRoom={selectedRoom}
+				/>
+			)}
 
-			<div className="flex-1 overflow-y-auto">
+			<div
+				key={currentView}
+				className={`flex-1 overflow-y-auto ${
+					isTransitioning
+						? (slideDirection === 'right' ? 'animate-slideOutToLeft' : 'animate-slideOutToRight')
+						: (slideDirection === 'right' ? 'animate-slideInFromRight' : 'animate-slideInFromLeft')
+				}`}
+			>
 				{renderCurrentView()}
 			</div>
 
@@ -320,7 +353,7 @@ export default function Page (): ReactElement {
 				/>
 			)}
 
-			{viewState !== 'feedback' && showFeedbackBanner && (
+			{currentView !== 'feedback' && showFeedbackBanner && (
 				<div
 					className="fixed bottom-10 right-6 bg-blue-500 text-white px-5 py-3 rounded-lg shadow-xl z-40"
 					onClick={handleFeedbackBannerClick}
@@ -329,7 +362,7 @@ export default function Page (): ReactElement {
 					aria-label="Giv ris eller ros"
 				>
 					<p className="font-bold text-sm">{'Har du ris eller ros?'}</p>
-					<p className="text-xs">{'Tryk her for at give feedback!'}</p>
+					<p className="text-xs">{'Tryk her!'}</p>
 				</div>
 			)}
 

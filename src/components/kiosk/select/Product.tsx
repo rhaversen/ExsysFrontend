@@ -43,7 +43,7 @@ const Product = ({
 					className="w-60 h-60 mx-auto"
 					width={100}
 					height={100}
-					quality={80}
+					quality={75}
 					src={`${product.imageURL === undefined || product.imageURL === '' ? KioskImages.noUrl.src : product.imageURL}`}
 					alt={product.name}
 					draggable={false}

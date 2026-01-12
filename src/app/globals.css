@@ -52,3 +52,49 @@ body {
 .animate-pulse-light {
 	animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateX(var(--slide-from)) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0) scale(1);
+	}
+}
+
+@keyframes slideOut {
+	from {
+		opacity: 1;
+		transform: translateX(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(var(--slide-to)) scale(0.98);
+	}
+}
+
+.animate-slideInFromRight {
+	--slide-from: 30px;
+	will-change: transform, opacity;
+	animation: slideIn 0.2s ease-out forwards;
+}
+
+.animate-slideInFromLeft {
+	--slide-from: -30px;
+	will-change: transform, opacity;
+	animation: slideIn 0.2s ease-out forwards;
+}
+
+.animate-slideOutToLeft {
+	--slide-to: -30px;
+	will-change: transform, opacity;
+	animation: slideOut 0.1s ease-in forwards;
+}
+
+.animate-slideOutToRight {
+	--slide-to: 30px;
+	will-change: transform, opacity;
+	animation: slideOut 0.1s ease-in forwards;
+}

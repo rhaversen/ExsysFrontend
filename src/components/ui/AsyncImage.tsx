@@ -29,21 +29,10 @@ const AsyncImage = ({
 	const [showLoading, setShowLoading] = useState(false)
 
 	useEffect(() => {
-		const img = new window.Image()
-		img.src = src
+		mounted.current = true
+		setShowLoading(true)
 
-		if (img.complete) {
-			setImageLoaded(true)
-		} else {
-			setShowLoading(true)
-			img.onload = () => {
-				if (mounted.current) {
-					setImageLoaded(true)
-				}
-			}
-		}
-
-		setTimeout(() => {
+		const timer = setTimeout(() => {
 			if (mounted.current) {
 				setSkipAnimation(false)
 			}
@@ -51,6 +40,7 @@ const AsyncImage = ({
 
 		return () => {
 			mounted.current = false
+			clearTimeout(timer)
 		}
 	}, [src])
 
@@ -81,7 +71,9 @@ const AsyncImage = ({
 				draggable={draggable}
 				priority={priority}
 				onLoad={() => {
-					setImageLoaded(true)
+					if (mounted.current) {
+						setImageLoaded(true)
+					}
 				}}
 			/>
 		</div>

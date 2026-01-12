@@ -1,7 +1,8 @@
 import Image from 'next/image'
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
+import TimeoutImage from '@/components/ui/TimeoutImage'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { KioskImages, LoadingImage } from '@/lib/images'
 import { type CheckoutMethod, type OrderStatus } from '@/types/frontendDataTypes'
@@ -25,34 +26,15 @@ const OrderConfirmationWindow = ({
 
 	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
-	const [remainingSeconds, setRemainingSeconds] = useState(autoCloseMs / 1000)
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
-
-	useEffect(() => {
-		setRemainingSeconds(autoCloseMs / 1000)
-		const timer = setInterval(() => {
-			setRemainingSeconds((prev) => {
-				return prev - 1
-			})
-		}, 1000)
-
-		return () => { clearInterval(timer) }
-	}, [autoCloseMs, canClose, orderStatus])
-
-	useEffect(() => {
-		if (!canClose || orderStatus === 'awaitingPayment') { return }
-		const timeoutId = setTimeout(() => {
-			onClose()
-		}, autoCloseMs + 1000)
-		return () => { clearTimeout(timeoutId) }
-	}, [autoCloseMs, canClose, orderStatus, onClose])
+	const showTimeoutImage = canClose && orderStatus !== 'awaitingPayment'
 
 	const headingTexts: Record<string, string> = {
 		awaitingPayment: 'Betal på skærmen',
 		success: 'Tak For Din Bestilling',
-		error: 'Der Skete En Fejl',
+		error: 'Noget Gik Galt',
 		loading: 'Sender Bestilling...',
-		paymentFailed: 'Betaling Ikke Gennemført'
+		paymentFailed: 'Betaling Mislykkedes'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
@@ -77,13 +59,11 @@ const OrderConfirmationWindow = ({
 
 	const paragraphContent: Record<OrderStatus, ReactElement> = {
 		loading: <p>{'Vent venligst'}</p>,
-		awaitingPayment: <p>{'Afventer betaling på terminalen til højre'}</p>,
+		awaitingPayment: <p>{'Betal på skærmen til højre'}</p>,
 		success: successMessage,
-		paymentFailed: <p>{'Betalingen blev ikke gennemført. Prøv igen eller kontakt personalet.'}</p>,
-		error: <p>{'Bestillingen kunne ikke gennemføres. Kontakt venligst personalet.'}</p>
+		paymentFailed: <p>{'Prøv igen, eller kontakt personalet'}</p>,
+		error: <p>{'Kontakt venligst personalet'}</p>
 	}
-
-	const showSubmitButton = orderStatus !== 'loading' && orderStatus !== 'awaitingPayment'
 
 	return (
 		<CloseableModal onClose={onClose} canClose={canClose}>
@@ -99,42 +79,36 @@ const OrderConfirmationWindow = ({
 
 			<div className="p-5 flex justify-center">
 				<div className="w-48 h-48 relative">
-					<Image
-						src={imageProps.src}
-						alt={imageProps.alt}
-						width={200}
-						height={200}
-					/>
+					{showTimeoutImage ? (
+						<TimeoutImage
+							totalMs={autoCloseMs}
+							onClick={onClose}
+							src={imageProps.src}
+							alt={imageProps.alt}
+							width={200}
+							height={200}
+						/>
+					) : (
+						<Image
+							src={imageProps.src}
+							alt={imageProps.alt}
+							width={200}
+							height={200}
+						/>
+					)}
 				</div>
 			</div>
 
-			<div className="flex p-5 justify-center items-center h-full">
-				{orderStatus === 'awaitingPayment' && (
+			{orderStatus === 'awaitingPayment' && (
+				<div className="flex p-5 justify-center items-center h-full">
 					<button
 						onClick={onCancelPayment}
-						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
+						className="bg-gray-200 hover:bg-gray-300 w-full text-gray-700 rounded-md py-3 px-4 mt-8 transition-colors"
 						type="button"
 						disabled={isCancelling}
 					>
-						{isCancelling ? 'Annullerer…' : 'Annuller'}
+						{isCancelling ? 'Afbryder…' : 'Afbryd betaling'}
 					</button>
-				)}
-				{showSubmitButton && (
-					<button
-						onClick={onClose}
-						className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
-						type="button"
-						disabled={!canClose}
-					>
-						{'OK'}
-					</button>
-				)}
-			</div>
-			{orderStatus !== 'awaitingPayment' && orderStatus !== 'loading' && (
-				<div className="text-center text-sm text-gray-800 mt-4">
-					{'Fortsætter om '}
-					<strong>{remainingSeconds}</strong>
-					{' sekund'}{remainingSeconds == 1 ? '' : 'er'}
 				</div>
 			)}
 		</CloseableModal>
