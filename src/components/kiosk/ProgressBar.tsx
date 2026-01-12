@@ -87,96 +87,93 @@ export default function ProgressBar ({
 		return markerIndex < currentIndex
 	}
 
+	const markerClass = (state: 'activity' | 'room' | 'order'): string =>
+		`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 transition-colors duration-300
+		${isMarkerActive(state) ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`
+
 	return (
-		<div className={`w-full flex flex-col relative ${viewState !== 'welcome' ? 'shadow-b-md' : ''}`}>
-			{/* Top progress bar container */}
-			<div className="w-full h-3 mt-2 mb-1 rounded-full">
-				{/* Progress bar overlay */}
-				<div className={`h-full transition-all duration-300 ease-in-out bg-gradient-to-r from-blue-400 to-blue-600 ${getProgress(viewState) !== 100 ? 'rounded-r-full' : ''}`}
-					style={{
-						width: `${getProgress(viewState)}%`
-					}}
+		<div className={`w-full flex flex-col ${viewState !== 'welcome' ? 'shadow-b-md' : ''}`}>
+			{/* Progress bar with markers */}
+			<div className="relative w-full h-4 flex items-center mt-2 mb-1">
+				{/* Track */}
+				<div className="absolute inset-x-0 h-3 rounded-full bg-gray-200" />
+				{/* Fill */}
+				<div
+					className={`absolute h-3 left-0 bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-300 ease-in-out ${getProgress(viewState) !== 100 ? 'rounded-r-full' : ''}`}
+					style={{ width: `${getProgress(viewState)}%` }}
 				/>
+				{/* Markers */}
+				{viewState !== 'welcome' && (
+					<>
+						<div className={markerClass('activity')} style={{ left: `${getProgress('activity')}%` }} />
+						<div className={markerClass('room')} style={{ left: `${getProgress('room')}%` }} />
+						<div className={markerClass('order')} style={{ left: `${getProgress('order')}%` }} />
+					</>
+				)}
 			</div>
 
 			{viewState !== 'welcome' && (
-				<>
-					{/* Progress markers */}
-					<div className="absolute w-full">
-						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('activity') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-							style={{ left: `${getProgress('activity')}%` }}
-						></div>
-						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('room') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-							style={{ left: `${getProgress('room')}%` }}
-						></div>
-						<div className={`w-4 h-4 rounded-full border-2 absolute top-1 -translate-x-1/2 ${isMarkerActive('order') ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-							style={{ left: `${getProgress('order')}%` }}
-						></div>
-					</div>
-
-					{/* Navigation buttons */}
-					<div className="flex justify-center items-center h-full px-[20%]">
-						{/* 'Start Forfra' on the left */}
-						<div className="absolute left-4 h-full flex items-center">
-							<button
-								onClick={() => {
-									setResetPressed(true)
-									onReset()
-									setTimeout(() => { setResetPressed(false) }, 300)
-								}}
-								className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
+				<div className="relative flex justify-center items-center h-full px-[20%]">
+					{/* 'Start Forfra' on the left */}
+					<div className="absolute left-4 h-full flex items-center">
+						<button
+							onClick={() => {
+								setResetPressed(true)
+								onReset()
+								setTimeout(() => { setResetPressed(false) }, 300)
+							}}
+							className={`font-bold h-14 p-4 rounded-full flex-1 flex justify-center items-center m-2
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform ${resetPressed ? 'translate-y-0 shadow-none' : '-translate-y-[4px]'}
 									text-gray-800 bg-white`}
-							>
-								<div className="text-md flex flex-col items-center justify-center text-center">
-									{'Start Forfra\r'}
-								</div>
-							</button>
-						</div>
-						<ProgressButton
-							isActive={viewState === 'activity'}
-							canClick={canClickActivity}
-							onClick={() => { if (canClickActivity) { onProgressClick('activity') } }}
-							selectedName={selectedActivity?.name}
-							label="Aktivitet"
-						/>
-						<ProgressButton
-							isActive={viewState === 'room'}
-							canClick={canClickRoom}
-							onClick={() => { if (canClickRoom) { onProgressClick('room') } }}
-							selectedName={selectedRoom?.name}
-							label="Spisested"
-						/>
-						<ProgressButton
-							isActive={viewState === 'order'}
-							canClick={canClickOrder}
-							onClick={() => { if (canClickOrder) { onProgressClick('order') } }}
-							label="Bestilling"
-						/>
-						{/* 'Hjem' on the right */}
-						<div className="absolute right-4 h-full flex items-center">
-							<button
-								title="Gå til forside"
-								onClick={() => { onProgressClick('welcome') }}
-								className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2
+						>
+							<div className="text-md flex flex-col items-center justify-center text-center">
+								{'Start Forfra\r'}
+							</div>
+						</button>
+					</div>
+					<ProgressButton
+						isActive={viewState === 'activity'}
+						canClick={canClickActivity}
+						onClick={() => { if (canClickActivity) { onProgressClick('activity') } }}
+						selectedName={selectedActivity?.name}
+						label="Aktivitet"
+					/>
+					<ProgressButton
+						isActive={viewState === 'room'}
+						canClick={canClickRoom}
+						onClick={() => { if (canClickRoom) { onProgressClick('room') } }}
+						selectedName={selectedRoom?.name}
+						label="Spisested"
+					/>
+					<ProgressButton
+						isActive={viewState === 'order'}
+						canClick={canClickOrder}
+						onClick={() => { if (canClickOrder) { onProgressClick('order') } }}
+						label="Bestilling"
+					/>
+					{/* 'Hjem' on the right */}
+					<div className="absolute right-4 h-full flex items-center">
+						<button
+							title="Gå til forside"
+							onClick={() => { onProgressClick('welcome') }}
+							className="font-bold h-14 w-14 rounded-full flex justify-center items-center m-2
 									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
 									transform text-gray-800 bg-white"
-							>
-								<AsyncImage
-									src={KioskImages.home.src}
-									alt={KioskImages.home.alt}
-									className="w-6 h-6"
-									width={24}
-									height={24}
-									quality={75}
-									priority={false}
-									draggable={false}
-								/>
-							</button>
-						</div>
+						>
+							<AsyncImage
+								src={KioskImages.home.src}
+								alt={KioskImages.home.alt}
+								className="w-6 h-6"
+								width={24}
+								height={24}
+								quality={75}
+								priority={false}
+								draggable={false}
+							/>
+						</button>
 					</div>
-				</>
+				</div>
 			)}
 		</div>
 	)
