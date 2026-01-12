@@ -36,7 +36,7 @@ const Option = ({
 						className="w-40 h-40"
 						width={100}
 						height={100}
-						quality={80}
+						quality={75}
 						src={`${option.imageURL === undefined || option.imageURL === '' ? KioskImages.noUrl.src : option.imageURL}`}
 						alt={option.name}
 						draggable={false}

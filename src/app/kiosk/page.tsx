@@ -183,6 +183,20 @@ export default function Page (): ReactElement {
 	}, [options])
 
 	useEffect(() => {
+		const productUrls = products.map(p => p.imageURL).filter((url): url is string => Boolean(url))
+		const optionUrls = options.map(o => o.imageURL).filter((url): url is string => Boolean(url))
+
+		const preloadNextImage = (url: string, width: number, quality: number): void => {
+			const nextImageUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`
+			const img = new Image()
+			img.src = nextImageUrl
+		}
+
+		productUrls.forEach(url => { preloadNextImage(url, 256, 75) })
+		optionUrls.forEach(url => { preloadNextImage(url, 256, 75) })
+	}, [products, options])
+
+	useEffect(() => {
 		if (currentView === 'activity' && !kiosk) {
 			navigateTo('welcome')
 		} else if (currentView === 'room' && !selectedActivity) {
