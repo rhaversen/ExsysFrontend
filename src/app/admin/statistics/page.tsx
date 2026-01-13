@@ -435,10 +435,18 @@ export default function Page (): ReactElement {
 
 							{/* Ordre statistikker */}
 							<h3 className="text-lg font-semibold">{'Ordre statistikker'}</h3>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 								<div className="bg-green-50 rounded p-3" title="Antal bestillinger i den valgte periode">
 									<div className="text-xs text-green-700">{'Antal ordrer'}</div>
 									<div className="text-xl font-bold">{stats.totalOrders}</div>
+								</div>
+								<div className="bg-blue-50 rounded p-3" title="Samlet antal produkter solgt i den valgte periode">
+									<div className="text-xs text-blue-700">{'Antal produkter'}</div>
+									<div className="text-xl font-bold">{stats.totalProductsSold}</div>
+								</div>
+								<div className="bg-purple-50 rounded p-3" title="Samlet antal tilvalg solgt i den valgte periode">
+									<div className="text-xs text-purple-700">{'Antal tilvalg'}</div>
+									<div className="text-xl font-bold">{stats.totalOptionsSold}</div>
 								</div>
 								<div className="bg-indigo-50 rounded p-3" title="Gennemsnitligt antal produkter i hver bestilling">
 									<div className="text-xs text-indigo-700">{'Gns. produkter pr. ordre'}</div>
