@@ -131,10 +131,10 @@ function getBadgeIcon (status: KioskStatus): React.ReactElement {
 			if (status.operational === 'operational') {
 				return <FiCheck className="w-3.5 h-3.5 text-green-600" />
 			}
-			if (status.operational === 'closed_deactivated_until') {
-				return <FaMoon className="w-3.5 h-3.5 text-yellow-600" />
+			if (status.operational === 'closed_deactivated') {
+				return <FiX className="w-3.5 h-3.5 text-orange-600" />
 			}
-			return <FiX className="w-3.5 h-3.5 text-yellow-600" />
+			return <FaMoon className="w-3.5 h-3.5 text-yellow-600" />
 	}
 }
 
