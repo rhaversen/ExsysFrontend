@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { type ActivityType, type RoomType } from '@/types/backendDataTypes'
 import { type ViewState } from '@/types/frontendDataTypes'
@@ -57,6 +57,29 @@ export default function ProgressBar ({
 	selectedActivity: ActivityType | null
 	selectedRoom: RoomType | null
 }): React.ReactElement {
+	const [showButtons, setShowButtons] = useState(viewState !== 'welcome')
+	const [isAnimating, setIsAnimating] = useState(false)
+	const [animationDirection, setAnimationDirection] = useState<'in' | 'out'>('in')
+
+	useEffect(() => {
+		const shouldShow = viewState !== 'welcome'
+		if (shouldShow !== showButtons) {
+			if (shouldShow) {
+				setShowButtons(true)
+				setAnimationDirection('in')
+				setIsAnimating(true)
+				setTimeout(() => { setIsAnimating(false) }, 300)
+			} else {
+				setAnimationDirection('out')
+				setIsAnimating(true)
+				setTimeout(() => {
+					setShowButtons(false)
+					setIsAnimating(false)
+				}, 200)
+			}
+		}
+	}, [viewState, showButtons])
+
 	const getProgress = (viewState: string): number => {
 		switch (viewState) {
 			case 'welcome':
@@ -85,7 +108,7 @@ export default function ProgressBar ({
 		${isMarkerActive(state) ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`
 
 	return (
-		<div className={`w-full flex flex-col ${viewState !== 'welcome' ? 'shadow-b-md' : ''}`}>
+		<div className="w-full flex flex-col">
 			{/* Progress bar with markers */}
 			<div className="relative w-full h-4 flex items-center mt-2 mb-1">
 				{/* Track */}
@@ -96,52 +119,49 @@ export default function ProgressBar ({
 					style={{ width: `${getProgress(viewState)}%` }}
 				/>
 				{/* Markers */}
-				{viewState !== 'welcome' && (
-					<>
-						<div className={markerClass('activity')} style={{ left: `${getProgress('activity')}%` }} />
-						<div className={markerClass('room')} style={{ left: `${getProgress('room')}%` }} />
-						<div className={markerClass('order')} style={{ left: `${getProgress('order')}%` }} />
-					</>
-				)}
+				<div className={`contents ${isAnimating ? (animationDirection === 'in' ? 'animate-fadeSlideDown' : 'animate-fadeSlideUp') : ''} ${!showButtons && !isAnimating ? 'invisible' : ''}`}>
+					<div className={markerClass('activity')} style={{ left: `${getProgress('activity')}%` }} />
+					<div className={markerClass('room')} style={{ left: `${getProgress('room')}%` }} />
+					<div className={markerClass('order')} style={{ left: `${getProgress('order')}%` }} />
+				</div>
 			</div>
 
-			{viewState !== 'welcome' && (
-				<div className="relative flex justify-center items-center h-full px-[20%]">
-					<div className="absolute left-4 h-full flex items-center">
-						<button
-							onClick={() => { onProgressClick('welcome') }}
-							className="font-bold h-14 rounded-xl flex justify-center items-center m-2 border border-gray-200
-									transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
-									transform -translate-y-[4px] text-gray-800 bg-white"
-							type="button"
-						>
-							<div className="text-xl flex flex-col items-center justify-center text-center p-3">
-								{'Start Forfra'}
-							</div>
-						</button>
-					</div>
-					<ProgressButton
-						isActive={viewState === 'activity'}
-						canClick={canClickActivity}
-						onClick={() => { if (canClickActivity) { onProgressClick('activity') } }}
-						selectedName={selectedActivity?.name}
-						label="Aktivitet"
-					/>
-					<ProgressButton
-						isActive={viewState === 'room'}
-						canClick={canClickRoom}
-						onClick={() => { if (canClickRoom) { onProgressClick('room') } }}
-						selectedName={selectedRoom?.name}
-						label="Spisested"
-					/>
-					<ProgressButton
-						isActive={viewState === 'order'}
-						canClick={canClickOrder}
-						onClick={() => { if (canClickOrder) { onProgressClick('order') } }}
-						label="Bestilling"
-					/>
+			{/* Button container - fixed height to prevent layout shift */}
+			<div className={`relative flex justify-center items-center h-20 px-[20%] transition-opacity duration-200 ${isAnimating ? (animationDirection === 'in' ? 'animate-fadeSlideDown' : 'animate-fadeSlideUp') : ''} ${!showButtons && !isAnimating ? 'opacity-0 pointer-events-none' : ''}`}>
+				<div className="absolute left-4 h-full flex items-center">
+					<button
+						onClick={() => { onProgressClick('welcome') }}
+						className="font-bold h-14 rounded-xl flex justify-center items-center m-2 border border-gray-200
+								transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
+								transform -translate-y-[4px] text-gray-800 bg-white"
+						type="button"
+					>
+						<div className="text-xl flex flex-col items-center justify-center text-center p-3">
+							{'Start Forfra'}
+						</div>
+					</button>
 				</div>
-			)}
+				<ProgressButton
+					isActive={viewState === 'activity'}
+					canClick={canClickActivity}
+					onClick={() => { if (canClickActivity) { onProgressClick('activity') } }}
+					selectedName={selectedActivity?.name}
+					label="Aktivitet"
+				/>
+				<ProgressButton
+					isActive={viewState === 'room'}
+					canClick={canClickRoom}
+					onClick={() => { if (canClickRoom) { onProgressClick('room') } }}
+					selectedName={selectedRoom?.name}
+					label="Spisested"
+				/>
+				<ProgressButton
+					isActive={viewState === 'order'}
+					canClick={canClickOrder}
+					onClick={() => { if (canClickOrder) { onProgressClick('order') } }}
+					label="Bestilling"
+				/>
+			</div>
 		</div>
 	)
 }
