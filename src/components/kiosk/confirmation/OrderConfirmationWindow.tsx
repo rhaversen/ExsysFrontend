@@ -34,7 +34,7 @@ const OrderConfirmationWindow = ({
 		success: 'Tak For Din Bestilling',
 		error: 'Noget Gik Galt',
 		loading: 'Sender Bestilling...',
-		paymentFailed: 'Betaling Mislykkedes'
+		paymentFailed: 'Betaling Afbrudt'
 	}
 
 	const images: Record<string, { src: string, alt: string }> = {
@@ -103,7 +103,7 @@ const OrderConfirmationWindow = ({
 				<div className="flex p-5 justify-center items-center h-full">
 					<button
 						onClick={onCancelPayment}
-						className="bg-gray-200 hover:bg-gray-300 w-full text-gray-700 rounded-md py-3 px-4 mt-8 transition-colors"
+						className={`bg-gray-200 ${isCancelling ? '' : 'hover:bg-gray-300'} w-full text-gray-700 rounded-md py-3 px-4 mt-8 transition-colors`}
 						type="button"
 						disabled={isCancelling}
 					>
