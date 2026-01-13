@@ -29,16 +29,12 @@ const AddActivity = ({
 
 	const [activity, setActivity] = useState<PostActivityType>({
 		name: '',
-		priorityRooms: [],
-		disabledRooms: [],
+		enabledRooms: [],
 		disabledProducts: []
 	})
 	const [selectedKiosks, setSelectedKiosks] = useState<KioskType[]>([])
-	const [disabledKiosks, setDisabledKiosks] = useState<KioskType[]>([])
 	const [showRooms, setShowRooms] = useState(false)
 	const [showKiosks, setShowKiosks] = useState(false)
-	const [showDisabledKiosks, setShowDisabledKiosks] = useState(false)
-	const [showDisabledRooms, setShowDisabledRooms] = useState(false)
 	const [showDisabledProducts, setShowDisabledProducts] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
@@ -65,20 +61,14 @@ const AddActivity = ({
 			// Update each selected kiosk to include the new activity
 			await Promise.all(selectedKiosks.map(async kiosk => {
 				await updateKioskAsync(kiosk._id, {
-					priorityActivities: [...kiosk.priorityActivities, activityId]
-				})
-			}))
-			// Update each disabled kiosk to include the activity in disabledActivities
-			await Promise.all(disabledKiosks.map(async kiosk => {
-				await updateKioskAsync(kiosk._id, {
-					disabledActivities: [...kiosk.disabledActivities, activityId]
+					enabledActivities: [...(kiosk.enabledActivities ?? []), activityId]
 				})
 			}))
 			onClose()
 		} catch (error) {
 			addError(error)
 		}
-	}, [onClose, addError, selectedKiosks, disabledKiosks, updateKioskAsync, createActivityAsync])
+	}, [onClose, addError, selectedKiosks, updateKioskAsync, createActivityAsync])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setActivity({
@@ -90,28 +80,14 @@ const AddActivity = ({
 	const handleAddRoom = useCallback((v: RoomType): void => {
 		setActivity({
 			...activity,
-			priorityRooms: [...(activity.priorityRooms ?? []), v._id]
+			enabledRooms: [...(activity.enabledRooms ?? []), v._id]
 		})
 	}, [activity])
 
 	const handleDeleteRoom = useCallback((v: RoomType): void => {
 		setActivity({
 			...activity,
-			priorityRooms: (activity.priorityRooms ?? []).filter((id) => id !== v._id)
-		})
-	}, [activity])
-
-	const handleAddDisabledRoom = useCallback((v: RoomType): void => {
-		setActivity({
-			...activity,
-			disabledRooms: [...(activity.disabledRooms ?? []), v._id]
-		})
-	}, [activity])
-
-	const handleDeleteDisabledRoom = useCallback((v: RoomType): void => {
-		setActivity({
-			...activity,
-			disabledRooms: (activity.disabledRooms ?? []).filter((id) => id !== v._id)
+			enabledRooms: (activity.enabledRooms ?? []).filter((id) => id !== v._id)
 		})
 	}, [activity])
 
@@ -135,14 +111,6 @@ const AddActivity = ({
 
 	const handleDeleteKiosk = useCallback((kiosk: KioskType): void => {
 		setSelectedKiosks(prev => prev.filter(k => k._id !== kiosk._id))
-	}, [])
-
-	const handleAddDisabledKiosk = useCallback((kiosk: KioskType): void => {
-		setDisabledKiosks(prev => [...prev, kiosk])
-	}, [])
-
-	const handleDeleteDisabledKiosk = useCallback((kiosk: KioskType): void => {
-		setDisabledKiosks(prev => prev.filter(k => k._id !== kiosk._id))
 	}, [])
 
 	const handleCancel = useCallback((): void => {
@@ -199,15 +167,15 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 3. Fremhævede Spisesteder */}
+					{/* 3. Spisesteder */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Spisesteder'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Spisesteder'}</div>
 						<div className="flex flex-col items-center justify-center">
-							{(activity.priorityRooms ?? []).length === 0 && (
+							{(activity.enabledRooms ?? []).length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
-								items={rooms.filter((r) => (activity.priorityRooms ?? []).includes(r._id))}
+								items={rooms.filter((r) => (activity.enabledRooms ?? []).includes(r._id))}
 								editable={true}
 								onDeleteItem={handleDeleteRoom}
 								onShowItems={() => { setShowRooms(true) }}
@@ -215,25 +183,9 @@ const AddActivity = ({
 						</div>
 					</div>
 
-					{/* 4. Deaktiverede Spisesteder */}
+					{/* 4. Kiosker */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Spisesteder'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{(activity.disabledRooms ?? []).length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
-								editable={true}
-								onDeleteItem={handleDeleteDisabledRoom}
-								onShowItems={() => { setShowDisabledRooms(true) }}
-							/>
-						</div>
-					</div>
-
-					{/* 5. Fremhævende Kiosker */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Kiosker'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Kiosker'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{selectedKiosks.length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -243,22 +195,6 @@ const AddActivity = ({
 								editable={true}
 								onDeleteItem={handleDeleteKiosk}
 								onShowItems={() => { setShowKiosks(true) }}
-							/>
-						</div>
-					</div>
-
-					{/* 6. Deaktiverede Kiosker */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Kiosker'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{disabledKiosks.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={disabledKiosks}
-								editable={true}
-								onDeleteItem={handleDeleteDisabledKiosk}
-								onShowItems={() => { setShowDisabledKiosks(true) }}
 							/>
 						</div>
 					</div>
@@ -288,31 +224,12 @@ const AddActivity = ({
 
 			{showRooms && (
 				<SelectionWindow
-					title={`Tilføj Fremhævede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={rooms.map(r => ({
-						...r,
-						// Disable if already in disabledRooms
-						disabled: (activity.disabledRooms ?? []).includes(r._id)
-					}))}
-					selectedItems={rooms.filter((r) => (activity.priorityRooms ?? []).includes(r._id))}
+					title={`Tilføj Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={rooms}
+					selectedItems={rooms.filter((r) => (activity.enabledRooms ?? []).includes(r._id))}
 					onAddItem={handleAddRoom}
 					onDeleteItem={handleDeleteRoom}
 					onClose={() => { setShowRooms(false) }}
-				/>
-			)}
-
-			{showDisabledRooms && (
-				<SelectionWindow
-					title={`Tilføj Deaktiverede Spisesteder til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={rooms.map(r => ({
-						...r,
-						// Disable if already in rooms
-						disabled: (activity.priorityRooms ?? []).includes(r._id)
-					}))}
-					selectedItems={rooms.filter((r) => (activity.disabledRooms ?? []).includes(r._id))}
-					onAddItem={handleAddDisabledRoom}
-					onDeleteItem={handleDeleteDisabledRoom}
-					onClose={() => { setShowDisabledRooms(false) }}
 				/>
 			)}
 
@@ -329,31 +246,12 @@ const AddActivity = ({
 
 			{showKiosks && (
 				<SelectionWindow
-					title={`Tilføj Fremhævende Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={kiosks.map(k => ({
-						...k,
-						// Disable if already in disabledKiosks
-						disabled: disabledKiosks.some(dk => dk._id === k._id)
-					}))}
+					title={`Tilføj Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
+					items={kiosks}
 					selectedItems={selectedKiosks}
 					onAddItem={handleAddKiosk}
 					onDeleteItem={handleDeleteKiosk}
 					onClose={() => { setShowKiosks(false) }}
-				/>
-			)}
-
-			{showDisabledKiosks && (
-				<SelectionWindow
-					title={`Tilføj Deaktiverede Kiosker til ${activity.name === '' ? 'Ny Aktivitet' : activity.name}`}
-					items={kiosks.map(k => ({
-						...k,
-						// Disable if already in selectedKiosks
-						disabled: selectedKiosks.some(pk => pk._id === k._id)
-					}))}
-					selectedItems={disabledKiosks}
-					onAddItem={handleAddDisabledKiosk}
-					onDeleteItem={handleDeleteDisabledKiosk}
-					onClose={() => { setShowDisabledKiosks(false) }}
 				/>
 			)}
 		</>

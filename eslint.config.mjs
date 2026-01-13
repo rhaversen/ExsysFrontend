@@ -19,6 +19,9 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
+	{
+		ignores: ['public/kiosk-recovery-sw.js', 'public/kiosk-offline.html']
+	},
 	...nextCoreWebVitals,
 	...nextTypescript,
 	...compat.extends('prettier'),
