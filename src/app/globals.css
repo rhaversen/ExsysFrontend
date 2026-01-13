@@ -130,3 +130,25 @@ body {
 	will-change: transform, opacity;
 	animation: fadeSlideUp 0.2s ease-in forwards;
 }
+
+@keyframes gradientShimmer {
+	from {
+		background-position: 0% 0;
+	}
+	to {
+		background-position: -100% 0;
+	}
+}
+
+.animate-gradientShimmer {
+	background: linear-gradient(
+		to right,
+		#60a5fa 0%,
+		#2563eb 10%,
+		#60a5fa 50%,
+		#2563eb 60%,
+		#60a5fa 100%
+	);
+	background-size: 200% 100%;
+	animation: gradientShimmer 3s linear infinite;
+}

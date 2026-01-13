@@ -115,7 +115,7 @@ export default function ProgressBar ({
 				<div className="absolute inset-x-0 h-3 rounded-full bg-gray-200" />
 				{/* Fill */}
 				<div
-					className={`absolute h-3 left-0 bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-300 ease-in-out ${getProgress(viewState) !== 100 ? 'rounded-r-full' : ''}`}
+					className={`absolute h-3 left-0 transition-all duration-300 ease-in-out ${viewState === 'welcome' ? 'animate-gradientShimmer' : 'bg-gradient-to-r from-blue-400 to-blue-600 rounded-r-full'}`}
 					style={{ width: `${getProgress(viewState)}%` }}
 				/>
 				{/* Markers */}
