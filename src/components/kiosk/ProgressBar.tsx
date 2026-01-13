@@ -104,8 +104,9 @@ export default function ProgressBar ({
 	}
 
 	const markerClass = (state: 'activity' | 'room' | 'order'): string =>
-		`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 transition-colors duration-300
-		${isMarkerActive(state) ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`
+		`absolute top-1/2 w-4 h-4 rounded-full border-2 transition-colors duration-300
+		${isMarkerActive(state) ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}
+		${isAnimating ? (animationDirection === 'in' ? 'animate-scaleIn' : 'animate-scaleOut') : '-translate-y-1/2 -translate-x-1/2'}`
 
 	return (
 		<div className="w-full flex flex-col">
@@ -119,7 +120,7 @@ export default function ProgressBar ({
 					style={{ width: `${getProgress(viewState)}%` }}
 				/>
 				{/* Markers */}
-				<div className={`contents ${isAnimating ? (animationDirection === 'in' ? 'animate-fadeSlideDown' : 'animate-fadeSlideUp') : ''} ${!showButtons && !isAnimating ? 'invisible' : ''}`}>
+				<div className={`contents ${!showButtons && !isAnimating ? 'invisible' : ''}`}>
 					<div className={markerClass('activity')} style={{ left: `${getProgress('activity')}%` }} />
 					<div className={markerClass('room')} style={{ left: `${getProgress('room')}%` }} />
 					<div className={markerClass('order')} style={{ left: `${getProgress('order')}%` }} />

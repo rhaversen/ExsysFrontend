@@ -131,6 +131,34 @@ body {
 	animation: fadeSlideUp 0.2s ease-in forwards;
 }
 
+@keyframes scaleIn {
+	from {
+		transform: translate(-50%, -50%) scale(0);
+	}
+	to {
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+@keyframes scaleOut {
+	from {
+		transform: translate(-50%, -50%) scale(1);
+	}
+	to {
+		transform: translate(-50%, -50%) scale(0);
+	}
+}
+
+.animate-scaleIn {
+	will-change: transform;
+	animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-scaleOut {
+	will-change: transform;
+	animation: scaleOut 0.2s ease-in forwards;
+}
+
 @keyframes gradientShimmer {
 	from {
 		background-position: 0% 0;
