@@ -164,6 +164,11 @@ const Activity = ({
 							onDeleteItem={(v) => { handleFieldChange('enabledRooms', newActivity.enabledRooms.filter((room) => room !== v._id)) }}
 							onShowItems={() => { setShowRooms(true) }}
 						/>
+						{newActivity.enabledRooms.length === 0 && (
+							<div className="mt-1 text-xs text-amber-600 font-medium text-center">
+								{'Der kan ikke vælges et spisested fra denne aktivitet'}
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -180,6 +185,11 @@ const Activity = ({
 							onDeleteItem={(v) => { handleKioskChange(linkedKiosks.filter((kiosk) => kiosk._id !== v._id)) }}
 							onShowItems={() => { setShowKiosks(true) }}
 						/>
+						{linkedKiosks.length === 0 && (
+							<div className="mt-1 text-xs text-amber-600 font-medium text-center">
+								{'Denne aktivitet kan aldrig vælges'}
+							</div>
+						)}
 					</div>
 				</div>
 			</EntityCard>

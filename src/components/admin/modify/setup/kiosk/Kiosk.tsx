@@ -146,6 +146,11 @@ const Kiosk = ({
 							onDeleteItem={(v: ActivityType) => { handleFieldChange('enabledActivities', newKiosk.enabledActivities.filter((activity) => activity !== v._id)) }}
 							onShowItems={() => { setShowActivities(true) }}
 						/>
+						{newKiosk.enabledActivities.length === 0 && (
+							<div className="mt-1 text-xs text-amber-600 font-medium text-center">
+								{'Der kan ikke vælges en aktivitet fra denne kiosk'}
+							</div>
+						)}
 					</div>
 				</div>
 			</EntityCard>

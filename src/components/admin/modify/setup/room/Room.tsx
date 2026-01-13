@@ -153,6 +153,11 @@ const Room = ({
 							onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
 							onShowItems={() => { setShowActivities(true) }}
 						/>
+						{linkedActivities.length === 0 && (
+							<div className="mt-1 text-xs text-amber-600 font-medium text-center">
+								{'Dette spisested kan aldrig vælges'}
+							</div>
+						)}
 					</div>
 				</div>
 			</EntityCard>
