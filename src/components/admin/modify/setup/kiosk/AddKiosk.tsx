@@ -30,11 +30,9 @@ const AddKiosk = ({
 		readerId: '',
 		name: '',
 		kioskTag: undefined,
-		priorityActivities: [],
-		disabledActivities: []
+		enabledActivities: []
 	})
 	const [showActivities, setShowActivities] = useState(false)
-	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -79,28 +77,14 @@ const AddKiosk = ({
 	const handleAddActivity = useCallback((v: ActivityType): void => {
 		setKiosk({
 			...kiosk,
-			priorityActivities: [...kiosk.priorityActivities, v._id]
+			enabledActivities: [...kiosk.enabledActivities, v._id]
 		})
 	}, [kiosk])
 
 	const handleDeleteActivity = useCallback((v: ActivityType): void => {
 		setKiosk({
 			...kiosk,
-			priorityActivities: kiosk.priorityActivities.filter((activity) => activity !== v._id)
-		})
-	}, [kiosk])
-
-	const handleAddDisabledActivity = useCallback((v: ActivityType): void => {
-		setKiosk({
-			...kiosk,
-			disabledActivities: [...kiosk.disabledActivities, v._id]
-		})
-	}, [kiosk])
-
-	const handleDeleteDisabledActivity = useCallback((v: ActivityType): void => {
-		setKiosk({
-			...kiosk,
-			disabledActivities: kiosk.disabledActivities.filter((activity) => activity !== v._id)
+			enabledActivities: kiosk.enabledActivities.filter((activity) => activity !== v._id)
 		})
 	}, [kiosk])
 
@@ -194,34 +178,18 @@ const AddKiosk = ({
 						</div>
 					</div>
 
-					{/* 4. Fremhævede Aktiviteter */}
+					{/* 4. Aktiviteter */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
-							{kiosk.priorityActivities.length === 0 && (
+							{kiosk.enabledActivities.length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
 							)}
 							<ItemsDisplay
-								items={activities.filter((activity) => kiosk.priorityActivities.includes(activity._id))}
+								items={activities.filter((activity) => kiosk.enabledActivities.includes(activity._id))}
 								editable={true}
 								onDeleteItem={handleDeleteActivity}
 								onShowItems={() => { setShowActivities(true) }}
-							/>
-						</div>
-					</div>
-
-					{/* 5. Deaktiverede Aktiviteter */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{kiosk.disabledActivities.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
-								editable={true}
-								onDeleteItem={handleDeleteDisabledActivity}
-								onShowItems={() => { setShowDisabledActivities(true) }}
 							/>
 						</div>
 					</div>
@@ -251,31 +219,12 @@ const AddKiosk = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj Fremhævede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in disabledActivities
-						disabled: kiosk.disabledActivities.includes(a._id)
-					}))}
-					selectedItems={activities.filter((activity) => kiosk.priorityActivities.includes(activity._id))}
+					title={`Tilføj Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
+					items={activities}
+					selectedItems={activities.filter((activity) => kiosk.enabledActivities.includes(activity._id))}
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
 					onClose={() => { setShowActivities(false) }}
-				/>
-			)}
-
-			{showDisabledActivities && (
-				<SelectionWindow
-					title={`Tilføj Deaktiverede Aktiviteter til ${kiosk.name === '' ? 'Ny Kiosk' : kiosk.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in selectedActivities
-						disabled: kiosk.priorityActivities.includes(a._id)
-					}))}
-					selectedItems={activities.filter((activity) => kiosk.disabledActivities.includes(activity._id))}
-					onAddItem={handleAddDisabledActivity}
-					onDeleteItem={handleDeleteDisabledActivity}
-					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>

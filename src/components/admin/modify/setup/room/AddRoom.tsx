@@ -28,9 +28,7 @@ const AddRoom = ({
 		description: ''
 	})
 	const [selectedActivities, setSelectedActivities] = useState<ActivityType[]>([])
-	const [disabledActivities, setDisabledActivities] = useState<ActivityType[]>([])
 	const [showActivities, setShowActivities] = useState(false)
-	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 	const [fieldValidations, setFieldValidations] = useState<Record<string, boolean>>({})
 	const [formIsValid, setFormIsValid] = useState(false)
 
@@ -58,17 +56,7 @@ const AddRoom = ({
 				selectedActivities.map(async activity =>
 					await updateActivityAsync(activity._id, {
 						...activity,
-						priorityRooms: [...activity.priorityRooms, createdRoom._id]
-					})
-				)
-			)
-
-			// Update activities that have this room disabled
-			await Promise.all(
-				disabledActivities.map(async activity =>
-					await updateActivityAsync(activity._id, {
-						...activity,
-						disabledRooms: [...activity.disabledRooms, createdRoom._id]
+						enabledRooms: [...activity.enabledRooms, createdRoom._id]
 					})
 				)
 			)
@@ -76,7 +64,7 @@ const AddRoom = ({
 			addError(error as Error)
 		}
 		onClose()
-	}, [createRoomAsync, selectedActivities, disabledActivities, updateActivityAsync, addError, onClose])
+	}, [createRoomAsync, selectedActivities, updateActivityAsync, addError, onClose])
 
 	const handleNameChange = useCallback((v: string): void => {
 		setRoom(prev => ({
@@ -98,14 +86,6 @@ const AddRoom = ({
 
 	const handleDeleteActivity = useCallback((activity: ActivityType): void => {
 		setSelectedActivities(prev => prev.filter(a => a._id !== activity._id))
-	}, [])
-
-	const handleAddDisabledActivity = useCallback((activity: ActivityType): void => {
-		setDisabledActivities(prev => [...prev, activity])
-	}, [])
-
-	const handleDeleteDisabledActivity = useCallback((activity: ActivityType): void => {
-		setDisabledActivities(prev => prev.filter(a => a._id !== activity._id))
 	}, [])
 
 	const handleCancel = useCallback((): void => {
@@ -166,9 +146,9 @@ const AddRoom = ({
 						</div>
 					</div>
 
-					{/* 3. Fremhævende Aktiviteter */}
+					{/* 3. Aktiviteter */}
 					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Aktiviteter'}</div>
+						<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
 						<div className="flex flex-col items-center justify-center">
 							{selectedActivities.length === 0 && (
 								<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -178,22 +158,6 @@ const AddRoom = ({
 								editable={true}
 								onDeleteItem={handleDeleteActivity}
 								onShowItems={() => { setShowActivities(true) }}
-							/>
-						</div>
-					</div>
-
-					{/* 4. Deaktiverede aktiviteter */}
-					<div className="flex flex-col items-center p-1 flex-1">
-						<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
-						<div className="flex flex-col items-center justify-center">
-							{disabledActivities.length === 0 && (
-								<div className="text-gray-500 text-sm">{'Ingen'}</div>
-							)}
-							<ItemsDisplay
-								items={disabledActivities}
-								editable={true}
-								onDeleteItem={handleDeleteDisabledActivity}
-								onShowItems={() => { setShowDisabledActivities(true) }}
 							/>
 						</div>
 					</div>
@@ -224,31 +188,12 @@ const AddRoom = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj Fremhævende Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in disabledActivities
-						disabled: disabledActivities.some(da => da._id === a._id)
-					}))}
+					title={`Tilføj Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
+					items={activities}
 					selectedItems={selectedActivities}
 					onAddItem={handleAddActivity}
 					onDeleteItem={handleDeleteActivity}
 					onClose={() => { setShowActivities(false) }}
-				/>
-			)}
-
-			{showDisabledActivities && (
-				<SelectionWindow
-					title={`Tilføj Deaktiverede Aktiviteter til ${room.name === '' ? 'Nyt Spisested' : room.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in selectedActivities
-						disabled: selectedActivities.some(sa => sa._id === a._id)
-					}))}
-					selectedItems={disabledActivities}
-					onAddItem={handleAddDisabledActivity}
-					onDeleteItem={handleDeleteDisabledActivity}
-					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>

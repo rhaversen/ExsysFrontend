@@ -12,6 +12,8 @@ import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
+import { useKioskPing } from '@/hooks/useKioskPing'
+import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
@@ -47,6 +49,9 @@ export default function Page (): ReactElement {
 
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
+
+	useKioskPing(currentView)
+	const { isBackendOffline } = useKioskRecovery()
 
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 60000
 	const kioskFeedbackBannerDelayMs = config?.configs.kioskFeedbackBannerDelayMs ?? 5000
@@ -89,11 +94,25 @@ export default function Page (): ReactElement {
 		}
 	}, [isKioskClosed, resetSession])
 
+	const getRoomsForActivity = useCallback((activity: typeof selectedActivity) => {
+		if (!activity) { return [] }
+		return rooms
+			.filter(room => activity.enabledRooms.includes(room._id))
+			.sort((a, b) => a.name.localeCompare(b.name))
+	}, [rooms])
+
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
 		setSelectedActivity(activity)
-		navigateTo(selectedRoom ? 'order' : 'room')
-	}, [selectedRoom, setSelectedActivity, navigateTo])
+
+		const activityRooms = getRoomsForActivity(activity)
+		if (activityRooms.length === 1) {
+			setSelectedRoom(activityRooms[0])
+			navigateTo('order')
+		} else {
+			navigateTo(selectedRoom ? 'order' : 'room')
+		}
+	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
@@ -152,27 +171,27 @@ export default function Page (): ReactElement {
 	const filteredActivities = useMemo(() => {
 		if (!kiosk) { return [] }
 		return activities
-			.filter(activity => !kiosk.disabledActivities?.includes(activity._id))
+			.filter(activity => kiosk.enabledActivities?.includes(activity._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [activities, kiosk])
 
 	const priorityActivities = useMemo(() => {
 		if (!kiosk) { return [] }
 		return activities
-			.filter(activity => kiosk.priorityActivities.includes(activity._id))
+			.filter(activity => kiosk.enabledActivities.includes(activity._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [activities, kiosk])
 
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
 		return rooms
-			.filter(room => !selectedActivity.disabledRooms.includes(room._id))
+			.filter(room => selectedActivity.enabledRooms.includes(room._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [rooms, selectedActivity])
 
 	const priorityRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
-		return selectedActivity.priorityRooms
+		return selectedActivity.enabledRooms
 			.map(roomId => rooms.find(r => r._id === roomId))
 			.filter((room): room is NonNullable<typeof room> => room !== undefined)
 			.sort((a, b) => a.name.localeCompare(b.name))
@@ -228,7 +247,21 @@ export default function Page (): ReactElement {
 							{kioskWelcomeMessage}
 						</h1>
 						<button
-							onClick={() => navigateTo('activity')}
+							onClick={() => {
+								if (filteredActivities.length === 1) {
+									const singleActivity = filteredActivities[0]
+									setSelectedActivity(singleActivity)
+									const activityRooms = getRoomsForActivity(singleActivity)
+									if (activityRooms.length === 1) {
+										setSelectedRoom(activityRooms[0])
+										navigateTo('order')
+									} else {
+										navigateTo('room')
+									}
+								} else {
+									navigateTo('activity')
+								}
+							}}
 							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
 						>
 							{'Tryk her for at starte'}
@@ -293,6 +326,26 @@ export default function Page (): ReactElement {
 				navigateTo('welcome')
 				return null
 		}
+	}
+
+	if (isBackendOffline === true) {
+		return (
+			<div className="flex flex-col h-screen">
+				<div className="flex-1">
+					<div className="fixed inset-0 flex items-center justify-center bg-black">
+						<div className="bg-gray-900/50 p-10 rounded-lg text-gray-500">
+							<h1 className="text-2xl text-center">{'Ingen forbindelse'}</h1>
+							<p className="text-center">
+								{'Kiosken forsøger at genoprette forbindelsen...'}
+							</p>
+						</div>
+					</div>
+				</div>
+				<div className="shrink-0 z-10 text-gray-400/75">
+					<KioskSessionInfo />
+				</div>
+			</div>
+		)
 	}
 
 	if (isKioskClosed) {
