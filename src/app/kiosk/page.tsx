@@ -15,7 +15,7 @@ import { useKioskData } from '@/hooks/useKioskData'
 import { useKioskPing } from '@/hooks/useKioskPing'
 import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
-import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
+import { formatRelativeDateLabel, getNextOpen, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
 import 'dayjs/locale/da'
@@ -165,8 +165,16 @@ export default function Page (): ReactElement {
 		if (!kiosk) { return [] }
 		return activities
 			.filter(activity => kiosk.enabledActivities?.includes(activity._id))
+			.filter(activity => {
+				const availableProducts = products.filter(
+					product => product.isActive &&
+						!activity.disabledProducts.includes(product._id) &&
+						isCurrentTimeInOrderWindow(product.orderWindow)
+				)
+				return availableProducts.length > 0
+			})
 			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [activities, kiosk])
+	}, [activities, kiosk, products])
 
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
