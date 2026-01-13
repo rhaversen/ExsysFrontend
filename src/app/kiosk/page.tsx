@@ -168,25 +168,10 @@ export default function Page (): ReactElement {
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [activities, kiosk])
 
-	const priorityActivities = useMemo(() => {
-		if (!kiosk) { return [] }
-		return activities
-			.filter(activity => kiosk.enabledActivities.includes(activity._id))
-			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [activities, kiosk])
-
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
 		return rooms
 			.filter(room => selectedActivity.enabledRooms.includes(room._id))
-			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [rooms, selectedActivity])
-
-	const priorityRooms = useMemo(() => {
-		if (!selectedActivity) { return [] }
-		return selectedActivity.enabledRooms
-			.map(roomId => rooms.find(r => r._id === roomId))
-			.filter((room): room is NonNullable<typeof room> => room !== undefined)
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [rooms, selectedActivity])
 
@@ -235,7 +220,7 @@ export default function Page (): ReactElement {
 		switch (currentView) {
 			case 'welcome':
 				return (
-					<div className="flex flex-col items-center justify-center h-full">
+					<div className="fixed inset-0 flex flex-col items-center justify-center">
 						<h1 className="text-gray-800 mb-8 text-7xl font-bold text-center">
 							{kioskWelcomeMessage}
 						</h1>
@@ -255,7 +240,10 @@ export default function Page (): ReactElement {
 									navigateTo('activity')
 								}
 							}}
-							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
+							className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-xl text-3xl
+								shadow-[0_0_15px_rgba(0,0,0,0.2)] hover:scale-102 hover:shadow-[0_0_25px_rgba(0,0,0,0.3)] active:scale-98
+								transition-all duration-150 relative overflow-hidden
+								before:absolute before:inset-0 before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full before:animate-shimmer"
 						>
 							{'Tryk her for at starte'}
 						</button>
@@ -269,9 +257,8 @@ export default function Page (): ReactElement {
 				return (
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
-						subtitle="Vælg den aktivitet du deltager i"
+						subtitle="Tryk for at vælge den aktivitet du deltager i"
 						items={filteredActivities}
-						priorityItems={priorityActivities}
 						currentSelectionId={selectedActivity?._id}
 						onSelect={handleActivitySelect}
 					/>
@@ -284,9 +271,8 @@ export default function Page (): ReactElement {
 				return (
 					<DeliveryInfoSelection
 						title="Vælg dit spisested"
-						subtitle="Vælg lokalet hvor bestillingen skal leveres til"
+						subtitle="Tryk for at vælge lokalet hvor bestillingen skal leveres til"
 						items={filteredRooms}
-						priorityItems={priorityRooms}
 						currentSelectionId={selectedRoom?._id}
 						onSelect={handleRoomSelect}
 					/>
