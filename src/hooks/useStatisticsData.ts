@@ -367,6 +367,8 @@ export default function useStatisticsData ({
 	const averageProductsPerOrder = orders.length
 		? orders.reduce((sum, order) => sum + order.products.reduce((s, p) => s + p.quantity, 0), 0) / orders.length
 		: 0
+	const totalProductsSold = orders.reduce((sum, order) => sum + order.products.reduce((s, p) => s + p.quantity, 0), 0)
+	const totalOptionsSold = orders.reduce((sum, order) => sum + order.options.reduce((s, o) => s + o.quantity, 0), 0)
 	const busiest = {
 		hour: ordersByHour.indexOf(Math.max(...ordersByHour)),
 		day: ordersByDayOfWeek.indexOf(Math.max(...ordersByDayOfWeek))
@@ -395,6 +397,8 @@ export default function useStatisticsData ({
 		chartLabels,
 		totalSalesDisplay,
 		totalOrders,
+		totalProductsSold,
+		totalOptionsSold,
 		avgOrderValueDisplay,
 		mostSoldProduct,
 		avgProductsDisplay,

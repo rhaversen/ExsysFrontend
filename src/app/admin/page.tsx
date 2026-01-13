@@ -169,25 +169,25 @@ export default function Page (): ReactElement | null {
 								hoverBgColor="hover:bg-teal-600"
 							/>
 						</div>
-						{/* Debug tools section */}
-						<div className="border-t border-gray-200 pt-4">
-							<p className="text-sm text-gray-500 mb-2">{'Udviklerværktøjer'}</p>
-							<div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-								<AdminLinkButton
-									href="/admin/debug"
-									icon={FiTerminal}
-									text="Betalingssimulator"
-									bgColor="bg-gray-600"
-									hoverBgColor="hover:bg-gray-700"
-								/>
-							</div>
-						</div>
 						{/* Config Weekdays Editor */}
 						<ConfigWeekdaysEditor configs={config} />
 						{/* All Kiosks Status Manager */}
 						<AllKiosksStatusManager kiosks={kiosks} products={products} />
 						{/* Kiosk Refresh Component */}
 						<KioskRefresh />
+						{/* Debug tools section - subtle/hidden */}
+						<details className="text-xs text-gray-400">
+							<summary className="cursor-pointer hover:text-gray-500">{'Udviklerværktøjer'}</summary>
+							<div className="mt-2">
+								<AdminLinkButton
+									href="/admin/debug"
+									icon={FiTerminal}
+									text="Betalingssimulator"
+									bgColor="bg-gray-400"
+									hoverBgColor="hover:bg-gray-500"
+								/>
+							</div>
+						</details>
 					</div>
 					<div className="flex flex-col gap-6">
 						{/* Kiosk Status */}

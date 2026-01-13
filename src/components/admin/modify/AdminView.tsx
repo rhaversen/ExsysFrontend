@@ -34,6 +34,28 @@ import {
 
 type ViewType = 'Aktiviteter' | 'Spisesteder' | 'Kiosker' | 'Kortlæsere' | 'Admins' | 'Konfiguration' | 'Produkter' | 'Tilvalg'
 
+const getEntityCount = (
+	selectedView: ViewType | null,
+	activities: ActivityType[],
+	rooms: RoomType[],
+	kiosks: KioskType[],
+	readers: ReaderType[],
+	admins: AdminType[],
+	products: ProductType[],
+	options: OptionType[]
+): number | null => {
+	switch (selectedView) {
+		case 'Aktiviteter': return activities.length
+		case 'Spisesteder': return rooms.length
+		case 'Kiosker': return kiosks.length
+		case 'Kortlæsere': return readers.length
+		case 'Admins': return admins.length
+		case 'Produkter': return products.length
+		case 'Tilvalg': return options.length
+		default: return null
+	}
+}
+
 const AdminView = ({
 	views,
 	activities,
@@ -144,18 +166,23 @@ const AdminView = ({
 					<div className="mb-2 space-y-1">
 						<ResourceInfo viewName={selectedView} />
 						<div className="flex flex-wrap justify-between items-center">
-							<button
-								type="button"
-								title={showAddForm ? 'Skjul ny' : 'Tilføj ny'}
-								className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-md"
-								onClick={toggleAdd}
-							>
-								{showAddForm
-									? <FaMinus className="h-4 w-4" />
-									: <FaPlus className="h-4 w-4" />
-								}
-								<span className="ml-2">{showAddForm ? 'Skjul ny' : 'Tilføj ny'}</span>
-							</button>
+							<div className="flex items-center gap-4">
+								<button
+									type="button"
+									title={showAddForm ? 'Skjul ny' : 'Tilføj ny'}
+									className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg shadow-md"
+									onClick={toggleAdd}
+								>
+									{showAddForm
+										? <FaMinus className="h-4 w-4" />
+										: <FaPlus className="h-4 w-4" />
+									}
+									<span className="ml-2">{showAddForm ? 'Skjul ny' : 'Tilføj ny'}</span>
+								</button>
+								<span className="text-sm text-gray-600">
+									{getEntityCount(selectedView, activities, rooms, kiosks, readers, admins, products, options)} {selectedView?.toLowerCase()}
+								</span>
+							</div>
 							{isEnabled && (
 								<SortingControl
 									options={sortingOptions}

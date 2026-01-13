@@ -11,19 +11,19 @@ interface PropDefinition {
 
 const info: Record<string, ReactElement[]> = {
 	Aktiviteter: [
-		<>{'Grupper, der spiser i et eller flere spisesteder. Tillader at have separate bestillinger for forskellige grupper der spiser i samme lokale.'}</>,
-		<>{'Tilknyttet en eller flere kiosker, hvor aktiviteten vises som en fremhævet valgmulighed.'}</>,
-		<>{'Brugere kan altid vælge mellem alle oprettede aktiviteter (ikke deaktiveret).'}</>
+		<>{'En aktivitet er en gruppe, der spiser i et eller flere spisesteder. Dette gør det muligt at have separate bestillinger for forskellige grupper (aktiviteter) der spiser i samme lokale.'}</>,
+		<>{'Tilknyttet en eller flere kiosker, hvor aktiviteten vises som en valgmulighed.'}</>,
+		<>{'Brugere kan kun vælge mellem de tilføjede aktiviteter på den givne kiosk. Hvis ingen er tilføjet, kan brugeren ikke udføre en bestilling.'}</>
 	],
 	Spisesteder: [
-		<>{'Lokationer, hvor bestillinger kan leveres til.'}</>,
-		<>{'Tilknyttet en eller flere aktiviteter, hvor spisestedet vises som en fremhævet valgmulighed.'}</>,
-		<>{'Brugere kan altid vælge mellem alle oprettede spisesteder (ikke deaktiveret).'}</>
+		<>{'Lokationer, hvor aktiviteter spiser, og deres bestillinger kan leveres til.'}</>,
+		<>{'Tilknyttet en eller flere aktiviteter, hvor spisestedet vises som en valgmulighed.'}</>,
+		<>{'Brugere kan kun vælge mellem de valgte spisesteder på den givne aktivitet. Hvis ingen er tilføjet, kan brugeren ikke udføre en bestilling.'}</>
 	],
 	Kiosker: [
-		<>{'Repræsenterer de fysiske touch-enheder, hvor brugere laver bestillinger. Fungerer som login til den fysiske enhed.'}</>,
-		<>{'Kioskernes adgangskode kan ændres i konfiguration.'}</>,
-		<>{'Tilknyttet en eller flere aktiviteter, som vises som en fremhævet valgmulighed. Hvis ingen aktiviteter er tilknyttet, vises alle aktiviteter ligeligt.'}</>,
+		<>{'En kiosk her på siden repræsenterer de fysiske touch-enheder, hvor brugere laver bestillinger. De fungerer som login til den fysiske enhed (iPad).'}</>,
+		<>{'Kioskernes adgangskode kan ændres under "Konfiguration" øverst på siden her.'}</>,
+		<>{'Tilknyttet en eller flere aktiviteter, som vises som en valgmulighed.'}</>,
 		<>{'Kan tilknyttes en SumUp kortlæser for at muliggøre kortbetaling. Hvis ingen kortlæser er tilknyttet, vil kiosken kun kunne modtage kontantbetalinger.'}</>,
 		<>{'Kioskens navn og nummer (#) vises i bunden af kioskens skærm når den er logget ind.'}</>
 	],
@@ -34,30 +34,29 @@ const info: Record<string, ReactElement[]> = {
 	],
 	Kortlæsere: [
 		<>{'Repræsenterer systemets SumUp-kortlæsere, hvortil kortbetalinger tilsendes.'}</>,
-		<>{'Kan knyttes til en kiosk for at muliggøre kortbetaling.'}</>,
+		<>{'Kan knyttes til en kiosk for at muliggøre kortbetaling. Kan flyttes mellem kiosker efter behov.'}</>,
 		<>
 			{'Ved opsætning af en ny enhed vælges API på SumUp-enheden, hvorefter parrekoden fra SumUp-skærmen indtastes her på siden.'}{' '}
 			<a
-				href="https://developer.sumup.com/terminal-payments/guides/pairing-solo#generating-the-pairing-code"
+				href="https://developer.sumup.com/terminal-payments/cloud-api#generate-pairing-code"
 				target="_blank"
 				rel="noopener noreferrer"
 				className="text-blue-600 hover:underline"
 			>
-				{'Se SumUp vejledning her\r'}
+				{'Se SumUp vejledning her. '}
 			</a>
-			{'. Hvis enheden har et nummer trykt på den, indtastes det også her på siden. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.\r'}
+			{'Hvis enheden har et nummer trykt på den, indtastes det også her på siden. Hvis ikke, skal feltet efterlades tomt, og systemet vil generere et nummer (#) til enheden, som derefter printes på den fysiske enhed for nem identifikation.'}
 		</>,
 		<>
 			{'Ved fjernelse af en enhed skal kortlæseren slettes her på siden, og derefter frakobles API\'en på SumUp-enheden.'}{' '}
 			<a
-				href="https://developer.sumup.com/terminal-payments/guides/pairing-solo#diconnect-reader"
+				href="https://developer.sumup.com/terminal-payments/cloud-api#disconnect-reader-physically"
 				target="_blank"
 				rel="noopener noreferrer"
 				className="text-blue-600 hover:underline"
 			>
-				{'Se SumUp vejledning her\r'}
+				{'Se SumUp vejledning her. '}
 			</a>
-			{'.\r'}
 		</>,
 		<>{'Kortlæserens nummer (#) er printet på den fysiske enhed.'}</>
 	],
@@ -90,25 +89,21 @@ const propInfo: Record<string, PropDefinition[]> = {
 		{ name: 'Produkter', message: 'Produkter hvor tilvalget vises som en tilkøbsmulighed.' }
 	],
 	Aktiviteter: [
-		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Navn', message: 'Aktivitetens visningsnavn på kiosken. Burde være kort og præcist, og let genkendeligt af brugeren.' },
+		{ name: 'Spisesteder', message: 'Spisesteder som kan vælges for aktiviteten.' },
 		{ name: 'Deaktiverede Produkter', message: 'Produkter som ikke kan vælges for aktiviteten.' },
-		{ name: 'Fremhævede Spisesteder', message: 'Spisesteder som vises som foreslået.' },
-		{ name: 'Deaktiverede Spisesteder', message: 'Spisesteder som ikke kan vælges for aktiviteten.' },
-		{ name: 'Fremhævende Kiosker', message: 'Kiosker som vil vise aktiviteten som foreslået.' },
-		{ name: 'Deaktiverede Kiosker', message: 'Kiosker hvor aktiviteten ikke kan vælges.' }
+		{ name: 'Kiosker', message: 'Kiosker hvor aktiviteten kan vælges.' }
 	],
 	Spisesteder: [
-		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken. Burde være kort og præcist.' },
+		{ name: 'Navn', message: 'Spisestedets visningsnavn på kiosken. Burde være kort og præcist, og let genkendeligt af brugeren.' },
 		{ name: 'Beskrivelse', message: 'Beskrivelse af rummet der vises på kiosken. Burde forklare lokationen af spisestedet.' },
-		{ name: 'Fremhævende Aktiviteter', message: 'Aktiviteter hvor spisestedet vises som foreslået.' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter hvor spisestedet ikke kan vælges.' }
+		{ name: 'Aktiviteter', message: 'Aktiviteter hvor spisestedet kan vælges.' }
 	],
 	Kiosker: [
 		{ name: 'Navn', message: 'Navn til intern identificering. Kioskens navn bør gøre det nemt at identificere den, f.eks. ved at angive placering eller funktion.' },
 		{ name: 'Kiosk #', message: 'Brugernavn til kiosk login.' },
 		{ name: 'Tilknyttet Kortlæser', message: 'Kioskens tilknyttede kortlæser.' },
-		{ name: 'Fremhævede Aktiviteter', message: 'Aktiviteter som vises som foreslået.' },
-		{ name: 'Deaktiverede Aktiviteter', message: 'Aktiviteter som ikke kan vælges.' }
+		{ name: 'Aktiviteter', message: 'Aktiviteter som kan vælges på kiosken.' }
 	],
 	Kortlæsere: [
 		{ name: 'Kortlæser #', message: 'Kortlæserens ID for intern identifikation.' },

@@ -112,7 +112,7 @@ export function useKioskData (): UseKioskDataReturn {
 			if (selectedActivity?._id === activityUpdate._id) {
 				setSelectedActivity(activityUpdate)
 			}
-			if (selectedRoom && activityUpdate.disabledRooms.includes(selectedRoom._id)) {
+			if (selectedRoom && !activityUpdate.enabledRooms.includes(selectedRoom._id)) {
 				setSelectedRoom(null)
 			}
 		},
@@ -128,7 +128,7 @@ export function useKioskData (): UseKioskDataReturn {
 			if (kiosk && kioskUpdate._id === kiosk._id) {
 				setKiosk(kioskUpdate)
 				updateCheckoutMethods(kioskUpdate)
-				if (selectedActivity && kioskUpdate.disabledActivities?.includes(selectedActivity._id)) {
+				if (selectedActivity && !kioskUpdate.enabledActivities?.includes(selectedActivity._id)) {
 					setSelectedActivity(null)
 				}
 			}
