@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { useCallback, useEffect, useState } from 'react'
 
-import type { KioskPongEventType } from '@/types/backendDataTypes'
 import { useSharedSocket } from '@/hooks/useSharedSocket'
+import type { KioskPongEventType } from '@/types/backendDataTypes'
 
 export interface KioskPingStatus {
 	kioskId: string

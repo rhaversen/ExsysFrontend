@@ -22,10 +22,7 @@ const Room = ({
 }): ReactElement => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [linkedActivities, setLinkedActivities] = useState(
-		activities.filter(a => a.priorityRooms.some(r => r === room._id))
-	)
-	const [disabledActivities, setDisabledActivities] = useState(
-		activities.filter(a => a.disabledRooms.includes(room._id))
+		activities.filter(a => a.enabledRooms.some(r => r === room._id))
 	)
 	const { addError } = useError()
 	const {
@@ -46,15 +43,13 @@ const Room = ({
 
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
-	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 
 	const handleActivityChange = (newActivities: ActivityType[]): void => {
 		setLinkedActivities(newActivities)
 	}
 
 	useEffect(() => {
-		setLinkedActivities(activities.filter(a => a.priorityRooms.some(r => r === room._id)))
-		setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
+		setLinkedActivities(activities.filter(a => a.enabledRooms.some(r => r === room._id)))
 	}, [activities, room])
 
 	const handleCompleteEdit = (): void => {
@@ -62,38 +57,22 @@ const Room = ({
 		updateRoom(newRoom._id, newRoom)
 
 		// Get activities that need updating for linked activities
-		const currentActivities = activities.filter(a => a.priorityRooms.some(r => r === room._id))
+		const currentActivities = activities.filter(a => a.enabledRooms.some(r => r === room._id))
 		const addedActivities = linkedActivities.filter(a => !currentActivities.some(ca => ca._id === a._id))
 		const removedActivities = currentActivities.filter(ca => !linkedActivities.some(a => a._id === ca._id))
-
-		// Get activities that need updating for disabled activities
-		const currentDisabledActivities = activities.filter(a => a.disabledRooms.includes(room._id))
-		const addedDisabledActivities = disabledActivities.filter(a => !currentDisabledActivities.some(ca => ca._id === a._id))
-		const removedDisabledActivities = currentDisabledActivities.filter(ca => !disabledActivities.some(a => a._id === ca._id))
 
 		Promise.all([
 			// Handle linking/unlinking activities
 			...addedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
-					priorityRooms: [...activity.priorityRooms, room._id]
+					enabledRooms: [...activity.enabledRooms, room._id]
 				})
 			}),
 			...removedActivities.map(async activity => {
 				await updateActivityAsync(activity._id, {
 					...activity,
-					priorityRooms: activity.priorityRooms.filter(r => r !== room._id)
-				})
-			}),
-			// Handle disabling/enabling rooms in activities
-			...addedDisabledActivities.map(async activity => {
-				await updateActivityAsync(activity._id, {
-					disabledRooms: [...activity.disabledRooms, room._id]
-				})
-			}),
-			...removedDisabledActivities.map(async activity => {
-				await updateActivityAsync(activity._id, {
-					disabledRooms: activity.disabledRooms.filter(id => id !== room._id)
+					enabledRooms: activity.enabledRooms.filter(r => r !== room._id)
 				})
 			})
 		]).then(() => {
@@ -111,14 +90,13 @@ const Room = ({
 				setIsEditing={setIsEditing}
 				onHandleUndoEdit={() => {
 					resetFormState()
-					setLinkedActivities(activities.filter(a => a.priorityRooms.some(r => r === room._id)))
-					setDisabledActivities(activities.filter(a => a.disabledRooms.includes(room._id)))
+					setLinkedActivities(activities.filter(a => a.enabledRooms.some(r => r === room._id)))
 					setIsEditing(false)
 				}}
 				onHandleCompleteEdit={handleCompleteEdit}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
 				formIsValid={formIsValid}
-				canClose={!showActivities && !showDisabledActivities}
+				canClose={!showActivities}
 				createdAt={room.createdAt}
 				updatedAt={room.updatedAt}
 			>
@@ -162,9 +140,9 @@ const Room = ({
 					</div>
 				</div>
 
-				{/* Fremhævende Activities */}
+				{/* Activities */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævende Aktiviteter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
 						{linkedActivities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
@@ -174,22 +152,6 @@ const Room = ({
 							editable={isEditing}
 							onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
 							onShowItems={() => { setShowActivities(true) }}
-						/>
-					</div>
-				</div>
-
-				{/* Disabled Activities */}
-				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
-					<div className="flex flex-col items-center justify-center">
-						{disabledActivities.length === 0 && (
-							<div className="text-gray-500 text-sm">{'Ingen'}</div>
-						)}
-						<ItemsDisplay
-							items={disabledActivities}
-							editable={isEditing}
-							onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
-							onShowItems={() => { setShowDisabledActivities(true) }}
 						/>
 					</div>
 				</div>
@@ -208,31 +170,12 @@ const Room = ({
 
 			{showActivities && (
 				<SelectionWindow
-					title={`Tilføj Fremhævende Aktiviteter til ${newRoom.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in disabledActivities
-						disabled: disabledActivities.some(da => da._id === a._id)
-					}))}
+					title={`Tilføj Aktiviteter til ${newRoom.name}`}
+					items={activities}
 					selectedItems={linkedActivities}
 					onAddItem={(v) => { handleActivityChange([...linkedActivities, v]) }}
 					onDeleteItem={(v) => { handleActivityChange(linkedActivities.filter((activity) => activity._id !== v._id)) }}
 					onClose={() => { setShowActivities(false) }}
-				/>
-			)}
-
-			{showDisabledActivities && (
-				<SelectionWindow
-					title={`Tilføj Deaktiverede Aktiviteter til ${newRoom.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in linkedActivities
-						disabled: linkedActivities.some(la => la._id === a._id)
-					}))}
-					selectedItems={disabledActivities}
-					onAddItem={(v) => { setDisabledActivities([...disabledActivities, v]) }}
-					onDeleteItem={(v) => { setDisabledActivities(disabledActivities.filter((activity) => activity._id !== v._id)) }}
-					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>

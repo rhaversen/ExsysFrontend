@@ -157,27 +157,27 @@ export default function Page (): ReactElement {
 	const filteredActivities = useMemo(() => {
 		if (!kiosk) { return [] }
 		return activities
-			.filter(activity => !kiosk.disabledActivities?.includes(activity._id))
+			.filter(activity => kiosk.enabledActivities?.includes(activity._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [activities, kiosk])
 
 	const priorityActivities = useMemo(() => {
 		if (!kiosk) { return [] }
 		return activities
-			.filter(activity => kiosk.priorityActivities.includes(activity._id))
+			.filter(activity => kiosk.enabledActivities.includes(activity._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [activities, kiosk])
 
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
 		return rooms
-			.filter(room => !selectedActivity.disabledRooms.includes(room._id))
+			.filter(room => selectedActivity.enabledRooms.includes(room._id))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	}, [rooms, selectedActivity])
 
 	const priorityRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
-		return selectedActivity.priorityRooms
+		return selectedActivity.enabledRooms
 			.map(roomId => rooms.find(r => r._id === roomId))
 			.filter((room): room is NonNullable<typeof room> => room !== undefined)
 			.sort((a, b) => a.name.localeCompare(b.name))

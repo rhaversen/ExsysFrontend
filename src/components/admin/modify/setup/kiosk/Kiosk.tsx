@@ -42,7 +42,6 @@ const Kiosk = ({
 	} = useCUDOperations<PostKioskType, PatchKioskType>('/v1/kiosks')
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 	const [showActivities, setShowActivities] = useState(false)
-	const [showDisabledActivities, setShowDisabledActivities] = useState(false)
 
 	return (
 		<>
@@ -62,7 +61,7 @@ const Kiosk = ({
 				}}
 				setShowDeleteConfirmation={setShowDeleteConfirmation}
 				formIsValid={formIsValid}
-				canClose={!showActivities && !showDisabledActivities}
+				canClose={!showActivities}
 				createdAt={kiosk.createdAt}
 				updatedAt={kiosk.updatedAt}
 			>
@@ -134,37 +133,18 @@ const Kiosk = ({
 					</div>
 				</div>
 
-				{/* Fremhævede Activities */}
+				{/* Enabled Activities */}
 				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Fremhævede Aktiviteter'}</div>
+					<div className="text-xs font-medium text-gray-500 mb-1">{'Aktiviteter'}</div>
 					<div className="flex flex-col items-center justify-center">
-						{newKiosk.priorityActivities.length === 0 && (
+						{newKiosk.enabledActivities.length === 0 && (
 							<div className="text-gray-500 text-sm">{'Ingen'}</div>
 						)}
 						<ItemsDisplay
-							items={activities.filter(activity => newKiosk.priorityActivities?.some(pa => pa === activity._id))}
+							items={activities.filter(activity => newKiosk.enabledActivities?.some(ea => ea === activity._id))}
 							editable={isEditing}
-							onDeleteItem={(v: ActivityType) => { handleFieldChange('priorityActivities', newKiosk.priorityActivities.filter((activity) => activity !== v._id)) }}
+							onDeleteItem={(v: ActivityType) => { handleFieldChange('enabledActivities', newKiosk.enabledActivities.filter((activity) => activity !== v._id)) }}
 							onShowItems={() => { setShowActivities(true) }}
-						/>
-					</div>
-				</div>
-
-				{/* Disabled Activities */}
-				<div className="flex flex-col items-center p-1 flex-1">
-					<div className="text-xs font-medium text-gray-500 mb-1">{'Deaktiverede Aktiviteter'}</div>
-					<div className="flex flex-col items-center justify-center">
-						{newKiosk.disabledActivities.length === 0 && (
-							<div className="text-gray-500 text-sm">{'Ingen'}</div>
-						)}
-						<ItemsDisplay
-							items={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
-							editable={isEditing}
-							onDeleteItem={(v: ActivityType) => {
-								handleFieldChange('disabledActivities',
-									(newKiosk.disabledActivities?.length > 0 ? newKiosk.disabledActivities : []).filter(id => id !== v._id))
-							}}
-							onShowItems={() => { setShowDisabledActivities(true) }}
 						/>
 					</div>
 				</div>
@@ -184,37 +164,13 @@ const Kiosk = ({
 			{showActivities && (
 				<SelectionWindow
 					title={`Tilføj aktivitet til ${newKiosk.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in disabledActivities
-						disabled: newKiosk.disabledActivities.includes(a._id)
-					}))}
-					selectedItems={activities.filter(activity => newKiosk.priorityActivities?.some(pa => pa === activity._id))}
+					items={activities}
+					selectedItems={activities.filter(activity => newKiosk.enabledActivities?.some(ea => ea === activity._id))}
 					onAddItem={(v) => {
-						handleFieldChange('priorityActivities', [...newKiosk.priorityActivities, v._id])
+						handleFieldChange('enabledActivities', [...newKiosk.enabledActivities, v._id])
 					}}
-					onDeleteItem={(v) => { handleFieldChange('priorityActivities', newKiosk.priorityActivities.filter((activity) => activity !== v._id)) }}
+					onDeleteItem={(v) => { handleFieldChange('enabledActivities', newKiosk.enabledActivities.filter((activity) => activity !== v._id)) }}
 					onClose={() => { setShowActivities(false) }}
-				/>
-			)}
-
-			{showDisabledActivities && (
-				<SelectionWindow
-					title={`Tilføj deaktiverede aktiviteter til ${newKiosk.name}`}
-					items={activities.map(a => ({
-						...a,
-						// Disable if already in prioritized activities
-						disabled: newKiosk.priorityActivities.some(pa => pa === a._id)
-					}))}
-					selectedItems={activities.filter(activity => newKiosk.disabledActivities?.includes(activity._id))}
-					onAddItem={(v) => {
-						handleFieldChange('disabledActivities', [...newKiosk.disabledActivities, v._id])
-					}}
-					onDeleteItem={(v) => {
-						handleFieldChange('disabledActivities',
-							newKiosk.disabledActivities.filter(id => id !== v._id))
-					}}
-					onClose={() => { setShowDisabledActivities(false) }}
 				/>
 			)}
 		</>
