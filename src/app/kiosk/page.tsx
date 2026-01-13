@@ -155,13 +155,6 @@ export default function Page (): ReactElement {
 		setIsOrderInProgress(false)
 	}, [])
 
-	const handleStartOver = useCallback(() => {
-		setSelectedActivity(null)
-		setSelectedRoom(null)
-		setCart(EMPTY_CART)
-		navigateTo('activity')
-	}, [setSelectedActivity, setSelectedRoom, navigateTo])
-
 	const handleFeedbackBannerClick = useCallback(() => {
 		clearTimeout(feedbackBannerTimerRef.current)
 		setShowFeedbackBanner(false)
@@ -382,7 +375,6 @@ export default function Page (): ReactElement {
 					canClickRoom={canClickRoom}
 					canClickOrder={canClickOrder}
 					onProgressClick={handleProgressClick}
-					onReset={handleStartOver}
 					selectedActivity={selectedActivity}
 					selectedRoom={selectedRoom}
 				/>
