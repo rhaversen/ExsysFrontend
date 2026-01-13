@@ -94,11 +94,25 @@ export default function Page (): ReactElement {
 		}
 	}, [isKioskClosed, resetSession])
 
+	const getRoomsForActivity = useCallback((activity: typeof selectedActivity) => {
+		if (!activity) { return [] }
+		return rooms
+			.filter(room => activity.enabledRooms.includes(room._id))
+			.sort((a, b) => a.name.localeCompare(b.name))
+	}, [rooms])
+
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
 		setSelectedActivity(activity)
-		navigateTo(selectedRoom ? 'order' : 'room')
-	}, [selectedRoom, setSelectedActivity, navigateTo])
+
+		const activityRooms = getRoomsForActivity(activity)
+		if (activityRooms.length === 1) {
+			setSelectedRoom(activityRooms[0])
+			navigateTo('order')
+		} else {
+			navigateTo(selectedRoom ? 'order' : 'room')
+		}
+	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
@@ -233,7 +247,21 @@ export default function Page (): ReactElement {
 							{kioskWelcomeMessage}
 						</h1>
 						<button
-							onClick={() => navigateTo('activity')}
+							onClick={() => {
+								if (filteredActivities.length === 1) {
+									const singleActivity = filteredActivities[0]
+									setSelectedActivity(singleActivity)
+									const activityRooms = getRoomsForActivity(singleActivity)
+									if (activityRooms.length === 1) {
+										setSelectedRoom(activityRooms[0])
+										navigateTo('order')
+									} else {
+										navigateTo('room')
+									}
+								} else {
+									navigateTo('activity')
+								}
+							}}
 							className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-3xl shadow-lg transition-colors"
 						>
 							{'Tryk her for at starte'}
