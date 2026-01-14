@@ -20,7 +20,13 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
 	{
-		ignores: ['public/kiosk-recovery-sw.js', 'public/kiosk-offline.html']
+		ignores: [
+			'public/kiosk-recovery-sw.js',
+			'public/kiosk-offline.html',
+			'coverage/**',
+			'jest.config.js',
+			'jest.setup.ts'
+		]
 	},
 	...nextCoreWebVitals,
 	...nextTypescript,
@@ -141,6 +147,14 @@ const eslintConfig = [
 		rules: {
 			'n/no-extraneous-import': 'off',
 			'n/no-unpublished-import': 'off'
+		}
+	},
+	{
+		files: ['**/*.test.ts', '**/*.test.tsx', 'jest.setup.ts'],
+		rules: {
+			'n/no-unpublished-import': ['error', {
+				allowModules: ['@testing-library/react', '@testing-library/jest-dom']
+			}]
 		}
 	},
 	{
