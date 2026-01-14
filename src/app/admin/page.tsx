@@ -142,9 +142,9 @@ export default function Page (): ReactElement | null {
 		<main className="flex flex-col items-center">
 			<div className="flex flex-col pt-4 gap-6 w-full px-4">
 				{/* Header row */}
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
 					{/* Welcome + Stats centered */}
-					<div className="flex-1" />
+					<div className="hidden sm:block flex-1" />
 					<div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
 						<h1 className="text-xl font-bold text-gray-800">
 							{'Velkommen, '}{currentUser?.name ?? 'Gæst'}{'!'}
@@ -168,7 +168,7 @@ export default function Page (): ReactElement | null {
 						</div>
 					</div>
 					{/* Kitchen button on the right */}
-					<div className="flex-1 flex justify-end">
+					<div className="sm:flex-1 flex justify-center sm:justify-end">
 						<Link
 							href="/admin/kitchen"
 							className="flex items-center gap-3 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg group"
