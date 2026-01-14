@@ -39,7 +39,7 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 			<div className="flex flex-col items-center justify-center text-center">
 				<h1 className="text-5xl font-bold mb-4 text-gray-800">{'Ris og Ros'}</h1>
-				<p className="text-2xl mb-8 text-gray-600">{'Giv din feedback med et tryk eller scan QR-koden'}</p>
+				<p className="text-2xl mb-8 text-gray-600">{'Vurder din oplevelse med et tryk, eller scan QR-koden for at skrive en besked til os'}</p>
 
 				<div className="flex items-center gap-12 mb-8">
 					<button
@@ -88,7 +88,7 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 				</div>
 
 				{submittedRating !== null ? (
-					<p className="text-2xl text-gray-600 font-semibold">{'Tak for din feedback!'}</p>
+					<p className="text-2xl text-gray-600 font-semibold">{'Tak for din vurdering!'}</p>
 				) : (
 					<p className="text-lg text-gray-500 font-mono">{feedbackUrl}</p>
 				)}
