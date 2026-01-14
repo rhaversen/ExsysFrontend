@@ -19,29 +19,30 @@ export interface UseKioskPingReturn {
 	getPingState: (kioskId: string) => KioskPingState
 }
 
-const PING_INTERVAL_MS = 1000
-const INITIAL_LOADING_MS = 5000
-const NO_RESPONSE_THRESHOLD_MS = 3000
+const PING_INTERVAL_MS = 10000
+const NO_RESPONSE_THRESHOLD_MS = 15000
 
 export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 	const socket = useSharedSocket()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [pingStatuses, setPingStatuses] = useState<Map<string, KioskPingStatus>>(new Map())
-	const [isInitialLoading, setIsInitialLoading] = useState(true)
+	const [timedOutKiosks, setTimedOutKiosks] = useState<Set<string>>(new Set())
 
 	const kioskIdsKey = kioskIds.join(',')
 
 	useEffect(() => {
-		setIsInitialLoading(true)
 		setPingStatuses(new Map())
-
-		const timer = setTimeout(() => {
-			setIsInitialLoading(false)
-		}, INITIAL_LOADING_MS)
-
-		return () => { clearTimeout(timer) }
+		setTimedOutKiosks(new Set())
 	}, [kioskIdsKey])
+
+	useEffect(() => {
+		const timeout = setTimeout(() => {
+			setTimedOutKiosks(new Set(kioskIds))
+		}, NO_RESPONSE_THRESHOLD_MS)
+
+		return () => { clearTimeout(timeout) }
+	}, [kioskIds])
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === '') { return }
@@ -82,13 +83,10 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 	}, [socket])
 
 	const getPingState = useCallback((kioskId: string): KioskPingState => {
-		if (isInitialLoading) {
-			return 'loading'
-		}
-
 		const status = pingStatuses.get(kioskId)
+
 		if (status === undefined) {
-			return 'no-response'
+			return timedOutKiosks.has(kioskId) ? 'no-response' : 'loading'
 		}
 
 		const timeSinceLastSeen = Date.now() - status.lastSeen.getTime()
@@ -97,7 +95,7 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 		}
 
 		return 'active'
-	}, [isInitialLoading, pingStatuses])
+	}, [pingStatuses, timedOutKiosks])
 
 	return {
 		pingStatuses,

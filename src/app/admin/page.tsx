@@ -1,39 +1,26 @@
 'use client'
 
 import axios from 'axios'
+import dayjs from 'dayjs'
 import Link from 'next/link'
-import { useCallback, useEffect, useState, type ReactElement } from 'react'
-import { FaEdit, FaChartBar } from 'react-icons/fa'
-import { FiMessageSquare, FiTerminal } from 'react-icons/fi'
+import { useCallback, useEffect, useState, useMemo, type ReactElement } from 'react'
+import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
+import 'dayjs/locale/da'
 
 import AllKiosksStatusManager from '@/components/admin/AllKiosksStatusManager'
 import ConfigWeekdaysEditor from '@/components/admin/ConfigWeekdaysEditor'
 import EntitiesTimelineOverview from '@/components/admin/EntitiesTimelineOverview'
-import KioskRefresh from '@/components/admin/KioskRefresh'
 import KioskStatusManager from '@/components/admin/KioskStatusManager'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
-import type { OrderType, KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
-
-const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
-	href: string
-	icon: React.ElementType
-	text: string
-	bgColor: string
-	hoverBgColor: string
-}): ReactElement => (
-	<Link href={href} className="flex justify-center">
-		<div className={`w-3/4 md:w-full flex flex-row gap-2 md:flex-col items-center justify-center py-3 md:py-6 ${bgColor} ${hoverBgColor} text-white rounded-lg transition transform hover:scale-105 shadow-md h-full`}>
-			<Icon className="w-7 h-7 md:w-12 md:h-12" />
-			<span className="text-lg font-medium text-center">{text}</span>
-		</div>
-	</Link>
-)
+import type { OrderType, KioskType, ProductType, SessionType, FeedbackMessageType, FeedbackRatingType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement | null {
+	dayjs.locale('da')
+
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const { config } = useConfig()
@@ -45,6 +32,8 @@ export default function Page (): ReactElement | null {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [sessions, setSessions] = useState<SessionType[]>([])
 	const [orders, setOrders] = useState<OrderType[]>([])
+	const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessageType[]>([])
+	const [feedbackRatings, setFeedbackRatings] = useState<FeedbackRatingType[]>([])
 
 	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
 		const today = new Date()
@@ -52,7 +41,6 @@ export default function Page (): ReactElement | null {
 		const tomorrow = new Date(today)
 		tomorrow.setDate(tomorrow.getDate() + 1)
 
-		// Filter needed for WebSocket events which can include orders from any date
 		const todayOrders = ordersList.filter(order => {
 			const orderDate = new Date(order.createdAt)
 			return orderDate >= today && orderDate < tomorrow && order.paymentStatus === 'successful'
@@ -78,23 +66,24 @@ export default function Page (): ReactElement | null {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const [kiosksRes, productsRes, sessionsRes, ordersRes] = await Promise.all([
+			const [kiosksRes, productsRes, sessionsRes, ordersRes, feedbackRes, ratingsRes] = await Promise.all([
 				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
 				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
 				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true }),
 				axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
-					params: {
-						fromDate: fromDate.toISOString(),
-						toDate: toDate.toISOString()
-					},
+					params: { fromDate: fromDate.toISOString(), toDate: toDate.toISOString() },
 					withCredentials: true
-				})
+				}),
+				axios.get<FeedbackMessageType[]>(`${API_URL}/v1/feedback/message`, { withCredentials: true }),
+				axios.get<FeedbackRatingType[]>(`${API_URL}/v1/feedback/rating`, { withCredentials: true })
 			])
 
 			setKiosks(kiosksRes.data)
 			setProducts(productsRes.data)
 			setSessions(sessionsRes.data)
 			setOrders(ordersRes.data)
+			setFeedbackMessages(feedbackRes.data)
+			setFeedbackRatings(ratingsRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -109,6 +98,8 @@ export default function Page (): ReactElement | null {
 			setProducts([])
 			setSessions([])
 			setOrders([])
+			setFeedbackMessages([])
+			setFeedbackRatings([])
 		})
 	}, [fetchData])
 
@@ -116,84 +107,207 @@ export default function Page (): ReactElement | null {
 	useEntitySocket<ProductType>('product', { setState: setProducts })
 	useEntitySocket<SessionType>('session', { setState: setSessions })
 	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<FeedbackMessageType>('feedbackMessage', { setState: setFeedbackMessages })
+	useEntitySocket<FeedbackRatingType>('feedbackRating', { setState: setFeedbackRatings })
+
+	const unreadFeedbackCount = feedbackMessages.filter(f => !f.isRead).length
+	const recentUnreadMessages = useMemo(() => {
+		return feedbackMessages
+			.filter(f => !f.isRead)
+			.sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
+			.slice(0, 3)
+	}, [feedbackMessages])
+
+	const todayRatings = useMemo(() => {
+		const today = dayjs().startOf('day')
+		const todayRatings = feedbackRatings.filter(r => dayjs(r.createdAt).isAfter(today))
+		const positive = todayRatings.filter(r => r.rating === 'positive').length
+		const negative = todayRatings.filter(r => r.rating === 'negative').length
+		const total = positive + negative
+		const positivePercent = total > 0 ? Math.round((positive / total) * 100) : 0
+		return { positive, negative, total, positivePercent }
+	}, [feedbackRatings])
+
+	const allTimeRatings = useMemo(() => {
+		const positive = feedbackRatings.filter(r => r.rating === 'positive').length
+		const negative = feedbackRatings.filter(r => r.rating === 'negative').length
+		const total = positive + negative
+		const positivePercent = total > 0 ? Math.round((positive / total) * 100) : 0
+		return { positive, negative, total, positivePercent }
+	}, [feedbackRatings])
 
 	if (!hasMounted) { return null }
 
 	return (
 		<main className="flex flex-col items-center">
-			<div className="flex flex-col pt-8 gap-8 w-full max-w-3xl xl:max-w-full px-4">
-				<p className="text-3xl font-bold text-gray-800 text-center">
-					{'Velkommen '}{((currentUser?.name) != null) ? currentUser.name : 'Gæst'}{'!'}
-				</p>
-				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+			<div className="flex flex-col pt-4 gap-6 w-full px-4">
+				{/* Header row */}
+				<div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
+					{/* Welcome + Stats centered */}
+					<div className="hidden sm:block flex-1" />
+					<div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+						<h1 className="text-xl font-bold text-gray-800">
+							{'Velkommen, '}{currentUser?.name ?? 'Gæst'}{'!'}
+						</h1>
+						<div className="flex items-center gap-3 text-sm">
+							<span className="flex items-center gap-1.5 bg-white rounded-lg px-3 py-1.5 shadow-sm border border-gray-100">
+								<FiShoppingBag className="w-4 h-4 text-blue-600" />
+								<span className="font-semibold text-gray-800">{totalOrdersToday}</span>
+								<span className="text-gray-400">{'bestillinger i dag'}</span>
+							</span>
+							{unreadFeedbackCount > 0 && (
+								<Link
+									href="/admin/feedback"
+									className="flex items-center gap-1.5 bg-red-50 rounded-lg px-3 py-1.5 shadow-sm border border-red-200 hover:bg-red-100 transition"
+								>
+									<FiMessageSquare className="w-4 h-4 text-red-600" />
+									<span className="font-semibold text-red-700">{unreadFeedbackCount}</span>
+									<span className="text-red-500">{'ulæste'}</span>
+								</Link>
+							)}
+						</div>
+					</div>
+					{/* Kitchen button on the right */}
+					<div className="sm:flex-1 flex justify-center sm:justify-end">
+						<Link
+							href="/admin/kitchen"
+							className="flex items-center gap-3 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg group"
+						>
+							<GiCookingPot className="w-6 h-6" />
+							<span className="font-semibold text-lg">{'Køkken'}</span>
+							{pendingOrders > 0 && (
+								<span className="bg-white text-blue-600 text-sm font-bold px-2 py-0.5 rounded-full min-w-6 text-center">
+									{pendingOrders}
+								</span>
+							)}
+							<FiChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+						</Link>
+					</div>
+				</div>
+
+				{/* Two Column Layout */}
+				<div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+					{/* Left Column */}
 					<div className="flex flex-col gap-6">
-						{/* Statistics section */}
-						<div className="grid grid-cols-2 gap-4">
-							<div className="bg-blue-50 p-4 rounded-lg">
-								<p className="text-sm text-blue-600 mb-1">{'Antal bestillinger i dag'}</p>
-								<p className="text-2xl font-bold text-blue-700">{totalOrdersToday}</p>
-							</div>
-							<div className="bg-amber-50 p-4 rounded-lg">
-								<p className="text-sm text-amber-600 mb-1">{'Afventende bestillinger'}</p>
-								<p className="text-2xl font-bold text-amber-700">{pendingOrders}</p>
-							</div>
+						{/* Åbningstider + Feedback side by side */}
+						<div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
+							{/* Åbningstider */}
+							<section className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col">
+								<div className="flex items-center gap-3 mb-4">
+									<FiCalendar className="w-5 h-5 text-gray-600" />
+									<h2 className="font-semibold text-gray-800">{'Åbningstider'}</h2>
+								</div>
+								<div className="flex-1 flex flex-col justify-center">
+									<ConfigWeekdaysEditor configs={config} />
+								</div>
+							</section>
+
+							{/* Feedback Overview */}
+							<section className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col">
+								<div className="flex items-center justify-between mb-4">
+									<div className="flex items-center gap-3">
+										<FiMessageSquare className="w-5 h-5 text-gray-600" />
+										<h2 className="font-semibold text-gray-800">{'Feedback'}</h2>
+									</div>
+									<Link
+										href="/admin/feedback"
+										className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+									>
+										{'Se alt'}
+										<FiChevronRight className="w-4 h-4" />
+									</Link>
+								</div>
+
+								<div className="flex-1 flex flex-col justify-center space-y-3">
+									<div className="flex items-center justify-between">
+										<span className="text-sm text-gray-600">{'I dag'}</span>
+										<div className="flex items-center gap-3">
+											<span className="flex items-center gap-1 text-sm">
+												<FiThumbsUp className="w-4 h-4 text-green-500" />
+												<span className="font-medium text-gray-700">{todayRatings.positive}</span>
+											</span>
+											<span className="flex items-center gap-1 text-sm">
+												<FiThumbsDown className="w-4 h-4 text-red-500" />
+												<span className="font-medium text-gray-700">{todayRatings.negative}</span>
+											</span>
+										</div>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-sm text-gray-600">{'Alt'}</span>
+										<div className="flex items-center gap-3">
+											<span className="flex items-center gap-1 text-sm">
+												<FiThumbsUp className="w-4 h-4 text-green-500" />
+												<span className="font-medium text-gray-700">{allTimeRatings.positive}</span>
+											</span>
+											<span className="flex items-center gap-1 text-sm">
+												<FiThumbsDown className="w-4 h-4 text-red-500" />
+												<span className="font-medium text-gray-700">{allTimeRatings.negative}</span>
+											</span>
+										</div>
+									</div>
+
+									{unreadFeedbackCount > 0
+										? (
+											<div className="pt-2 border-t border-gray-100">
+												<p className="text-sm text-gray-600">
+													<span className="font-medium text-gray-800">{unreadFeedbackCount}</span>
+													{' ulæste beskeder'}
+													{recentUnreadMessages[0] != null && (
+														<span className="text-gray-400">
+															{' fra '}
+															{recentUnreadMessages[0].name != null && recentUnreadMessages[0].name.length > 0
+																? recentUnreadMessages[0].name
+																: 'Anonym'}
+														</span>
+													)}
+												</p>
+											</div>
+										)
+										: (
+											<p className="text-sm text-gray-400">{'Ingen ulæste beskeder'}</p>
+										)}
+								</div>
+							</section>
 						</div>
-						{/* Task selection buttons */}
-						<div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-							<AdminLinkButton
-								href="/admin/kitchen"
-								icon={GiCookingPot}
-								text="Bestillinger"
-								bgColor="bg-blue-500"
-								hoverBgColor="hover:bg-blue-600"
-							/>
-							<AdminLinkButton
-								href="/admin/modify"
-								icon={FaEdit}
-								text="Opsætning"
-								bgColor="bg-green-500"
-								hoverBgColor="hover:bg-green-600"
-							/>
-							<AdminLinkButton
-								href="/admin/statistics"
-								icon={FaChartBar}
-								text="Statistik"
-								bgColor="bg-purple-500"
-								hoverBgColor="hover:bg-purple-600"
-							/>
-							<AdminLinkButton
-								href="/admin/feedback"
-								icon={FiMessageSquare}
-								text="Brugerfeedback"
-								bgColor="bg-teal-500"
-								hoverBgColor="hover:bg-teal-600"
-							/>
-						</div>
-						{/* Config Weekdays Editor */}
-						<ConfigWeekdaysEditor configs={config} />
-						{/* All Kiosks Status Manager */}
-						<AllKiosksStatusManager kiosks={kiosks} products={products} />
-						{/* Kiosk Refresh Component */}
-						<KioskRefresh />
-						{/* Debug tools section - subtle/hidden */}
+
+						{/* Product Timeline */}
+						<section className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+							<div className="flex items-center gap-3 mb-4">
+								<FiClock className="w-5 h-5 text-gray-600" />
+								<h2 className="font-semibold text-gray-800">{'Produkttidslinje'}</h2>
+							</div>
+							<EntitiesTimelineOverview products={products} />
+						</section>
+
+						{/* Debug tools */}
 						<details className="text-xs text-gray-400">
 							<summary className="cursor-pointer hover:text-gray-500">{'Udviklerværktøjer'}</summary>
 							<div className="mt-2">
-								<AdminLinkButton
+								<Link
 									href="/admin/debug"
-									icon={FiTerminal}
-									text="Betalingssimulator"
-									bgColor="bg-gray-400"
-									hoverBgColor="hover:bg-gray-500"
-								/>
+									className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm"
+								>
+									<FiTerminal className="w-4 h-4" />
+									{'Betalingssimulator'}
+								</Link>
 							</div>
 						</details>
 					</div>
+
+					{/* Right Column */}
 					<div className="flex flex-col gap-6">
-						{/* Kiosk Status */}
-						<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} />
-						{/* Entities Timeline Overview */}
-						<EntitiesTimelineOverview products={products} />
+						{/* Kioskhåndtering */}
+						<section className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+							<div className="flex items-center justify-between mb-4">
+								<div className="flex items-center gap-3">
+									<FiMonitor className="w-5 h-5 text-gray-600" />
+									<h2 className="font-semibold text-gray-800">{'Kioskhåndtering'}</h2>
+								</div>
+								<AllKiosksStatusManager kiosks={kiosks} products={products} />
+							</div>
+
+							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} />
+						</section>
 					</div>
 				</div>
 			</div>

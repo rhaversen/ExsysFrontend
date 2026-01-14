@@ -30,7 +30,6 @@ interface OrderViewProps {
 	updateCart: (cart: CartType) => void
 	onClose: () => void
 	onOrderStart: () => void
-	onOrderEnd: () => void
 }
 
 const OrderView = ({
@@ -43,8 +42,7 @@ const OrderView = ({
 	cart,
 	updateCart,
 	onClose,
-	onOrderStart,
-	onOrderEnd
+	onOrderStart
 }: OrderViewProps): ReactElement => {
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -169,16 +167,10 @@ const OrderView = ({
 	const cancelPayment = useCallback(() => {
 		if (!currentOrder) { return }
 		setIsCancelling(true)
-		setCurrentOrder(null)
 
 		axios.post(`${API_URL}/v1/orders/${currentOrder._id}/cancel`, {}, { withCredentials: true })
-			.finally(() => {
-				setIsCancelling(false)
-				setIsOrderConfirmationVisible(false)
-				onOrderEnd()
-			})
 			.catch(error => addError(error))
-	}, [currentOrder, API_URL, addError, onOrderEnd])
+	}, [currentOrder, API_URL, addError])
 
 	useEntitySocket<OrderType>('order', {
 		onCreate: order => {

@@ -1,60 +1,108 @@
-import { type ReactElement } from 'react'
+import axios from 'axios'
+import { type ReactElement, useState } from 'react'
+import { FiArrowLeft, FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 import QRCode from 'react-qr-code'
 
-import FeedbackForm from '@/components/shared/FeedbackForm'
+import TimeoutButton from '@/components/ui/TimeoutButton'
+import { useError } from '@/contexts/ErrorContext/ErrorContext'
+import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
 const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => {
 	const feedbackUrl = 'kantine.nyskivehus.dk/risros'
-	const domain = feedbackUrl.substring(0, feedbackUrl.indexOf('/'))
-	const path = feedbackUrl.substring(feedbackUrl.indexOf('/'))
+	const API_URL = process.env.NEXT_PUBLIC_API_URL
+	const { addError } = useError()
+	const [submittedRating, setSubmittedRating] = useState<FeedbackRatingValue | null>(null)
+	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
+		if (isSubmitting) { return }
+		setIsSubmitting(true)
+		try {
+			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })
+			setSubmittedRating(rating)
+		} catch (error) {
+			addError(error)
+		} finally {
+			setIsSubmitting(false)
+		}
+	}
 
 	return (
-		<div className="flex flex-col h-full relative">
-			<button
-				type="button"
-				onClick={onBack}
-				className="absolute top-4 left-4 z-10 flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-			>
-				<span className="text-xl">{'←'}</span>
-				<span>{'Tilbage'}</span>
-			</button>
-			<div className="flex-1 overflow-y-auto flex items-center justify-center">
-				<div className="flex flex-col items-center justify-center text-center p-8">
-					<h1 className="text-4xl font-bold mb-8 text-gray-800">{'Ris og Ros'}</h1>
-					<p className="text-xl mb-6 text-gray-600">{'Har du ris eller ros? Vi vil gerne høre fra dig!'}</p>
-					<p className="text-lg mb-10 text-gray-600">{'Scan QR-koden, besøg hjemmesiden, eller skriv direkte her.'}</p>
+		<div className="fixed inset-0 flex flex-col items-center justify-center">
+			<div className="flex flex-col items-center justify-center text-center">
+				<h1 className="text-5xl font-bold mb-4 text-gray-800">{'Ris og Ros'}</h1>
+				<p className="text-2xl mb-8 text-gray-600">{'Vurder din oplevelse med et tryk, eller scan QR-koden for at skrive en besked til os'}</p>
 
-					<div className="flex flex-row flex-wrap justify-around gap-4 w-full">
-						{/* Scan QR Code */}
-						<div className="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-xl w-80">
-							<h2 className="text-2xl font-semibold mb-6 text-gray-700">{'Scan QR-koden'}</h2>
-							<div className="p-4 border-2 border-dashed w-full h-[260px] border-gray-400 rounded-lg bg-white flex items-center justify-center">
-								<QRCode
-									value={`https://${feedbackUrl}`}
-									size={220}
-									bgColor="#ffffff"
-									fgColor="#000000"
-									level="H"
-								/>
-							</div>
-						</div>
+				<div className="flex items-center gap-12 mb-8">
+					<button
+						type="button"
+						onClick={() => submitFeedback('negative')}
+						disabled={isSubmitting || submittedRating !== null}
+						title="Negativ feedback"
+						aria-label="Negativ feedback"
+						className={`p-8 rounded-2xl shadow-xl transition-all ${
+							submittedRating === 'negative'
+								? 'bg-red-500 text-white scale-110'
+								: submittedRating !== null
+									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+									: 'bg-white text-red-500 hover:bg-red-50 hover:scale-105 active:scale-95'
+						}`}
+					>
+						<FiThumbsDown className="w-20 h-20" />
+					</button>
 
-						{/* Visit URL */}
-						<div className="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-xl w-80">
-							<h2 className="text-2xl font-semibold mb-6 text-gray-700">{'Besøg Hjemmesiden'}</h2>
-							{/* Square box for the link, matching QR code box dimensions */}
-							<div className="flex flex-col items-center justify-center w-full h-[260px] p-4 border-2 border-dashed border-gray-400 rounded-lg bg-gray-50">
-								<p className="text-lg font-mono text-blue-700 text-center">{domain}</p>
-								<p className="text-lg font-mono text-blue-700 text-center">{path}</p>
-							</div>
-						</div>
-
-						{/* Instant Feedback Form */}
-						<div className="flex flex-col items-center justify-start p-6 bg-white rounded-xl shadow-xl w-80">
-							<h2 className="text-2xl font-semibold mb-6 text-gray-700">{'Skriv her'}</h2>
-							<FeedbackForm />
-						</div>
+					<div className="p-6 bg-white rounded-2xl shadow-xl">
+						<QRCode
+							value={`https://${feedbackUrl}`}
+							size={200}
+							bgColor="#ffffff"
+							fgColor="#000000"
+							level="H"
+						/>
 					</div>
+
+					<button
+						type="button"
+						onClick={() => submitFeedback('positive')}
+						disabled={isSubmitting || submittedRating !== null}
+						title="Positiv feedback"
+						aria-label="Positiv feedback"
+						className={`p-8 rounded-2xl shadow-xl transition-all ${
+							submittedRating === 'positive'
+								? 'bg-green-500 text-white scale-110'
+								: submittedRating !== null
+									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+									: 'bg-white text-green-500 hover:bg-green-50 hover:scale-105 active:scale-95'
+						}`}
+					>
+						<FiThumbsUp className="w-20 h-20" />
+					</button>
+				</div>
+
+				<div className="flex flex-col items-center gap-6">
+					<p className="text-lg text-gray-500 font-mono">{feedbackUrl}</p>
+					<p className={`text-2xl font-semibold transition-opacity ${submittedRating !== null ? 'text-gray-600 opacity-100' : 'opacity-0'}`}>
+						{'Tak for din vurdering!'}
+					</p>
+					{submittedRating !== null ? (
+						<TimeoutButton
+							totalMs={5000}
+							onClick={onBack}
+							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
+						>
+							<FiArrowLeft className="w-6 h-6 shrink-0" />
+							<span>{'Tilbage'}</span>
+						</TimeoutButton>
+					) : (
+						<button
+							type="button"
+							onClick={onBack}
+							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
+						>
+							<FiArrowLeft className="w-6 h-6 shrink-0" />
+							<span>{'Tilbage'}</span>
+						</button>
+					)}
 				</div>
 			</div>
 		</div>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { type ReactElement } from 'react'
 
-import DailyReloader from '@/components/DailyReloader'
+import DailyReloader from '@/components/kiosk/DailyReloader'
 import ErrorProvider from '@/contexts/ErrorContext/ErrorProvider'
 import UserProvider from '@/contexts/UserProvider'
 
