@@ -16,19 +16,25 @@ import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useUser } from '@/contexts/UserProvider'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
-import type { OrderType, KioskType, ProductType, SessionType } from '@/types/backendDataTypes'
+import type { OrderType, KioskType, ProductType, SessionType, FeedbackMessageType } from '@/types/backendDataTypes'
 
-const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor }: {
+const AdminLinkButton = ({ href, icon: Icon, text, bgColor, hoverBgColor, badge }: {
 	href: string
 	icon: React.ElementType
 	text: string
 	bgColor: string
 	hoverBgColor: string
+	badge?: number
 }): ReactElement => (
 	<Link href={href} className="flex justify-center">
-		<div className={`w-3/4 md:w-full flex flex-row gap-2 md:flex-col items-center justify-center py-3 md:py-6 ${bgColor} ${hoverBgColor} text-white rounded-lg transition transform hover:scale-105 shadow-md h-full`}>
+		<div className={`relative w-3/4 md:w-full flex flex-row gap-2 md:flex-col items-center justify-center py-3 md:py-6 ${bgColor} ${hoverBgColor} text-white rounded-lg transition transform hover:scale-105 shadow-md h-full`}>
 			<Icon className="w-7 h-7 md:w-12 md:h-12" />
 			<span className="text-lg font-medium text-center">{text}</span>
+			{badge !== undefined && badge > 0 && (
+				<span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[1.25rem] text-center shadow-lg">
+					{badge > 99 ? '99+' : badge}
+				</span>
+			)}
 		</div>
 	</Link>
 )
@@ -45,6 +51,7 @@ export default function Page (): ReactElement | null {
 	const [products, setProducts] = useState<ProductType[]>([])
 	const [sessions, setSessions] = useState<SessionType[]>([])
 	const [orders, setOrders] = useState<OrderType[]>([])
+	const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessageType[]>([])
 
 	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
 		const today = new Date()
@@ -78,7 +85,7 @@ export default function Page (): ReactElement | null {
 			const fromDate = new Date(); fromDate.setHours(0, 0, 0, 0)
 			const toDate = new Date(); toDate.setHours(24, 0, 0, 0)
 
-			const [kiosksRes, productsRes, sessionsRes, ordersRes] = await Promise.all([
+			const [kiosksRes, productsRes, sessionsRes, ordersRes, feedbackRes] = await Promise.all([
 				axios.get<KioskType[]>(`${API_URL}/v1/kiosks`, { withCredentials: true }),
 				axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
 				axios.get<SessionType[]>(`${API_URL}/v1/sessions`, { withCredentials: true }),
@@ -88,13 +95,15 @@ export default function Page (): ReactElement | null {
 						toDate: toDate.toISOString()
 					},
 					withCredentials: true
-				})
+				}),
+				axios.get<FeedbackMessageType[]>(`${API_URL}/v1/feedback/message`, { withCredentials: true })
 			])
 
 			setKiosks(kiosksRes.data)
 			setProducts(productsRes.data)
 			setSessions(sessionsRes.data)
 			setOrders(ordersRes.data)
+			setFeedbackMessages(feedbackRes.data)
 		} catch (error) {
 			addError(error)
 		}
@@ -109,6 +118,7 @@ export default function Page (): ReactElement | null {
 			setProducts([])
 			setSessions([])
 			setOrders([])
+			setFeedbackMessages([])
 		})
 	}, [fetchData])
 
@@ -116,6 +126,9 @@ export default function Page (): ReactElement | null {
 	useEntitySocket<ProductType>('product', { setState: setProducts })
 	useEntitySocket<SessionType>('session', { setState: setSessions })
 	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<FeedbackMessageType>('feedbackMessage', { setState: setFeedbackMessages })
+
+	const unreadFeedbackCount = feedbackMessages.filter(f => !f.isRead).length
 
 	if (!hasMounted) { return null }
 
@@ -167,6 +180,7 @@ export default function Page (): ReactElement | null {
 								text="Brugerfeedback"
 								bgColor="bg-teal-500"
 								hoverBgColor="hover:bg-teal-600"
+								badge={unreadFeedbackCount}
 							/>
 						</div>
 						{/* Config Weekdays Editor */}

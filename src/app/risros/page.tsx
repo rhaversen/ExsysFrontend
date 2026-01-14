@@ -4,15 +4,15 @@ import { type ReactElement, useState, type FormEvent } from 'react'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
-import { FeedbackType, PatchFeedbackType, PostFeedbackType } from '@/types/backendDataTypes'
+import { FeedbackMessageType, PatchFeedbackMessageType, PostFeedbackMessageType } from '@/types/backendDataTypes'
 
 export default function Page (): ReactElement {
 	const { addError } = useError()
 	const [isLoading, setIsLoading] = useState(false)
 	const [isSuccess, setIsSuccess] = useState(false)
 
-	const { createEntityAsync } = useCUDOperations<PostFeedbackType, PatchFeedbackType, FeedbackType>(
-		'/v1/feedback'
+	const { createEntityAsync } = useCUDOperations<PostFeedbackMessageType, PatchFeedbackMessageType, FeedbackMessageType>(
+		'/v1/feedback/message'
 	)
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -24,7 +24,7 @@ export default function Page (): ReactElement {
 		try {
 			await createEntityAsync({
 				name: data.name as string,
-				feedback: data.feedback as string
+				message: data.message as string
 			})
 			setIsSuccess(true)
 			;(event.target as HTMLFormElement).reset()
@@ -66,10 +66,10 @@ export default function Page (): ReactElement {
 							/>
 						</div>
 						<div>
-							<label htmlFor="feedbackFeedbackForm" className="block text-sm font-medium text-gray-700 mb-1 text-left">{'Ris og Ros'}</label>
+							<label htmlFor="messageFeedbackForm" className="block text-sm font-medium text-gray-700 mb-1 text-left">{'Ris og Ros'}</label>
 							<textarea
-								name="feedback"
-								id="feedbackFeedbackForm"
+								name="message"
+								id="messageFeedbackForm"
 								required
 								rows={4}
 								placeholder="Skriv her..."
