@@ -15,7 +15,7 @@ import { useKioskData } from '@/hooks/useKioskData'
 import { useKioskPing } from '@/hooks/useKioskPing'
 import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
-import { formatRelativeDateLabel, getNextOpen, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
+import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
 import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
 import 'dayjs/locale/da'
@@ -32,8 +32,9 @@ export default function Page (): ReactElement {
 		kiosk,
 		products,
 		options,
-		activities,
 		rooms,
+		availableProducts,
+		availableActivities,
 		checkoutMethods,
 		isKioskClosed,
 		selectedActivity,
@@ -157,21 +158,6 @@ export default function Page (): ReactElement {
 		navigateTo('feedback')
 	}, [navigateTo])
 
-	const filteredActivities = useMemo(() => {
-		if (!kiosk) { return [] }
-		return activities
-			.filter(activity => kiosk.enabledActivities?.includes(activity._id))
-			.filter(activity => {
-				const availableProducts = products.filter(
-					product => product.isActive &&
-						!activity.disabledProducts.includes(product._id) &&
-						isCurrentTimeInOrderWindow(product.orderWindow)
-				)
-				return availableProducts.length > 0
-			})
-			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [activities, kiosk, products])
-
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
 		return rooms
@@ -181,11 +167,10 @@ export default function Page (): ReactElement {
 
 	const filteredProducts = useMemo(() => {
 		if (!selectedActivity) { return [] }
-		return products
+		return availableProducts
 			.filter(product => !selectedActivity.disabledProducts.includes(product._id))
-			.filter(product => product.isActive)
 			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [products, selectedActivity])
+	}, [availableProducts, selectedActivity])
 
 	const sortedOptions = useMemo(() => {
 		return options.sort((a, b) => a.name.localeCompare(b.name))
@@ -230,8 +215,8 @@ export default function Page (): ReactElement {
 						</h1>
 						<button
 							onClick={() => {
-								if (filteredActivities.length === 1) {
-									const singleActivity = filteredActivities[0]
+								if (availableActivities.length === 1) {
+									const singleActivity = availableActivities[0]
 									setSelectedActivity(singleActivity)
 									const activityRooms = getRoomsForActivity(singleActivity)
 									if (activityRooms.length === 1) {
@@ -262,7 +247,7 @@ export default function Page (): ReactElement {
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Tryk for at vælge den aktivitet du deltager i"
-						items={filteredActivities}
+						items={availableActivities}
 						currentSelectionId={selectedActivity?._id}
 						onSelect={handleActivitySelect}
 					/>
