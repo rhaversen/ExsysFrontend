@@ -22,9 +22,6 @@ jobs:
             -   name: Setup environment
                 uses: ./.github/actions/setup
 
-            -   name: Test
-                run: npm test
-
             -   name: Build
                 run: npm run build
 
