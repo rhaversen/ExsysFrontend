@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { type ReactElement, useState } from 'react'
-import { FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
+import { FiArrowLeft, FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 import QRCode from 'react-qr-code'
 
+import TimeoutButton from '@/components/ui/TimeoutButton'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
@@ -28,15 +29,6 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 	return (
 		<div className="fixed inset-0 flex flex-col items-center justify-center">
-			<button
-				type="button"
-				onClick={onBack}
-				className="absolute top-4 left-4 z-10 flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-			>
-				<span className="text-xl">{'←'}</span>
-				<span>{'Tilbage'}</span>
-			</button>
-
 			<div className="flex flex-col items-center justify-center text-center">
 				<h1 className="text-5xl font-bold mb-4 text-gray-800">{'Ris og Ros'}</h1>
 				<p className="text-2xl mb-8 text-gray-600">{'Vurder din oplevelse med et tryk, eller scan QR-koden for at skrive en besked til os'}</p>
@@ -87,11 +79,31 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 					</button>
 				</div>
 
-				{submittedRating !== null ? (
-					<p className="text-2xl text-gray-600 font-semibold">{'Tak for din vurdering!'}</p>
-				) : (
+				<div className="flex flex-col items-center gap-6">
 					<p className="text-lg text-gray-500 font-mono">{feedbackUrl}</p>
-				)}
+					<p className={`text-2xl font-semibold transition-opacity ${submittedRating !== null ? 'text-gray-600 opacity-100' : 'opacity-0'}`}>
+						{'Tak for din vurdering!'}
+					</p>
+					{submittedRating !== null ? (
+						<TimeoutButton
+							totalMs={5000}
+							onClick={onBack}
+							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
+						>
+							<FiArrowLeft className="w-6 h-6 shrink-0" />
+							<span>{'Tilbage'}</span>
+						</TimeoutButton>
+					) : (
+						<button
+							type="button"
+							onClick={onBack}
+							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
+						>
+							<FiArrowLeft className="w-6 h-6 shrink-0" />
+							<span>{'Tilbage'}</span>
+						</button>
+					)}
+				</div>
 			</div>
 		</div>
 	)
