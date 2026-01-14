@@ -40,48 +40,49 @@ export default function Page (): ReactElement {
 	}, [checkAuth, router, addError])
 
 	return (
-		<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-			<div className="mb-8 text-center">
-				<h1 className="mb-4 text-4xl font-bold text-gray-800">
-					{'Din Feedback Tæller!'}
+		<main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
+			{/* Main user action - prominent and welcoming */}
+			<div className="mb-12 text-center max-w-lg">
+				<h1 className="mb-3 text-5xl font-bold text-gray-800">
+					{'Ris & Ros'}
 				</h1>
-				<p className="mb-6 text-lg text-gray-600">
-					{'Hjælp os med at gøre bestillings-systemet bedre. Del din ris eller ros med os.'}
+				<p className="mb-8 text-xl text-gray-600">
+					{'Din mening hjælper os med at blive bedre!'}
 				</p>
 				<button
 					type="button"
-					className="px-8 py-4 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+					className="px-12 py-5 text-2xl font-bold text-white bg-green-500 rounded-2xl shadow-xl hover:bg-green-600 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200"
 					onClick={() => {
 						router.push('/risros')
 					}}
 				>
-					{'Giv Ris & Ros'}
+					{'Tryk her for at give Ris & Ros'}
 				</button>
 			</div>
 
-			<div className="border-t border-gray-300 pt-8 mt-8 w-full max-w-md text-center">
-				<h2 className="mb-4 text-xl font-semibold text-gray-700">
-					{'Log ind'}
-				</h2>
-				<div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+			{/* Staff login - smaller, less prominent */}
+			<div className="text-center">
+				<p className="text-sm text-gray-400 mb-3">{'Personale Login'}</p>
+				<div className="flex gap-3">
 					<button
 						type="button"
-						className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 sm:flex-1"
-						onClick={() => {
-							router.replace('/login-kiosk')
-						}}
-					>
-						{'Bestillings Station'}
-					</button>
-					<button
-						type="button"
-						className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 sm:flex-1"
+						className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
 						onClick={() => {
 							router.push('/login-admin')
 						}}
 					>
-						{'Personale'}
+						{'Admin'}
 					</button>
+					<button
+						type="button"
+						className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+						onClick={() => {
+							router.replace('/login-kiosk')
+						}}
+					>
+						{'Kiosk'}
+					</button>
+
 				</div>
 			</div>
 		</main>

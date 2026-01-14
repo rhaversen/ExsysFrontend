@@ -98,3 +98,85 @@ body {
 	will-change: transform, opacity;
 	animation: slideOut 0.1s ease-in forwards;
 }
+
+@keyframes fadeSlideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeSlideUp {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+.animate-fadeSlideDown {
+	will-change: transform, opacity;
+	animation: fadeSlideDown 0.3s ease-out forwards;
+}
+
+.animate-fadeSlideUp {
+	will-change: transform, opacity;
+	animation: fadeSlideUp 0.2s ease-in forwards;
+}
+
+@keyframes scaleIn {
+	from {
+		transform: translate(-50%, -50%) scale(0);
+	}
+	to {
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+@keyframes scaleOut {
+	from {
+		transform: translate(-50%, -50%) scale(1);
+	}
+	to {
+		transform: translate(-50%, -50%) scale(0);
+	}
+}
+
+.animate-scaleIn {
+	will-change: transform;
+	animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-scaleOut {
+	will-change: transform;
+	animation: scaleOut 0.2s ease-in forwards;
+}
+
+@keyframes gradientShimmer {
+	from {
+		background-position: 0% 0;
+	}
+	to {
+		background-position: -100% 0;
+	}
+}
+
+.animate-gradientShimmer {
+	background: linear-gradient(
+		to right,
+		#60a5fa 0%,
+		#2563eb 10%,
+		#60a5fa 50%,
+		#2563eb 60%,
+		#60a5fa 100%
+	);
+	background-size: 200% 100%;
+	animation: gradientShimmer 3s linear infinite;
+}

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { useCallback, useMemo } from 'react'
 import 'dayjs/locale/da'
-import { FaBan, FaCalendarAlt } from 'react-icons/fa'
+import { FaBan } from 'react-icons/fa'
 
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import useCUDOperations from '@/hooks/useCUDOperations'
@@ -10,6 +10,7 @@ import type { ConfigsType } from '@/types/backendDataTypes'
 dayjs.locale('da')
 
 const weekdayNumbers = [1, 2, 3, 4, 5, 6, 0] // Monday=1 ... Sunday=0 (JS Sunday=0)
+const weekdayShorthands = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn']
 const weekdayLabels = weekdayNumbers.map(n => dayjs().day(n).format('dddd').charAt(0).toUpperCase() + dayjs().day(n).format('dddd').slice(1))
 
 const ConfigWeekdaysEditor = ({
@@ -22,7 +23,6 @@ const ConfigWeekdaysEditor = ({
 		'/v1/configs'
 	)
 
-	// Simplify nested configs access
 	const configData = configs?.configs
 	const disabledWeekdays = useMemo(() => configData?.disabledWeekdays ?? [], [configData])
 
@@ -33,7 +33,6 @@ const ConfigWeekdaysEditor = ({
 			? current.filter(w => w !== weekday)
 			: [...current, weekday].sort()
 		try {
-			// For configs, PATCH is sent to /v1/configs (no id)
 			await updateEntityAsync('', { disabledWeekdays: next })
 		} catch (e) {
 			addError(e)
@@ -43,33 +42,24 @@ const ConfigWeekdaysEditor = ({
 	if (!configData) { return null }
 
 	return (
-		<div className="p-4 bg-gray-50 rounded-lg w-full flex flex-col gap-2">
-			{/* Header Section */}
-			<div className="flex items-center gap-3">
-				<FaCalendarAlt className="text-blue-500 text-2xl flex-shrink-0" />
-				<h2 className="text-lg text-gray-800">{'Deaktiver ugedage for bestilling'}</h2>
+		<div className="flex flex-col gap-3">
+			<div>
+				<p className="text-sm text-gray-600">{'Tryk på en dag for at aktivere/deaktivere bestillinger.'}</p>
+				<p className="text-sm text-gray-600">{'Deaktiverede dage vil ikke være tilgængelige for bestilling.'}</p>
 			</div>
 
-			{/* Description Section */}
-			<div className="text-gray-500 text-sm">
-				<div>{'Deaktiverede dage vil ikke være tilgængelige for bestilling.'}</div>
-				<div>{'Tryk på en dag for at aktivere/deaktivere den.'}</div>
-			</div>
-
-			{/* Weekday Buttons */}
-			<div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
+			<div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
 				{weekdayNumbers.map((n, idx) => {
 					const isDisabled = disabledWeekdays.includes(n)
 					return (
 						<button
 							key={n}
 							className={`
-								flex flex-col items-center justify-center px-3 py-2 rounded-lg border font-medium transition
+								flex flex-col items-center justify-center px-2 py-2 rounded-lg border font-medium transition
 								${isDisabled
-							? 'bg-red-100 border-red-300 text-red-700 shadow-inner'
-							: 'bg-green-100 border-green-300 text-green-800 hover:bg-green-200'}
+							? 'bg-red-50 border-red-200 text-red-700'
+							: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'}
 								focus:outline-none focus:ring-2 focus:ring-blue-400
-								group
 							`}
 							onClick={() => handleToggle(n)}
 							type="button"
@@ -77,10 +67,10 @@ const ConfigWeekdaysEditor = ({
 								? `${weekdayLabels[idx]} er deaktiveret`
 								: `${weekdayLabels[idx]} er aktiv`}
 						>
-							<span className="text-xs sm:text-sm">{weekdayLabels[idx]}</span>
+							<span className="text-xs sm:text-sm">{weekdayShorthands[idx]}</span>
 							<span className="mt-1 h-4 flex items-center justify-center">
 								{isDisabled
-									? <FaBan className="text-red-500" aria-label="Deaktiveret" />
+									? <FaBan className="text-red-400 w-3 h-3" aria-label="Deaktiveret" />
 									: <span className="block w-2 h-2 rounded-full bg-green-500" aria-label="Aktiv"></span>
 								}
 							</span>

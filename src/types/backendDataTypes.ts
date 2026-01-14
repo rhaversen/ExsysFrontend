@@ -217,25 +217,40 @@ export interface SessionType {
 	userAgent: string // Agent information
 }
 
-// Feedback types
-export interface FeedbackType {
+// Feedback Message types (written feedback from web)
+export interface FeedbackMessageType {
 	_id: string
-	name?: string // Optional name
-	feedback: string // Required feedback text
-	isRead: boolean // Whether the feedback has been read
+	name?: string
+	message: string
+	isRead: boolean
 	createdAt: string
 	updatedAt: string
 }
 
-export interface PostFeedbackType {
-	name?: string // Optional name
-	feedback: string // Required feedback text
+export interface PostFeedbackMessageType {
+	name?: string
+	message: string
 }
 
-export interface PatchFeedbackType {
-	name?: string // Optional name
-	feedback?: string // Required feedback text
-	isRead?: boolean // Whether the feedback has been read
+export interface PatchFeedbackMessageType {
+	name?: string
+	message?: string
+	isRead?: boolean
+}
+
+// Feedback Rating types (thumbs up/down from kiosk)
+export type FeedbackRatingValue = 'positive' | 'negative'
+
+export interface FeedbackRatingType {
+	_id: string
+	kioskId: string
+	rating: FeedbackRatingValue
+	createdAt: string
+	updatedAt: string
+}
+
+export interface PostFeedbackRatingType {
+	rating: FeedbackRatingValue
 }
 
 // Config types
