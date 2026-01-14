@@ -2,8 +2,9 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import 'dayjs/locale/da'
-import { FaCodeBranch, FaMoon, FaSyncAlt, FaUsers, FaUserSlash, FaWifi } from 'react-icons/fa'
+import { FaCodeBranch, FaMoon, FaSyncAlt, FaUsers, FaUserSlash } from 'react-icons/fa'
 import { FiCheck, FiX, FiLoader } from 'react-icons/fi'
+import { MdWifiOff } from 'react-icons/md'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
@@ -121,7 +122,7 @@ function getBadgeIcon (status: KioskStatus): React.ReactElement {
 		case 'multi_session':
 			return <FaUsers className="w-3.5 h-3.5 text-red-700" />
 		case 'not_responding':
-			return <FaWifi className="w-3.5 h-3.5 text-red-700" />
+			return <MdWifiOff className="w-3.5 h-3.5 text-red-700" />
 		case 'checking':
 			return <FiLoader className="w-3.5 h-3.5 text-gray-400 animate-spin" />
 		case 'healthy':
@@ -368,8 +369,7 @@ const KioskStatusManager = ({
 	const isLoading = configs === null
 
 	return (
-		<div className='p-4 bg-gray-50 rounded-lg'>
-			<h2 className="mb-3 text-lg text-gray-800">{'Kiosk status og håndtering'}</h2>
+		<div>
 			<div className="flex flex-col w-full mx-auto">
 				{isLoading ? (
 					<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser data...'}</div>
