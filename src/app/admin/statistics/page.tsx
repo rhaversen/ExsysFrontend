@@ -125,8 +125,50 @@ export default function Page (): ReactElement {
 		return () => clearInterval(timer)
 	}, [])
 
-	// Filter orders based on selected time range
+	// Filter orders based on selected time range and payment status
 	const filteredOrders = useMemo(() => {
+		if (orders.length === 0) { return [] }
+		const now = new Date()
+
+		const paidOrders = orders.filter(order =>
+			order.paymentStatus === 'successful' || order.paymentStatus === 'refunded'
+		)
+
+		if (timeRange === 'allTime') {
+			return paidOrders
+		}
+
+		if (timeRange === 'custom') {
+			if (!customFromDate || !customToDate) { return paidOrders }
+			const fromDate = new Date(customFromDate)
+			fromDate.setHours(0, 0, 0, 0)
+			const toDate = new Date(customToDate)
+			toDate.setHours(23, 59, 59, 999)
+			return paidOrders.filter(order => {
+				const orderDate = new Date(order.createdAt)
+				return orderDate >= fromDate && orderDate <= toDate
+			})
+		}
+
+		let fromDate = new Date()
+		if (timeRange === '30days') {
+			fromDate.setDate(fromDate.getDate() - 29)
+		} else if (timeRange === '7days') {
+			fromDate.setDate(fromDate.getDate() - 6)
+		} else if (timeRange === 'month') {
+			fromDate = new Date(now.getFullYear(), now.getMonth(), 1)
+		} else if (timeRange === 'today') {
+			fromDate.setHours(0, 0, 0, 0)
+		}
+		fromDate.setHours(0, 0, 0, 0)
+		return paidOrders.filter(order => {
+			const orderDate = new Date(order.createdAt)
+			return orderDate >= fromDate && orderDate <= now
+		})
+	}, [orders, timeRange, customFromDate, customToDate])
+
+	// Filter all orders by time range only (for payment status breakdown)
+	const allFilteredOrders = useMemo(() => {
 		if (orders.length === 0) { return [] }
 		const now = new Date()
 
@@ -165,6 +207,7 @@ export default function Page (): ReactElement {
 
 	const stats = useStatisticsData({
 		orders: filteredOrders,
+		allOrders: allFilteredOrders,
 		products,
 		options,
 		activities,
@@ -541,6 +584,13 @@ export default function Page (): ReactElement {
 													</span>
 													<span className="font-semibold">{stats.paymentStatusCount.failed ?? 0}</span>
 												</li>
+												<li className="flex items-center justify-between border-t pt-2 mt-2">
+													<span className="flex items-center">
+														<span className="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
+														{'I alt:\r'}
+													</span>
+													<span className="font-semibold">{stats.totalOrdersAll}</span>
+												</li>
 											</ul>
 										</div>
 
@@ -783,15 +833,15 @@ export default function Page (): ReactElement {
 								<h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
 									<FiPackage className="text-blue-600" />
 									{'Alle ordrer'}
-									{filteredOrders.length > 0 && <span className="text-sm text-gray-500 font-normal">{'('}{filteredOrders.length}{')'}</span>}
+									{allFilteredOrders.length > 0 && <span className="text-sm text-gray-500 font-normal">{'('}{allFilteredOrders.length}{')'}</span>}
 								</h2>
-								{filteredOrders.length === 0 ? (
+								{allFilteredOrders.length === 0 ? (
 									<div className="text-gray-500 p-8 text-center bg-gray-50 rounded border border-gray-200">
 										{'Ingen ordrer i den valgte periode'}
 									</div>
 								) : (
 									<OrdersTable
-										orders={filteredOrders}
+										orders={allFilteredOrders}
 										products={products}
 										options={options}
 										rooms={rooms}

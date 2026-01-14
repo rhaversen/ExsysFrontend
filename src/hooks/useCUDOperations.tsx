@@ -11,6 +11,7 @@ const useCUDOperations = <PostType, PatchType, ReturnType = void> (
 	deleteEntity: (id: string, confirm: boolean) => void
 	createEntityAsync: (data: PostType) => Promise<ReturnType>
 	updateEntityAsync: (id: string, data: PatchType) => Promise<ReturnType>
+	deleteEntityAsync: (id: string, confirm?: boolean) => Promise<void>
 } => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -42,12 +43,20 @@ const useCUDOperations = <PostType, PatchType, ReturnType = void> (
 		}).catch(addError)
 	}, [API_URL, entityPath, addError])
 
+	const deleteEntityAsync = useCallback(async (id: string, confirm: boolean = true) => {
+		await axios.delete(`${API_URL}${entityPath}/${id}`, {
+			data: { confirm },
+			withCredentials: true
+		})
+	}, [API_URL, entityPath])
+
 	return {
 		createEntity,
 		updateEntity,
 		deleteEntity,
 		createEntityAsync,
-		updateEntityAsync
+		updateEntityAsync,
+		deleteEntityAsync
 	}
 }
 

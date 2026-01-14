@@ -45,6 +45,7 @@ function getOrderTotal (order: OrderType, products: ProductType[], options: Opti
 
 export default function useStatisticsData ({
 	orders,
+	allOrders,
 	products,
 	options,
 	activities,
@@ -53,6 +54,7 @@ export default function useStatisticsData ({
 	timeRange
 }: {
   orders: OrderType[];
+  allOrders: OrderType[];
   products: ProductType[];
   options: OptionType[];
   activities: ActivityType[];
@@ -142,11 +144,14 @@ export default function useStatisticsData ({
 	const mostSoldProductEntry = Object.entries(productSales).sort((a, b) => b[1] - a[1])[0]
 	const mostSoldProduct = mostSoldProductEntry !== undefined ? `${mostSoldProductEntry[0]} (${mostSoldProductEntry[1]})` : '-'
 
-	// Payment status breakdown
-	const paymentStatusCount = orders.reduce((acc, o) => {
+	// Payment status breakdown (uses all orders, not just paid)
+	const paymentStatusCount = allOrders.reduce((acc, o) => {
 		acc[o.paymentStatus] = (acc[o.paymentStatus] || 0) + 1
 		return acc
 	}, {} as Record<OrderType['paymentStatus'], number>)
+
+	// Total orders count (all orders regardless of payment status)
+	const totalOrdersAll = allOrders.length
 
 	// Checkout method breakdown
 	const checkoutMethodCount = orders.reduce((acc, o) => {
@@ -397,6 +402,7 @@ export default function useStatisticsData ({
 		chartLabels,
 		totalSalesDisplay,
 		totalOrders,
+		totalOrdersAll,
 		totalProductsSold,
 		totalOptionsSold,
 		avgOrderValueDisplay,
