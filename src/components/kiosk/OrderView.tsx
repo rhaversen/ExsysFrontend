@@ -30,7 +30,6 @@ interface OrderViewProps {
 	updateCart: (cart: CartType) => void
 	onClose: () => void
 	onOrderStart: () => void
-	onOrderEnd: () => void
 }
 
 const OrderView = ({
@@ -43,8 +42,7 @@ const OrderView = ({
 	cart,
 	updateCart,
 	onClose,
-	onOrderStart,
-	onOrderEnd
+	onOrderStart
 }: OrderViewProps): ReactElement => {
 	const { addError } = useError()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL

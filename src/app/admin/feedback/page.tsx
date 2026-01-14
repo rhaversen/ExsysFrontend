@@ -112,7 +112,7 @@ export default function Page (): ReactElement {
 	}
 
 	const handleDeleteMessage = async (id: string): Promise<void> => {
-		if (!window.confirm('Er du sikker på, at du vil slette denne besked?')) return
+		if (!window.confirm('Er du sikker på, at du vil slette denne besked?')) { return }
 		try {
 			await deleteMessageAsync(id)
 		} catch (error) {
@@ -121,7 +121,7 @@ export default function Page (): ReactElement {
 	}
 
 	const handleDeleteRating = async (id: string): Promise<void> => {
-		if (!window.confirm('Er du sikker på, at du vil slette denne vurdering?')) return
+		if (!window.confirm('Er du sikker på, at du vil slette denne vurdering?')) { return }
 		try {
 			await deleteRatingAsync(id)
 		} catch (error) {
@@ -136,9 +136,9 @@ export default function Page (): ReactElement {
 
 	const filteredMessages = useMemo(() => {
 		return feedbackList.filter(item => {
-			if (messageFilter === 'all') return true
-			if (messageFilter === 'read') return item.isRead
-			if (messageFilter === 'unread') return !item.isRead
+			if (messageFilter === 'all') { return true }
+			if (messageFilter === 'read') { return item.isRead }
+			if (messageFilter === 'unread') { return !item.isRead }
 			return true
 		}).sort((a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf())
 	}, [feedbackList, messageFilter])
@@ -228,7 +228,7 @@ export default function Page (): ReactElement {
 	}, [dailyRatings])
 
 	const filteredRatings = useMemo(() => {
-		if (selectedKioskFilter === null) return feedbackRatings
+		if (selectedKioskFilter === null) { return feedbackRatings }
 		return feedbackRatings.filter(r => r.kioskId === selectedKioskFilter)
 	}, [feedbackRatings, selectedKioskFilter])
 
@@ -285,7 +285,7 @@ export default function Page (): ReactElement {
 								<span className="text-sm text-gray-600">
 									{timePeriod === 'all' ? 'Alle vurderinger' : `Sidste ${timePeriod} dage`}
 								</span>
-								<span className="text-2xl font-bold text-gray-800">{ratingStats.positivePercent}%</span>
+								<span className="text-2xl font-bold text-gray-800">{ratingStats.positivePercent}{'%'}</span>
 							</div>
 							<div className="h-3 bg-gray-200 rounded-full overflow-hidden">
 								<div
@@ -383,7 +383,7 @@ export default function Page (): ReactElement {
 									>
 										<div className="flex items-center justify-between mb-1">
 											<span className="text-sm font-medium text-gray-700">{kiosk.kioskName}</span>
-											<span className="text-sm text-gray-500">{kiosk.positivePercent}%</span>
+											<span className="text-sm text-gray-500">{kiosk.positivePercent}{'%'}</span>
 										</div>
 										<div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
 											<div
@@ -392,7 +392,7 @@ export default function Page (): ReactElement {
 											/>
 										</div>
 										<div className="flex justify-between mt-1 text-xs text-gray-400">
-											<span>{kiosk.positive} / {kiosk.total}</span>
+											<span>{kiosk.positive}{' / '}{kiosk.total}</span>
 										</div>
 									</button>
 								))}
@@ -429,7 +429,7 @@ export default function Page (): ReactElement {
 						>
 							<FiThumbsUp />
 							{'Vurderinger'}
-							<span className="text-xs text-gray-400">({feedbackRatings.length})</span>
+							<span className="text-xs text-gray-400">{'('}{feedbackRatings.length}{')'}</span>
 						</button>
 					</div>
 
@@ -443,9 +443,9 @@ export default function Page (): ReactElement {
 											onClick={() => setMessageFilter(f)}
 											className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors
 												${messageFilter === f
-												? 'bg-blue-600 text-white'
-												: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-											}`}
+											? 'bg-blue-600 text-white'
+											: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+										}`}
 										>
 											{f === 'unread' ? 'Ulæst' : f === 'read' ? 'Læst' : 'Alle'}
 										</button>

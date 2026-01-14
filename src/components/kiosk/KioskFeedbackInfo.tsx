@@ -14,7 +14,7 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
-		if (isSubmitting) return
+		if (isSubmitting) { return }
 		setIsSubmitting(true)
 		try {
 			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })

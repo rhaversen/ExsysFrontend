@@ -151,10 +151,6 @@ export default function Page (): ReactElement {
 		setIsOrderInProgress(true)
 	}, [])
 
-	const handleOrderEnd = useCallback(() => {
-		setIsOrderInProgress(false)
-	}, [])
-
 	const handleFeedbackBannerClick = useCallback(() => {
 		clearTimeout(feedbackBannerTimerRef.current)
 		setShowFeedbackBanner(false)
@@ -302,7 +298,6 @@ export default function Page (): ReactElement {
 						updateCart={setCart}
 						onClose={handleOrderClose}
 						onOrderStart={handleOrderStart}
-						onOrderEnd={handleOrderEnd}
 					/>
 				)
 
