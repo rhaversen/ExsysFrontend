@@ -785,7 +785,7 @@ describe('timeSince', () => {
 	})
 
 	it('returns months without days when exact months', () => {
-		jest.useFakeTimers().setSystemTime(new Date('2026-04-15T10:00:00'))
+		jest.useFakeTimers().setSystemTime(new Date('2026-04-14T10:00:00'))
 		const result = timeSince('2026-01-14T10:00:00')
 		expect(result).toBe('3 måneder siden')
 	})
@@ -906,7 +906,7 @@ describe('timeUntil', () => {
 
 	it('returns months without days when exact months', () => {
 		jest.useFakeTimers().setSystemTime(new Date('2026-01-14T10:00:00'))
-		const result = timeUntil('2026-04-15T10:00:00')
+		const result = timeUntil('2026-04-14T10:00:00')
 		expect(result).toBe('om 3 måneder')
 	})
 
