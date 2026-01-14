@@ -163,6 +163,8 @@ export default function Page (): ReactElement {
 							<p className="font-medium mb-1">{'Vigtig information'}</p>
 							<ul className="list-disc list-inside space-y-1">
 								<li>{'Kun ordrer med checkoutMethod "sumUp" kan simuleres'}</li>
+								<li>{'Kun ordrer med betalingsstatus "pending" kan simuleres'}</li>
+								<li>{'Denne funktion vil ikke påvirke SumUp enheden, kun systemets opfattelse af betalingens status'}</li>
 							</ul>
 						</div>
 					</div>
