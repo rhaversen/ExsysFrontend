@@ -19,8 +19,8 @@ export interface UseKioskPingReturn {
 	getPingState: (kioskId: string) => KioskPingState
 }
 
-const PING_INTERVAL_MS = 10000
-const NO_RESPONSE_THRESHOLD_MS = 15000
+const PING_INTERVAL_MS = 5000
+const NO_RESPONSE_THRESHOLD_MS = 5000
 
 export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 	const socket = useSharedSocket()
@@ -28,6 +28,7 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 
 	const [pingStatuses, setPingStatuses] = useState<Map<string, KioskPingStatus>>(new Map())
 	const [timedOutKiosks, setTimedOutKiosks] = useState<Set<string>>(new Set())
+	const [pingCycle, setPingCycle] = useState(0)
 
 	const kioskIdsKey = kioskIds.join(',')
 
@@ -42,20 +43,52 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 		}, NO_RESPONSE_THRESHOLD_MS)
 
 		return () => { clearTimeout(timeout) }
-	}, [kioskIds])
+	}, [kioskIds, pingCycle])
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === '') { return }
+
+		let interval: ReturnType<typeof setInterval> | null = null
 
 		const sendPing = (): void => {
 			axios.post(`${API_URL}/v1/kiosks/ping`, {}, { withCredentials: true })
 				.catch(() => {})
 		}
 
-		sendPing()
-		const interval = setInterval(sendPing, PING_INTERVAL_MS)
+		const startPinging = (): void => {
+			if (interval !== null) { return }
+			setPingStatuses(new Map())
+			setTimedOutKiosks(new Set())
+			setPingCycle(c => c + 1)
+			sendPing()
+			interval = setInterval(sendPing, PING_INTERVAL_MS)
+		}
 
-		return () => { clearInterval(interval) }
+		const stopPinging = (): void => {
+			if (interval !== null) {
+				clearInterval(interval)
+				interval = null
+			}
+		}
+
+		const handleVisibilityChange = (): void => {
+			if (document.visibilityState === 'visible') {
+				startPinging()
+			} else {
+				stopPinging()
+			}
+		}
+
+		if (document.visibilityState === 'visible') {
+			startPinging()
+		}
+
+		document.addEventListener('visibilitychange', handleVisibilityChange)
+
+		return () => {
+			stopPinging()
+			document.removeEventListener('visibilitychange', handleVisibilityChange)
+		}
 	}, [API_URL])
 
 	useEffect(() => {

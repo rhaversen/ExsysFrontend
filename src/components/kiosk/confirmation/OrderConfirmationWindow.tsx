@@ -1,10 +1,11 @@
 import axios from 'axios'
 import Image from 'next/image'
-import { useState, type ReactElement } from 'react'
+import { useCallback, useState, type ReactElement } from 'react'
 import { FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import TimeoutImage from '@/components/ui/TimeoutImage'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { KioskImages, LoadingImage } from '@/lib/images'
@@ -28,14 +29,26 @@ const OrderConfirmationWindow = ({
 }): ReactElement => {
 	const { config } = useConfig()
 	const { addError } = useError()
+	const { track } = useAnalytics()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const [submittedRating, setSubmittedRating] = useState<FeedbackRatingValue | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	const handleTimeoutClose = useCallback(() => {
+		track('confirmation_close')
+		onClose()
+	}, [track, onClose])
+
+	const handleTimeoutExpired = useCallback(() => {
+		track('confirmation_timeout')
+		onClose()
+	}, [track, onClose])
 
 	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
 	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
 		if (isSubmitting) { return }
+		track(rating === 'positive' ? 'confirmation_feedback_positive' : 'confirmation_feedback_negative')
 		setIsSubmitting(true)
 		try {
 			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })
@@ -87,7 +100,7 @@ const OrderConfirmationWindow = ({
 	}
 
 	return (
-		<CloseableModal onClose={onClose} canClose={canClose}>
+		<CloseableModal onClose={handleTimeoutClose} canClose={canClose}>
 			<h2 className="text-2xl pt-3 px-5 font-bold mb-2 text-center text-gray-800">
 				{headingTexts[orderStatus]}
 			</h2>
@@ -103,7 +116,8 @@ const OrderConfirmationWindow = ({
 					{showTimeoutImage ? (
 						<TimeoutImage
 							totalMs={autoCloseMs}
-							onClick={onClose}
+							onClick={handleTimeoutClose}
+							onTimeout={handleTimeoutExpired}
 							src={imageProps.src}
 							alt={imageProps.alt}
 							width={200}
@@ -165,7 +179,7 @@ const OrderConfirmationWindow = ({
 			{orderStatus === 'awaitingPayment' && (
 				<div className="flex p-5 justify-center items-center h-full">
 					<button
-						onClick={onCancelPayment}
+						onClick={() => { track('payment_cancel'); onCancelPayment() }}
 						className={`bg-gray-200 ${isCancelling ? '' : 'hover:bg-gray-300'} w-full text-gray-700 rounded-md py-3 px-4 mt-8 transition-colors`}
 						type="button"
 						disabled={isCancelling}

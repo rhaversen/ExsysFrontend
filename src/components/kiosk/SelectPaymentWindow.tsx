@@ -2,6 +2,7 @@ import { type ReactElement } from 'react'
 
 import AsyncImage from '@/components/ui/AsyncImage'
 import CloseableModal from '@/components/ui/CloseableModal'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { KioskImages } from '@/lib/images'
 
 const SelectPaymentWindow = ({
@@ -15,15 +16,33 @@ const SelectPaymentWindow = ({
 	onSubmit: (type: 'sumUp' | 'later' | 'mobilePay') => void
 	onCancel: () => void
 }): ReactElement => {
+	const { track } = useAnalytics()
+
+	const handleSubmit = (type: 'sumUp' | 'later' | 'mobilePay'): void => {
+		if (type === 'sumUp') {
+			track('payment_select_card')
+		} else if (type === 'mobilePay') {
+			track('payment_select_mobilepay')
+		} else {
+			track('payment_select_later')
+		}
+		onSubmit(type)
+	}
+
+	const handleCancel = (): void => {
+		track('checkout_cancel')
+		onCancel()
+	}
+
 	return (
-		<CloseableModal canClose={true} onClose={onCancel}>
+		<CloseableModal canClose={true} onClose={handleCancel}>
 			<h2 className="text-4xl pt-5 text-black font-semibold text-center mb-4">
 				{'Vælg Betaling'}
 			</h2>
 			<div className="p-5 flex gap-4 justify-center">
 				{checkoutMethods.later && (
 					<button
-						onClick={() => { onSubmit('later') }}
+						onClick={() => { handleSubmit('later') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
 						type="button"
 					>
@@ -45,7 +64,7 @@ const SelectPaymentWindow = ({
 				{checkoutMethods.sumUp && (
 					<div className="flex flex-col items-center">
 						<button
-							onClick={() => onSubmit('sumUp')}
+							onClick={() => handleSubmit('sumUp')}
 							className={`py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500 ${sumUpDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 							type="button"
 							disabled={sumUpDisabled}
@@ -73,7 +92,7 @@ const SelectPaymentWindow = ({
 				)}
 				{checkoutMethods.mobilePay && (
 					<button
-						onClick={() => { onSubmit('mobilePay') }}
+						onClick={() => { handleSubmit('mobilePay') }}
 						className="py-2 px-6 focus:outline-none rounded-xl border-dotted border-2 border-blue-500"
 						type="button"
 					>
@@ -95,7 +114,7 @@ const SelectPaymentWindow = ({
 			</div>
 			<div className="flex p-5 justify-center items-center h-full">
 				<button
-					onClick={() => { onCancel() }}
+					onClick={() => { handleCancel() }}
 					className="bg-blue-500 w-full text-white rounded-md py-2 px-4 mt-12"
 					type="button"
 				>

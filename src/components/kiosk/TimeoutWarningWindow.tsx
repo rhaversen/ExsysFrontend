@@ -1,21 +1,40 @@
-import { type ReactElement } from 'react'
+import { useCallback, type ReactElement } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import TimeoutButton from '@/components/ui/TimeoutButton'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { useConfig } from '@/contexts/ConfigProvider'
 
 const TimeoutWarningWindow = ({
 	onClose,
-	onTimeout
+	onTimeout,
+	onRestart
 }: {
 	onClose: () => void
 	onTimeout: () => void
+	onRestart: () => void
 }): ReactElement => {
 	const { config } = useConfig()
+	const { track } = useAnalytics()
 	const timeoutWarningMs = config?.configs.kioskInactivityTimeoutWarningMs ?? 1000 * 10
 
+	const handleClose = useCallback((): void => {
+		track('timeout_continue')
+		onClose()
+	}, [track, onClose])
+
+	const handleTimeout = useCallback((): void => {
+		track('session_timeout')
+		onTimeout()
+	}, [track, onTimeout])
+
+	const handleRestart = useCallback((): void => {
+		track('timeout_restart')
+		onRestart()
+	}, [track, onRestart])
+
 	return (
-		<CloseableModal onClose={onClose}>
+		<CloseableModal onClose={handleClose}>
 			<div className="p-10 flex flex-col items-center gap-8 text-black">
 				<h2 className="text-2xl font-bold">
 					{'Er du der stadig?'}
@@ -27,13 +46,14 @@ const TimeoutWarningWindow = ({
 					<button
 						className="bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold px-8 py-5 rounded-2xl w-full shadow-lg transition-all duration-200 active:scale-[0.98]"
 						type="button"
-						onClick={onClose}
+						onClick={handleClose}
 					>
 						{'Fortsæt bestilling'}
 					</button>
 					<TimeoutButton
 						totalMs={timeoutWarningMs}
-						onClick={onTimeout}
+						onClick={handleRestart}
+						onTimeout={handleTimeout}
 						className="bg-gray-200 hover:bg-gray-200 text-gray-900 text-base font-medium px-8 py-4 rounded-2xl w-full border border-gray-200 transition-all duration-200"
 					>
 						{'Start forfra'}

@@ -322,3 +322,47 @@ export function formatFullDateLabel (date: Date): string {
 	// Capitalize first letter of formatted string
 	return `${formatted.charAt(0).toUpperCase()}${formatted.slice(1)}`
 }
+
+export function getNextOrderWindowChange (orderWindows: OrderWindow[]): Date | null {
+	const now = new Date()
+	const currentMinutes = now.getHours() * 60 + now.getMinutes()
+
+	const candidates: Date[] = []
+
+	for (const window of orderWindows) {
+		const fromMinutes = window.from.hour * 60 + window.from.minute
+		const toMinutes = window.to.hour * 60 + window.to.minute
+
+		const addCandidate = (minutes: number, daysOffset: number): void => {
+			const candidate = new Date(now)
+			candidate.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0)
+			candidate.setDate(candidate.getDate() + daysOffset)
+			if (candidate > now) {
+				candidates.push(candidate)
+			}
+		}
+
+		const spansOverMidnight = fromMinutes > toMinutes || (fromMinutes === toMinutes && fromMinutes !== 0)
+
+		if (spansOverMidnight) {
+			// Window spans midnight (e.g., 22:00 - 06:00)
+			// "from" today or tomorrow, "to" today or tomorrow
+			addCandidate(fromMinutes, 0)
+			addCandidate(fromMinutes, 1)
+			addCandidate(toMinutes, 0)
+			addCandidate(toMinutes, 1)
+		} else {
+			// Normal window (e.g., 08:00 - 14:00)
+			addCandidate(fromMinutes, currentMinutes >= fromMinutes ? 1 : 0)
+			addCandidate(toMinutes, currentMinutes >= toMinutes ? 1 : 0)
+		}
+	}
+
+	if (candidates.length === 0) {
+		return null
+	}
+
+	return candidates.reduce((earliest, candidate) =>
+		candidate < earliest ? candidate : earliest
+	)
+}
