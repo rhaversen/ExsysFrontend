@@ -1,13 +1,15 @@
 import axios from 'axios'
-import { type ReactElement, useState } from 'react'
+import { type ReactElement, useCallback, useState } from 'react'
 import { FiArrowLeft, FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 import QRCode from 'react-qr-code'
 
 import TimeoutButton from '@/components/ui/TimeoutButton'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
 const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => {
+	const { track } = useAnalytics()
 	const feedbackUrl = 'kantine.nyskivehus.dk/risros'
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -16,6 +18,7 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
 		if (isSubmitting) { return }
+		track(rating === 'positive' ? 'feedback_positive' : 'feedback_negative')
 		setIsSubmitting(true)
 		try {
 			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })
@@ -26,6 +29,16 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 			setIsSubmitting(false)
 		}
 	}
+
+	const handleBack = useCallback((): void => {
+		track('feedback_back')
+		onBack()
+	}, [track, onBack])
+
+	const handleAutoBack = useCallback((): void => {
+		track('feedback_auto_back')
+		onBack()
+	}, [track, onBack])
 
 	return (
 		<div className="fixed inset-0 flex flex-col items-center justify-center">
@@ -87,7 +100,8 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 					{submittedRating !== null ? (
 						<TimeoutButton
 							totalMs={5000}
-							onClick={onBack}
+							onClick={handleBack}
+							onTimeout={handleAutoBack}
 							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
 						>
 							<FiArrowLeft className="w-6 h-6 shrink-0" />
@@ -96,7 +110,7 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 					) : (
 						<button
 							type="button"
-							onClick={onBack}
+							onClick={handleBack}
 							className="flex items-center gap-3 px-8 py-4 bg-gray-200 text-gray-700 font-semibold text-xl rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
 						>
 							<FiArrowLeft className="w-6 h-6 shrink-0" />

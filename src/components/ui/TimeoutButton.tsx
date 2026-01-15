@@ -3,6 +3,7 @@ import { memo, type ReactElement, useEffect, useState } from 'react'
 interface TimeoutButtonProps {
 	totalMs: number
 	onClick: () => void
+	onTimeout?: () => void
 	children: React.ReactNode
 	className?: string
 }
@@ -10,6 +11,7 @@ interface TimeoutButtonProps {
 const TimeoutButton = memo(function TimeoutButton ({
 	totalMs,
 	onClick,
+	onTimeout,
 	children,
 	className = ''
 }: TimeoutButtonProps): ReactElement {
@@ -23,12 +25,16 @@ const TimeoutButton = memo(function TimeoutButton ({
 			setElapsedMs(elapsed)
 			if (elapsed >= totalMs) {
 				clearInterval(interval)
-				onClick()
+				if (onTimeout) {
+					onTimeout()
+				} else {
+					onClick()
+				}
 			}
 		}, 50)
 
 		return () => { clearInterval(interval) }
-	}, [totalMs, onClick])
+	}, [totalMs, onClick, onTimeout])
 
 	return (
 		<button
