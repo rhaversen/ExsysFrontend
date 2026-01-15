@@ -196,8 +196,8 @@ export default function OverviewTab ({
 				<StatCard label="Gennemførte" value={stats.completed.toString()} color="green" />
 			</div>
 
-		<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-			<h3 className="font-semibold text-gray-800 mb-4">{'Konverteringstragt'}</h3>
+			<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+				<h3 className="font-semibold text-gray-800 mb-4">{'Konverteringstragt'}</h3>
 				<div className="flex flex-col items-center space-y-1">
 					{funnelData.map((step, idx) => (
 						<div key={step.label} className="w-full flex items-center">
