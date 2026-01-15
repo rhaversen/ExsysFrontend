@@ -9,7 +9,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
 const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => {
-	const { track } = useAnalytics()
+	const { track, endSession } = useAnalytics()
 	const feedbackUrl = 'kantine.nyskivehus.dk/risros'
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
@@ -32,13 +32,15 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 	const handleBack = useCallback((): void => {
 		track('feedback_back')
+		void endSession()
 		onBack()
-	}, [track, onBack])
+	}, [track, endSession, onBack])
 
 	const handleAutoBack = useCallback((): void => {
 		track('feedback_auto_back')
+		void endSession()
 		onBack()
-	}, [track, onBack])
+	}, [track, endSession, onBack])
 
 	return (
 		<div className="fixed inset-0 flex flex-col items-center justify-center">
