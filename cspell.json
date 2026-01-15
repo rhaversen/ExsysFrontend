@@ -16,7 +16,8 @@
         "package.json",
         "package-lock.json",
         "tsconfig.json",
-        "**/*.bat"
+        "**/*.bat",
+        "coverage/**"
     ],
     "ignoreWords": [
         "chunkname",
@@ -27,6 +28,9 @@
         "simulatable",
         "endpointet",
         "Wifi",
-        "livez"
+        "livez",
+        "friday",
+        "KHTML",
+        "mobilepay"
     ]
 }

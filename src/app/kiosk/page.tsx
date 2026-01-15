@@ -9,14 +9,15 @@ import KioskSessionInfo from '@/components/kiosk/KioskSessionInfo'
 import OrderView from '@/components/kiosk/OrderView'
 import ProgressBar from '@/components/kiosk/ProgressBar'
 import TimeoutWarningWindow from '@/components/kiosk/TimeoutWarningWindow'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import { useKioskData } from '@/hooks/useKioskData'
 import { useKioskPing } from '@/hooks/useKioskPing'
 import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
-import { formatRelativeDateLabel, getNextOpen, isCurrentTimeInOrderWindow } from '@/lib/timeUtils'
-import { type CartType, type ViewState } from '@/types/frontendDataTypes'
+import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
+import { type CartType, type InteractionType, type ViewState } from '@/types/frontendDataTypes'
 
 import 'dayjs/locale/da'
 
@@ -27,13 +28,15 @@ const VIEW_ORDER: ViewState[] = ['welcome', 'activity', 'room', 'order', 'feedba
 
 export default function Page (): ReactElement {
 	const { config } = useConfig()
+	const { track, endSession } = useAnalytics()
 
 	const {
 		kiosk,
 		products,
 		options,
-		activities,
 		rooms,
+		availableProducts,
+		availableActivities,
 		checkoutMethods,
 		isKioskClosed,
 		selectedActivity,
@@ -44,7 +47,19 @@ export default function Page (): ReactElement {
 
 	const { currentView, isTransitioning, slideDirection, navigateTo } = useViewTransition({
 		initialView: 'welcome' as ViewState,
-		viewOrder: VIEW_ORDER
+		viewOrder: VIEW_ORDER,
+		onNavigate: (view) => {
+			const navEvents: Record<string, InteractionType> = {
+				welcome: 'nav_to_welcome',
+				activity: 'nav_to_activity',
+				room: 'nav_to_room',
+				order: 'nav_to_order'
+			}
+			const event = navEvents[view]
+			if (event !== undefined) {
+				track(event)
+			}
+		}
 	})
 
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
@@ -58,12 +73,13 @@ export default function Page (): ReactElement {
 	const kioskWelcomeMessage = config?.configs.kioskWelcomeMessage ?? 'Bestilling af brød, kaffe og the'
 
 	const resetSession = useCallback(() => {
+		void endSession()
 		setSelectedActivity(null)
 		setSelectedRoom(null)
 		setCart(EMPTY_CART)
 		setIsOrderInProgress(false)
 		navigateTo('welcome')
-	}, [setSelectedActivity, setSelectedRoom, navigateTo])
+	}, [setSelectedActivity, setSelectedRoom, navigateTo, endSession])
 
 	const isTimerEnabled = currentView !== 'welcome' && !isOrderInProgress
 
@@ -103,22 +119,25 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
+		track('activity_select')
 		setSelectedActivity(activity)
 
 		const activityRooms = getRoomsForActivity(activity)
 		if (activityRooms.length === 1) {
+			track('room_auto_select')
 			setSelectedRoom(activityRooms[0])
 			navigateTo('order')
 		} else {
-			navigateTo(selectedRoom ? 'order' : 'room')
+			navigateTo(selectedRoom !== null ? 'order' : 'room')
 		}
-	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity])
+	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity, track])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
+		track('room_select')
 		setSelectedRoom(room)
 		navigateTo('order')
-	}, [setSelectedRoom, navigateTo])
+	}, [setSelectedRoom, navigateTo, track])
 
 	const canClickActivity = currentView !== 'activity'
 	const canClickRoom = currentView !== 'room' && selectedActivity !== null
@@ -129,19 +148,26 @@ export default function Page (): ReactElement {
 
 		switch (clickedView) {
 			case 'activity':
-				if (canClickActivity) { navigateTo('activity') }
+				if (canClickActivity) {
+					navigateTo('activity')
+				}
 				break
 			case 'room':
-				if (canClickRoom) { navigateTo('room') }
+				if (canClickRoom) {
+					navigateTo('room')
+				}
 				break
 			case 'order':
-				if (canClickOrder) { navigateTo('order') }
+				if (canClickOrder) {
+					navigateTo('order')
+				}
 				break
 			case 'welcome':
+				track('nav_to_welcome')
 				resetSession()
 				break
 		}
-	}, [currentView, canClickActivity, canClickRoom, canClickOrder, resetSession, navigateTo])
+	}, [currentView, canClickActivity, canClickRoom, canClickOrder, resetSession, navigateTo, track])
 
 	const handleOrderClose = useCallback(() => {
 		resetSession()
@@ -152,25 +178,11 @@ export default function Page (): ReactElement {
 	}, [])
 
 	const handleFeedbackBannerClick = useCallback(() => {
+		track('feedback_banner_click')
 		clearTimeout(feedbackBannerTimerRef.current)
 		setShowFeedbackBanner(false)
 		navigateTo('feedback')
-	}, [navigateTo])
-
-	const filteredActivities = useMemo(() => {
-		if (!kiosk) { return [] }
-		return activities
-			.filter(activity => kiosk.enabledActivities?.includes(activity._id))
-			.filter(activity => {
-				const availableProducts = products.filter(
-					product => product.isActive &&
-						!activity.disabledProducts.includes(product._id) &&
-						isCurrentTimeInOrderWindow(product.orderWindow)
-				)
-				return availableProducts.length > 0
-			})
-			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [activities, kiosk, products])
+	}, [navigateTo, track])
 
 	const filteredRooms = useMemo(() => {
 		if (!selectedActivity) { return [] }
@@ -181,11 +193,10 @@ export default function Page (): ReactElement {
 
 	const filteredProducts = useMemo(() => {
 		if (!selectedActivity) { return [] }
-		return products
+		return availableProducts
 			.filter(product => !selectedActivity.disabledProducts.includes(product._id))
-			.filter(product => product.isActive)
 			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [products, selectedActivity])
+	}, [availableProducts, selectedActivity])
 
 	const sortedOptions = useMemo(() => {
 		return options.sort((a, b) => a.name.localeCompare(b.name))
@@ -230,11 +241,14 @@ export default function Page (): ReactElement {
 						</h1>
 						<button
 							onClick={() => {
-								if (filteredActivities.length === 1) {
-									const singleActivity = filteredActivities[0]
+								track('session_start')
+								if (availableActivities.length === 1) {
+									const singleActivity = availableActivities[0]
+									track('activity_auto_select')
 									setSelectedActivity(singleActivity)
 									const activityRooms = getRoomsForActivity(singleActivity)
 									if (activityRooms.length === 1) {
+										track('room_auto_select')
 										setSelectedRoom(activityRooms[0])
 										navigateTo('order')
 									} else {
@@ -262,7 +276,7 @@ export default function Page (): ReactElement {
 					<DeliveryInfoSelection
 						title="Vælg din aktivitet"
 						subtitle="Tryk for at vælge den aktivitet du deltager i"
-						items={filteredActivities}
+						items={availableActivities}
 						currentSelectionId={selectedActivity?._id}
 						onSelect={handleActivitySelect}
 					/>
@@ -384,6 +398,7 @@ export default function Page (): ReactElement {
 				<TimeoutWarningWindow
 					onTimeout={handleTimeout}
 					onClose={dismissTimeoutWarning}
+					onRestart={resetSession}
 				/>
 			)}
 

@@ -4,7 +4,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo, type ReactElement } from 'react'
-import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal } from 'react-icons/fi'
+import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal, FiActivity } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 import 'dayjs/locale/da'
 
@@ -282,13 +282,20 @@ export default function Page (): ReactElement | null {
 						{/* Debug tools */}
 						<details className="text-xs text-gray-400">
 							<summary className="cursor-pointer hover:text-gray-500">{'Udviklerværktøjer'}</summary>
-							<div className="mt-2">
+							<div className="mt-2 flex flex-wrap gap-2">
 								<Link
 									href="/admin/debug"
 									className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm"
 								>
 									<FiTerminal className="w-4 h-4" />
 									{'Betalingssimulator'}
+								</Link>
+								<Link
+									href="/admin/analytics"
+									className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm"
+								>
+									<FiActivity className="w-4 h-4" />
+									{'Brugeranalyse'}
 								</Link>
 							</div>
 						</details>

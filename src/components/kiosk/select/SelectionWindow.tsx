@@ -2,6 +2,7 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 
 import OptionsBar from '@/components/kiosk/select/OptionsBar'
 import ProductCatalog from '@/components/kiosk/select/ProductCatalog'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 import { type CartType } from '@/types/frontendDataTypes'
 
@@ -16,15 +17,18 @@ const SelectionWindow = ({
 	options: OptionType[]
 	handleCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', change: number) => void
 }): ReactElement => {
+	const { track } = useAnalytics()
 	const [productsOptions, setProductsOptions] = useState<OptionType[]>([])
 
 	const handleProductSelect = useCallback((product: ProductType): void => {
+		track('product_select')
 		handleCartChange(product._id, 'products', 1)
-	}, [handleCartChange])
+	}, [handleCartChange, track])
 
 	const handleOptionSelect = useCallback((option: OptionType): void => {
+		track('option_select')
 		handleCartChange(option._id, 'options', 1)
-	}, [handleCartChange])
+	}, [handleCartChange, track])
 
 	// Update the productsOptions to include all options which are in the products in the cart
 	useEffect(() => {

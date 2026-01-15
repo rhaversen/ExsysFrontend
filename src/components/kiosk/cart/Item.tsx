@@ -2,6 +2,7 @@ import { type ReactElement, useCallback } from 'react'
 
 import QuantityAdjuster from '@/components/kiosk/cart/QuantityAdjuster'
 import AsyncImage from '@/components/ui/AsyncImage'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { KioskImages } from '@/lib/images'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
 
@@ -22,9 +23,17 @@ const Item = ({
 	quantity: number
 	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
 }): ReactElement => {
+	const { track } = useAnalytics()
+	const isProduct = type === 'products'
+
 	const handleQuantityChange = useCallback((change: number): void => {
+		if (change > 0) {
+			track(isProduct ? 'product_increase' : 'option_increase')
+		} else {
+			track(isProduct ? 'product_decrease' : 'option_decrease')
+		}
 		onCartChange(id, type, change)
-	}, [onCartChange, id, type])
+	}, [onCartChange, id, type, track, isProduct])
 
 	return (
 		<div className="py-3">

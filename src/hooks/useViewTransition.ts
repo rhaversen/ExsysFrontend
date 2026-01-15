@@ -5,6 +5,7 @@ const TRANSITION_DURATION_MS = 100
 interface UseViewTransitionOptions<T extends string> {
 	initialView: T
 	viewOrder: T[]
+	onNavigate?: (view: T) => void
 }
 
 interface UseViewTransitionReturn<T extends string> {
@@ -16,7 +17,8 @@ interface UseViewTransitionReturn<T extends string> {
 
 export function useViewTransition<T extends string> ({
 	initialView,
-	viewOrder
+	viewOrder,
+	onNavigate
 }: UseViewTransitionOptions<T>): UseViewTransitionReturn<T> {
 	const [currentView, setCurrentView] = useState<T>(initialView)
 	const [isTransitioning, setIsTransitioning] = useState(false)
@@ -30,6 +32,10 @@ export function useViewTransition<T extends string> ({
 			clearTimeout(timeoutRef.current)
 		}
 
+		if (onNavigate !== undefined) {
+			onNavigate(newView)
+		}
+
 		const direction = viewOrder.indexOf(newView) > viewOrder.indexOf(currentView) ? 'right' : 'left'
 		setSlideDirection(direction)
 		setIsTransitioning(true)
@@ -38,7 +44,7 @@ export function useViewTransition<T extends string> ({
 			setCurrentView(newView)
 			setIsTransitioning(false)
 		}, TRANSITION_DURATION_MS)
-	}, [currentView, isTransitioning, viewOrder])
+	}, [currentView, isTransitioning, viewOrder, onNavigate])
 
 	return {
 		currentView,

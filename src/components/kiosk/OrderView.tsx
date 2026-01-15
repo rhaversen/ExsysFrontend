@@ -5,6 +5,7 @@ import CartWindow from '@/components/kiosk/cart/CartWindow'
 import OrderConfirmationWindow from '@/components/kiosk/confirmation/OrderConfirmationWindow'
 import SelectionWindow from '@/components/kiosk/select/SelectionWindow'
 import SelectPaymentWindow from '@/components/kiosk/SelectPaymentWindow'
+import { useAnalytics } from '@/contexts/AnalyticsProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
 import {
@@ -45,6 +46,7 @@ const OrderView = ({
 	onOrderStart
 }: OrderViewProps): ReactElement => {
 	const { addError } = useError()
+	const { track } = useAnalytics()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 	const [isOrderConfirmationVisible, setIsOrderConfirmationVisible] = useState(false)
@@ -123,16 +125,19 @@ const OrderView = ({
 	const mapPaymentStatusToOrderStatus = useCallback((status: PaymentStatus): OrderStatus => {
 		switch (status) {
 			case 'successful':
+				track('checkout_complete')
 				return 'success'
 			case 'failed':
+				track('checkout_failed')
 				return 'paymentFailed'
 			case 'pending':
 				return 'awaitingPayment'
 			default:
+				track('checkout_failed')
 				addError(new Error('Unknown payment status'))
 				return 'error'
 		}
-	}, [addError])
+	}, [addError, track])
 
 	const submitOrder = useCallback((selectedCheckoutMethod: CheckoutMethod): void => {
 		onOrderStart()
@@ -159,10 +164,11 @@ const OrderView = ({
 				return null
 			})
 			.catch(error => {
+				track('checkout_failed')
 				addError(error)
 				setOrderStatus('error')
 			})
-	}, [onOrderStart, kiosk, activity, room, cart, API_URL, mapPaymentStatusToOrderStatus, addError])
+	}, [onOrderStart, kiosk, activity, room, cart, API_URL, mapPaymentStatusToOrderStatus, addError, track])
 
 	const cancelPayment = useCallback(() => {
 		if (!currentOrder) { return }
@@ -185,6 +191,7 @@ const OrderView = ({
 		},
 		onDelete: id => {
 			if (currentOrder?._id === id) {
+				track('checkout_failed')
 				setOrderStatus('error')
 			}
 		}
@@ -207,7 +214,7 @@ const OrderView = ({
 		}, 5 * 60 * 1000) // 5 minutes
 
 		return () => { clearTimeout(timeoutId) }
-	}, [orderStatus, currentOrder, API_URL, addError, onClose])
+	}, [orderStatus, currentOrder, API_URL, addError, track, onClose])
 
 	const handleOrderConfirmationClose = useCallback(() => {
 		setIsOrderConfirmationVisible(false)
@@ -215,17 +222,20 @@ const OrderView = ({
 	}, [onClose])
 
 	const handleCartSubmit = useCallback(() => {
+		track('checkout_start')
 		if (totalPrice === 0) {
+			track('payment_auto_later')
 			submitOrder('later')
 		} else {
 			setIsSelectPaymentWindowVisible(true)
 		}
-	}, [totalPrice, submitOrder])
+	}, [totalPrice, submitOrder, track])
 
 	const clearCart = useCallback(() => {
+		track('cart_clear')
 		updateCart({ products: {}, options: {} })
 		window.dispatchEvent(new Event('resetScroll'))
-	}, [updateCart])
+	}, [updateCart, track])
 
 	return (
 		<main className="flex flex-row h-full">
