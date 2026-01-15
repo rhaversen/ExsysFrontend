@@ -2,12 +2,13 @@
 
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
-import { isCurrentTimeInOrderWindow, isKioskDeactivated } from '@/lib/timeUtils'
+import { filterAvailableActivities, filterAvailableProducts, isKioskCurrentlyClosed } from '@/lib/kioskAvailability'
+import { getNextOrderWindowChange } from '@/lib/timeUtils'
 import { type ActivityType, type KioskType, type OptionType, type ProductType, type RoomType } from '@/types/backendDataTypes'
 
 interface CheckoutMethods {
@@ -22,6 +23,8 @@ interface UseKioskDataReturn {
 	options: OptionType[]
 	activities: ActivityType[]
 	rooms: RoomType[]
+	availableProducts: ProductType[]
+	availableActivities: ActivityType[]
 	checkoutMethods: CheckoutMethods
 	isKioskClosed: boolean
 	selectedActivity: ActivityType | null
@@ -48,6 +51,7 @@ export function useKioskData (): UseKioskDataReturn {
 		later: true,
 		mobilePay: false
 	})
+	const [availabilityTick, setAvailabilityTick] = useState(0)
 
 	const updateCheckoutMethods = useCallback((kioskData: KioskType) => {
 		setCheckoutMethods(prev => ({
@@ -56,25 +60,30 @@ export function useKioskData (): UseKioskDataReturn {
 		}))
 	}, [])
 
-	const isKioskClosed = useCallback(() => {
-		if (!kiosk || !config) { return true }
+	const availableProducts = useMemo(() => {
+		void availabilityTick
+		return filterAvailableProducts(products)
+	}, [products, availabilityTick])
 
-		const kioskIsDeactivated = isKioskDeactivated(kiosk)
-		const dayEnabled = !config.configs.disabledWeekdays.includes(new Date().getDay())
-		const hasAvailableProducts = products.length > 0 && products.some(
-			p => p.isActive && isCurrentTimeInOrderWindow(p.orderWindow)
-		)
+	const availableActivities = useMemo(() => {
+		return filterAvailableActivities(activities, kiosk, availableProducts)
+	}, [activities, kiosk, availableProducts])
 
-		return kioskIsDeactivated || !hasAvailableProducts || !dayEnabled
-	}, [config, kiosk, products])
-
-	const [isKioskClosedState, setIsKioskClosedState] = useState(true)
+	const isKioskClosed = useMemo(() => {
+		return isKioskCurrentlyClosed(kiosk, config, availableProducts)
+	}, [config, kiosk, availableProducts])
 
 	useEffect(() => {
-		setIsKioskClosedState(isKioskClosed())
-		const interval = setInterval(() => setIsKioskClosedState(isKioskClosed()), 60000)
-		return () => clearInterval(interval)
-	}, [isKioskClosed])
+		const orderWindows = products.map(p => p.orderWindow)
+		const nextChange = getNextOrderWindowChange(orderWindows)
+
+		if (!nextChange) { return }
+
+		const msUntilChange = nextChange.getTime() - Date.now() + 100
+		const timeout = setTimeout(() => setAvailabilityTick(t => t + 1), msUntilChange)
+
+		return () => clearTimeout(timeout)
+	}, [products, availabilityTick])
 
 	useEffect(() => {
 		if (API_URL === undefined || API_URL === null || API_URL === '') { return }
@@ -158,8 +167,10 @@ export function useKioskData (): UseKioskDataReturn {
 		options,
 		activities,
 		rooms,
+		availableProducts,
+		availableActivities,
 		checkoutMethods,
-		isKioskClosed: isKioskClosedState,
+		isKioskClosed,
 		selectedActivity,
 		setSelectedActivity,
 		selectedRoom,

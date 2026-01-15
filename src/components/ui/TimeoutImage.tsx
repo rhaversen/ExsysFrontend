@@ -4,6 +4,7 @@ import { memo, type ReactElement, useEffect, useState } from 'react'
 interface TimeoutImageProps {
 	totalMs: number
 	onClick: () => void
+	onTimeout?: () => void
 	src: string
 	alt: string
 	width: number
@@ -14,6 +15,7 @@ interface TimeoutImageProps {
 const TimeoutImage = memo(function TimeoutImage ({
 	totalMs,
 	onClick,
+	onTimeout,
 	src,
 	alt,
 	width,
@@ -24,18 +26,23 @@ const TimeoutImage = memo(function TimeoutImage ({
 	const progress = Math.min(elapsedMs / totalMs, 1)
 
 	useEffect(() => {
+		setElapsedMs(0)
 		const startTime = Date.now()
 		const interval = setInterval(() => {
 			const elapsed = Date.now() - startTime
 			setElapsedMs(elapsed)
 			if (elapsed >= totalMs) {
 				clearInterval(interval)
-				onClick()
+				if (onTimeout) {
+					onTimeout()
+				} else {
+					onClick()
+				}
 			}
 		}, 50)
 
 		return () => { clearInterval(interval) }
-	}, [totalMs, onClick])
+	}, [totalMs, onClick, onTimeout])
 
 	return (
 		<button

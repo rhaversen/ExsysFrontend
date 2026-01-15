@@ -1,6 +1,7 @@
 import { type Metadata } from 'next'
 
 import KioskBroadcastedEventHandlers from '@/components/kiosk/KioskBroadcastedEventHandlers'
+import { AnalyticsProvider } from '@/contexts/AnalyticsProvider'
 import ConfigProvider from '@/contexts/ConfigProvider'
 import KioskAuthProvider from '@/contexts/KioskAuthProvider'
 
@@ -22,8 +23,10 @@ export default function SelectRoomLayout ({
 	return (
 		<KioskAuthProvider>
 			<ConfigProvider>
-				<KioskBroadcastedEventHandlers />
-				{children}
+				<AnalyticsProvider>
+					<KioskBroadcastedEventHandlers />
+					{children}
+				</AnalyticsProvider>
 			</ConfigProvider>
 		</KioskAuthProvider>
 	)
