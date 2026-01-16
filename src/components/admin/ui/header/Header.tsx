@@ -24,9 +24,9 @@ const Header = (): ReactElement | null => {
 	const [selectedLink, setSelectedLink] = useState<string>(pathname ?? '')
 
 	const routeTitles = {
-		'/admin/kitchen': 'Køkken',
 		'/admin/modify': 'Modificer',
 		'/admin/statistics': 'Statistik',
+		'/admin/analytics': 'Analyse',
 		'/admin/feedback': 'Feedback'
 	}
 

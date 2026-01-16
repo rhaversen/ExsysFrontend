@@ -4,7 +4,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo, type ReactElement } from 'react'
-import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal, FiActivity } from 'react-icons/fi'
+import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiChevronDown, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 import 'dayjs/locale/da'
 
@@ -139,12 +139,30 @@ export default function Page (): ReactElement | null {
 	if (!hasMounted) { return null }
 
 	return (
-		<main className="flex flex-col items-center">
+		<main className="flex flex-col items-center relative">
+			{/* Dev tools - absolutely positioned top left */}
+			<details className="group text-xs text-gray-400 absolute top-2 left-4 z-20">
+				<summary className="cursor-pointer hover:text-gray-500 flex items-center gap-1 list-none">
+					<FiChevronDown className="w-3 h-3 transition-transform group-open:rotate-180" />
+					{'Udviklerværktøjer'}
+				</summary>
+				<div className="absolute top-full left-0 mt-2 flex flex-col gap-2 bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+					<Link
+						href="/admin/debug"
+						className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
+					>
+						<FiTerminal className="w-4 h-4" />
+						{'Betalingssimulator'}
+					</Link>
+				</div>
+			</details>
+
 			<div className="flex flex-col pt-4 gap-6 w-full px-4">
 				{/* Header row */}
 				<div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
-					{/* Welcome + Stats centered */}
+					{/* Spacer for left side */}
 					<div className="hidden sm:block flex-1" />
+					{/* Welcome + Stats centered */}
 					<div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
 						<h1 className="text-xl font-bold text-gray-800">
 							{'Velkommen, '}{currentUser?.name ?? 'Gæst'}{'!'}
@@ -278,27 +296,6 @@ export default function Page (): ReactElement | null {
 							</div>
 							<EntitiesTimelineOverview products={products} />
 						</section>
-
-						{/* Debug tools */}
-						<details className="text-xs text-gray-400">
-							<summary className="cursor-pointer hover:text-gray-500">{'Udviklerværktøjer'}</summary>
-							<div className="mt-2 flex flex-wrap gap-2">
-								<Link
-									href="/admin/debug"
-									className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm"
-								>
-									<FiTerminal className="w-4 h-4" />
-									{'Betalingssimulator'}
-								</Link>
-								<Link
-									href="/admin/analytics"
-									className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm"
-								>
-									<FiActivity className="w-4 h-4" />
-									{'Brugeranalyse'}
-								</Link>
-							</div>
-						</details>
 					</div>
 
 					{/* Right Column */}
