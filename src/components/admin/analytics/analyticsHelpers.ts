@@ -10,6 +10,8 @@ export interface SessionAnalysis {
 	hasTimeout: boolean
 	hasCheckoutComplete: boolean
 	hasCheckoutStart: boolean
+	hasPaymentFailure: boolean
+	hasPaymentCancelled: boolean
 	lastViewState: string
 	endReason: 'completed' | 'timeout' | 'abandoned' | 'manual_end'
 	timeToFirstAction: number | null
@@ -32,12 +34,30 @@ export interface PercentileStats {
 }
 
 export function formatDuration (ms: number): string {
-	if (ms < 1000) { return `${ms}ms` }
-	const seconds = Math.floor(ms / 1000)
-	const minutes = Math.floor(seconds / 60)
-	const remainingSeconds = seconds % 60
-	if (minutes === 0) { return `${remainingSeconds}s` }
-	return `${minutes}m ${remainingSeconds}s`
+	const seconds = ms / 1000
+	return `${seconds.toFixed(2)}s`
+}
+
+export function roundPercent (value: number, decimals: number = 1): number {
+	const factor = Math.pow(10, decimals)
+	return Math.round(value * factor) / factor
+}
+
+const AUTO_INTERACTION_TYPES: InteractionTypeValue[] = [
+	'session_start',
+	'activity_auto_select',
+	'room_auto_select',
+	'nav_auto_to_activity',
+	'nav_auto_to_room',
+	'nav_auto_to_order',
+	'payment_auto_later',
+	'session_timeout',
+	'confirmation_timeout',
+	'feedback_auto_back'
+]
+
+export function isAutoInteraction (type: InteractionTypeValue): boolean {
+	return AUTO_INTERACTION_TYPES.includes(type)
 }
 
 export function getKioskName (kioskId: string, kiosks: KioskType[]): string {
@@ -57,6 +77,9 @@ export function getInteractionIcon (type: InteractionTypeValue): string {
 		nav_to_activity: '🎯',
 		nav_to_room: '🚪',
 		nav_to_order: '🛒',
+		nav_auto_to_activity: '⚡',
+		nav_auto_to_room: '⚡',
+		nav_auto_to_order: '⚡',
 		timeout_continue: '▶️',
 		timeout_restart: '🔄',
 		product_select: '➕',
@@ -100,6 +123,9 @@ export function getInteractionLabel (type: InteractionTypeValue): string {
 		nav_to_activity: 'Navigation til aktivitet',
 		nav_to_room: 'Navigation til lokale',
 		nav_to_order: 'Navigation til bestilling',
+		nav_auto_to_activity: 'Auto-navigation til aktivitet',
+		nav_auto_to_room: 'Auto-navigation til lokale',
+		nav_auto_to_order: 'Auto-navigation til bestilling',
 		timeout_continue: 'Fortsæt efter timeout-advarsel',
 		timeout_restart: 'Start forfra efter timeout-advarsel',
 		product_select: 'Produkt tilføjet',
@@ -221,10 +247,13 @@ export function analyzeSession (
 	const lastViewState = determineLastViewState(sessionFiltered)
 
 	let timeToFirstAction: number | null = null
-	const firstNonStartInteraction = sessionFiltered.find(i => i.type !== 'session_start')
-	if (firstNonStartInteraction !== undefined && sessionFiltered[0]?.type === 'session_start') {
-		timeToFirstAction = new Date(firstNonStartInteraction.timestamp).getTime() - startTime.getTime()
+	const firstManualInteraction = sessionFiltered.find(i => !isAutoInteraction(i.type))
+	if (firstManualInteraction !== undefined && sessionFiltered[0]?.type === 'session_start') {
+		timeToFirstAction = new Date(firstManualInteraction.timestamp).getTime() - startTime.getTime()
 	}
+
+	const hasPaymentFailure = sessionFiltered.some(i => i.type === 'checkout_failed')
+	const hasPaymentCancelled = sessionFiltered.some(i => i.type === 'payment_cancel')
 
 	let maxIdleGap = 0
 	for (let i = 1; i < sessionFiltered.length; i++) {
@@ -250,6 +279,8 @@ export function analyzeSession (
 		hasTimeout,
 		hasCheckoutComplete,
 		hasCheckoutStart,
+		hasPaymentFailure,
+		hasPaymentCancelled,
 		lastViewState,
 		endReason,
 		timeToFirstAction,

@@ -2,26 +2,43 @@
 
 import { type ReactElement, useMemo } from 'react'
 
-import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { ActivityType, InteractionType, KioskType, OrderType, RoomType } from '@/types/backendDataTypes'
 
 import {
 	type SessionAnalysis,
 	formatDuration,
 	getKioskName,
 	analyzeSession,
-	groupInteractionsBySession
+	groupInteractionsBySession,
+	roundPercent,
+	isAutoInteraction
 } from './analyticsHelpers'
 
 interface ProblemsTabProps {
 	interactions: InteractionType[]
 	kiosks: KioskType[]
 	orders: OrderType[]
+	activities: ActivityType[]
+	rooms: RoomType[]
+}
+
+type ViewType = 'welcome' | 'activity' | 'room' | 'order' | 'checkout'
+
+interface LongPause {
+	view: ViewType
+	duration: number
+	sessionId: string
+	kioskId: string
+	activityId?: string
+	roomId?: string
 }
 
 export default function ProblemsTab ({
 	interactions,
 	kiosks,
-	orders
+	orders,
+	activities,
+	rooms
 }: ProblemsTabProps): ReactElement {
 	const sessions = useMemo(() => {
 		const grouped = groupInteractionsBySession(interactions)
@@ -40,21 +57,17 @@ export default function ProblemsTab ({
 		const timedOut = sessions.filter(s => s.endReason === 'timeout').length
 		const checkoutStarted = sessions.filter(s => s.hasCheckoutStart).length
 		const completed = sessions.filter(s => s.hasCheckoutComplete).length
-		const failed = sessions.filter(s =>
-			s.interactions.some(i => i.type === 'checkout_failed')
-		).length
-		const highIndecision = sessions.filter(s => s.cartModifications > 5).length
+		const paymentFailed = sessions.filter(s => s.hasPaymentFailure === true).length
 
 		return {
-			timeoutRate: total > 0 ? (timedOut / total) * 100 : 0,
-			abandonmentRate: checkoutStarted > 0 ? ((checkoutStarted - completed) / checkoutStarted) * 100 : 0,
-			errorRate: total > 0 ? (failed / total) * 100 : 0,
-			highIndecisionRate: total > 0 ? (highIndecision / total) * 100 : 0,
+			timeoutRate: total > 0 ? roundPercent((timedOut / total) * 100) : 0,
+			abandonmentRate: checkoutStarted > 0 ? roundPercent(((checkoutStarted - completed) / checkoutStarted) * 100) : 0,
+			paymentFailedRate: checkoutStarted > 0 ? roundPercent((paymentFailed / checkoutStarted) * 100) : 0,
 			timedOut,
 			abandoned: checkoutStarted - completed,
-			failed,
-			highIndecision,
-			total
+			paymentFailed,
+			total,
+			checkoutStarted
 		}
 	}, [sessions])
 
@@ -64,29 +77,26 @@ export default function ProblemsTab ({
 			reasons: string[]
 		}> = []
 
-		const avgDuration = sessions.reduce((sum, s) => sum + s.duration, 0) / sessions.length || 0
-		const avgCartMods = sessions.reduce((sum, s) => sum + s.cartModifications, 0) / sessions.length || 0
+		const durations = sessions.map(s => s.duration)
+		const avgDuration = durations.reduce((sum, d) => sum + d, 0) / durations.length || 0
 
 		for (const session of sessions) {
 			const reasons: string[] = []
 
-			if (session.duration > avgDuration * 3) {
-				reasons.push(`Usædvanlig lang varighed (${formatDuration(session.duration)})`)
+			if (session.duration > avgDuration * 3 && session.duration > 60000) {
+				reasons.push(`Usædvanlig lang (${formatDuration(session.duration)})`)
 			}
-			if (session.duration < 5000 && session.interactionCount > 1) {
-				reasons.push(`Meget kort session (${formatDuration(session.duration)})`)
-			}
-			if (session.maxIdleGap > 60000) {
+
+			if (session.maxIdleGap > 45000) {
 				reasons.push(`Lang pause (${formatDuration(session.maxIdleGap)})`)
 			}
-			if (session.cartModifications > avgCartMods * 3 && session.cartModifications > 5) {
+
+			if (session.hasCheckoutStart && !session.hasCheckoutComplete && !session.hasTimeout && session.hasPaymentFailure === false && session.hasPaymentCancelled === false) {
+				reasons.push('Checkout afbrudt manuelt')
+			}
+
+			if (session.cartModifications > 8) {
 				reasons.push(`Mange kurvændringer (${session.cartModifications})`)
-			}
-			if (session.hasCheckoutStart && !session.hasCheckoutComplete && !session.hasTimeout) {
-				reasons.push('Checkout afbrudt uden timeout')
-			}
-			if (session.interactions.some(i => i.type === 'checkout_failed')) {
-				reasons.push('Checkout fejl')
 			}
 
 			if (reasons.length > 0) {
@@ -94,68 +104,137 @@ export default function ProblemsTab ({
 			}
 		}
 
-		return outliers.slice(0, 20)
+		return outliers
+			.sort((a, b) => b.reasons.length - a.reasons.length)
+			.slice(0, 15)
 	}, [sessions])
+
+	const longestPauses = useMemo(() => {
+		const pauses: LongPause[] = []
+		const PAUSE_THRESHOLD = 10000
+
+		for (const session of sessions) {
+			let currentView: ViewType = 'welcome'
+			let lastActivityId: string | undefined
+			let lastRoomId: string | undefined
+
+			for (let i = 1; i < session.interactions.length; i++) {
+				const prev = session.interactions[i - 1]
+				const curr = session.interactions[i]
+
+				if (prev.type === 'activity_select' || prev.type === 'activity_auto_select') {
+					lastActivityId = prev.metadata?.activityId
+				}
+				if (prev.type === 'room_select' || prev.type === 'room_auto_select') {
+					lastRoomId = prev.metadata?.roomId
+				}
+
+				if (prev.type === 'nav_to_welcome' || prev.type === 'timeout_restart' || prev.type === 'session_start') {
+					currentView = 'welcome'
+				} else if (prev.type === 'nav_to_activity' || prev.type === 'nav_auto_to_activity') {
+					currentView = 'activity'
+				} else if (prev.type === 'nav_to_room' || prev.type === 'nav_auto_to_room') {
+					currentView = 'room'
+				} else if (prev.type === 'nav_to_order' || prev.type === 'nav_auto_to_order') {
+					currentView = 'order'
+				} else if (prev.type === 'checkout_start') {
+					currentView = 'checkout'
+				} else if (prev.type === 'checkout_cancel' || prev.type === 'payment_cancel' || prev.type === 'checkout_failed') {
+					currentView = 'order'
+				}
+
+				const gap = new Date(curr.timestamp).getTime() - new Date(prev.timestamp).getTime()
+
+				if (gap >= PAUSE_THRESHOLD && isAutoInteraction(prev.type) === false && prev.type !== 'session_start') {
+					pauses.push({
+						view: currentView,
+						duration: gap,
+						sessionId: session.sessionId,
+						kioskId: session.kioskId,
+						activityId: lastActivityId,
+						roomId: lastRoomId
+					})
+				}
+			}
+		}
+
+		const viewLabels: Record<ViewType, string> = {
+			welcome: 'Velkomst',
+			activity: 'Aktivitetsvalg',
+			room: 'Lokalevalg',
+			order: 'Produktvalg',
+			checkout: 'Checkout'
+		}
+
+		return pauses
+			.sort((a, b) => b.duration - a.duration)
+			.slice(0, 10)
+			.map(p => ({
+				...p,
+				viewLabel: viewLabels[p.view],
+				kioskName: getKioskName(p.kioskId, kiosks),
+				activityName: p.activityId !== undefined ? activities.find(a => a._id === p.activityId)?.name : undefined,
+				roomName: p.roomId !== undefined ? rooms.find(r => r._id === p.roomId)?.name : undefined
+			}))
+	}, [sessions, kiosks, activities, rooms])
 
 	return (
 		<div className="space-y-6">
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-3 gap-4">
 				<RateCard
 					label="Timeout rate"
 					value={rates.timeoutRate}
 					count={rates.timedOut}
+					total={rates.total}
 					threshold={20}
-					unit="%"
 				/>
 				<RateCard
 					label="Checkout afbrydelse"
 					value={rates.abandonmentRate}
 					count={rates.abandoned}
+					total={rates.checkoutStarted}
 					threshold={30}
-					unit="%"
 				/>
 				<RateCard
-					label="Fejlrate"
-					value={rates.errorRate}
-					count={rates.failed}
-					threshold={5}
-					unit="%"
-				/>
-				<RateCard
-					label="Høj ubeslutsom"
-					value={rates.highIndecisionRate}
-					count={rates.highIndecision}
-					threshold={20}
-					unit="%"
+					label="Betaling mislykket"
+					value={rates.paymentFailedRate}
+					count={rates.paymentFailed}
+					total={rates.checkoutStarted}
+					threshold={15}
+					color="yellow"
 				/>
 			</div>
 
 			<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-				<h3 className="font-semibold text-gray-800 mb-4">{'Problematiske sessioner'}</h3>
+				<h3 className="font-semibold text-gray-800 mb-4">{'Usædvanlige sessioner'}</h3>
 				{outlierSessions.length > 0 ? (
-					<div className="space-y-4">
+					<div className="space-y-3 max-h-96 overflow-y-auto">
 						{outlierSessions.map(({ session, reasons }) => (
 							<div key={session.sessionId} className="border border-gray-200 rounded-lg p-3">
 								<div className="flex justify-between items-start mb-2">
 									<div>
 										<div className="font-medium text-sm">
-											{session.startTime.toLocaleString('da-DK')}
+											{session.startTime.toLocaleDateString('da-DK', {
+												weekday: 'short',
+												day: 'numeric',
+												month: 'short',
+												hour: '2-digit',
+												minute: '2-digit'
+											})}
 										</div>
 										<div className="text-xs text-gray-500">
 											{getKioskName(session.kioskId, kiosks)}
 											{' • '}
 											{formatDuration(session.duration)}
-											{' • '}
-											{session.interactionCount} {'interaktioner\r'}
 										</div>
 									</div>
 									<EndReasonBadge reason={session.endReason} />
 								</div>
-								<div className="flex flex-wrap gap-2">
+								<div className="flex flex-wrap gap-1">
 									{reasons.map((reason, idx) => (
 										<span
 											key={idx}
-											className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded"
+											className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded"
 										>
 											{reason}
 										</span>
@@ -166,48 +245,42 @@ export default function ProblemsTab ({
 					</div>
 				) : (
 					<div className="text-gray-400 text-center py-8">
-						{'Ingen problematiske sessioner fundet'}
+						{'Ingen usædvanlige sessioner fundet'}
 					</div>
 				)}
 			</div>
 
 			<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-				<h3 className="font-semibold text-gray-800 mb-4">{'Anbefalinger'}</h3>
-				<div className="space-y-3">
-					{rates.timeoutRate > 20 && (
-						<Recommendation
-							type="warning"
-							title="Høj timeout rate"
-							description="Overvej at øge timeout-varigheden eller forenkle brugerflowet."
-						/>
-					)}
-					{rates.abandonmentRate > 30 && (
-						<Recommendation
-							type="warning"
-							title="Høj checkout afbrydelse"
-							description="Undersøg checkout-flowet for problemer eller forvirrende elementer."
-						/>
-					)}
-					{rates.errorRate > 5 && (
-						<Recommendation
-							type="error"
-							title="Høj fejlrate"
-							description="Check betalingsintegration og systemlogge for fejl."
-						/>
-					)}
-					{rates.highIndecisionRate > 20 && (
-						<Recommendation
-							type="info"
-							title="Mange ubeslutsomme brugere"
-							description="Overvej at forenkle produktudvalget eller tilføje anbefalinger."
-						/>
-					)}
-					{rates.timeoutRate <= 20 && rates.abandonmentRate <= 30 && rates.errorRate <= 5 && rates.highIndecisionRate <= 20 && (
-						<div className="text-green-600 text-center py-4">
-							{'✓ Ingen problemer detekteret'}
-						</div>
-					)}
-				</div>
+				<h3 className="font-semibold text-gray-800 mb-4">{'Længste pauser'}</h3>
+				<p className="text-xs text-gray-500 mb-4">{'Pauser over 10 sekunder - potentielle problempunkter'}</p>
+				{longestPauses.length > 0 ? (
+					<div className="overflow-x-auto">
+						<table className="w-full text-sm">
+							<thead>
+								<tr className="text-left text-gray-500 border-b border-gray-200">
+									<th className="pb-2 font-medium">{'Varighed'}</th>
+									<th className="pb-2 font-medium">{'Visning'}</th>
+									<th className="pb-2 font-medium">{'Aktivitet'}</th>
+									<th className="pb-2 font-medium">{'Lokale'}</th>
+									<th className="pb-2 font-medium">{'Kiosk'}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{longestPauses.map((pause, idx) => (
+									<tr key={`${pause.sessionId}-${idx}`} className="border-b border-gray-100 last:border-b-0">
+										<td className="py-2 font-medium text-amber-600">{formatDuration(pause.duration)}</td>
+										<td className="py-2 text-gray-600">{pause.viewLabel}</td>
+										<td className="py-2 text-gray-600">{pause.activityName ?? '-'}</td>
+										<td className="py-2 text-gray-600">{pause.roomName ?? '-'}</td>
+										<td className="py-2 text-gray-600">{pause.kioskName}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				) : (
+					<div className="text-gray-400 text-center py-4">{'Ingen lange pauser fundet'}</div>
+				)}
 			</div>
 		</div>
 	)
@@ -217,26 +290,36 @@ function RateCard ({
 	label,
 	value,
 	count,
+	total,
 	threshold,
-	unit
+	color
 }: {
 	label: string
 	value: number
 	count: number
+	total: number
 	threshold: number
-	unit: string
+	color?: 'yellow'
 }): ReactElement {
-	const isWarning = value > threshold
+	const isWarning = color !== 'yellow' && value > threshold
+	const bgColor = color === 'yellow'
+		? 'bg-yellow-50 border-yellow-200'
+		: isWarning
+			? 'bg-red-50 border-red-200'
+			: 'bg-white border-gray-100'
+	const textColor = color === 'yellow'
+		? 'text-yellow-700'
+		: isWarning
+			? 'text-red-600'
+			: 'text-gray-900'
+
 	return (
-		<div className={`rounded-xl shadow-sm p-4 ${isWarning ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-100'}`}>
+		<div className={`rounded-xl shadow-sm p-4 border ${bgColor}`}>
 			<div className="text-xs text-gray-500">{label}</div>
-			<div className={`text-2xl font-bold ${isWarning ? 'text-red-600' : 'text-gray-900'}`}>
-				{value.toFixed(1)}{unit}
+			<div className={`text-2xl font-bold ${textColor}`}>
+				{value}{'%'}
 			</div>
-			<div className="text-xs text-gray-400">{count}{' af total'}</div>
-			{isWarning && (
-				<div className="text-xs text-red-600 mt-1">{'⚠️ Over grænse'}</div>
-			)}
+			<div className="text-xs text-gray-400">{count}{' af '}{total}</div>
 		</div>
 	)
 }
@@ -249,41 +332,15 @@ function EndReasonBadge ({ reason }: { reason: SessionAnalysis['endReason'] }): 
 		manual_end: 'bg-gray-100 text-gray-800'
 	}
 	const labels = {
-		completed: '✓ Køb gennemført',
-		timeout: '⏰ Session timeout',
-		abandoned: '✕ Afbrudt betaling',
-		manual_end: 'Manuel afslutning'
+		completed: '✓ Gennemført',
+		timeout: '⏰ Timeout',
+		abandoned: '✕ Afbrudt',
+		manual_end: 'Manuel'
 	}
+
 	return (
-		<span className={`px-2 py-1 text-xs rounded ${colors[reason]}`}>
+		<span className={`px-2 py-0.5 text-xs rounded ${colors[reason]}`}>
 			{labels[reason]}
 		</span>
-	)
-}
-
-function Recommendation ({
-	type,
-	title,
-	description
-}: {
-	type: 'warning' | 'error' | 'info'
-	title: string
-	description: string
-}): ReactElement {
-	const colors = {
-		warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-		error: 'bg-red-50 border-red-200 text-red-800',
-		info: 'bg-blue-50 border-blue-200 text-blue-800'
-	}
-	const icons = {
-		warning: '⚠️',
-		error: '❌',
-		info: 'ℹ️'
-	}
-	return (
-		<div className={`p-3 border rounded-lg ${colors[type]}`}>
-			<div className="font-medium">{icons[type]} {title}</div>
-			<div className="text-sm mt-1">{description}</div>
-		</div>
 	)
 }

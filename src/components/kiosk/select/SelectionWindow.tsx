@@ -21,12 +21,12 @@ const SelectionWindow = ({
 	const [productsOptions, setProductsOptions] = useState<OptionType[]>([])
 
 	const handleProductSelect = useCallback((product: ProductType): void => {
-		track('product_select')
+		track('product_select', { productId: product._id })
 		handleCartChange(product._id, 'products', 1)
 	}, [handleCartChange, track])
 
 	const handleOptionSelect = useCallback((option: OptionType): void => {
-		track('option_select')
+		track('option_select', { optionId: option._id })
 		handleCartChange(option._id, 'options', 1)
 	}, [handleCartChange, track])
 

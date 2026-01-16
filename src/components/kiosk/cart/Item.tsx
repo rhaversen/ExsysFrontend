@@ -27,10 +27,11 @@ const Item = ({
 	const isProduct = type === 'products'
 
 	const handleQuantityChange = useCallback((change: number): void => {
+		const metadata = isProduct ? { productId: id } : { optionId: id }
 		if (change > 0) {
-			track(isProduct ? 'product_increase' : 'option_increase')
+			track(isProduct ? 'product_increase' : 'option_increase', metadata)
 		} else {
-			track(isProduct ? 'product_decrease' : 'option_decrease')
+			track(isProduct ? 'product_decrease' : 'option_decrease', metadata)
 		}
 		onCartChange(id, type, change)
 	}, [onCartChange, id, type, track, isProduct])

@@ -17,7 +17,8 @@
         "package-lock.json",
         "tsconfig.json",
         "**/*.bat",
-        "coverage/**"
+        "coverage/**",
+        "tsconfig.tsbuildinfo"
     ],
     "ignoreWords": [
         "chunkname",
@@ -31,6 +32,8 @@
         "livez",
         "friday",
         "KHTML",
-        "mobilepay"
+        "mobilepay",
+        "Fortrydelser",
+        "fortrydelser"
     ]
 }
