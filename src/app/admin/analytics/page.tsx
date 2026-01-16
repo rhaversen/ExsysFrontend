@@ -2,8 +2,9 @@
 
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useMemo } from 'react'
-import { FiActivity, FiBarChart2, FiClock, FiAlertTriangle, FiMonitor, FiList, FiFilter, FiMessageSquare } from 'react-icons/fi'
+import { FiActivity, FiBarChart2, FiClock, FiAlertTriangle, FiMonitor, FiList, FiFilter, FiMessageSquare, FiUsers } from 'react-icons/fi'
 
+import BehaviorTab from '@/components/admin/analytics/BehaviorTab'
 import FeedbackTab from '@/components/admin/analytics/FeedbackTab'
 import KiosksTab from '@/components/admin/analytics/KiosksTab'
 import OverviewTab from '@/components/admin/analytics/OverviewTab'
@@ -12,9 +13,9 @@ import SessionsTab from '@/components/admin/analytics/SessionsTab'
 import TimingTab from '@/components/admin/analytics/TimingTab'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
-import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { ActivityType, InteractionType, KioskType, OptionType, OrderType, ProductType, RoomType } from '@/types/backendDataTypes'
 
-type AnalyticsTab = 'overview' | 'timing' | 'problems' | 'kiosks' | 'sessions' | 'feedback'
+type AnalyticsTab = 'overview' | 'timing' | 'behavior' | 'problems' | 'kiosks' | 'sessions' | 'feedback'
 type TimeRange = '7d' | '14d' | '30d' | 'all'
 
 export default function Page (): ReactElement {
@@ -29,10 +30,18 @@ export default function Page (): ReactElement {
 	const [interactions, setInteractions] = useState<InteractionType[]>([])
 	const [kiosks, setKiosks] = useState<KioskType[]>([])
 	const [orders, setOrders] = useState<OrderType[]>([])
+	const [activities, setActivities] = useState<ActivityType[]>([])
+	const [rooms, setRooms] = useState<RoomType[]>([])
+	const [products, setProducts] = useState<ProductType[]>([])
+	const [options, setOptions] = useState<OptionType[]>([])
 
 	useEntitySocket<InteractionType>('interaction', { setState: setInteractions })
 	useEntitySocket<KioskType>('kiosk', { setState: setKiosks })
 	useEntitySocket<OrderType>('order', { setState: setOrders })
+	useEntitySocket<ActivityType>('activity', { setState: setActivities })
+	useEntitySocket<RoomType>('room', { setState: setRooms })
+	useEntitySocket<ProductType>('product', { setState: setProducts })
+	useEntitySocket<OptionType>('option', { setState: setOptions })
 
 	useEffect(() => {
 		const fetchData = async (): Promise<void> => {
@@ -51,7 +60,7 @@ export default function Page (): ReactElement {
 					}
 				}
 
-				const [interactionsRes, kiosksRes, ordersRes] = await Promise.all([
+				const [interactionsRes, kiosksRes, ordersRes, activitiesRes, roomsRes, productsRes, optionsRes] = await Promise.all([
 					axios.get<InteractionType[]>(`${API_URL}/v1/interactions`, {
 						params: dateParams,
 						withCredentials: true
@@ -60,12 +69,20 @@ export default function Page (): ReactElement {
 					axios.get<OrderType[]>(`${API_URL}/v1/orders`, {
 						params: dateParams.from !== undefined ? { fromDate: dateParams.from, toDate: dateParams.to } : {},
 						withCredentials: true
-					})
+					}),
+					axios.get<ActivityType[]>(`${API_URL}/v1/activities`, { withCredentials: true }),
+					axios.get<RoomType[]>(`${API_URL}/v1/rooms`, { withCredentials: true }),
+					axios.get<ProductType[]>(`${API_URL}/v1/products`, { withCredentials: true }),
+					axios.get<OptionType[]>(`${API_URL}/v1/options`, { withCredentials: true })
 				])
 
 				setInteractions(interactionsRes.data)
 				setKiosks(kiosksRes.data)
 				setOrders(ordersRes.data)
+				setActivities(activitiesRes.data)
+				setRooms(roomsRes.data)
+				setProducts(productsRes.data)
+				setOptions(optionsRes.data)
 			} catch (error) {
 				addError(error)
 			} finally {
@@ -86,6 +103,7 @@ export default function Page (): ReactElement {
 	const tabs: Array<{ id: AnalyticsTab, label: string, icon: ReactElement }> = [
 		{ id: 'overview', label: 'Overblik', icon: <FiBarChart2 className="w-4 h-4" /> },
 		{ id: 'timing', label: 'Tidsmålinger', icon: <FiClock className="w-4 h-4" /> },
+		{ id: 'behavior', label: 'Adfærd', icon: <FiUsers className="w-4 h-4" /> },
 		{ id: 'problems', label: 'Problemer', icon: <FiAlertTriangle className="w-4 h-4" /> },
 		{ id: 'kiosks', label: 'Kiosker', icon: <FiMonitor className="w-4 h-4" /> },
 		{ id: 'sessions', label: 'Sessioner', icon: <FiList className="w-4 h-4" /> },
@@ -175,11 +193,23 @@ export default function Page (): ReactElement {
 							orders={orders}
 						/>
 					)}
+					{activeTab === 'behavior' && (
+						<BehaviorTab
+							interactions={filteredInteractions}
+							orders={orders}
+							activities={activities}
+							rooms={rooms}
+							products={products}
+							options={options}
+						/>
+					)}
 					{activeTab === 'problems' && (
 						<ProblemsTab
 							interactions={filteredInteractions}
 							kiosks={kiosks}
 							orders={orders}
+							activities={activities}
+							rooms={rooms}
 						/>
 					)}
 					{activeTab === 'kiosks' && (
@@ -194,6 +224,10 @@ export default function Page (): ReactElement {
 							interactions={filteredInteractions}
 							kiosks={kiosks}
 							orders={orders}
+							activities={activities}
+							rooms={rooms}
+							products={products}
+							options={options}
 						/>
 					)}
 					{activeTab === 'feedback' && (

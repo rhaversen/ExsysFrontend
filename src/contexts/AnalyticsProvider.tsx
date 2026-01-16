@@ -5,13 +5,22 @@ import { createContext, useCallback, useContext, useRef, type ReactNode } from '
 
 import { type InteractionType } from '@/types/frontendDataTypes'
 
+export interface InteractionMetadata {
+	activityId?: string
+	roomId?: string
+	productId?: string
+	optionId?: string
+	orderId?: string
+}
+
 interface Interaction {
 	type: InteractionType
 	timestamp: string
+	metadata?: InteractionMetadata
 }
 
 interface AnalyticsContextType {
-	track: (type: InteractionType) => void
+	track: (type: InteractionType, metadata?: InteractionMetadata) => void
 	endSession: () => Promise<void>
 }
 
@@ -23,10 +32,11 @@ export function AnalyticsProvider ({ children }: { children: ReactNode }): React
 	const sessionIdRef = useRef<string>(crypto.randomUUID())
 	const interactionsRef = useRef<Interaction[]>([])
 
-	const track = useCallback((type: InteractionType) => {
+	const track = useCallback((type: InteractionType, metadata?: InteractionMetadata) => {
 		interactionsRef.current.push({
 			type,
-			timestamp: new Date().toISOString()
+			timestamp: new Date().toISOString(),
+			metadata
 		})
 	}, [])
 
