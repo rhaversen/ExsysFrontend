@@ -162,7 +162,7 @@ export default function Page (): ReactElement | null {
 								>
 									<FiMessageSquare className="w-4 h-4 text-red-600" />
 									<span className="font-semibold text-red-700">{unreadFeedbackCount}</span>
-									<span className="text-red-500">{'ulæste'}</span>
+									<span className="text-red-500">{'ulæste feedback'}</span>
 								</Link>
 							)}
 						</div>
