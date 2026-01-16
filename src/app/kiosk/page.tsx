@@ -47,19 +47,7 @@ export default function Page (): ReactElement {
 
 	const { currentView, isTransitioning, slideDirection, navigateTo } = useViewTransition({
 		initialView: 'welcome' as ViewState,
-		viewOrder: VIEW_ORDER,
-		onNavigate: (view) => {
-			const navEvents: Record<string, InteractionType> = {
-				welcome: 'nav_to_welcome',
-				activity: 'nav_to_activity',
-				room: 'nav_to_room',
-				order: 'nav_to_order'
-			}
-			const event = navEvents[view]
-			if (event !== undefined) {
-				track(event)
-			}
-		}
+		viewOrder: VIEW_ORDER
 	})
 
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
@@ -119,23 +107,31 @@ export default function Page (): ReactElement {
 
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
-		track('activity_select')
+		track('activity_select', { activityId: activity._id })
 		setSelectedActivity(activity)
 
 		const activityRooms = getRoomsForActivity(activity)
 		if (activityRooms.length === 1) {
-			track('room_auto_select')
+			track('room_auto_select', { roomId: activityRooms[0]._id })
 			setSelectedRoom(activityRooms[0])
+			track('nav_auto_to_order')
 			navigateTo('order')
 		} else {
-			navigateTo(selectedRoom !== null ? 'order' : 'room')
+			if (selectedRoom !== null) {
+				track('nav_auto_to_order')
+				navigateTo('order')
+			} else {
+				track('nav_auto_to_room')
+				navigateTo('room')
+			}
 		}
 	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity, track])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
-		track('room_select')
+		track('room_select', { roomId: room._id })
 		setSelectedRoom(room)
+		track('nav_auto_to_order')
 		navigateTo('order')
 	}, [setSelectedRoom, navigateTo, track])
 
@@ -149,16 +145,19 @@ export default function Page (): ReactElement {
 		switch (clickedView) {
 			case 'activity':
 				if (canClickActivity) {
+					track('nav_to_activity')
 					navigateTo('activity')
 				}
 				break
 			case 'room':
 				if (canClickRoom) {
+					track('nav_to_room')
 					navigateTo('room')
 				}
 				break
 			case 'order':
 				if (canClickOrder) {
+					track('nav_to_order')
 					navigateTo('order')
 				}
 				break
@@ -244,17 +243,20 @@ export default function Page (): ReactElement {
 								track('session_start')
 								if (availableActivities.length === 1) {
 									const singleActivity = availableActivities[0]
-									track('activity_auto_select')
+									track('activity_auto_select', { activityId: singleActivity._id })
 									setSelectedActivity(singleActivity)
 									const activityRooms = getRoomsForActivity(singleActivity)
 									if (activityRooms.length === 1) {
-										track('room_auto_select')
+										track('room_auto_select', { roomId: activityRooms[0]._id })
 										setSelectedRoom(activityRooms[0])
+										track('nav_auto_to_order')
 										navigateTo('order')
 									} else {
+										track('nav_auto_to_room')
 										navigateTo('room')
 									}
 								} else {
+									track('nav_auto_to_activity')
 									navigateTo('activity')
 								}
 							}}
