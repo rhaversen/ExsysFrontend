@@ -298,6 +298,9 @@ export type InteractionTypeValue =
 	| 'nav_to_activity'
 	| 'nav_to_room'
 	| 'nav_to_order'
+	| 'nav_auto_to_activity'
+	| 'nav_auto_to_room'
+	| 'nav_auto_to_order'
 	| 'timeout_continue'
 	| 'timeout_restart'
 	| 'product_select'
@@ -326,12 +329,21 @@ export type InteractionTypeValue =
 	| 'feedback_back'
 	| 'feedback_auto_back'
 
+export interface InteractionMetadata {
+	activityId?: string
+	roomId?: string
+	productId?: string
+	optionId?: string
+	orderId?: string
+}
+
 export interface InteractionType {
 	_id: string
 	sessionId: string
 	kioskId: KioskType['_id']
 	type: InteractionTypeValue
 	timestamp: string
+	metadata?: InteractionMetadata
 	createdAt: string
 	updatedAt: string
 }
@@ -340,4 +352,5 @@ export interface PostInteractionType {
 	sessionId: string
 	type: InteractionTypeValue
 	timestamp: string
+	metadata?: InteractionMetadata
 }

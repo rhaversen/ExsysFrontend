@@ -37,7 +37,7 @@ const SelectPaymentWindow = ({
 	return (
 		<CloseableModal canClose={true} onClose={handleCancel}>
 			<h2 className="text-4xl pt-5 text-black font-semibold text-center mb-4">
-				{'Vælg Betaling'}
+				{'Tryk for at vælge betaling'}
 			</h2>
 			<div className="p-5 flex gap-4 justify-center">
 				{checkoutMethods.later && (
@@ -70,7 +70,7 @@ const SelectPaymentWindow = ({
 							disabled={sumUpDisabled}
 						>
 							<div className="text-2xl font-bold text-center text-gray-800">
-								{'Kort'}
+								{'Kort Betaling'}
 							</div>
 							<AsyncImage
 								src={KioskImages.creditCard.src}

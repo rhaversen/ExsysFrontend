@@ -2,7 +2,7 @@
 
 import { type ReactElement, useMemo, useState } from 'react'
 
-import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { ActivityType, InteractionType, KioskType, OptionType, OrderType, ProductType, RoomType } from '@/types/backendDataTypes'
 
 import {
 	type SessionAnalysis,
@@ -18,12 +18,20 @@ interface SessionsTabProps {
 	interactions: InteractionType[]
 	kiosks: KioskType[]
 	orders: OrderType[]
+	activities: ActivityType[]
+	rooms: RoomType[]
+	products: ProductType[]
+	options: OptionType[]
 }
 
 export default function SessionsTab ({
 	interactions,
 	kiosks,
-	orders
+	orders,
+	activities,
+	rooms,
+	products,
+	options
 }: SessionsTabProps): ReactElement {
 	const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set())
 
@@ -59,6 +67,10 @@ export default function SessionsTab ({
 					session={session}
 					kiosks={kiosks}
 					orders={orders}
+					activities={activities}
+					rooms={rooms}
+					products={products}
+					options={options}
 					isExpanded={expandedSessions.has(session.sessionId)}
 					onToggle={() => toggleSession(session.sessionId)}
 				/>
@@ -75,16 +87,50 @@ function SessionCard ({
 	session,
 	kiosks,
 	orders,
+	activities,
+	rooms,
+	products,
+	options,
 	isExpanded,
 	onToggle
 }: {
 	session: SessionAnalysis
 	kiosks: KioskType[]
 	orders: OrderType[]
+	activities: ActivityType[]
+	rooms: RoomType[]
+	products: ProductType[]
+	options: OptionType[]
 	isExpanded: boolean
 	onToggle: () => void
 }): ReactElement {
 	const order = orders.find(o => o._id === session.orderId)
+
+	const getMetadataLabel = (interaction: InteractionType): string | null => {
+		const meta = interaction.metadata
+		if (!meta) { return null }
+
+		if (meta.activityId != null) {
+			const activity = activities.find(a => a._id === meta.activityId)
+			return activity?.name ?? meta.activityId.slice(-6)
+		}
+		if (meta.roomId != null) {
+			const room = rooms.find(r => r._id === meta.roomId)
+			return room?.name ?? meta.roomId.slice(-6)
+		}
+		if (meta.productId != null) {
+			const product = products.find(p => p._id === meta.productId)
+			return product?.name ?? meta.productId.slice(-6)
+		}
+		if (meta.optionId != null) {
+			const option = options.find(o => o._id === meta.optionId)
+			return option?.name ?? meta.optionId.slice(-6)
+		}
+		if (meta.orderId != null) {
+			return `#${meta.orderId.slice(-6)}`
+		}
+		return null
+	}
 
 	return (
 		<div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -135,22 +181,30 @@ function SessionCard ({
 
 					<div className="text-sm font-medium mb-2">{'Tidslinje'}</div>
 					<div className="space-y-1 max-h-96 overflow-y-auto">
-						{session.interactions.map((interaction, idx) => (
-							<div
-								key={`${interaction._id}-${idx}`}
-								className="flex items-center space-x-3 py-1 text-sm"
-							>
-								<span className="text-gray-400 w-12 text-xs">
-									{new Date(interaction.timestamp).toLocaleTimeString('da-DK', {
-										hour: '2-digit',
-										minute: '2-digit',
-										second: '2-digit'
-									})}
-								</span>
-								<span className="text-lg">{getInteractionIcon(interaction.type)}</span>
-								<span>{getInteractionLabel(interaction.type)}</span>
-							</div>
-						))}
+						{session.interactions.map((interaction, idx) => {
+							const metadataLabel = getMetadataLabel(interaction)
+							return (
+								<div
+									key={`${interaction._id}-${idx}`}
+									className="flex items-center space-x-3 py-1 text-sm"
+								>
+									<span className="text-gray-400 w-12 text-xs">
+										{new Date(interaction.timestamp).toLocaleTimeString('da-DK', {
+											hour: '2-digit',
+											minute: '2-digit',
+											second: '2-digit'
+										})}
+									</span>
+									<span className="text-lg">{getInteractionIcon(interaction.type)}</span>
+									<span>{getInteractionLabel(interaction.type)}</span>
+									{metadataLabel != null && (
+										<span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium">
+											{metadataLabel}
+										</span>
+									)}
+								</div>
+							)
+						})}
 					</div>
 				</div>
 			)}

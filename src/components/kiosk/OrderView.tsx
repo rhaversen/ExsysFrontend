@@ -122,18 +122,18 @@ const OrderView = ({
 		}
 	}, [products, options, cart, updateCart])
 
-	const mapPaymentStatusToOrderStatus = useCallback((status: PaymentStatus): OrderStatus => {
+	const mapPaymentStatusToOrderStatus = useCallback((status: PaymentStatus, orderId?: string): OrderStatus => {
 		switch (status) {
 			case 'successful':
-				track('checkout_complete')
+				track('checkout_complete', { orderId })
 				return 'success'
 			case 'failed':
-				track('checkout_failed')
+				track('checkout_failed', { orderId })
 				return 'paymentFailed'
 			case 'pending':
 				return 'awaitingPayment'
 			default:
-				track('checkout_failed')
+				track('checkout_failed', { orderId })
 				addError(new Error('Unknown payment status'))
 				return 'error'
 		}
@@ -160,11 +160,11 @@ const OrderView = ({
 		axios.post<OrderType>(`${API_URL}/v1/orders`, data, { withCredentials: true })
 			.then(response => {
 				setCurrentOrder(response.data)
-				setOrderStatus(mapPaymentStatusToOrderStatus(response.data.paymentStatus))
+				setOrderStatus(mapPaymentStatusToOrderStatus(response.data.paymentStatus, response.data._id))
 				return null
 			})
 			.catch(error => {
-				track('checkout_failed')
+				track('checkout_failed', { orderId: undefined })
 				addError(error)
 				setOrderStatus('error')
 			})
@@ -181,17 +181,17 @@ const OrderView = ({
 	useEntitySocket<OrderType>('order', {
 		onCreate: order => {
 			if (currentOrder?._id === order._id) {
-				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus))
+				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus, order._id))
 			}
 		},
 		onUpdate: order => {
 			if (currentOrder?._id === order._id) {
-				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus))
+				setOrderStatus(mapPaymentStatusToOrderStatus(order.paymentStatus, order._id))
 			}
 		},
 		onDelete: id => {
 			if (currentOrder?._id === id) {
-				track('checkout_failed')
+				track('checkout_failed', { orderId: id })
 				setOrderStatus('error')
 			}
 		}
