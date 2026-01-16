@@ -17,7 +17,7 @@ import { useKioskPing } from '@/hooks/useKioskPing'
 import { useKioskRecovery } from '@/hooks/useKioskRecovery'
 import { useViewTransition } from '@/hooks/useViewTransition'
 import { formatRelativeDateLabel, getNextOpen } from '@/lib/timeUtils'
-import { type CartType, type InteractionType, type ViewState } from '@/types/frontendDataTypes'
+import { type CartType, type ViewState } from '@/types/frontendDataTypes'
 
 import 'dayjs/locale/da'
 
