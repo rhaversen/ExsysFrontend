@@ -66,7 +66,7 @@ const eslintConfig = [
 			semi: ['error', 'never'],
 			'no-extra-semi': 'error',
 			quotes: ['error', 'single'],
-			'@typescript-eslint/no-unused-vars': 'warn',
+			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
 			'no-tabs': 'off',
 			indent: ['error', 'tab', { SwitchCase: 1 }],
 			'react/jsx-curly-brace-presence': [
