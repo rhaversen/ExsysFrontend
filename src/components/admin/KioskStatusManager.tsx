@@ -2,7 +2,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import 'dayjs/locale/da'
-import { FaCodeBranch, FaMoon, FaSyncAlt, FaUsers, FaUserSlash } from 'react-icons/fa'
+import { FaCodeBranch, FaLock, FaMoon, FaSyncAlt, FaUsers, FaUserSlash } from 'react-icons/fa'
 import { FiCheck, FiX, FiLoader } from 'react-icons/fi'
 import { MdWifiOff } from 'react-icons/md'
 
@@ -312,17 +312,21 @@ function KioskControlModalContent ({
 
 // --- Main Component ---
 
-const KioskStatusManager = ({
-	kiosks,
-	products,
-	configs,
-	sessions
-}: {
+interface KioskStatusManagerProps {
 	kiosks: KioskType[]
 	products: ProductType[]
 	configs: ConfigsType | null
 	sessions: SessionType[]
-}): React.ReactElement => {
+	onResetAllKiosks?: (resetFn: () => void) => void
+}
+
+const KioskStatusManager = ({
+	kiosks,
+	products,
+	configs,
+	sessions,
+	onResetAllKiosks
+}: KioskStatusManagerProps): React.ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const adminGitHash = process.env.NEXT_PUBLIC_GIT_HASH ?? 'unknown'
 	const { addError } = useError()
@@ -333,7 +337,11 @@ const KioskStatusManager = ({
 	const [, setNow] = useState(Date.now())
 
 	const kioskIds = useMemo(() => kiosks.map(k => k._id), [kiosks])
-	const { pingStatuses, getPingState } = useAdminKioskPing(kioskIds)
+	const { pingStatuses, getPingState, resetKiosk, resetAllKiosks } = useAdminKioskPing(kioskIds)
+
+	useEffect(() => {
+		onResetAllKiosks?.(resetAllKiosks)
+	}, [onResetAllKiosks, resetAllKiosks])
 
 	useEffect(() => {
 		const interval = setInterval(() => { setNow(Date.now()) }, 1000)
@@ -354,6 +362,7 @@ const KioskStatusManager = ({
 
 	const handleRefreshKiosk = useCallback(async (kioskId: string) => {
 		setIsRefreshing(kioskId)
+		resetKiosk(kioskId)
 		try {
 			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
 				params: { kioskId },
@@ -364,7 +373,7 @@ const KioskStatusManager = ({
 		} finally {
 			setIsRefreshing(null)
 		}
-	}, [API_URL, addError])
+	}, [API_URL, addError, resetKiosk])
 
 	const isLoading = configs === null
 
@@ -464,17 +473,22 @@ const KioskStatusManager = ({
 												} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
 												aria-label={isDeactivated ? `Aktiver ${kiosk.name}` : `Deaktiver ${kiosk.name}`}
 											>
-												{isDeactivated ? 'Aktiver' : 'Deaktiver'}
+												<span className="flex items-center gap-1">
+													<FaLock className="w-3 h-3" />
+													{isDeactivated ? 'Aktiver' : 'Deaktiver'}
+												</span>
 											</button>
 											<button
 												type="button"
 												disabled={isRefreshing === kiosk._id || health === 'not_logged_in'}
 												onClick={() => { void handleRefreshKiosk(kiosk._id) }}
-												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 ${
-													isRefreshing === kiosk._id || health === 'not_logged_in' ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'
-												}`}
+												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+													isDeactivated
+														? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+														: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+												} ${isRefreshing === kiosk._id || health === 'not_logged_in' ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
 												aria-label={`Genindlæs ${kiosk.name}`}
-												title={health === 'not_logged_in' ? 'Kiosk er ikke logget ind' : `Genindlæs ${kiosk.name}`}
+												title={health === 'not_logged_in' ? 'Kiosk er ikke logget ind' : `Genindlæs ${kiosk.name} – afbryder igangværende bestillinger`}
 											>
 												<span className="flex items-center gap-1">
 													<FaSyncAlt className={`w-3 h-3 ${isRefreshing === kiosk._id ? 'animate-spin' : ''}`} />
