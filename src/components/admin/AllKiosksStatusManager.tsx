@@ -12,10 +12,12 @@ import CloseModeSelector from './ui/CloseModeSelector'
 
 const AllKiosksStatusManager = ({
 	kiosks,
-	products
+	products,
+	onRefreshAll
 }: {
 	kiosks: KioskType[]
 	products: ProductType[]
+	onRefreshAll?: () => void
 }): React.ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const [isProcessing, setIsProcessing] = useState(false)
@@ -91,6 +93,7 @@ const AllKiosksStatusManager = ({
 
 	const handleForceRefresh = async (): Promise<void> => {
 		try {
+			onRefreshAll?.()
 			await axios.get(`${API_URL}/service/force-kiosk-refresh`, { withCredentials: true })
 			setShowRefreshModal(false)
 			setShowOptions(false)
