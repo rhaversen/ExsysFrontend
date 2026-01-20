@@ -312,17 +312,21 @@ function KioskControlModalContent ({
 
 // --- Main Component ---
 
-const KioskStatusManager = ({
-	kiosks,
-	products,
-	configs,
-	sessions
-}: {
+interface KioskStatusManagerProps {
 	kiosks: KioskType[]
 	products: ProductType[]
 	configs: ConfigsType | null
 	sessions: SessionType[]
-}): React.ReactElement => {
+	onResetAllKiosks?: (resetFn: () => void) => void
+}
+
+const KioskStatusManager = ({
+	kiosks,
+	products,
+	configs,
+	sessions,
+	onResetAllKiosks
+}: KioskStatusManagerProps): React.ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const adminGitHash = process.env.NEXT_PUBLIC_GIT_HASH ?? 'unknown'
 	const { addError } = useError()
@@ -333,7 +337,11 @@ const KioskStatusManager = ({
 	const [, setNow] = useState(Date.now())
 
 	const kioskIds = useMemo(() => kiosks.map(k => k._id), [kiosks])
-	const { pingStatuses, getPingState } = useAdminKioskPing(kioskIds)
+	const { pingStatuses, getPingState, resetKiosk, resetAllKiosks } = useAdminKioskPing(kioskIds)
+
+	useEffect(() => {
+		onResetAllKiosks?.(resetAllKiosks)
+	}, [onResetAllKiosks, resetAllKiosks])
 
 	useEffect(() => {
 		const interval = setInterval(() => { setNow(Date.now()) }, 1000)
@@ -354,6 +362,7 @@ const KioskStatusManager = ({
 
 	const handleRefreshKiosk = useCallback(async (kioskId: string) => {
 		setIsRefreshing(kioskId)
+		resetKiosk(kioskId)
 		try {
 			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
 				params: { kioskId },
@@ -364,7 +373,7 @@ const KioskStatusManager = ({
 		} finally {
 			setIsRefreshing(null)
 		}
-	}, [API_URL, addError])
+	}, [API_URL, addError, resetKiosk])
 
 	const isLoading = configs === null
 

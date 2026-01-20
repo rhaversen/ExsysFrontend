@@ -3,7 +3,7 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
 import Link from 'next/link'
-import { useCallback, useEffect, useState, useMemo, type ReactElement } from 'react'
+import { useCallback, useEffect, useState, useMemo, useRef, type ReactElement } from 'react'
 import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiChevronDown, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 import 'dayjs/locale/da'
@@ -34,6 +34,7 @@ export default function Page (): ReactElement | null {
 	const [orders, setOrders] = useState<OrderType[]>([])
 	const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessageType[]>([])
 	const [feedbackRatings, setFeedbackRatings] = useState<FeedbackRatingType[]>([])
+	const resetAllKiosksRef = useRef<(() => void) | null>(null)
 
 	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
 		const today = new Date()
@@ -307,10 +308,10 @@ export default function Page (): ReactElement | null {
 									<FiMonitor className="w-5 h-5 text-gray-600" />
 									<h2 className="font-semibold text-gray-800">{'Kioskhåndtering'}</h2>
 								</div>
-								<AllKiosksStatusManager kiosks={kiosks} products={products} />
+								<AllKiosksStatusManager kiosks={kiosks} products={products} onRefreshAll={() => resetAllKiosksRef.current?.()} />
 							</div>
 
-							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} />
+							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} onResetAllKiosks={(fn) => { resetAllKiosksRef.current = fn }} />
 						</section>
 					</div>
 				</div>
