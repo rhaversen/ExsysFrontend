@@ -5,33 +5,62 @@ import SaveFeedback, { useSaveFeedback } from '@/components/ui/SaveFeedback'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { type ConfigsType } from '@/types/backendDataTypes'
 
+function msToTimeString (ms: number): string {
+	const totalMinutes = Math.floor(ms / 60000)
+	const hours = Math.floor(totalMinutes / 60)
+	const minutes = totalMinutes % 60
+	return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+}
+
+function timeStringToMs (time: string): number {
+	const [hours, minutes] = time.split(':').map(Number)
+	return (hours * 60 + minutes) * 60000
+}
+
 const ConfigItem = ({
 	label,
-	value, // value is in milliseconds
+	value,
 	readableLabel,
 	description,
+	inputType = 'default',
+	divisor = 1000,
+	unitLabel = 'sekunder',
+	min,
+	max,
 	onSave
 }: {
 	label: keyof ConfigsType['configs']
 	value: number | string
 	readableLabel: string
 	description: string
+	inputType?: 'default' | 'time'
+	divisor?: number
+	unitLabel?: string
+	min?: string
+	max?: string
 	onSave: (label: string, value: number | string) => void
 }): ReactElement => {
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const isString = typeof value === 'string'
-	// convert ms to seconds string or passthrough string
+	const isTime = inputType === 'time'
 	const toDisplay = useCallback(
-		(val: string | number) => isString ? val.toString() : (Number(val) / 1000).toString(),
-		[isString]
+		(val: string | number) => {
+			if (isTime) return msToTimeString(Number(val))
+			if (isString) return val.toString()
+			return (Number(val) / divisor).toString()
+		},
+		[isString, isTime, divisor]
 	)
 	const toPatch = useCallback(
-		(input: string) => isString ? input : Number(input) * 1000,
-		[isString]
+		(input: string) => {
+			if (isTime) return timeStringToMs(input)
+			if (isString) return input
+			return Number(input) * divisor
+		},
+		[isString, isTime, divisor]
 	)
 	const [rawValue, setRawValue] = useState<string>(toDisplay(value))
-	// sync when prop value changes
 	useEffect(() => { setRawValue(toDisplay(value)) }, [toDisplay, value])
 	const hasChanged = rawValue !== toDisplay(value)
 	const { showSuccess, showSuccessMessage } = useSaveFeedback()
@@ -61,16 +90,18 @@ const ConfigItem = ({
 					<div className="flex items-center">
 						<input
 							id={label}
-							type={isString ? 'text' : 'number'}
-							value={rawValue}
-							aria-label={readableLabel}
-							placeholder={toDisplay(value)}
-							title={readableLabel}
-							onChange={(e) => setRawValue(e.target.value)}
-							onKeyDown={handleKeyDown}
-							className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						/>
-						{!isString && <span className="ml-2 text-slate-700">{'sekunder'}</span>}
+						type={isTime ? 'time' : isString ? 'text' : 'number'}
+						value={rawValue}
+						aria-label={readableLabel}
+						placeholder={toDisplay(value)}
+						title={readableLabel}
+						onChange={(e) => setRawValue(e.target.value)}
+						onKeyDown={handleKeyDown}
+						{...(min !== undefined && { min })}
+						{...(max !== undefined && { max })}
+						className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					/>
+					{!isString && !isTime && <span className="ml-2 text-slate-700">{unitLabel}</span>}
 					</div>
 				</div>
 				<p className="text-sm text-slate-700 mt-1">

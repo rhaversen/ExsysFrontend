@@ -2,32 +2,28 @@
 
 import { useEffect } from 'react'
 
+import { useConfig } from '@/contexts/ConfigProvider'
 import { useError } from '@/contexts/ErrorContext/ErrorContext'
 
-export default function DailyReloader ({
-	reloadHour = 0,
-	randomDelayMinutes = 10
-}: {
-	reloadHour?: number
-	randomDelayMinutes?: number
-}): null {
+export default function DailyReloader (): null {
+	const { config } = useConfig()
 	const { addError } = useError()
 
+	const reloadMsSinceMidnight = config?.configs.kioskReloadMsSinceMidnight ?? 10800000 // 3 AM default
+	const randomDelayMinutes = 10
+
 	useEffect(() => {
-		const setMidnightReload = (): NodeJS.Timeout | undefined => {
+		const setReloadTimer = (): NodeJS.Timeout | undefined => {
 			try {
 				const now = new Date()
-				const target = new Date(
-					now.getFullYear(),
-					now.getMonth(),
-					now.getHours() >= reloadHour ? now.getDate() + 1 : now.getDate(),
-					reloadHour,
-					0,
-					0
-				)
-				// Add random delay between 0-10 minutes
+				const midnightToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+				const todayReloadTime = midnightToday + reloadMsSinceMidnight
+				const targetTime = now.getTime() >= todayReloadTime
+					? todayReloadTime + 86400000 // Tomorrow
+					: todayReloadTime
+
 				const randomDelay = Math.floor(Math.random() * randomDelayMinutes * 60 * 1000)
-				const msToReload = target.getTime() - now.getTime() + randomDelay
+				const msToReload = targetTime - now.getTime() + randomDelay
 
 				console.info(`Page will reload in ${Math.floor(msToReload / 1000 / 60)} minutes`)
 
@@ -40,13 +36,13 @@ export default function DailyReloader ({
 			}
 		}
 
-		const timeoutId = setMidnightReload()
+		const timeoutId = setReloadTimer()
 		return () => {
 			if (timeoutId !== null && timeoutId !== undefined) {
 				clearTimeout(timeoutId)
 			}
 		}
-	}, [addError, randomDelayMinutes, reloadHour])
+	}, [addError, randomDelayMinutes, reloadMsSinceMidnight])
 
 	return null
 }
