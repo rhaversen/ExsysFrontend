@@ -46,16 +46,16 @@ const ConfigItem = ({
 	const isTime = inputType === 'time'
 	const toDisplay = useCallback(
 		(val: string | number) => {
-			if (isTime) return msToTimeString(Number(val))
-			if (isString) return val.toString()
+			if (isTime) { return msToTimeString(Number(val)) }
+			if (isString) { return val.toString() }
 			return (Number(val) / divisor).toString()
 		},
 		[isString, isTime, divisor]
 	)
 	const toPatch = useCallback(
 		(input: string) => {
-			if (isTime) return timeStringToMs(input)
-			if (isString) return input
+			if (isTime) { return timeStringToMs(input) }
+			if (isString) { return input }
 			return Number(input) * divisor
 		},
 		[isString, isTime, divisor]
@@ -90,18 +90,18 @@ const ConfigItem = ({
 					<div className="flex items-center">
 						<input
 							id={label}
-						type={isTime ? 'time' : isString ? 'text' : 'number'}
-						value={rawValue}
-						aria-label={readableLabel}
-						placeholder={toDisplay(value)}
-						title={readableLabel}
-						onChange={(e) => setRawValue(e.target.value)}
-						onKeyDown={handleKeyDown}
-						{...(min !== undefined && { min })}
-						{...(max !== undefined && { max })}
-						className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-					{!isString && !isTime && <span className="ml-2 text-slate-700">{unitLabel}</span>}
+							type={isTime ? 'time' : isString ? 'text' : 'number'}
+							value={rawValue}
+							aria-label={readableLabel}
+							placeholder={toDisplay(value)}
+							title={readableLabel}
+							onChange={(e) => setRawValue(e.target.value)}
+							onKeyDown={handleKeyDown}
+							{...(min !== undefined && { min })}
+							{...(max !== undefined && { max })}
+							className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						/>
+						{!isString && !isTime && <span className="ml-2 text-slate-700">{unitLabel}</span>}
 					</div>
 				</div>
 				<p className="text-sm text-slate-700 mt-1">
