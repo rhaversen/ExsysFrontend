@@ -53,7 +53,7 @@ export default function Page (): ReactElement {
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
-	useKioskPing(currentView)
+	useKioskPing(isKioskClosed ? 'closed' : currentView)
 	useKioskRecovery()
 
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 60000

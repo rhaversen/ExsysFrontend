@@ -200,6 +200,7 @@ function getDescription (status: KioskStatus, adminGitHash: string): string {
 
 function translateViewState (viewState: string): string {
 	switch (viewState) {
+		case 'closed': return 'Lukket'
 		case 'welcome': return 'Velkomst'
 		case 'activity': return 'Aktivitet'
 		case 'room': return 'Lokale'
