@@ -14,6 +14,7 @@ const ScrollIndicator = (): React.ReactElement => {
 						className="filter invert"
 						width={30}
 						height={30}
+						priority
 					/>
 				</div>
 			</div>
