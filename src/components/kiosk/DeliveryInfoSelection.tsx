@@ -48,14 +48,14 @@ export default function DeliveryInfoSelection<T extends SelectionItem> ({
 	}
 
 	return (
-		<main className="fixed inset-0 flex flex-col items-center">
-			<header className="text-center mt-[10%]">
+		<main className="flex flex-col items-center justify-center mx-auto min-h-full gap-6 p-6">
+			<header className="text-center">
 				<h1 className="text-gray-800 text-6xl font-bold">{title}</h1>
 				<p className="text-gray-600 text-2xl mt-4">{subtitle}</p>
 			</header>
 
 			{items.length > 0 ? (
-				<div className="flex flex-wrap justify-center gap-4 max-w-5xl mt-8">
+				<div className="flex flex-wrap justify-center gap-4 max-w-5xl">
 					{items.map((item) => (
 						<button
 							key={item._id}
