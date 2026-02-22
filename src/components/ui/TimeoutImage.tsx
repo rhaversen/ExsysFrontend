@@ -56,6 +56,7 @@ const TimeoutImage = memo(function TimeoutImage ({
 				alt={alt}
 				width={width}
 				height={height}
+				priority
 			/>
 			<div
 				className="absolute inset-0 bg-white/50 transition-none rounded-full"

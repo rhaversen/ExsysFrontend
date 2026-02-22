@@ -51,7 +51,7 @@ const Item = ({
 					className="w-16 h-16"
 					width={40}
 					height={40}
-					quality={40}
+					quality={75}
 					src={`${imageURL === undefined || imageURL === '' ? KioskImages.noUrl.src : imageURL}`} alt={name}
 					draggable={false}
 					priority={true}

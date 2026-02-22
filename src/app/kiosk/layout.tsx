@@ -1,5 +1,6 @@
 import { type Metadata } from 'next'
 
+import DailyReloader from '@/components/kiosk/DailyReloader'
 import KioskBroadcastedEventHandlers from '@/components/kiosk/KioskBroadcastedEventHandlers'
 import { AnalyticsProvider } from '@/contexts/AnalyticsProvider'
 import ConfigProvider from '@/contexts/ConfigProvider'
@@ -24,6 +25,7 @@ export default function SelectRoomLayout ({
 		<KioskAuthProvider>
 			<ConfigProvider>
 				<AnalyticsProvider>
+					<DailyReloader />
 					<KioskBroadcastedEventHandlers />
 					{children}
 				</AnalyticsProvider>
