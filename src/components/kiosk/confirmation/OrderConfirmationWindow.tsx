@@ -129,6 +129,7 @@ const OrderConfirmationWindow = ({
 							alt={imageProps.alt}
 							width={200}
 							height={200}
+							priority
 						/>
 					)}
 				</div>

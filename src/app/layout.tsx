@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { type ReactElement } from 'react'
 
-import DailyReloader from '@/components/kiosk/DailyReloader'
 import ErrorProvider from '@/contexts/ErrorContext/ErrorProvider'
 import UserProvider from '@/contexts/UserProvider'
 
@@ -44,7 +43,6 @@ export default function RootLayout ({
 			>
 				<ErrorProvider>
 					<UserProvider>
-						<DailyReloader />
 						{children}
 					</UserProvider>
 				</ErrorProvider>

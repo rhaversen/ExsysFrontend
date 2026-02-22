@@ -53,7 +53,7 @@ export default function Page (): ReactElement {
 	const [cart, setCart] = useState<CartType>(EMPTY_CART)
 	const [isOrderInProgress, setIsOrderInProgress] = useState(false)
 
-	useKioskPing(currentView)
+	useKioskPing(isKioskClosed ? 'closed' : currentView)
 	useKioskRecovery()
 
 	const kioskInactivityTimeoutMs = config?.configs.kioskInactivityTimeoutMs ?? 60000
@@ -108,6 +108,7 @@ export default function Page (): ReactElement {
 	const handleActivitySelect = useCallback((activity: typeof selectedActivity) => {
 		if (!activity) { return }
 		track('activity_select', { activityId: activity._id })
+		setSelectedRoom(null)
 		setSelectedActivity(activity)
 
 		const activityRooms = getRoomsForActivity(activity)
@@ -117,15 +118,10 @@ export default function Page (): ReactElement {
 			track('nav_auto_to_order')
 			navigateTo('order')
 		} else {
-			if (selectedRoom !== null) {
-				track('nav_auto_to_order')
-				navigateTo('order')
-			} else {
-				track('nav_auto_to_room')
-				navigateTo('room')
-			}
+			track('nav_auto_to_room')
+			navigateTo('room')
 		}
-	}, [selectedRoom, setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity, track])
+	}, [setSelectedActivity, setSelectedRoom, navigateTo, getRoomsForActivity, track])
 
 	const handleRoomSelect = useCallback((room: typeof selectedRoom) => {
 		if (!room) { return }
