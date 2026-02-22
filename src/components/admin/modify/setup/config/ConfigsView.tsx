@@ -41,12 +41,13 @@ const ConfigsView = (): ReactElement => {
 			title: 'Kiosk Indhold og Adgang',
 			items: [
 				'kioskWelcomeMessage',
-				'kioskPassword'
+				'kioskPassword',
+				'kioskReloadMsSinceMidnight'
 			] as const
 		}
 	]
 
-	const text = {
+	const text: Record<string, { readableLabel: string, description: string, divisor?: number, unitLabel?: string, inputType?: 'default' | 'time', min?: string, max?: string }> = {
 		kioskInactivityTimeoutMs: {
 			readableLabel: 'Kiosk Inaktivitet Timeout',
 			description: 'Den maksimale tid, en bruger kan være inaktiv, før kiosken advarer om inaktivitet. Tiden nulstilles hver gang brugeren interagerer med skærmen.'
@@ -70,6 +71,13 @@ const ConfigsView = (): ReactElement => {
 		kioskWelcomeMessage: {
 			readableLabel: 'Kiosk Velkomstbesked',
 			description: 'Beskeden der vises på kioskens velkomstskærm.'
+		},
+		kioskReloadMsSinceMidnight: {
+			readableLabel: 'Kiosk Genindlæsnings Tidspunkt',
+			description: 'Tidspunktet på dagen, hvor kioskerne automatisk genindlæses. Kioskerne vil genindlæses en gang i døgnet ved dette tidspunkt, hvilket sikrer at eventuelle opdateringer eller ændringer i konfigurationen træder i kraft. Bemærk: Det faktiske genindlæsningstidspunkt vil variere med op til 10 minutter for at sprede belastningen, så ikke alle kiosker genindlæses på samme tid.',
+			inputType: 'time',
+			min: '01:00',
+			max: '11:00'
 		}
 	}
 
@@ -92,6 +100,11 @@ const ConfigsView = (): ReactElement => {
 											value={configs[label]}
 											readableLabel={text[label].readableLabel}
 											description={text[label].description}
+											{...(text[label].divisor !== undefined && { divisor: text[label].divisor })}
+											{...(text[label].unitLabel !== undefined && { unitLabel: text[label].unitLabel })}
+											{...(text[label].inputType !== undefined && { inputType: text[label].inputType })}
+											{...(text[label].min !== undefined && { min: text[label].min })}
+											{...(text[label].max !== undefined && { max: text[label].max })}
 											onSave={(label, value) => {
 												setConfigs({
 													...configs,

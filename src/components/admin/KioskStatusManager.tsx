@@ -200,6 +200,7 @@ function getDescription (status: KioskStatus, adminGitHash: string): string {
 
 function translateViewState (viewState: string): string {
 	switch (viewState) {
+		case 'closed': return 'Lukket'
 		case 'welcome': return 'Velkomst'
 		case 'activity': return 'Aktivitet'
 		case 'room': return 'Lokale'
@@ -333,20 +334,14 @@ const KioskStatusManager = ({
 	const [selectedKiosk, setSelectedKiosk] = useState<KioskType | null>(null)
 	const [showModal, setShowModal] = useState(false)
 	const [isPatching, setIsPatching] = useState(false)
-	const [isRefreshing, setIsRefreshing] = useState<string | null>(null)
-	const [, setNow] = useState(Date.now())
+	const [isRefreshingKiosk, setIsRefreshingKiosk] = useState<string | null>(null)
 
 	const kioskIds = useMemo(() => kiosks.map(k => k._id), [kiosks])
-	const { pingStatuses, getPingState, resetKiosk, resetAllKiosks } = useAdminKioskPing(kioskIds)
+	const { pingStatuses, getPingState, resetKiosk, resetAllKiosks, isRefreshing: isRefreshingPing } = useAdminKioskPing(kioskIds)
 
 	useEffect(() => {
 		onResetAllKiosks?.(resetAllKiosks)
 	}, [onResetAllKiosks, resetAllKiosks])
-
-	useEffect(() => {
-		const interval = setInterval(() => { setNow(Date.now()) }, 1000)
-		return () => { clearInterval(interval) }
-	}, [])
 
 	const handlePatchKiosk = useCallback(async (kioskId: string, patch: Partial<KioskType>) => {
 		setIsPatching(true)
@@ -361,7 +356,7 @@ const KioskStatusManager = ({
 	}, [API_URL, addError])
 
 	const handleRefreshKiosk = useCallback(async (kioskId: string) => {
-		setIsRefreshing(kioskId)
+		setIsRefreshingKiosk(kioskId)
 		resetKiosk(kioskId)
 		try {
 			await axios.get(`${API_URL}/service/force-kiosk-refresh`, {
@@ -371,7 +366,7 @@ const KioskStatusManager = ({
 		} catch (error) {
 			addError(error)
 		} finally {
-			setIsRefreshing(null)
+			setIsRefreshingKiosk(null)
 		}
 	}, [API_URL, addError, resetKiosk])
 
@@ -383,124 +378,138 @@ const KioskStatusManager = ({
 				{isLoading ? (
 					<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser data...'}</div>
 				) : (
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						{kiosks.map(kiosk => {
-							const kioskSessions = sessions.filter(s => s.type === 'kiosk' && s.userId === kiosk._id)
-							const pingState = getPingState(kiosk._id)
-							const pingStatus = pingStatuses.get(kiosk._id)
+					<>
+						<div className="flex justify-end mb-3">
+							<button
+								type="button"
+								disabled={isRefreshingPing}
+								onClick={resetAllKiosks}
+								className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors ${isRefreshingPing === true ? 'opacity-50 cursor-not-allowed' : ''}`}
+								title="Opdater status for alle kiosker"
+							>
+								<FaSyncAlt className={`w-3.5 h-3.5 ${isRefreshingPing === true ? 'animate-spin' : ''}`} />
+								{'Opdater status'}
+							</button>
+						</div>
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							{kiosks.map(kiosk => {
+								const kioskSessions = sessions.filter(s => s.type === 'kiosk' && s.userId === kiosk._id)
+								const pingState = getPingState(kiosk._id)
+								const pingStatus = pingStatuses.get(kiosk._id)
 
-							const isResponding = pingState === 'active'
-							const isChecking = pingState === 'loading'
+								const isResponding = pingState === 'active'
+								const isChecking = pingState === 'loading'
 
-							const health = getKioskHealth(kioskSessions, isResponding, isChecking)
-							const operational = getOperationalState(kiosk, products, configs)
-							const kioskGitHash = pingStatus?.gitHash
-							const hasVersionMismatch = health === 'healthy' &&
-								kioskGitHash !== undefined &&
-								kioskGitHash !== adminGitHash &&
-								kioskGitHash !== 'unknown' &&
-								adminGitHash !== 'unknown'
+								const health = getKioskHealth(kioskSessions, isResponding, isChecking)
+								const operational = getOperationalState(kiosk, products, configs)
+								const kioskGitHash = pingStatus?.gitHash
+								const hasVersionMismatch = health === 'healthy' &&
+									kioskGitHash !== undefined &&
+									kioskGitHash !== adminGitHash &&
+									kioskGitHash !== 'unknown' &&
+									adminGitHash !== 'unknown'
 
-							const status: KioskStatus = {
-								health,
-								operational,
-								hasVersionMismatch,
-								viewState: pingStatus?.viewState,
-								kioskGitHash
-							}
+								const status: KioskStatus = {
+									health,
+									operational,
+									hasVersionMismatch,
+									viewState: pingStatus?.viewState,
+									kioskGitHash
+								}
 
-							const color = getDisplayColor(status)
-							const badgeIcon = getBadgeIcon(status)
-							const statusText = getStatusText(status, kiosk)
-							const description = getDescription(status, adminGitHash)
-							const isDeactivated = isKioskDeactivated(kiosk)
+								const color = getDisplayColor(status)
+								const badgeIcon = getBadgeIcon(status)
+								const statusText = getStatusText(status, kiosk)
+								const description = getDescription(status, adminGitHash)
+								const isDeactivated = isKioskDeactivated(kiosk)
 
-							const nextOpenTime = (
-								health === 'healthy' &&
-								operational !== 'operational' &&
-								operational !== 'closed_deactivated' &&
-								operational !== 'loading'
-							) ? getNextOpen(configs, kiosk, products) : null
+								const nextOpenTime = (
+									health === 'healthy' &&
+									operational !== 'operational' &&
+									operational !== 'closed_deactivated' &&
+									operational !== 'loading'
+								) ? getNextOpen(configs, kiosk, products) : null
 
-							return (
-								<div key={kiosk._id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-									<KioskCircle
-										kioskTag={kiosk.kioskTag}
-										color={color}
-										badgeIcon={badgeIcon}
-										className="mt-1 shrink-0"
-									/>
-									<div className="flex-1 flex flex-col gap-1">
-										<div title={kiosk.name} className="text-base font-semibold text-gray-900 break-all line-clamp-1">
-											{kiosk.name}
-										</div>
-
-										<div className={`text-sm font-medium ${DISPLAY_COLORS[color].text}`}>
-											{statusText}
-										</div>
-
-										<div className="text-xs text-gray-600">
-											{description}
-										</div>
-
-										{nextOpenTime !== null && (
-											<div className="text-xs text-gray-500">
-												{`Åbner ${formatRelativeDateLabel(nextOpenTime)}`}
+								return (
+									<div key={kiosk._id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+										<KioskCircle
+											kioskTag={kiosk.kioskTag}
+											color={color}
+											badgeIcon={badgeIcon}
+											className="mt-1 shrink-0"
+										/>
+										<div className="flex-1 flex flex-col gap-1">
+											<div title={kiosk.name} className="text-base font-semibold text-gray-900 break-all line-clamp-1">
+												{kiosk.name}
 											</div>
-										)}
 
-										{health === 'healthy' && status.viewState !== undefined && (
-											<div className="text-xs text-gray-500">
-												{`Viser: ${translateViewState(status.viewState)}`}
+											<div className={`text-sm font-medium ${DISPLAY_COLORS[color].text}`}>
+												{statusText}
 											</div>
-										)}
 
-										{hasVersionMismatch && (
-											<div className="text-xs text-orange-600">
-												{`Version: ${kioskGitHash?.slice(0, 7)} (forventet: ${adminGitHash.slice(0, 7)})`}
+											<div className="text-xs text-gray-600">
+												{description}
 											</div>
-										)}
 
-										<div className="flex items-center gap-2 mt-2">
-											<button
-												type="button"
-												disabled={isPatching}
-												onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
-												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-													isDeactivated
-														? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
-														: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
-												} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-												aria-label={isDeactivated ? `Aktiver ${kiosk.name}` : `Deaktiver ${kiosk.name}`}
-											>
-												<span className="flex items-center gap-1">
-													<FaLock className="w-3 h-3" />
-													{isDeactivated ? 'Aktiver' : 'Deaktiver'}
-												</span>
-											</button>
-											<button
-												type="button"
-												disabled={isRefreshing === kiosk._id || health === 'not_logged_in'}
-												onClick={() => { void handleRefreshKiosk(kiosk._id) }}
-												className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-													isDeactivated
-														? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
-														: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
-												} ${isRefreshing === kiosk._id || health === 'not_logged_in' ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
-												aria-label={`Genindlæs ${kiosk.name}`}
-												title={health === 'not_logged_in' ? 'Kiosk er ikke logget ind' : `Genindlæs ${kiosk.name} – afbryder igangværende bestillinger`}
-											>
-												<span className="flex items-center gap-1">
-													<FaSyncAlt className={`w-3 h-3 ${isRefreshing === kiosk._id ? 'animate-spin' : ''}`} />
-													{'Genindlæs'}
-												</span>
-											</button>
+											{nextOpenTime !== null && (
+												<div className="text-xs text-gray-500">
+													{`Åbner ${formatRelativeDateLabel(nextOpenTime)}`}
+												</div>
+											)}
+
+											{health === 'healthy' && status.viewState !== undefined && (
+												<div className="text-xs text-gray-500">
+													{`Viser: ${translateViewState(status.viewState)}`}
+												</div>
+											)}
+
+											{hasVersionMismatch && (
+												<div className="text-xs text-orange-600">
+													{`Version: ${kioskGitHash?.slice(0, 7)} (forventet: ${adminGitHash.slice(0, 7)})`}
+												</div>
+											)}
+
+											<div className="flex items-center gap-2 mt-2">
+												<button
+													type="button"
+													disabled={isPatching}
+													onClick={() => { setSelectedKiosk(kiosk); setShowModal(true) }}
+													className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+														isDeactivated
+															? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+															: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+													} ${isPatching ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
+													aria-label={isDeactivated ? `Aktiver ${kiosk.name}` : `Deaktiver ${kiosk.name}`}
+												>
+													<span className="flex items-center gap-1">
+														<FaLock className="w-3 h-3" />
+														{isDeactivated ? 'Aktiver' : 'Deaktiver'}
+													</span>
+												</button>
+												<button
+													type="button"
+													disabled={isRefreshingKiosk === kiosk._id || health === 'not_logged_in'}
+													onClick={() => { void handleRefreshKiosk(kiosk._id) }}
+													className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+														isDeactivated
+															? 'bg-white text-green-700 border border-green-200 hover:bg-green-50'
+															: 'bg-white text-yellow-700 border border-yellow-200 hover:bg-yellow-50'
+													} ${isRefreshingKiosk === kiosk._id || health === 'not_logged_in' ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}`}
+													aria-label={`Genindlæs ${kiosk.name}`}
+													title={health === 'not_logged_in' ? 'Kiosk er ikke logget ind' : `Genindlæs ${kiosk.name} – afbryder igangværende bestillinger`}
+												>
+													<span className="flex items-center gap-1">
+														<FaSyncAlt className={`w-3 h-3 ${isRefreshingKiosk === kiosk._id ? 'animate-spin' : ''}`} />
+														{'Genindlæs'}
+													</span>
+												</button>
+											</div>
 										</div>
 									</div>
-								</div>
-							)
-						})}
-					</div>
+								)
+							})}
+						</div>
+					</>
 				)}
 			</div>
 

@@ -64,7 +64,7 @@ const CartWindow = ({
 							width={5}
 							height={5}
 							quality={75}
-							priority={false}
+							priority={true}
 							draggable={false}
 						/>
 						{'Ryd kurven'}

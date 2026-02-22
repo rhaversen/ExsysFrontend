@@ -19,11 +19,10 @@ export interface UseKioskPingReturn {
 	getPingState: (kioskId: string) => KioskPingState
 	resetKiosk: (kioskId: string) => void
 	resetAllKiosks: () => void
+	isRefreshing: boolean
 }
 
-const PING_INTERVAL_MS = 10000
 const NO_RESPONSE_THRESHOLD_MS = 15000
-const DEBOUNCE_MS = 300
 
 export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 	const socket = useSharedSocket()
@@ -31,10 +30,10 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 
 	const [pingStatuses, setPingStatuses] = useState<Map<string, KioskPingStatus>>(new Map())
 	const [loadingKiosks, setLoadingKiosks] = useState<Set<string>>(() => new Set(kioskIds))
+	const [isRefreshing, setIsRefreshing] = useState(false)
 
-	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 	const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
-	const acceptPongsAfterRef = useRef<Map<string, number>>(new Map())
+	const hasSentInitialPing = useRef(false)
 
 	const kioskIdsKey = useMemo(() => kioskIds.join(','), [kioskIds])
 
@@ -61,11 +60,11 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 				return next
 			})
 			timeoutsRef.current.delete(kioskId)
+			setIsRefreshing(false)
 		}, NO_RESPONSE_THRESHOLD_MS))
 	}, [])
 
 	const markAsLoading = useCallback((kioskId: string): void => {
-		acceptPongsAfterRef.current.set(kioskId, Date.now() + DEBOUNCE_MS)
 		setLoadingKiosks(prev => new Set(prev).add(kioskId))
 		setPingStatuses(prev => {
 			const next = new Map(prev)
@@ -75,44 +74,13 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 		startLoadingTimeout(kioskId)
 	}, [startLoadingTimeout])
 
-	useEffect(() => {
-		const now = Date.now() + DEBOUNCE_MS
-		kioskIds.forEach(id => acceptPongsAfterRef.current.set(id, now))
-		setLoadingKiosks(new Set(kioskIds))
-		setPingStatuses(new Map())
-
-		const timeouts = timeoutsRef.current
-		timeouts.forEach(t => clearTimeout(t))
-		timeouts.clear()
-		kioskIds.forEach(id => startLoadingTimeout(id))
-
-		sendPing()
-
-		if (intervalRef.current !== null) {
-			clearInterval(intervalRef.current)
-		}
-		intervalRef.current = setInterval(sendPing, PING_INTERVAL_MS)
-
-		return () => {
-			if (intervalRef.current !== null) {
-				clearInterval(intervalRef.current)
-			}
-			timeouts.forEach(t => clearTimeout(t))
-			timeouts.clear()
-		}
-	}, [kioskIds, kioskIdsKey, sendPing, startLoadingTimeout])
-
+	// Set up pong listener first, then send initial ping — handles fast responses
 	useEffect(() => {
 		if (socket === null) {
 			return
 		}
 
 		const handlePong = (data: KioskPongEventType): void => {
-			const acceptAfter = acceptPongsAfterRef.current.get(data.kioskId) ?? 0
-			if (Date.now() < acceptAfter) {
-				return
-			}
-
 			const timeout = timeoutsRef.current.get(data.kioskId)
 			if (timeout !== undefined) {
 				clearTimeout(timeout)
@@ -139,11 +107,36 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 				next.delete(data.kioskId)
 				return next
 			})
+
+			setIsRefreshing(false)
 		}
 
 		socket.on('kiosk-pong', handlePong)
 		return () => { socket.off('kiosk-pong', handlePong) }
 	}, [socket])
+
+	// Send initial ping once after socket and listener are ready
+	useEffect(() => {
+		if (socket === null || hasSentInitialPing.current) {
+			return
+		}
+
+		hasSentInitialPing.current = true
+		setLoadingKiosks(new Set(kioskIds))
+		setPingStatuses(new Map())
+
+		const timeouts = timeoutsRef.current
+		timeouts.forEach(t => clearTimeout(t))
+		timeouts.clear()
+		kioskIds.forEach(id => startLoadingTimeout(id))
+
+		sendPing()
+
+		return () => {
+			timeouts.forEach(t => clearTimeout(t))
+			timeouts.clear()
+		}
+	}, [socket, kioskIds, kioskIdsKey, sendPing, startLoadingTimeout])
 
 	const getPingState = useCallback((kioskId: string): KioskPingState => {
 		if (loadingKiosks.has(kioskId)) {
@@ -155,31 +148,20 @@ export const useAdminKioskPing = (kioskIds: string[]): UseKioskPingReturn => {
 			return 'no-response'
 		}
 
-		const timeSinceLastSeen = Date.now() - status.lastSeen
-		if (timeSinceLastSeen > NO_RESPONSE_THRESHOLD_MS) {
-			return 'no-response'
-		}
-
 		return 'active'
 	}, [pingStatuses, loadingKiosks])
 
 	const resetKiosk = useCallback((kioskId: string): void => {
+		setIsRefreshing(true)
 		markAsLoading(kioskId)
 		sendPing()
-		if (intervalRef.current !== null) {
-			clearInterval(intervalRef.current)
-		}
-		intervalRef.current = setInterval(sendPing, PING_INTERVAL_MS)
 	}, [markAsLoading, sendPing])
 
 	const resetAllKiosks = useCallback((): void => {
+		setIsRefreshing(true)
 		kioskIds.forEach(id => markAsLoading(id))
 		sendPing()
-		if (intervalRef.current !== null) {
-			clearInterval(intervalRef.current)
-		}
-		intervalRef.current = setInterval(sendPing, PING_INTERVAL_MS)
 	}, [kioskIds, markAsLoading, sendPing])
 
-	return { pingStatuses, getPingState, resetKiosk, resetAllKiosks }
+	return { pingStatuses, getPingState, resetKiosk, resetAllKiosks, isRefreshing }
 }

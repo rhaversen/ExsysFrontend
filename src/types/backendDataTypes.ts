@@ -264,6 +264,7 @@ export interface ConfigsType {
 		kioskPassword: string
 		kioskFeedbackBannerDelayMs: number
 		kioskWelcomeMessage: string
+		kioskReloadMsSinceMidnight: number
 	}
 	createdAt: Date
 	updatedAt: Date
