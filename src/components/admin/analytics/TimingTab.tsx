@@ -123,6 +123,42 @@ export default function TimingTab ({
 
 	const [selectedPauseView, setSelectedPauseView] = useState<ViewType | 'all'>('all')
 
+	const timeoutReaction = useMemo(() => {
+		const continueTimes: number[] = []
+		const restartTimes: number[] = []
+		const expiredTimes: number[] = []
+
+		for (const session of sessions) {
+			for (let i = 0; i < session.interactions.length; i++) {
+				if (session.interactions[i].type !== 'timeout_warning_shown') { continue }
+
+				const warningTime = new Date(session.interactions[i].timestamp).getTime()
+				const nextInteraction = session.interactions.slice(i + 1).find(j =>
+					j.type === 'timeout_continue' || j.type === 'timeout_restart' || j.type === 'session_timeout'
+				)
+				if (!nextInteraction) { continue }
+
+				const reactionMs = new Date(nextInteraction.timestamp).getTime() - warningTime
+				if (reactionMs <= 0) { continue }
+
+				if (nextInteraction.type === 'timeout_continue') {
+					continueTimes.push(reactionMs)
+				} else if (nextInteraction.type === 'timeout_restart') {
+					restartTimes.push(reactionMs)
+				} else {
+					expiredTimes.push(reactionMs)
+				}
+			}
+		}
+
+		return {
+			continue: calcPercentileStats(continueTimes),
+			restart: calcPercentileStats(restartTimes),
+			expired: calcPercentileStats(expiredTimes),
+			total: calcPercentileStats([...continueTimes, ...restartTimes, ...expiredTimes])
+		}
+	}, [sessions])
+
 	const pauseEvents = useMemo(() => {
 		const pauses: PauseEvent[] = []
 		const PAUSE_THRESHOLD = 3000
@@ -354,6 +390,57 @@ export default function TimingTab ({
 					</div>
 				</div>
 			</div>
+
+			{timeoutReaction.total.count > 0 && (
+				<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+					<h3 className="font-semibold text-gray-800 mb-3">{'Timeout-advarsel reaktionstid'}</h3>
+					<p className="text-xs text-gray-500 mb-4">{'Tid fra timeout-advarslen vises til brugeren reagerer'}</p>
+					<div className="overflow-x-auto">
+						<table className="w-full text-sm">
+							<thead>
+								<tr className="text-left border-b border-gray-200">
+									<th className="pb-2 pr-4">{'Handling'}</th>
+									<th className="pb-2 pr-4 text-right">{'Gns.'}</th>
+									<th className="pb-2 pr-4 text-right">{'Median'}</th>
+									<th className="pb-2 text-right">{'Antal'}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{timeoutReaction.continue.count > 0 && (
+									<tr className="border-b border-gray-100">
+										<td className="py-2 pr-4 font-medium">{'Fortsæt bestilling'}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.continue.avg)}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.continue.median)}</td>
+										<td className="py-2 text-right">{timeoutReaction.continue.count}</td>
+									</tr>
+								)}
+								{timeoutReaction.restart.count > 0 && (
+									<tr className="border-b border-gray-100">
+										<td className="py-2 pr-4 font-medium">{'Start forfra'}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.restart.avg)}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.restart.median)}</td>
+										<td className="py-2 text-right">{timeoutReaction.restart.count}</td>
+									</tr>
+								)}
+								{timeoutReaction.expired.count > 0 && (
+									<tr className="border-b border-gray-100">
+										<td className="py-2 pr-4 font-medium">{'Udløbet (ingen handling)'}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.expired.avg)}</td>
+										<td className="py-2 pr-4 text-right">{formatDuration(timeoutReaction.expired.median)}</td>
+										<td className="py-2 text-right">{timeoutReaction.expired.count}</td>
+									</tr>
+								)}
+								<tr>
+									<td className="py-2 pr-4 font-semibold">{'Samlet'}</td>
+									<td className="py-2 pr-4 text-right font-semibold">{formatDuration(timeoutReaction.total.avg)}</td>
+									<td className="py-2 pr-4 text-right font-semibold">{formatDuration(timeoutReaction.total.median)}</td>
+									<td className="py-2 text-right font-semibold">{timeoutReaction.total.count}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			)}
 
 			<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
 				<h3 className="font-semibold text-gray-800 mb-4">{'Tid per visning'}</h3>

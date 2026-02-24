@@ -1,4 +1,4 @@
-import { useCallback, type ReactElement } from 'react'
+import { useCallback, useEffect, type ReactElement } from 'react'
 
 import CloseableModal from '@/components/ui/CloseableModal'
 import TimeoutButton from '@/components/ui/TimeoutButton'
@@ -17,6 +17,10 @@ const TimeoutWarningWindow = ({
 	const { config } = useConfig()
 	const { track } = useAnalytics()
 	const timeoutWarningMs = config?.configs.kioskInactivityTimeoutWarningMs ?? 1000 * 10
+
+	useEffect(() => {
+		track('timeout_warning_shown')
+	}, [track])
 
 	const handleClose = useCallback((): void => {
 		track('timeout_continue')

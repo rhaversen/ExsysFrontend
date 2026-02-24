@@ -302,6 +302,7 @@ export type InteractionTypeValue =
 	| 'nav_auto_to_activity'
 	| 'nav_auto_to_room'
 	| 'nav_auto_to_order'
+	| 'timeout_warning_shown'
 	| 'timeout_continue'
 	| 'timeout_restart'
 	| 'product_select'
