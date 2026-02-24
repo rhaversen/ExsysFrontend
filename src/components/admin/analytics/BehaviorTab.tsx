@@ -182,7 +182,7 @@ export default function BehaviorTab ({
 		const flowMap = new Map<string, FlowEntry>()
 
 		const getViewFromInteraction = (type: string): ViewType | null => {
-			if (type === 'nav_to_welcome' || type === 'timeout_restart') { return 'welcome' }
+			if (type === 'nav_to_welcome') { return 'welcome' }
 			if (type === 'nav_to_activity' || type === 'nav_auto_to_activity') { return 'activity' }
 			if (type === 'nav_to_room' || type === 'nav_auto_to_room') { return 'room' }
 			if (type === 'nav_to_order' || type === 'nav_auto_to_order') { return 'order' }
@@ -238,6 +238,37 @@ export default function BehaviorTab ({
 		}
 
 		return Array.from(flowMap.values()).sort((a, b) => b.count - a.count)
+	}, [sessions])
+
+	const timeoutsPerView = useMemo(() => {
+		const counts: Record<ViewType, number> = { welcome: 0, activity: 0, room: 0, order: 0, checkout: 0, confirmation: 0 }
+
+		const getViewFromInteraction = (type: string): ViewType | null => {
+			if (type === 'nav_to_welcome') { return 'welcome' }
+			if (type === 'nav_to_activity' || type === 'nav_auto_to_activity') { return 'activity' }
+			if (type === 'nav_to_room' || type === 'nav_auto_to_room') { return 'room' }
+			if (type === 'nav_to_order' || type === 'nav_auto_to_order') { return 'order' }
+			if (type === 'checkout_start') { return 'checkout' }
+			if (type === 'checkout_complete') { return 'confirmation' }
+			if (type === 'checkout_cancel' || type === 'payment_cancel' || type === 'checkout_failed') { return 'order' }
+			return null
+		}
+
+		for (const session of sessions) {
+			if (!session.hasTimeout) { continue }
+
+			let currentView: ViewType = 'welcome'
+			for (const interaction of session.interactions) {
+				if (interaction.type === 'session_timeout' || interaction.type === 'timeout_restart') {
+					counts[currentView]++
+					break
+				}
+				const newView = getViewFromInteraction(interaction.type)
+				if (newView !== null) { currentView = newView }
+			}
+		}
+
+		return counts
 	}, [sessions])
 
 	const checkoutCancelFlow = useMemo(() => {
@@ -544,10 +575,10 @@ export default function BehaviorTab ({
 					</div>
 				</div>
 
-				{navigationFlows.length > 0 && (
+				{(navigationFlows.length > 0 || Object.values(timeoutsPerView).some(v => v > 0)) && (
 					<div className="mt-4 pt-4">
 						<div className="text-sm font-medium text-gray-700 mb-3">{'Navigationsflows'}</div>
-						<NavigationFlowDiagram flows={navigationFlows} />
+						<NavigationFlowDiagram flows={navigationFlows} timeoutsPerView={timeoutsPerView} />
 					</div>
 				)}
 			</div>
@@ -730,7 +761,7 @@ export default function BehaviorTab ({
 	)
 }
 
-function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement {
+function NavigationFlowDiagram ({ flows, timeoutsPerView }: { flows: FlowEntry[], timeoutsPerView: Record<ViewType, number> }): ReactElement {
 	const stages: ViewType[] = ['welcome', 'activity', 'room', 'order']
 	const stageLabels: Record<ViewType, string> = {
 		welcome: 'Velkomst',
@@ -857,6 +888,8 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 				{stages.map((stage, idx) => {
 					const colors = stageColors[stage]
 					const x = getBoxX(idx)
+					const timeoutCount = timeoutsPerView[stage] ?? 0
+					const centerX = x + boxWidth / 2
 					return (
 						<g key={stage}>
 							<rect
@@ -870,7 +903,7 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 								strokeWidth={2}
 							/>
 							<text
-								x={x + boxWidth / 2}
+								x={centerX}
 								y={boxY + boxHeight / 2 + 5}
 								textAnchor="middle"
 								fontSize="13"
@@ -879,6 +912,11 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 							>
 								{stageLabels[stage]}
 							</text>
+							{timeoutCount > 0 && (
+								<text x={centerX} y={boxY - 10} textAnchor="middle" fontSize="10" fill="#eab308" fontWeight="600">
+									{'⏰ '}{timeoutCount}
+								</text>
+							)}
 						</g>
 					)
 				})}
