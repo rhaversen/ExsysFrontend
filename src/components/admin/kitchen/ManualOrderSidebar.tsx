@@ -118,150 +118,213 @@ export default function ManualOrderSidebar ({
 	const getRoomName = useCallback((id: string) => rooms.find(r => r._id === id)?.name ?? 'Ukendt', [rooms])
 
 	return (
-		<div className="bg-gray-100 p-4 pb-20 flex flex-col">
-			<h2 className="text-lg font-medium text-gray-700 pb-2 bg-gray-100">{'Manuel Ordre Indtastning'}</h2>
-			<div className="p-3 bg-white rounded shadow">
+		<div className="p-4 pb-20 flex flex-col gap-4">
+			<h2 className="text-lg font-semibold text-gray-800">{'Manuel Ordre Indtastning'}</h2>
+
+			<div className="space-y-2">
 				<div>
-					<label className="block text-sm font-medium text-gray-600 mb-1">{'Lokale'}</label>
+					<label className="block text-xs font-medium text-gray-500 mb-1">{'Lokale'}</label>
 					<select
 						title='Lokale'
 						value={selectedRoomId}
 						onChange={(e) => setSelectedRoomId(e.target.value)}
-						className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+						className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
 					>
-						<option disabled value="">
-							{'Vælg Lokale...'}
-						</option>
+						<option disabled value="">{'Vælg...'}</option>
 						{roomOptions.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
+							<option key={option.value} value={option.value}>{option.label}</option>
 						))}
 					</select>
 				</div>
-				<div className="mt-2">
-					<label className="block text-sm font-medium text-gray-600 mb-1">{'Aktivitet'}</label>
+				<div>
+					<label className="block text-xs font-medium text-gray-500 mb-1">{'Aktivitet'}</label>
 					<select
 						title='Aktivitet'
 						value={selectedActivityId}
 						onChange={(e) => setSelectedActivityId(e.target.value)}
-						className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none sm:text-sm rounded-md"
+						className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
 					>
-						<option disabled value="">
-							{'Vælg Aktivitet...'}
-						</option>
+						<option disabled value="">{'Vælg...'}</option>
 						{activityOptions.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
+							<option key={option.value} value={option.value}>{option.label}</option>
 						))}
 					</select>
 				</div>
-				{/* Current Order Items */}
-				{currentOrderItems.length > 0 && (
-					<div className="mb-4 border-t pt-3 mt-3">
-						<h4 className="text-md font-medium mb-2 text-gray-700">{'Valgte Varer:'}</h4>
-						<ul className="space-y-2 max-h-60 overflow-y-auto text-sm">
-							{currentOrderItems.map(item => (
-								<li
-									key={`${item.type}-${item.id}`}
-									className={`flex justify-between items-center p-1 rounded overflow-hidden cursor-pointer ${item.quantity === 0 ? 'bg-gray-100' : 'bg-gray-50'}`}
-									onClick={() => { handleQuantityChange(item.id, item.type, 1) }}
-								>
-									<span className={`flex-1 truncate mr-2 ${item.quantity === 0 ? 'text-gray-400' : 'text-gray-700'}`}>
-										{item.name}
-									</span>
-									<div className="flex items-center space-x-2">
-										<button
-											onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, -1) }}
-											className={`bg-red-400/50 hover:bg-red-500 text-white w-8 h-8 rounded text-lg flex items-center justify-center ${item.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-											disabled={item.quantity === 0}
+			</div>
+
+			{currentOrderItems.length > 0 && (
+				<div>
+					<div className="max-h-72 overflow-y-auto space-y-3">
+						{products.length > 0 && (
+							<div>
+								<h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{'Produkter'}</h4>
+								<div className="space-y-1">
+									{currentOrderItems.filter(i => i.type === 'product').map(item => (
+										<div
+											key={`product-${item.id}`}
+											className={`flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer transition-colors ${item.quantity > 0 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+											onClick={() => { handleQuantityChange(item.id, item.type, 1) }}
 										>
-											{'-'}
-										</button>
-										{editingItem?.id === item.id && editingItem.type === item.type ? (
-											<input
-												aria-label='Antal'
-												placeholder="0"
-												type="text"
-												inputMode="numeric"
-												pattern="\d*"
-												className="w-10 text-center border rounded py-1 text-sm"
-												value={item.quantity.toString()}
-												onClick={(e) => e.stopPropagation()}
-												onChange={e => {
-													const raw = e.currentTarget.value
-													if (/^\d*$/.test(raw)) {
-														const sanitized = raw.replace(/^0+(?=\d)/, '')
-														const n = sanitized === '' ? 0 : parseInt(sanitized, 10)
-														setCurrentOrderItems(prev =>
-															prev.map(x =>
-																x.id === item.id && x.type === item.type
-																	? { ...x, quantity: n }
-																	: x
-															)
-														)
-													}
-												}}
-												onBlur={() => setEditingItem(null)}
-												onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur() } }}
-												autoFocus
-											/>
-										) : (
-											<span
-												className="w-8 text-center text-gray-800 py-1 text-sm"
-												onClick={(e) => { e.stopPropagation(); setEditingItem({ id: item.id, type: item.type }) }}
-											>
-												{item.quantity}
+											<span className={`text-sm truncate mr-2 ${item.quantity > 0 ? 'text-gray-800 font-medium' : 'text-gray-500'}`}>
+												{item.name}
 											</span>
-										)}
-										<button
-											onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, 1) }}
-											className="bg-green-400/50 hover:bg-green-500 text-white w-8 h-8 rounded text-lg flex items-center justify-center"
+											<div className="flex items-center gap-1 shrink-0">
+												<button
+													onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, -1) }}
+													className="w-6 h-6 rounded-full bg-red-100 hover:bg-red-200 text-red-600 text-xs flex items-center justify-center disabled:opacity-30"
+													disabled={item.quantity === 0}
+												>{'-'}</button>
+												{editingItem?.id === item.id && editingItem.type === item.type ? (
+													<input
+														aria-label='Antal'
+														placeholder="0"
+														type="text"
+														inputMode="numeric"
+														pattern="\d*"
+														className="w-8 text-center border border-gray-200 rounded text-sm py-0.5"
+														value={item.quantity.toString()}
+														onClick={(e) => e.stopPropagation()}
+														onChange={e => {
+															const raw = e.currentTarget.value
+															if (/^\d*$/.test(raw)) {
+																const sanitized = raw.replace(/^0+(?=\d)/, '')
+																const n = sanitized === '' ? 0 : parseInt(sanitized, 10)
+																setCurrentOrderItems(prev =>
+																	prev.map(x =>
+																		x.id === item.id && x.type === item.type ? { ...x, quantity: n } : x
+																	)
+																)
+															}
+														}}
+														onBlur={() => setEditingItem(null)}
+														onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur() } }}
+														autoFocus
+													/>
+												) : (
+													<span
+														className={`w-6 text-center text-sm ${item.quantity > 0 ? 'font-semibold text-gray-800' : 'text-gray-400'}`}
+														onClick={(e) => { e.stopPropagation(); setEditingItem({ id: item.id, type: item.type }) }}
+													>
+														{item.quantity}
+													</span>
+												)}
+												<button
+													onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, 1) }}
+													className="w-6 h-6 rounded-full bg-green-100 hover:bg-green-200 text-green-600 text-xs flex items-center justify-center"
+												>{'+'}</button>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+						{options.length > 0 && (
+							<div>
+								<h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{'Tilvalg'}</h4>
+								<div className="space-y-1">
+									{currentOrderItems.filter(i => i.type === 'option').map(item => (
+										<div
+											key={`option-${item.id}`}
+											className={`flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer transition-colors ${item.quantity > 0 ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+											onClick={() => { handleQuantityChange(item.id, item.type, 1) }}
 										>
-											{'+'}
-										</button>
-									</div>
-								</li>
-							))}
-						</ul>
-						<p className="text-right font-semibold mt-2 text-gray-800">{'Total: '}{calculateTotal.toFixed(2)}{' kr'}</p>
+											<span className={`text-sm truncate mr-2 ${item.quantity > 0 ? 'text-gray-800 font-medium' : 'text-gray-500'}`}>
+												{item.name}
+											</span>
+											<div className="flex items-center gap-1 shrink-0">
+												<button
+													onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, -1) }}
+													className="w-6 h-6 rounded-full bg-red-100 hover:bg-red-200 text-red-600 text-xs flex items-center justify-center disabled:opacity-30"
+													disabled={item.quantity === 0}
+												>{'-'}</button>
+												{editingItem?.id === item.id && editingItem.type === item.type ? (
+													<input
+														aria-label='Antal'
+														placeholder="0"
+														type="text"
+														inputMode="numeric"
+														pattern="\d*"
+														className="w-8 text-center border border-gray-200 rounded text-sm py-0.5"
+														value={item.quantity.toString()}
+														onClick={(e) => e.stopPropagation()}
+														onChange={e => {
+															const raw = e.currentTarget.value
+															if (/^\d*$/.test(raw)) {
+																const sanitized = raw.replace(/^0+(?=\d)/, '')
+																const n = sanitized === '' ? 0 : parseInt(sanitized, 10)
+																setCurrentOrderItems(prev =>
+																	prev.map(x =>
+																		x.id === item.id && x.type === item.type ? { ...x, quantity: n } : x
+																	)
+																)
+															}
+														}}
+														onBlur={() => setEditingItem(null)}
+														onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur() } }}
+														autoFocus
+													/>
+												) : (
+													<span
+														className={`w-6 text-center text-sm ${item.quantity > 0 ? 'font-semibold text-gray-800' : 'text-gray-400'}`}
+														onClick={(e) => { e.stopPropagation(); setEditingItem({ id: item.id, type: item.type }) }}
+													>
+														{item.quantity}
+													</span>
+												)}
+												<button
+													onClick={(e) => { e.stopPropagation(); handleQuantityChange(item.id, item.type, 1) }}
+													className="w-6 h-6 rounded-full bg-green-100 hover:bg-green-200 text-green-600 text-xs flex items-center justify-center"
+												>{'+'}</button>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
 					</div>
-				)}
-				<button
-					type="button"
-					onClick={handleSubmitOrder}
-					disabled={isSubmitting || !selectedRoomId || !selectedActivityId || !currentOrderItems.some(item => item.quantity > 0)}
-					className="w-full bg-blue-500 text-white py-2 px-4 rounded disabled:opacity-50 transition-colors disabled:hover:bg-blue-500 hover:bg-blue-600"
-				>
-					{isSubmitting ? 'Opretter...' : 'Opret Manuel Ordre'}
-				</button>
-			</div>
-			<div className="mt-2">
-				<h3 className="text-lg font-medium text-gray-700 bg-gray-100 py-2">{'Seneste Manuelle Ordrer'}</h3>
-				{recentManualOrders.length === 0
-					? <p className="text-sm text-gray-500">{'Ingen nylige manuelle ordrer.'}</p>
-					: (
-						<ul className="space-y-3">
-							{recentManualOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(order => (
-								<li key={order._id} className="bg-white p-3 rounded shadow text-sm">
-									<p className="font-semibold text-gray-800">{'Lokale: '}{getRoomName(order.roomId)}</p>
-									<p className="font-semibold text-gray-800">{'Aktivitet: '}{getActivityName(order.activityId)}</p>
-									<p className="text-gray-600">{'Oprettet: '}{timeSince(order.createdAt)}</p>
-									<ul className="mt-2 text-xs space-y-1 pl-2 border-l ml-1">
-										{order.products.map(p => (
-											<li key={p._id}>{p.quantity}{' x '}{products.find(product => product._id === p._id)?.name}</li>
-										))}
-										{order.options.map(o => (
-											<li key={o._id}>{o.quantity}{' x '}{options.find(option => option._id === o._id)?.name}</li>
-										))}
-									</ul>
-									<p className="text-xs text-gray-500 mt-1">{'Status: '}{order.status === 'confirmed' ? 'Læst' : order.status === 'delivered' ? 'Leveret' : 'Afventer'}</p>
-								</li>
-							))}
-						</ul>
+					{currentOrderItems.some(i => i.quantity > 0) && (
+						<p className="text-right text-sm font-semibold text-gray-700 mt-2">{calculateTotal.toFixed(2)}{' kr'}</p>
 					)}
-			</div>
+				</div>
+			)}
+
+			<button
+				type="button"
+				onClick={handleSubmitOrder}
+				disabled={isSubmitting || !selectedRoomId || !selectedActivityId || !currentOrderItems.some(item => item.quantity > 0)}
+				className="w-full bg-blue-500 text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors hover:bg-blue-600"
+			>
+				{isSubmitting ? 'Opretter...' : 'Opret Ordre'}
+			</button>
+
+			{recentManualOrders.length > 0 && (
+				<div>
+					<h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{'Seneste Ordrer'}</h3>
+					<div className="space-y-2">
+						{recentManualOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(order => (
+							<div key={order._id} className="border border-gray-100 rounded-lg p-3 text-sm">
+								<div className="flex justify-between items-start">
+									<div>
+										<span className="font-medium text-gray-800">{getRoomName(order.roomId)}</span>
+										<span className="text-gray-400">{' · '}</span>
+										<span className="text-gray-600">{getActivityName(order.activityId)}</span>
+									</div>
+									<span className={`text-xs px-2 py-0.5 rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : order.status === 'confirmed' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+										{order.status === 'delivered' ? 'Leveret' : order.status === 'confirmed' ? 'Læst' : 'Afventer'}
+									</span>
+								</div>
+								<div className="text-xs text-gray-500 mt-1">
+									{timeSince(order.createdAt)}
+									<span className="text-gray-300">{' · '}</span>
+									{order.products.map(p => `${p.quantity}× ${products.find(product => product._id === p._id)?.name ?? ''}`).concat(
+										order.options.map(o => `${o.quantity}× ${options.find(option => option._id === o._id)?.name ?? ''}`)
+									).join(', ')}
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
