@@ -1,4 +1,6 @@
-import type { InteractionType, InteractionTypeValue, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
+
+import type { InteractionTypeValue } from '@/types/interactionTypes'
 
 export interface SessionAnalysis {
 	sessionId: string
@@ -91,7 +93,7 @@ export function getInteractionIcon (type: InteractionTypeValue): string {
 		option_decrease: '➖',
 		cart_clear: '🗑️',
 		checkout_start: '💳',
-		payment_select_later: '⏳',
+		payment_select_later: '🪙',
 		payment_select_card: '💳',
 		payment_select_mobilepay: '📱',
 		payment_auto_later: '⚡',
