@@ -11,6 +11,44 @@ interface FeedbackTabProps {
 	kiosks: KioskType[]
 }
 
+interface OpinionFlowStats {
+	startedPositive: number
+	startedNegative: number
+	endedPositive: number
+	endedNegative: number
+	keptFirst: number
+	switchedOnce: number
+	switchedBack: number
+}
+
+function classifyOpinionFlow (types: string[]): { first: 'positive' | 'negative', last: 'positive' | 'negative', switches: number } {
+	const first = types[0].includes('positive') ? 'positive' as const : 'negative' as const
+	const last = types[types.length - 1].includes('positive') ? 'positive' as const : 'negative' as const
+	let switches = 0
+	for (let i = 1; i < types.length; i++) {
+		if (types[i] !== types[i - 1]) { switches++ }
+	}
+	return { first, last, switches }
+}
+
+function analyzeOpinionFlows (sessions: Array<{ feedbackTypes: string[] }>): OpinionFlowStats {
+	const stats: OpinionFlowStats = {
+		startedPositive: 0, startedNegative: 0,
+		endedPositive: 0, endedNegative: 0,
+		keptFirst: 0, switchedOnce: 0, switchedBack: 0
+	}
+	for (const { feedbackTypes } of sessions) {
+		if (feedbackTypes.length === 0) { continue }
+		const flow = classifyOpinionFlow(feedbackTypes)
+		if (flow.first === 'positive') { stats.startedPositive++ } else { stats.startedNegative++ }
+		if (flow.last === 'positive') { stats.endedPositive++ } else { stats.endedNegative++ }
+		if (flow.switches === 0) { stats.keptFirst++ }
+		else if (flow.switches === 1) { stats.switchedOnce++ }
+		else { stats.switchedBack++ }
+	}
+	return stats
+}
+
 function StatCard ({ label, value, subtext }: { label: string, value: string | number, subtext?: string }): ReactElement {
 	return (
 		<div className="rounded-xl shadow-sm border border-gray-100 p-5">
@@ -45,6 +83,74 @@ function HourChart ({ data, label, fullHeight = false }: { data: number[], label
 	)
 }
 
+function OpinionFlowPanel ({ flow, total }: { flow: OpinionFlowStats, total: number }): ReactElement | null {
+	if (total === 0) { return null }
+	const pct = (n: number): string => total > 0 ? `${((n / total) * 100).toFixed(0)}%` : '0%'
+	const bar = (n: number, color: string): ReactElement => (
+		<div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+			<div className={`h-full ${color} rounded-full`} style={{ width: pct(n) }} />
+		</div>
+	)
+
+	return (
+		<div className="rounded-xl shadow-sm border border-gray-100 p-5">
+			<div className="text-sm text-gray-500 mb-4">{'Meningsskift'}</div>
+			<div className="space-y-5">
+				<div>
+					<div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{'Første klik'}</div>
+					<div className="space-y-1.5">
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-center">{'👍'}</span>
+							{bar(flow.startedPositive, 'bg-green-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.startedPositive} (${pct(flow.startedPositive)})`}</span>
+						</div>
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-center">{'👎'}</span>
+							{bar(flow.startedNegative, 'bg-red-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.startedNegative} (${pct(flow.startedNegative)})`}</span>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{'Endeligt valg'}</div>
+					<div className="space-y-1.5">
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-center">{'👍'}</span>
+							{bar(flow.endedPositive, 'bg-green-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.endedPositive} (${pct(flow.endedPositive)})`}</span>
+						</div>
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-center">{'👎'}</span>
+							{bar(flow.endedNegative, 'bg-red-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.endedNegative} (${pct(flow.endedNegative)})`}</span>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{'Adfærd'}</div>
+					<div className="space-y-1.5">
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-xs text-center text-gray-400">{'—'}</span>
+							{bar(flow.keptFirst, 'bg-blue-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.keptFirst} holdt`}</span>
+						</div>
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-xs text-center text-gray-400">{'↔'}</span>
+							{bar(flow.switchedOnce, 'bg-amber-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.switchedOnce} skiftet`}</span>
+						</div>
+						<div className="flex items-center gap-3">
+							<span className="w-8 text-xs text-center text-gray-400">{'↔↔'}</span>
+							{bar(flow.switchedBack, 'bg-orange-400')}
+							<span className="text-xs text-gray-500 w-16 text-right">{`${flow.switchedBack} frem/tilbage`}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
 export default function FeedbackTab ({
 	interactions,
 	kiosks
@@ -60,17 +166,32 @@ export default function FeedbackTab ({
 
 		const responseTimes: number[] = []
 		const exitBehavior = { feedback: 0, close: 0, timeout: 0 }
+		let changedOpinionCount = 0
+		const feedbackSessions: Array<{ feedbackTypes: string[] }> = []
 
 		sessionsWithCheckout.forEach(session => {
 			const checkoutComplete = session.interactions.find(i => i.type === 'checkout_complete')
-			const feedback = session.interactions.find(i =>
+			const feedbackInteractions = session.interactions.filter(i =>
 				i.type === 'confirmation_feedback_positive' || i.type === 'confirmation_feedback_negative'
 			)
+			const firstFeedback = feedbackInteractions[0]
+			const lastFeedback = feedbackInteractions[feedbackInteractions.length - 1]
 			const close = session.interactions.find(i => i.type === 'confirmation_close')
 			const timeout = session.interactions.find(i => i.type === 'confirmation_timeout')
 
-			if (feedback !== undefined && checkoutComplete !== undefined) {
-				const responseTime = new Date(feedback.timestamp).getTime() - new Date(checkoutComplete.timestamp).getTime()
+			if (feedbackInteractions.length > 0) {
+				feedbackSessions.push({ feedbackTypes: feedbackInteractions.map(fi => fi.type) })
+			}
+
+			if (feedbackInteractions.length > 1) {
+				const hasChange = feedbackInteractions.some((fi, idx) =>
+					idx > 0 && fi.type !== feedbackInteractions[idx - 1].type
+				)
+				if (hasChange) { changedOpinionCount++ }
+			}
+
+			if (lastFeedback !== undefined && checkoutComplete !== undefined) {
+				const responseTime = new Date(firstFeedback.timestamp).getTime() - new Date(checkoutComplete.timestamp).getTime()
 				if (responseTime > 0 && responseTime < 60000) {
 					responseTimes.push(responseTime)
 				}
@@ -122,6 +243,8 @@ export default function FeedbackTab ({
 			.filter(k => k.total >= 3)
 			.sort((a, b) => b.rate - a.rate)
 
+		const opinionFlow = analyzeOpinionFlows(feedbackSessions)
+
 		return {
 			totalCheckouts: sessionsWithCheckout.length,
 			totalWithFeedback: sessionsWithFeedback.length,
@@ -130,6 +253,11 @@ export default function FeedbackTab ({
 				: 0,
 			avgResponseTime,
 			exitBehavior,
+			changedOpinionCount,
+			changedOpinionRate: sessionsWithFeedback.length > 0
+				? (changedOpinionCount / sessionsWithFeedback.length) * 100
+				: 0,
+			opinionFlow,
 			feedbackByCartSize: Array.from(feedbackByCartSize.entries())
 				.map(([size, stats]) => ({ size, ...stats, rate: stats.total > 0 ? (stats.withFeedback / stats.total) * 100 : 0 }))
 				.sort((a, b) => {
@@ -156,6 +284,21 @@ export default function FeedbackTab ({
 			!ints.some(i => i.type === 'feedback_positive' || i.type === 'feedback_negative')
 		)
 
+		let changedOpinionCount = 0
+		const feedbackSessions: Array<{ feedbackTypes: string[] }> = []
+		completedFeedback.forEach(([, ints]) => {
+			const feedbackInteractions = ints.filter(i =>
+				i.type === 'feedback_positive' || i.type === 'feedback_negative'
+			)
+			feedbackSessions.push({ feedbackTypes: feedbackInteractions.map(fi => fi.type) })
+			if (feedbackInteractions.length > 1) {
+				const hasChange = feedbackInteractions.some((fi, idx) =>
+					idx > 0 && fi.type !== feedbackInteractions[idx - 1].type
+				)
+				if (hasChange) { changedOpinionCount++ }
+			}
+		})
+
 		const abandonReasons = { back: 0, autoBack: 0, other: 0 }
 		abandoned.forEach(([, ints]) => {
 			if (ints.some(i => i.type === 'feedback_back')) {
@@ -170,8 +313,7 @@ export default function FeedbackTab ({
 		const timeOnFeedbackPage: number[] = []
 		sessionsWithBannerClick.forEach(([, ints]) => {
 			const bannerClick = ints.find(i => i.type === 'feedback_banner_click')
-			const exit = ints.find(i =>
-				i.type === 'feedback_positive' || i.type === 'feedback_negative' ||
+			const exit = [...ints].reverse().find(i =>
 				i.type === 'feedback_back' || i.type === 'feedback_auto_back'
 			)
 			if (bannerClick !== undefined && exit !== undefined) {
@@ -211,6 +353,8 @@ export default function FeedbackTab ({
 			bannerClicksByHour[new Date(i.timestamp).getHours()]++
 		})
 
+		const opinionFlow = analyzeOpinionFlows(feedbackSessions)
+
 		return {
 			totalBannerClicks: sessionsWithBannerClick.length,
 			completedCount: completedFeedback.length,
@@ -218,6 +362,11 @@ export default function FeedbackTab ({
 			completionRate: sessionsWithBannerClick.length > 0
 				? (completedFeedback.length / sessionsWithBannerClick.length) * 100
 				: 0,
+			changedOpinionCount,
+			changedOpinionRate: completedFeedback.length > 0
+				? (changedOpinionCount / completedFeedback.length) * 100
+				: 0,
+			opinionFlow,
 			abandonReasons,
 			avgTimeOnPage,
 			feedbackTiming,
@@ -231,7 +380,7 @@ export default function FeedbackTab ({
 				<h2 className="text-lg font-semibold text-gray-800 mb-2">{'Bekræftelsesskærm Adfærd'}</h2>
 				<p className="text-sm text-gray-500 mb-4">{'Hvordan brugere interagerer med feedback efter ordre'}</p>
 
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+				<div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
 					<StatCard
 						label="Interaktionsrate"
 						value={`${confirmationBehavior.responseRate.toFixed(0)}%`}
@@ -241,6 +390,11 @@ export default function FeedbackTab ({
 						label="Gns. responstid"
 						value={confirmationBehavior.avgResponseTime > 0 ? formatDuration(confirmationBehavior.avgResponseTime) : '-'}
 						subtext="Fra ordre til klik"
+					/>
+					<StatCard
+						label="Skiftede mening"
+						value={confirmationBehavior.changedOpinionCount}
+						subtext={`${confirmationBehavior.changedOpinionRate.toFixed(0)}% af feedback`}
 					/>
 					<StatCard
 						label="Lukket manuelt"
@@ -296,6 +450,7 @@ export default function FeedbackTab ({
 							</div>
 						</div>
 					)}
+					<OpinionFlowPanel flow={confirmationBehavior.opinionFlow} total={confirmationBehavior.totalWithFeedback} />
 				</div>
 			</div>
 
@@ -303,7 +458,7 @@ export default function FeedbackTab ({
 				<h2 className="text-lg font-semibold text-gray-800 mb-2">{'Ris og Ros Adfærd'}</h2>
 				<p className="text-sm text-gray-500 mb-4">{'Brugerflow fra banner til feedback'}</p>
 
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+				<div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
 					<StatCard
 						label="Banner klik"
 						value={risRosBehavior.totalBannerClicks}
@@ -313,6 +468,11 @@ export default function FeedbackTab ({
 						label="Fuldført"
 						value={risRosBehavior.completedCount}
 						subtext={`${risRosBehavior.completionRate.toFixed(0)}% gennemførsel`}
+					/>
+					<StatCard
+						label="Skiftede mening"
+						value={risRosBehavior.changedOpinionCount}
+						subtext={`${risRosBehavior.changedOpinionRate.toFixed(0)}% af feedback`}
 					/>
 					<StatCard
 						label="Afbrudt"
@@ -326,10 +486,11 @@ export default function FeedbackTab ({
 					/>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					<div className="rounded-xl shadow-sm border border-gray-100 p-5">
 						<HourChart data={risRosBehavior.bannerClicksByHour} label="Banner klik fordelt på tidspunkt" fullHeight />
 					</div>
+					<OpinionFlowPanel flow={risRosBehavior.opinionFlow} total={risRosBehavior.completedCount} />
 
 					<div className="rounded-xl shadow-sm border border-gray-100 p-5">
 						<div className="text-sm text-gray-500 mb-3">{'Feedback timing i forhold til ordre'}</div>

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Image from 'next/image'
-import { useCallback, useState, type ReactElement } from 'react'
+import { useCallback, useRef, useState, type ReactElement } from 'react'
 import { FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 
 import CloseableModal from '@/components/ui/CloseableModal'
@@ -31,33 +31,36 @@ const OrderConfirmationWindow = ({
 	const { addError } = useError()
 	const { track } = useAnalytics()
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
-	const [submittedRating, setSubmittedRating] = useState<FeedbackRatingValue | null>(null)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [selectedRating, setSelectedRating] = useState<FeedbackRatingValue | null>(null)
+	const selectedRatingRef = useRef<FeedbackRatingValue | null>(null)
+
+	const submitFeedbackAndClose = useCallback(async (): Promise<void> => {
+		if (selectedRatingRef.current !== null) {
+			try {
+				await axios.post(`${API_URL}/v1/feedback/rating`, { rating: selectedRatingRef.current }, { withCredentials: true })
+			} catch (error) {
+				addError(error)
+			}
+		}
+		onClose()
+	}, [API_URL, addError, onClose])
 
 	const handleTimeoutClose = useCallback(() => {
 		track('confirmation_close')
-		onClose()
-	}, [track, onClose])
+		void submitFeedbackAndClose()
+	}, [track, submitFeedbackAndClose])
 
 	const handleTimeoutExpired = useCallback(() => {
 		track('confirmation_timeout')
-		onClose()
-	}, [track, onClose])
+		void submitFeedbackAndClose()
+	}, [track, submitFeedbackAndClose])
 
 	const autoCloseMs = config?.configs.kioskOrderConfirmationTimeoutMs ?? 1000 * 10
 
-	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
-		if (isSubmitting) { return }
+	const handleSelectRating = (rating: FeedbackRatingValue): void => {
 		track(rating === 'positive' ? 'confirmation_feedback_positive' : 'confirmation_feedback_negative')
-		setIsSubmitting(true)
-		try {
-			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })
-			setSubmittedRating(rating)
-		} catch (error) {
-			addError(error)
-		} finally {
-			setIsSubmitting(false)
-		}
+		setSelectedRating(rating)
+		selectedRatingRef.current = rating
 	}
 
 	const canClose = ['success', 'error', 'paymentFailed'].includes(orderStatus)
@@ -138,37 +141,31 @@ const OrderConfirmationWindow = ({
 			{orderStatus === 'success' && (
 				<div className="px-5 pb-5">
 					<p className="text-center text-gray-600 text-lg mb-4">
-						{submittedRating !== null ? 'Tak for din vurdering!' : 'Hvordan var din oplevelse?'}
+						{'Hvordan var din oplevelse?'}
 					</p>
 					<div className="flex justify-center gap-6">
 						<button
 							type="button"
-							onClick={() => { void submitFeedback('negative') }}
-							disabled={isSubmitting || submittedRating !== null}
+							onClick={() => { handleSelectRating('negative') }}
 							title="Negativ feedback"
 							aria-label="Negativ feedback"
 							className={`p-6 rounded-2xl shadow transition-all ${
-								submittedRating === 'negative'
+								selectedRating === 'negative'
 									? 'bg-red-500 text-white scale-110'
-									: submittedRating !== null
-										? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-										: 'bg-white text-red-500 hover:bg-red-50 hover:scale-105 active:scale-95 border border-gray-200'
+									: 'bg-white text-red-500 hover:bg-red-50 hover:scale-105 active:scale-95 border border-gray-200'
 							}`}
 						>
 							<FiThumbsDown className="w-14 h-14" />
 						</button>
 						<button
 							type="button"
-							onClick={() => { void submitFeedback('positive') }}
-							disabled={isSubmitting || submittedRating !== null}
+							onClick={() => { handleSelectRating('positive') }}
 							title="Positiv feedback"
 							aria-label="Positiv feedback"
 							className={`p-6 rounded-2xl shadow transition-all ${
-								submittedRating === 'positive'
+								selectedRating === 'positive'
 									? 'bg-green-500 text-white scale-110'
-									: submittedRating !== null
-										? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-										: 'bg-white text-green-500 hover:bg-green-50 hover:scale-105 active:scale-95 border border-gray-200'
+									: 'bg-white text-green-500 hover:bg-green-50 hover:scale-105 active:scale-95 border border-gray-200'
 							}`}
 						>
 							<FiThumbsUp className="w-14 h-14" />
