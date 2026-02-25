@@ -11,7 +11,8 @@ export interface CartItemType {
 
 export interface CartType {
 	products: Record<ProductType['_id'], number>
-	options: Record<OptionType['_id'], number>
+	options: Record<ProductType['_id'], Record<OptionType['_id'], number>>
+	productOrder: Array<ProductType['_id']>
 }
 
 export interface Validation {

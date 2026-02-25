@@ -1,74 +1,69 @@
-import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
+import { type ReactElement, useEffect, useMemo, useRef } from 'react'
 
 import Item from '@/components/kiosk/cart/Item'
+import OptionRow from '@/components/kiosk/cart/OptionRow'
 import { type OptionType, type ProductType } from '@/types/backendDataTypes'
-import { type CartItemType, type CartType } from '@/types/frontendDataTypes'
+import { type CartType } from '@/types/frontendDataTypes'
 
 const OrderSummary = ({
 	products,
 	options,
 	cart,
-	onCartChange
+	onProductChange,
+	onOptionChange
 }: {
 	products: ProductType[]
 	options: OptionType[]
 	cart: CartType
-	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
+	onProductChange: (productId: ProductType['_id'], change: number) => void
+	onOptionChange: (productId: ProductType['_id'], optionId: OptionType['_id'], change: number) => void
 }): ReactElement => {
 	const endOfCartRef = useRef<HTMLDivElement | null>(null)
 	const prevCartLengthRef = useRef<number>(0)
 
-	// Helper function to map cart entries to CartItemType
-	const mapCartEntries = useCallback((
-		entries: Record<string, number>,
-		items: ProductType[] | OptionType[],
-		type: 'products' | 'options'
-	): CartItemType[] => {
-		return Object.entries(entries).reduce<CartItemType[]>((acc, [id, quantity]) => {
-			const item = items.find(i => i._id === id)
-			if (item !== undefined) {
-				acc.push({
-					id: item._id,
-					name: item.name,
-					price: item.price,
-					type,
-					quantity,
-					imageURL: item.imageURL
-				})
-			}
-			return acc
-		}, [])
-	}, [])
+	const cartProducts = useMemo(() => {
+		return cart.productOrder
+			.map(id => products.find(p => p._id === id))
+			.filter((p): p is ProductType => p !== undefined && (cart.products[p._id] ?? 0) > 0)
+	}, [products, cart.products, cart.productOrder])
 
-	// Memoize cart items to prevent unnecessary recalculations
-	const cartItems: CartItemType[] = useMemo(() => {
-		return [
-			...mapCartEntries(cart.products, products, 'products'),
-			...mapCartEntries(cart.options, options, 'options')
-		]
-	}, [mapCartEntries, cart, products, options])
-
-	// Handle scrolling to the end of the cart when items are added
 	useEffect(() => {
-		if (cartItems.length > prevCartLengthRef.current) {
+		if (cartProducts.length > prevCartLengthRef.current) {
 			endOfCartRef.current?.scrollIntoView({ behavior: 'smooth' })
 		}
-		prevCartLengthRef.current = cartItems.length
-	}, [cartItems.length])
+		prevCartLengthRef.current = cartProducts.length
+	}, [cartProducts.length])
 
 	return (
-		<div className="pt-2">
-			{cartItems.map(item => (
-				<Item
-					key={item.id}
-					imageURL={item.imageURL}
-					id={item.id}
-					name={item.name}
-					price={item.price}
-					type={item.type}
-					quantity={item.quantity}
-					onCartChange={onCartChange}
-				/>
+		<div className="divide-y divide-gray-100">
+			{cartProducts.map(product => (
+				<div key={product._id} className="py-1">
+					<Item
+						imageURL={product.imageURL}
+						id={product._id}
+						name={product.name}
+						price={product.price}
+						type="products"
+						quantity={cart.products[product._id]}
+						onQuantityChange={(change) => { onProductChange(product._id, change) }}
+					/>
+					{product.options.length > 0 && (
+						<div className="ml-8">
+							{product.options
+								.map(optionId => options.find(o => o._id === optionId))
+								.filter((o): o is OptionType => o !== undefined)
+								.map(option => (
+									<OptionRow
+										key={option._id}
+										option={option}
+										quantity={cart.options[product._id]?.[option._id] ?? 0}
+										onQuantityChange={(change) => { onOptionChange(product._id, option._id, change) }}
+									/>
+								))
+							}
+						</div>
+					)}
+				</div>
 			))}
 			<div ref={endOfCartRef} />
 		</div>
