@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type ReactElement, useEffect, useRef, useState } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
+import { FiTerminal } from 'react-icons/fi'
 
 import { useUser } from '@/contexts/UserProvider'
 import { type AdminType } from '@/types/backendDataTypes'
@@ -106,14 +107,26 @@ const Header = (): ReactElement | null => {
 								</span>
 							</button>
 							<div
-								className={`absolute right-0 w-20 md:w-24 mt-2 z-20 transform transition-all duration-200 ${dropdownOpen
+								className={`absolute right-0 mt-2 w-52 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden z-20 transform transition-all duration-200 ${dropdownOpen
 									? 'opacity-100 scale-100'
 									: 'opacity-0 scale-95 pointer-events-none'}`}
 							>
-								<LogoutButton
-									isLoggingOut={isLoggingOut}
-									setIsLoggingOut={setIsLoggingOut}
-								/>
+								<div className="px-3 py-2 border-b border-gray-700">
+									<Link
+										href="/admin/debug"
+										onClick={() => { setDropdownOpen(false) }}
+										className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+									>
+										<FiTerminal className="w-4 h-4" />
+										{'Betalingssimulator'}
+									</Link>
+								</div>
+								<div className="px-3 py-2">
+									<LogoutButton
+										isLoggingOut={isLoggingOut}
+										setIsLoggingOut={setIsLoggingOut}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
