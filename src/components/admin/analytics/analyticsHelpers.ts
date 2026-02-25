@@ -1,5 +1,4 @@
 import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
-
 import type { InteractionTypeValue } from '@/types/interactionTypes'
 
 export interface SessionAnalysis {

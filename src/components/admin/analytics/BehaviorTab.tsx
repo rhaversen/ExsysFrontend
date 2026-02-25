@@ -58,7 +58,7 @@ export default function BehaviorTab ({
 
 			for (const interaction of session.interactions) {
 				const itemId = interaction.metadata?.productId ?? interaction.metadata?.optionId
-				if (!itemId) { continue }
+				if (itemId == null) { continue }
 
 				if (interaction.type === 'product_select' || interaction.type === 'option_select') {
 					const entry = itemActions.get(itemId) ?? { catalogClicks: 0, basketIncreases: 0 }

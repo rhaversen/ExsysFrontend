@@ -34,7 +34,7 @@ const Item = ({
 			track(isProduct ? 'product_decrease' : 'option_decrease', metadata)
 		}
 		onQuantityChange(change)
-	}, [onQuantityChange, id, type, track, isProduct])
+	}, [onQuantityChange, id, track, isProduct])
 
 	return (
 		<div className="flex items-center gap-2 px-3 py-2">
