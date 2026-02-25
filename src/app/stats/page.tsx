@@ -83,6 +83,56 @@ function PieChart ({ data }: { data: ActivityStat[] }): ReactElement {
 	)
 }
 
+const EMBED_URL = 'https://kantine.nyskivehus.dk/stats'
+const STAGING_EMBED_URL = 'https://staging.kantine.nyskivehus.dk/stats'
+
+function EmbedInstructions (): ReactElement | null {
+	const [isEmbedded, setIsEmbedded] = useState(true)
+	const [showEmbed, setShowEmbed] = useState(true)
+
+	useEffect(() => {
+		try {
+			setIsEmbedded(window.self !== window.top)
+		} catch {
+			setIsEmbedded(true)
+		}
+	}, [])
+
+	if (isEmbedded) { return null }
+
+	const isStaging = typeof window !== 'undefined' && window.location.hostname.startsWith('staging.')
+	const url = isStaging ? STAGING_EMBED_URL : EMBED_URL
+	const snippet = `<iframe src="${url}" style="width:100%;height:600px;border:none;" loading="lazy"></iframe>`
+
+	return (
+		<div className="fixed bottom-3 right-3 z-50 text-sm">
+			{!showEmbed && (
+				<button
+					onClick={() => { setShowEmbed(true) }}
+					className="bg-white border border-gray-200 shadow-md rounded-lg px-3 py-1.5 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+				>
+					{'Embed'}
+				</button>
+			)}
+			{showEmbed && (
+				<div className="bg-white border border-gray-200 shadow-lg rounded-lg p-4 max-w-md">
+					<div className="flex items-center justify-between mb-2">
+						<span className="font-medium text-gray-700">{'Indlejr denne side'}</span>
+						<button
+							onClick={() => { setShowEmbed(false) }}
+							className="text-gray-400 hover:text-gray-600 cursor-pointer"
+						>
+							{'✕'}
+						</button>
+					</div>
+					<p className="text-gray-500 mb-2">{'Kopiér koden herunder for at indlejre statistik på din hjemmeside:'}</p>
+					<pre className="bg-gray-100 rounded p-2 text-xs text-gray-800 overflow-x-auto select-all whitespace-pre-wrap break-all">{snippet}</pre>
+				</div>
+			)}
+		</div>
+	)
+}
+
 export default function PublicStatsPage (): ReactElement {
 	const [stats, setStats] = useState<PublicStats | null>(null)
 	const [error, setError] = useState(false)
@@ -112,6 +162,8 @@ export default function PublicStatsPage (): ReactElement {
 
 	return (
 		<div className="h-screen w-screen overflow-hidden bg-gray-50 text-gray-900 text-[min(1.8vw,2.2vh)] grid grid-cols-2 gap-[min(1vw,1vh)] p-[min(1vw,1vh)]">
+			<EmbedInstructions />
+
 			{error && stats === null && (
 				<div className="col-span-2 flex items-center justify-center text-red-500">{'Kunne ikke hente data'}</div>
 			)}
