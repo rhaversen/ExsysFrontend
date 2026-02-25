@@ -42,9 +42,7 @@ function analyzeOpinionFlows (sessions: Array<{ feedbackTypes: string[] }>): Opi
 		const flow = classifyOpinionFlow(feedbackTypes)
 		if (flow.first === 'positive') { stats.startedPositive++ } else { stats.startedNegative++ }
 		if (flow.last === 'positive') { stats.endedPositive++ } else { stats.endedNegative++ }
-		if (flow.switches === 0) { stats.keptFirst++ }
-		else if (flow.switches === 1) { stats.switchedOnce++ }
-		else { stats.switchedBack++ }
+		if (flow.switches === 0) { stats.keptFirst++ } else if (flow.switches === 1) { stats.switchedOnce++ } else { stats.switchedBack++ }
 	}
 	return stats
 }
