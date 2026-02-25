@@ -3,7 +3,7 @@
 import axios from 'axios'
 import { createContext, useCallback, useContext, useRef, type ReactNode } from 'react'
 
-import { type InteractionType } from '@/types/frontendDataTypes'
+import { type InteractionTypeValue } from '@/types/interactionTypes'
 
 export interface InteractionMetadata {
 	activityId?: string
@@ -14,13 +14,13 @@ export interface InteractionMetadata {
 }
 
 interface Interaction {
-	type: InteractionType
+	type: InteractionTypeValue
 	timestamp: string
 	metadata?: InteractionMetadata
 }
 
 interface AnalyticsContextType {
-	track: (type: InteractionType, metadata?: InteractionMetadata) => void
+	track: (type: InteractionTypeValue, metadata?: InteractionMetadata) => void
 	endSession: () => Promise<void>
 }
 
@@ -32,7 +32,7 @@ export function AnalyticsProvider ({ children }: { children: ReactNode }): React
 	const sessionIdRef = useRef<string>(crypto.randomUUID())
 	const interactionsRef = useRef<Interaction[]>([])
 
-	const track = useCallback((type: InteractionType, metadata?: InteractionMetadata) => {
+	const track = useCallback((type: InteractionTypeValue, metadata?: InteractionMetadata) => {
 		interactionsRef.current.push({
 			type,
 			timestamp: new Date().toISOString(),

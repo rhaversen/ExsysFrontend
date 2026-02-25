@@ -2,14 +2,14 @@ import { type ReactElement } from 'react'
 
 import Option from '@/components/kiosk/select/Option'
 import { type OptionType } from '@/types/backendDataTypes'
-import { type CartType } from '@/types/frontendDataTypes'
 
+/**
+ * @deprecated OptionsBar is no longer used. Options are now shown inline in the cart below each product.
+ */
 const OptionsBar = ({
-	cart,
 	options,
 	onOptionSelect
 }: {
-	cart: CartType
 	options: OptionType[]
 	onOptionSelect: (option: OptionType) => void
 }): ReactElement => {
@@ -20,7 +20,6 @@ const OptionsBar = ({
 					key={option._id}
 					option={option}
 					onOptionSelect={onOptionSelect}
-					amount={cart.options[option._id]}
 				/>
 			))}
 		</div>

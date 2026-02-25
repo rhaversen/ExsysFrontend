@@ -50,41 +50,37 @@ export default function BehaviorTab ({
 		return analyzed.sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
 	}, [interactions, orders])
 
-	const cartBuildingStyle = useMemo(() => {
-		let catalogClickers = 0
-		let plusButtonUsers = 0
-		let mixedUsers = 0
+	const cartBuildingPatterns = useMemo(() => {
+		const patternCounts = new Map<string, number>()
 
 		for (const session of sessions) {
-			const productSelects = session.interactions.filter(i => i.type === 'product_select').length
-			const productIncreases = session.interactions.filter(i => i.type === 'product_increase').length
+			const itemActions = new Map<string, { catalogClicks: number, basketIncreases: number }>()
 
-			if (productSelects === 0 && productIncreases === 0) {
-				continue
+			for (const interaction of session.interactions) {
+				const itemId = interaction.metadata?.productId ?? interaction.metadata?.optionId
+				if (itemId == null) { continue }
+
+				if (interaction.type === 'product_select' || interaction.type === 'option_select') {
+					const entry = itemActions.get(itemId) ?? { catalogClicks: 0, basketIncreases: 0 }
+					entry.catalogClicks++
+					itemActions.set(itemId, entry)
+				} else if (interaction.type === 'product_increase' || interaction.type === 'option_increase') {
+					const entry = itemActions.get(itemId) ?? { catalogClicks: 0, basketIncreases: 0 }
+					entry.basketIncreases++
+					itemActions.set(itemId, entry)
+				}
 			}
 
-			const totalAdds = productSelects + productIncreases
-			const catalogRatio = productSelects / totalAdds
-
-			if (catalogRatio > 0.7) {
-				catalogClickers++
-			} else if (catalogRatio < 0.3) {
-				plusButtonUsers++
-			} else {
-				mixedUsers++
+			for (const { catalogClicks, basketIncreases } of itemActions.values()) {
+				const label = `${catalogClicks} katalog, ${basketIncreases} kurv`
+				patternCounts.set(label, (patternCounts.get(label) ?? 0) + 1)
 			}
 		}
 
-		const total = catalogClickers + plusButtonUsers + mixedUsers
-		return {
-			catalogClickers,
-			plusButtonUsers,
-			mixedUsers,
-			total,
-			catalogPct: total > 0 ? roundPercent((catalogClickers / total) * 100) : 0,
-			plusPct: total > 0 ? roundPercent((plusButtonUsers / total) * 100) : 0,
-			mixedPct: total > 0 ? roundPercent((mixedUsers / total) * 100) : 0
-		}
+		const total = Array.from(patternCounts.values()).reduce((a, b) => a + b, 0)
+		return Array.from(patternCounts.entries())
+			.map(([label, count]) => ({ label, count, pct: total > 0 ? roundPercent((count / total) * 100) : 0 }))
+			.sort((a, b) => b.count - a.count)
 	}, [sessions])
 
 	const regretSignals = useMemo(() => {
@@ -186,7 +182,7 @@ export default function BehaviorTab ({
 		const flowMap = new Map<string, FlowEntry>()
 
 		const getViewFromInteraction = (type: string): ViewType | null => {
-			if (type === 'nav_to_welcome' || type === 'timeout_restart') { return 'welcome' }
+			if (type === 'nav_to_welcome') { return 'welcome' }
 			if (type === 'nav_to_activity' || type === 'nav_auto_to_activity') { return 'activity' }
 			if (type === 'nav_to_room' || type === 'nav_auto_to_room') { return 'room' }
 			if (type === 'nav_to_order' || type === 'nav_auto_to_order') { return 'order' }
@@ -242,6 +238,37 @@ export default function BehaviorTab ({
 		}
 
 		return Array.from(flowMap.values()).sort((a, b) => b.count - a.count)
+	}, [sessions])
+
+	const timeoutsPerView = useMemo(() => {
+		const counts: Record<ViewType, number> = { welcome: 0, activity: 0, room: 0, order: 0, checkout: 0, confirmation: 0 }
+
+		const getViewFromInteraction = (type: string): ViewType | null => {
+			if (type === 'nav_to_welcome') { return 'welcome' }
+			if (type === 'nav_to_activity' || type === 'nav_auto_to_activity') { return 'activity' }
+			if (type === 'nav_to_room' || type === 'nav_auto_to_room') { return 'room' }
+			if (type === 'nav_to_order' || type === 'nav_auto_to_order') { return 'order' }
+			if (type === 'checkout_start') { return 'checkout' }
+			if (type === 'checkout_complete') { return 'confirmation' }
+			if (type === 'checkout_cancel' || type === 'payment_cancel' || type === 'checkout_failed') { return 'order' }
+			return null
+		}
+
+		for (const session of sessions) {
+			if (!session.hasTimeout) { continue }
+
+			let currentView: ViewType = 'welcome'
+			for (const interaction of session.interactions) {
+				if (interaction.type === 'session_timeout' || interaction.type === 'timeout_restart') {
+					counts[currentView]++
+					break
+				}
+				const newView = getViewFromInteraction(interaction.type)
+				if (newView !== null) { currentView = newView }
+			}
+		}
+
+		return counts
 	}, [sessions])
 
 	const checkoutCancelFlow = useMemo(() => {
@@ -488,7 +515,7 @@ export default function BehaviorTab ({
 				<div className="flex items-start justify-between mb-4">
 					<div>
 						<h3 className="font-semibold text-gray-800">{'Kurvopbygning'}</h3>
-						<p className="text-xs text-gray-500">{'Hvordan bygger brugere deres kurv?'}</p>
+						<p className="text-xs text-gray-500">{'Hvordan tilføjer brugere mængde per vare? (katalog-klik vs. + i kurven)'}</p>
 					</div>
 					<div className="text-right">
 						<div className="text-2xl font-bold text-amber-600">{regretSignals.pct}{'%'}</div>
@@ -498,24 +525,27 @@ export default function BehaviorTab ({
 					</div>
 				</div>
 
-				{cartBuildingStyle.total > 0 ? (
+				{cartBuildingPatterns.length > 0 ? (
 					<div className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-							<div className="bg-blue-50 rounded-lg p-3">
-								<div className="text-2xl font-bold text-blue-600">{cartBuildingStyle.catalogPct}{'%'}</div>
-								<div className="text-sm text-gray-700">{'Katalog-klik'}</div>
-								<div className="text-xs text-gray-500">{'Klikker produktet flere gange'}</div>
-							</div>
-							<div className="bg-green-50 rounded-lg p-3">
-								<div className="text-2xl font-bold text-green-600">{cartBuildingStyle.plusPct}{'%'}</div>
-								<div className="text-sm text-gray-700">{'Plus-knap'}</div>
-								<div className="text-xs text-gray-500">{'Bruger + i kurven'}</div>
-							</div>
-							<div className="bg-gray-50 rounded-lg p-3">
-								<div className="text-2xl font-bold text-gray-600">{cartBuildingStyle.mixedPct}{'%'}</div>
-								<div className="text-sm text-gray-700">{'Blandet'}</div>
-								<div className="text-xs text-gray-500">{'Bruger begge metoder'}</div>
-							</div>
+						<div className="space-y-2">
+							{cartBuildingPatterns.map((pattern) => {
+								const maxPct = cartBuildingPatterns[0].pct
+								const barWidth = maxPct > 0 ? (pattern.pct / maxPct) * 100 : 0
+								return (
+									<div key={pattern.label} className="flex items-center gap-3">
+										<div className="w-36 text-sm text-gray-600 shrink-0">{pattern.label}</div>
+										<div className="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden">
+											<div
+												className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
+												style={{ width: `${barWidth}%` }}
+											/>
+											<span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
+												{pattern.count}{' ('}{pattern.pct}{'%)'}
+											</span>
+										</div>
+									</div>
+								)
+							})}
 						</div>
 						<div className="mt-4 pt-4">
 							<div className="text-sm font-medium text-amber-700 mb-1">{'Fortrydelser'}</div>
@@ -545,10 +575,10 @@ export default function BehaviorTab ({
 					</div>
 				</div>
 
-				{navigationFlows.length > 0 && (
+				{(navigationFlows.length > 0 || Object.values(timeoutsPerView).some(v => v > 0)) && (
 					<div className="mt-4 pt-4">
 						<div className="text-sm font-medium text-gray-700 mb-3">{'Navigationsflows'}</div>
-						<NavigationFlowDiagram flows={navigationFlows} />
+						<NavigationFlowDiagram flows={navigationFlows} timeoutsPerView={timeoutsPerView} />
 					</div>
 				)}
 			</div>
@@ -731,7 +761,7 @@ export default function BehaviorTab ({
 	)
 }
 
-function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement {
+function NavigationFlowDiagram ({ flows, timeoutsPerView }: { flows: FlowEntry[], timeoutsPerView: Record<ViewType, number> }): ReactElement {
 	const stages: ViewType[] = ['welcome', 'activity', 'room', 'order']
 	const stageLabels: Record<ViewType, string> = {
 		welcome: 'Velkomst',
@@ -858,6 +888,8 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 				{stages.map((stage, idx) => {
 					const colors = stageColors[stage]
 					const x = getBoxX(idx)
+					const timeoutCount = timeoutsPerView[stage] ?? 0
+					const centerX = x + boxWidth / 2
 					return (
 						<g key={stage}>
 							<rect
@@ -871,7 +903,7 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 								strokeWidth={2}
 							/>
 							<text
-								x={x + boxWidth / 2}
+								x={centerX}
 								y={boxY + boxHeight / 2 + 5}
 								textAnchor="middle"
 								fontSize="13"
@@ -880,6 +912,11 @@ function NavigationFlowDiagram ({ flows }: { flows: FlowEntry[] }): ReactElement
 							>
 								{stageLabels[stage]}
 							</text>
+							{timeoutCount > 0 && (
+								<text x={centerX} y={boxY - 40} textAnchor="middle" fontSize="10" fill="#eab308" fontWeight="600">
+									{'⏰ '}{timeoutCount}
+								</text>
+							)}
 						</g>
 					)
 				})}
