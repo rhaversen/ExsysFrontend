@@ -10,24 +10,22 @@ const QuantityAdjuster = ({
 	onQuantityChange: (change: number) => void
 }): ReactElement => {
 	return (
-		<div className="inline-flex items-center ring-4 ring-blue-400 rounded-full ring-inset">
-			<div className="flex items-center">
-				<QuantityAdjustButton
-					onClick={() => {
-						onQuantityChange(-1)
-					}}
-					text="-"
-				/>
-				<div className="w-10 text-2xl font-extrabold bg-transparent text-center text-blue-600">
-					{quantity}
-				</div>
-				<QuantityAdjustButton
-					onClick={() => {
-						onQuantityChange(1)
-					}}
-					text="+"
-				/>
+		<div className="inline-flex items-center ring-2 ring-blue-400 rounded-full shrink-0">
+			<QuantityAdjustButton
+				onClick={() => {
+					onQuantityChange(-1)
+				}}
+				text="-"
+			/>
+			<div className="w-6 text-lg font-extrabold text-center text-blue-600">
+				{quantity}
 			</div>
+			<QuantityAdjustButton
+				onClick={() => {
+					onQuantityChange(1)
+				}}
+				text="+"
+			/>
 		</div>
 	)
 }

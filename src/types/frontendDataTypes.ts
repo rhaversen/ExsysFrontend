@@ -11,7 +11,8 @@ export interface CartItemType {
 
 export interface CartType {
 	products: Record<ProductType['_id'], number>
-	options: Record<OptionType['_id'], number>
+	options: Record<ProductType['_id'], Record<OptionType['_id'], number>>
+	productOrder: Array<ProductType['_id']>
 }
 
 export interface Validation {
@@ -34,45 +35,3 @@ export type OrderStatus = 'success' | 'error' | 'loading' | 'awaitingPayment' | 
 export type CheckoutMethod = 'sumUp' | 'later' | 'mobilePay'
 
 export type ViewState = 'welcome' | 'activity' | 'room' | 'order' | 'feedback'
-
-export type InteractionType =
-	| 'session_start'
-	| 'session_timeout'
-	| 'activity_select'
-	| 'activity_auto_select'
-	| 'room_select'
-	| 'room_auto_select'
-	| 'nav_to_welcome'
-	| 'nav_to_activity'
-	| 'nav_to_room'
-	| 'nav_to_order'
-	| 'nav_auto_to_activity'
-	| 'nav_auto_to_room'
-	| 'nav_auto_to_order'
-	| 'timeout_continue'
-	| 'timeout_restart'
-	| 'product_select'
-	| 'product_increase'
-	| 'product_decrease'
-	| 'option_select'
-	| 'option_increase'
-	| 'option_decrease'
-	| 'cart_clear'
-	| 'checkout_start'
-	| 'payment_select_later'
-	| 'payment_select_card'
-	| 'payment_select_mobilepay'
-	| 'payment_auto_later'
-	| 'checkout_cancel'
-	| 'payment_cancel'
-	| 'checkout_complete'
-	| 'checkout_failed'
-	| 'confirmation_feedback_positive'
-	| 'confirmation_feedback_negative'
-	| 'confirmation_close'
-	| 'confirmation_timeout'
-	| 'feedback_banner_click'
-	| 'feedback_positive'
-	| 'feedback_negative'
-	| 'feedback_back'
-	| 'feedback_auto_back'

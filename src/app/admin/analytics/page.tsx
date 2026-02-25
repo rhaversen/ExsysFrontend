@@ -2,11 +2,12 @@
 
 import axios from 'axios'
 import { type ReactElement, useState, useEffect, useMemo } from 'react'
-import { FiActivity, FiBarChart2, FiClock, FiAlertTriangle, FiMonitor, FiList, FiFilter, FiMessageSquare, FiUsers } from 'react-icons/fi'
+import { FiActivity, FiBarChart2, FiClock, FiAlertTriangle, FiMonitor, FiList, FiFilter, FiMessageSquare, FiUsers, FiTrendingUp } from 'react-icons/fi'
 
 import BehaviorTab from '@/components/admin/analytics/BehaviorTab'
 import FeedbackTab from '@/components/admin/analytics/FeedbackTab'
 import KiosksTab from '@/components/admin/analytics/KiosksTab'
+import OrderFlowTab from '@/components/admin/analytics/OrderFlowTab'
 import OverviewTab from '@/components/admin/analytics/OverviewTab'
 import ProblemsTab from '@/components/admin/analytics/ProblemsTab'
 import SessionsTab from '@/components/admin/analytics/SessionsTab'
@@ -15,7 +16,7 @@ import { useError } from '@/contexts/ErrorContext/ErrorContext'
 import { useEntitySocket } from '@/hooks/CudWebsocket'
 import type { ActivityType, InteractionType, KioskType, OptionType, OrderType, ProductType, RoomType } from '@/types/backendDataTypes'
 
-type AnalyticsTab = 'overview' | 'timing' | 'behavior' | 'problems' | 'kiosks' | 'sessions' | 'feedback'
+type AnalyticsTab = 'overview' | 'timing' | 'behavior' | 'problems' | 'kiosks' | 'sessions' | 'feedback' | 'orderflow'
 type TimeRange = '7d' | '14d' | '30d' | 'all'
 
 export default function Page (): ReactElement {
@@ -104,6 +105,7 @@ export default function Page (): ReactElement {
 		{ id: 'overview', label: 'Overblik', icon: <FiBarChart2 className="w-4 h-4" /> },
 		{ id: 'timing', label: 'Tidsmålinger', icon: <FiClock className="w-4 h-4" /> },
 		{ id: 'behavior', label: 'Adfærd', icon: <FiUsers className="w-4 h-4" /> },
+		{ id: 'orderflow', label: 'Ordreflow', icon: <FiTrendingUp className="w-4 h-4" /> },
 		{ id: 'problems', label: 'Problemer', icon: <FiAlertTriangle className="w-4 h-4" /> },
 		{ id: 'kiosks', label: 'Kiosker', icon: <FiMonitor className="w-4 h-4" /> },
 		{ id: 'sessions', label: 'Sessioner', icon: <FiList className="w-4 h-4" /> },
@@ -201,6 +203,12 @@ export default function Page (): ReactElement {
 							rooms={rooms}
 							products={products}
 							options={options}
+						/>
+					)}
+					{activeTab === 'orderflow' && (
+						<OrderFlowTab
+							orders={orders}
+							kiosks={kiosks}
 						/>
 					)}
 					{activeTab === 'problems' && (

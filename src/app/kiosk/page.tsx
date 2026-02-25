@@ -23,7 +23,7 @@ import 'dayjs/locale/da'
 
 dayjs.locale('da')
 
-const EMPTY_CART: CartType = { products: {}, options: {} }
+const EMPTY_CART: CartType = { products: {}, options: {}, productOrder: [] }
 const VIEW_ORDER: ViewState[] = ['welcome', 'activity', 'room', 'order', 'feedback']
 
 export default function Page (): ReactElement {
