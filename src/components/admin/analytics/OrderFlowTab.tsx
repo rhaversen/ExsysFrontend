@@ -243,9 +243,7 @@ export default function OrderFlowTab ({ orders, kiosks, products }: { orders: Or
 									title={`${hour}:00 — ${count} ordrer`}
 								/>
 							</div>
-							{hour % 2 === 0 && (
-								<span className="text-[10px] text-gray-400 mt-1">{hour}</span>
-							)}
+							<span className={`text-[10px] mt-1 ${hour % 2 === 0 ? 'text-gray-400' : 'invisible'}`}>{hour}</span>
 						</div>
 					))}
 				</div>
