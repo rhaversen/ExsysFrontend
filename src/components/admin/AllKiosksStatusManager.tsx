@@ -112,7 +112,7 @@ const AllKiosksStatusManager = ({
 					title="Handlinger for alle kiosker"
 				>
 					<FiSettings className="w-4 h-4" />
-					<span className="hidden sm:inline">{'Alle kiosker'}</span>
+					<span className="hidden sm:inline">{'Administrer Kiosker'}</span>
 					<FaChevronDown className={`w-3 h-3 transition-transform ${showOptions ? 'rotate-180' : ''}`} />
 				</button>
 

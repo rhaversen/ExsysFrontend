@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo, useRef, type ReactElement } from 'react'
 import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag } from 'react-icons/fi'
+import { FaSyncAlt } from 'react-icons/fa'
 import { GiCookingPot } from 'react-icons/gi'
 import 'dayjs/locale/da'
 
@@ -35,6 +36,7 @@ export default function Page (): ReactElement | null {
 	const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessageType[]>([])
 	const [feedbackRatings, setFeedbackRatings] = useState<FeedbackRatingType[]>([])
 	const resetAllKiosksRef = useRef<(() => void) | null>(null)
+	const [isPingRefreshing, setIsPingRefreshing] = useState(false)
 
 	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
 		const today = new Date()
@@ -291,10 +293,22 @@ export default function Page (): ReactElement | null {
 									<FiMonitor className="w-5 h-5 text-gray-600" />
 									<h2 className="font-semibold text-gray-800">{'Kioskhåndtering'}</h2>
 								</div>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									disabled={isPingRefreshing}
+									onClick={() => resetAllKiosksRef.current?.()}
+									className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors ${isPingRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+									title="Opdater status for alle kiosker"
+								>
+									<FaSyncAlt className={`w-3.5 h-3.5 ${isPingRefreshing ? 'animate-spin' : ''}`} />
+									{'Opdater status'}
+								</button>
 								<AllKiosksStatusManager kiosks={kiosks} products={products} onRefreshAll={() => resetAllKiosksRef.current?.()} />
 							</div>
+							</div>
 
-							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} onResetAllKiosks={(fn) => { resetAllKiosksRef.current = fn }} />
+							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} onResetAllKiosks={(fn, refreshing) => { resetAllKiosksRef.current = fn; setIsPingRefreshing(refreshing) }} />
 						</section>
 					</div>
 				</div>
