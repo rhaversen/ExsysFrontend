@@ -913,7 +913,7 @@ function NavigationFlowDiagram ({ flows, timeoutsPerView }: { flows: FlowEntry[]
 								{stageLabels[stage]}
 							</text>
 							{timeoutCount > 0 && (
-								<text x={centerX} y={boxY - 10} textAnchor="middle" fontSize="10" fill="#eab308" fontWeight="600">
+								<text x={centerX} y={boxY - 40} textAnchor="middle" fontSize="10" fill="#eab308" fontWeight="600">
 									{'⏰ '}{timeoutCount}
 								</text>
 							)}
