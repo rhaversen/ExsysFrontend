@@ -24,7 +24,7 @@ export default function Page (): ReactElement {
 	const { addError } = useError()
 
 	const [activeTab, setActiveTab] = useState<AnalyticsTab>('overview')
-	const [timeRange, setTimeRange] = useState<TimeRange>('7d')
+	const [timeRange, setTimeRange] = useState<TimeRange>('all')
 	const [selectedKiosk, setSelectedKiosk] = useState<string>('all')
 	const [loading, setLoading] = useState(true)
 

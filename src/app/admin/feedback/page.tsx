@@ -40,7 +40,7 @@ export default function Page (): ReactElement {
 	const [messageFilter, setMessageFilter] = useState<'all' | 'read' | 'unread'>('unread')
 	const [rightPanelView, setRightPanelView] = useState<'messages' | 'ratings'>('messages')
 	const [selectedKioskFilter, setSelectedKioskFilter] = useState<string | null>(null)
-	const [timePeriod, setTimePeriod] = useState<7 | 14 | 30 | 'all'>(30)
+	const [timePeriod, setTimePeriod] = useState<7 | 14 | 30 | 'all'>('all')
 
 	const { updateEntityAsync, deleteEntityAsync: deleteMessageAsync } = useCUDOperations<PostFeedbackMessageType, PatchFeedbackMessageType, FeedbackMessageType>(
 		'/v1/feedback/message'

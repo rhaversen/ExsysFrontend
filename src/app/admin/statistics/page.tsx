@@ -24,7 +24,7 @@ export default function Page (): ReactElement {
 
 	const [activeSection, setActiveSection] = useState<StatSection>('overview')
 	const [clickedSection, setClickedSection] = useState<StatSection | null>(null)
-	const [timeRange, setTimeRange] = useState<TimeRange>('30days')
+	const [timeRange, setTimeRange] = useState<TimeRange>('allTime')
 	const [customFromDate, setCustomFromDate] = useState<string>('')
 	const [customToDate, setCustomToDate] = useState<string>('')
 	const [currentTime, setCurrentTime] = useState<Date>(new Date())
