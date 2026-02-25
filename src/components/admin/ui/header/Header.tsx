@@ -19,7 +19,7 @@ type Environment = 'production' | 'staging' | 'development'
 const ENVIRONMENTS: Array<{ env: Environment, label: string, url: string, color: string }> = [
 	{ env: 'production', label: 'Produktion', url: 'https://kantine.nyskivehus.dk', color: 'bg-green-500' },
 	{ env: 'staging', label: 'Test', url: 'https://staging.kantine.nyskivehus.dk', color: 'bg-yellow-500' },
-	{ env: 'development', label: 'Lokal', url: '', color: 'bg-blue-500' }
+	{ env: 'development', label: 'Lokal', url: 'localhost:3000', color: 'bg-blue-500' }
 ]
 
 function detectEnvironment (): Environment {
