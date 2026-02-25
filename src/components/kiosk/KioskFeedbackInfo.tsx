@@ -10,7 +10,7 @@ import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
 const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => {
 	const { track, endSession } = useAnalytics()
-	const feedbackUrl = 'kantine.nyskivehus.dk/risros'
+	const feedbackUrl = 'kantine.nyskivehus.dk'
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
 	const [submittedRating, setSubmittedRating] = useState<FeedbackRatingValue | null>(null)
