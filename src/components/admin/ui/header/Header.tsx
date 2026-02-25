@@ -51,8 +51,9 @@ const Header = (): ReactElement | null => {
 
 	useEffect(() => {
 		setIsClient(true)
+	}, [])
 
-		// Update selectedLink when the pathname changes
+	useEffect(() => {
 		setSelectedLink(pathname ?? '')
 
 		const handleScroll = (): void => {
@@ -68,21 +69,29 @@ const Header = (): ReactElement | null => {
 		window.addEventListener('scroll', handleScroll)
 		document.addEventListener('mousedown', handleClickOutside)
 
+		return () => {
+			window.removeEventListener('scroll', handleScroll)
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [pathname])
+
+	useEffect(() => {
+		const header = headerRef.current
+		if (header == null) { return }
+
+		setHeaderHeight(header.getBoundingClientRect().height)
+
 		const observer = new ResizeObserver(([entry]) => {
 			if (entry != null) {
 				setHeaderHeight(entry.contentRect.height)
 			}
 		})
-		if (headerRef.current != null) {
-			observer.observe(headerRef.current)
-		}
+		observer.observe(header)
 
 		return () => {
-			window.removeEventListener('scroll', handleScroll)
-			document.removeEventListener('mousedown', handleClickOutside)
 			observer.disconnect()
 		}
-	}, [pathname])
+	}, [isClient])
 
 	// TODO: Dont return null if not client, return a loading spinner or something instead of user name
 	if (!isClient) {
