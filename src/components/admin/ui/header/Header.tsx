@@ -37,6 +37,8 @@ const Header = (): ReactElement | null => {
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isLoggingOut, setIsLoggingOut] = useState(false)
 	const dropdownRef = useRef<HTMLDivElement>(null)
+	const headerRef = useRef<HTMLElement>(null)
+	const [headerHeight, setHeaderHeight] = useState(64)
 	const pathname = usePathname()
 	const [selectedLink, setSelectedLink] = useState<string>(pathname ?? '')
 
@@ -66,9 +68,19 @@ const Header = (): ReactElement | null => {
 		window.addEventListener('scroll', handleScroll)
 		document.addEventListener('mousedown', handleClickOutside)
 
+		const observer = new ResizeObserver(([entry]) => {
+			if (entry != null) {
+				setHeaderHeight(entry.contentRect.height)
+			}
+		})
+		if (headerRef.current != null) {
+			observer.observe(headerRef.current)
+		}
+
 		return () => {
 			window.removeEventListener('scroll', handleScroll)
 			document.removeEventListener('mousedown', handleClickOutside)
+			observer.disconnect()
 		}
 	}, [pathname])
 
@@ -84,9 +96,10 @@ const Header = (): ReactElement | null => {
 	return (
 		<>
 			<header
-				className={`w-full h-16 items-center bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
+				ref={headerRef}
+				className={`w-full items-center bg-gray-900 fixed top-0 left-0 right-0 z-50 transition-shadow ${isScrolled ? 'shadow-lg duration-500' : 'duration-0'}`}
 			>
-				<div className="flex items-center justify-between text-sm md:text-lg align-middle max-w-6xl mx-auto h-full px-4">
+				<div className="flex items-center justify-between text-sm md:text-lg align-middle max-w-6xl mx-auto h-16 px-4">
 					{/* Left side: Home link + env badge */}
 					<div className="flex items-center shrink-0 gap-2">
 						<Link href="/admin" className="text-white font-semibold md:font-bold">
@@ -178,9 +191,19 @@ const Header = (): ReactElement | null => {
 						</div>
 					</div>
 				</div>
+				{currentEnv === 'staging' && (
+					<div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2">
+						<div className="max-w-6xl mx-auto flex items-start gap-2 text-xs text-yellow-800">
+							<span className="font-semibold shrink-0 mt-px">{'⚠ Testmiljø:'}</span>
+							<span>
+								{'Dette er staging-miljøet med en separat database. Ændringer her påvirker ikke produktionsmiljøet. Miljøet afspejler produktion og understøtter fuld drift inkl. SumUp-betalinger og kiosker.'}
+							</span>
+						</div>
+					</div>
+				)}
 			</header>
-			{/* Add padding to the top of the page content */}
-			<div className="mt-16"></div>
+
+			<div style={{ marginTop: `${headerHeight}px` }} />
 
 			{/* Conditionally render the modal */}
 			{isLoggingOut && (
