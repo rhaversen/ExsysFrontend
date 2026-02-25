@@ -209,6 +209,7 @@ export default function Page (): ReactElement {
 						<OrderFlowTab
 							orders={orders}
 							kiosks={kiosks}
+							products={products}
 						/>
 					)}
 					{activeTab === 'problems' && (
