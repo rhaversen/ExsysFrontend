@@ -9,8 +9,8 @@
 	position: fixed;
 	inset: 0;
 	overflow: hidden;
-	user-select: none;
 	-webkit-user-select: none;
+	user-select: none;
 }
 
 .kiosk-touch .overflow-y-auto {
