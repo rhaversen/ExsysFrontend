@@ -54,7 +54,14 @@ const createConfig = (disabledWeekdays: number[] = []): ConfigsType => ({
 	createdAt: new Date().toISOString(),
 	updatedAt: new Date().toISOString(),
 	configs: {
-		disabledWeekdays
+		kioskInactivityTimeoutMs: 30000,
+		kioskInactivityTimeoutWarningMs: 10000,
+		kioskOrderConfirmationTimeoutMs: 5000,
+		disabledWeekdays,
+		kioskPassword: 'test',
+		kioskFeedbackBannerDelayMs: 5000,
+		kioskWelcomeMessage: 'Welcome',
+		kioskReloadMsSinceMidnight: 0
 	}
 })
 
