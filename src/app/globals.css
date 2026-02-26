@@ -3,6 +3,26 @@
 /* Enable hover effects for touch devices */
 @custom-variant hover (&:hover);
 
+.kiosk-touch {
+	touch-action: none;
+	overscroll-behavior: none;
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.kiosk-touch .overflow-y-auto {
+	touch-action: pan-y;
+	overscroll-behavior: contain;
+}
+
+.kiosk-touch .overflow-y-auto button,
+.kiosk-touch .overflow-y-auto [role="button"] {
+	touch-action: pan-y;
+}
+
 :root {
 	--background: #ffffff;
 	--foreground: #171717;
