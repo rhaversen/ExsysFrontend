@@ -121,7 +121,7 @@ const Header = (): ReactElement | null => {
 						)}
 					</div>
 					{/* Center: Page links */}
-					<div className="flex items-center justify-center h-full flex-grow mx-1 md:mx-2">
+					<div className="flex items-center justify-center h-full grow mx-1 md:mx-2">
 						{Object.entries(routeTitles).map(([route, title]) => (
 							<PageLink
 								key={route}
@@ -133,7 +133,7 @@ const Header = (): ReactElement | null => {
 						))}
 					</div>
 					{/* Right side: User dropdown */}
-					<div className="flex items-center justify-end flex-shrink-0">
+					<div className="flex items-center justify-end shrink-0">
 						<div className="relative" ref={dropdownRef}>
 							<button
 								onClick={() => { setDropdownOpen(!dropdownOpen) }}

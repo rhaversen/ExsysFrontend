@@ -256,10 +256,10 @@ export default function Page (): ReactElement {
 									navigateTo('activity')
 								}
 							}}
-							className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-xl text-3xl
+							className="bg-linear-to-r from-blue-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-xl text-3xl
 								shadow-[0_0_15px_rgba(0,0,0,0.2)] hover:scale-102 hover:shadow-[0_0_25px_rgba(0,0,0,0.3)] active:scale-98
 								transition-all duration-150 relative overflow-hidden
-								before:absolute before:inset-0 before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full before:animate-shimmer"
+								before:absolute before:inset-0 before:w-full before:h-full before:bg-linear-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full before:animate-shimmer"
 						>
 							{'Tryk her for at starte'}
 						</button>
@@ -340,7 +340,7 @@ export default function Page (): ReactElement {
 						</div>
 					</div>
 				</div>
-				<div className="flex-shrink-0 z-10 text-gray-400/75">
+				<div className="shrink-0 z-10 text-gray-400/75">
 					<KioskSessionInfo />
 				</div>
 			</div>
@@ -393,7 +393,7 @@ export default function Page (): ReactElement {
 				</div>
 			)}
 
-			<div className="flex-shrink-0">
+			<div className="shrink-0">
 				<KioskSessionInfo />
 			</div>
 		</div>

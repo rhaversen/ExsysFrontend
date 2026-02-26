@@ -99,7 +99,7 @@ const ConfigItem = ({
 							onKeyDown={handleKeyDown}
 							{...(min !== undefined && { min })}
 							{...(max !== undefined && { max })}
-							className="flex-grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+							className="grow px-3 py-2 border border-slate-500 min-w-0 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 						/>
 						{!isString && !isTime && <span className="ml-2 text-slate-700">{unitLabel}</span>}
 					</div>

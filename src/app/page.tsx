@@ -68,7 +68,7 @@ export default function Page (): ReactElement {
 	}
 
 	return (
-		<main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
+		<main className="flex flex-col items-center justify-center min-h-screen bg-linear-to-b from-gray-50 to-gray-100 p-4">
 			<div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mb-12">
 				<h1 className="text-3xl font-bold text-center text-gray-800 mb-2">{'Ris og Ros'}</h1>
 				<p className="text-center text-gray-600 mb-6">{'Skriv din ris og ros i felterne nedenfor. Indtast venligst dit navn eller email, hvis vi må kontakte dig.'}</p>

@@ -117,7 +117,7 @@ const AllKiosksStatusManager = ({
 				</button>
 
 				{showOptions && (
-					<div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-[340px]">
+					<div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-85">
 						{/* Refresh section */}
 						<div className="flex flex-col gap-3 text-gray-700 mb-4 pb-4 border-b border-gray-200">
 							<label className="flex flex-col gap-0.5">

@@ -200,16 +200,16 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 										)}
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={kioskName}>{kioskName}</div>
+										<div className="truncate max-w-25" title={kioskName}>{kioskName}</div>
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={activityName}>{activityName}</div>
+										<div className="truncate max-w-25" title={activityName}>{activityName}</div>
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={roomName}>{roomName}</div>
+										<div className="truncate max-w-25" title={roomName}>{roomName}</div>
 									</td>
 									<td className="p-3">
-										<div className="max-w-[200px] truncate" title={order.products.map(p => `${products.find(prod => prod._id === p._id)?.name} (${p.quantity})`).join(', ')}>
+										<div className="max-w-50 truncate" title={order.products.map(p => `${products.find(prod => prod._id === p._id)?.name} (${p.quantity})`).join(', ')}>
 											{order.products.length > 0 ? (
 												<span>
 													{products.find(prod => prod._id === order.products[0]._id)?.name ?? 'Ukendt produkt'}

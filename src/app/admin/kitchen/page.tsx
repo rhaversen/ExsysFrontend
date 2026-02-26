@@ -120,7 +120,7 @@ export default function Page (): ReactElement {
 	return (
 		<main className="flex">
 			{/* Main Content Area */}
-			<div className="flex-grow">
+			<div className="grow">
 				{allActive.length === 0
 					? (
 						<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col justify-center items-center">

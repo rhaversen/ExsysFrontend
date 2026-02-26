@@ -27,7 +27,7 @@ const ProgressButton = ({
 			: 'text-gray-400 bg-gray-100'
 	}
                     ${canClick && !isActive
-		? '-translate-y-[4px]'
+		? '-translate-y-1'
 		: 'shadow-none'}`}
 
 		onClick={onClick}
@@ -116,7 +116,7 @@ export default function ProgressBar ({
 				<div className="absolute inset-x-0 h-3 rounded-full bg-gray-200" />
 				{/* Fill */}
 				<div
-					className={`absolute h-3 left-0 transition-all duration-300 ease-in-out ${viewState === 'welcome' ? 'animate-gradientShimmer' : 'bg-gradient-to-r from-blue-400 to-blue-600 rounded-r-full'}`}
+					className={`absolute h-3 left-0 transition-all duration-300 ease-in-out ${viewState === 'welcome' ? 'animate-gradientShimmer' : 'bg-linear-to-r from-blue-400 to-blue-600 rounded-r-full'}`}
 					style={{ width: `${getProgress(viewState)}%` }}
 				/>
 				{/* Markers */}
@@ -134,7 +134,7 @@ export default function ProgressBar ({
 						onClick={() => { onProgressClick('welcome') }}
 						className="font-bold h-14 rounded-xl flex justify-center items-center m-2 border border-gray-200
 								transition-all duration-300 shadow-[0_4px_0_#CBD5E1,0_2px_4px_rgba(0,0,0,0.1)]
-								transform -translate-y-[4px] text-gray-800 bg-white"
+								transform -translate-y-1 text-gray-800 bg-white"
 						type="button"
 					>
 						<div className="text-xl flex flex-col items-center justify-center text-center p-3">

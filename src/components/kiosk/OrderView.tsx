@@ -295,7 +295,7 @@ const OrderView = ({
 				</div>
 			</div>
 
-			<div className="w-[300px] shrink-0 shadow-l-md">
+			<div className="w-75 shrink-0 shadow-l-md">
 				<CartWindow
 					price={totalPrice}
 					products={products}

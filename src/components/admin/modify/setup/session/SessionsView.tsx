@@ -350,7 +350,7 @@ const SessionsView = ({
 							{viewMode.type === 'kiosk' && viewMode.showAll && kiosksWithMultipleSessions.length > 0 && (
 								<div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-5">
 									<div className="flex items-start mb-3">
-										<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 flex-shrink-0" size={18} />
+										<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 shrink-0" size={18} />
 										<div>
 											<h3 className="text-amber-800 font-medium">
 												{`Advarsel: ${kiosksWithMultipleSessions.length} kiosk${kiosksWithMultipleSessions.length > 1 ? 'er' : ''} har flere aktive sessioner`}
@@ -382,7 +382,7 @@ const SessionsView = ({
 							{/* Warning message for kiosks with multiple sessions */}
 							{showKioskMultipleSessionsWarning && (
 								<div className="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-5 flex items-start">
-									<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 flex-shrink-0" size={18} />
+									<FaExclamationTriangle className="text-amber-500 mt-1 mr-3 shrink-0" size={18} />
 									<div>
 										<h3 className="text-amber-800 font-medium mb-1">{'Advarsel: Flere aktive sessioner på samme kiosk'}</h3>
 										<p className="text-amber-700 text-sm">
