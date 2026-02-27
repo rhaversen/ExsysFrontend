@@ -4,9 +4,10 @@ import { type ProductType, type OrderWindow, type Time, type KioskType, ConfigsT
 
 export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 	const now = new Date()
-	const currentHour = now.getHours()
-	const currentMinute = now.getMinutes()
+	return isTimeInOrderWindow(now.getHours(), now.getMinutes(), orderWindow)
+}
 
+export function isTimeInOrderWindow (hour: number, minute: number, orderWindow: OrderWindow): boolean {
 	const fromHour = orderWindow.from.hour
 	const fromMinute = orderWindow.from.minute
 	const toHour = orderWindow.to.hour
@@ -14,14 +15,14 @@ export function isCurrentTimeInOrderWindow (orderWindow: OrderWindow): boolean {
 
 	// If from is after to, it spans over midnight
 	if (fromHour > toHour || (fromHour === toHour && fromMinute > toMinute)) {
-		// Check if current time is after from or before to
-		return (currentHour > fromHour || (currentHour === fromHour && currentMinute >= fromMinute)) ||
-			(currentHour < toHour || (currentHour === toHour && currentMinute < toMinute))
+		// Check if time is after from or before to
+		return (hour > fromHour || (hour === fromHour && minute >= fromMinute)) ||
+			(hour < toHour || (hour === toHour && minute < toMinute))
 	} else {
-		// Check if current time is within from and to
-		return (currentHour >= fromHour && currentHour <= toHour) &&
-			(currentHour === fromHour ? currentMinute >= fromMinute : true) &&
-			(currentHour === toHour ? currentMinute < toMinute : true)
+		// Check if time is within from and to
+		return (hour >= fromHour && hour <= toHour) &&
+			(hour === fromHour ? minute >= fromMinute : true) &&
+			(hour === toHour ? minute < toMinute : true)
 	}
 }
 

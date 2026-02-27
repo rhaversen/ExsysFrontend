@@ -47,7 +47,7 @@ const ErrorWindow = ({ error, onClose }: { error: string[]; onClose: () => void 
 				</button>
 			</div>
 			<div
-				className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-[5000ms] translate-x-full' : 'duration-0'} origin-right ease-linear transform`}
+				className={`ml-1 rounded-l h-1 bg-white transition-transform ${timeoutAnimation ? 'duration-5000 translate-x-full' : 'duration-0'} origin-right ease-linear transform`}
 			/>
 		</div>
 	)

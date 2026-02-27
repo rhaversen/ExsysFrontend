@@ -268,8 +268,8 @@ export interface ConfigsType {
 		kioskWelcomeMessage: string
 		kioskReloadMsSinceMidnight: number
 	}
-	createdAt: Date
-	updatedAt: Date
+	createdAt: string
+	updatedAt: string
 }
 
 // Kiosk ping/pong types

@@ -318,7 +318,7 @@ interface KioskStatusManagerProps {
 	products: ProductType[]
 	configs: ConfigsType | null
 	sessions: SessionType[]
-	onResetAllKiosks?: (resetFn: () => void) => void
+	onResetAllKiosks?: (resetFn: () => void, isRefreshing: boolean) => void
 }
 
 const KioskStatusManager = ({
@@ -340,8 +340,8 @@ const KioskStatusManager = ({
 	const { pingStatuses, getPingState, resetKiosk, resetAllKiosks, isRefreshing: isRefreshingPing } = useAdminKioskPing(kioskIds)
 
 	useEffect(() => {
-		onResetAllKiosks?.(resetAllKiosks)
-	}, [onResetAllKiosks, resetAllKiosks])
+		onResetAllKiosks?.(resetAllKiosks, isRefreshingPing)
+	}, [onResetAllKiosks, resetAllKiosks, isRefreshingPing])
 
 	const handlePatchKiosk = useCallback(async (kioskId: string, patch: Partial<KioskType>) => {
 		setIsPatching(true)
@@ -379,18 +379,6 @@ const KioskStatusManager = ({
 					<div className="flex justify-center items-center py-10 text-gray-500 text-lg">{'Indlæser data...'}</div>
 				) : (
 					<>
-						<div className="flex justify-end mb-3">
-							<button
-								type="button"
-								disabled={isRefreshingPing}
-								onClick={resetAllKiosks}
-								className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors ${isRefreshingPing === true ? 'opacity-50 cursor-not-allowed' : ''}`}
-								title="Opdater status for alle kiosker"
-							>
-								<FaSyncAlt className={`w-3.5 h-3.5 ${isRefreshingPing === true ? 'animate-spin' : ''}`} />
-								{'Opdater status'}
-							</button>
-						</div>
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							{kiosks.map(kiosk => {
 								const kioskSessions = sessions.filter(s => s.type === 'kiosk' && s.userId === kiosk._id)

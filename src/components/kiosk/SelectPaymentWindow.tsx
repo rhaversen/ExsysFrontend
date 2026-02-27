@@ -84,7 +84,7 @@ const SelectPaymentWindow = ({
 							/>
 						</button>
 						{sumUpDisabled && (
-							<div className="mt-2 bg-red-100 text-red-700 px-3 py-1 rounded border border-red-200 text-center text-sm max-w-48 break-words">
+							<div className="mt-2 bg-red-100 text-red-700 px-3 py-1 rounded border border-red-200 text-center text-sm max-w-48 wrap-break-word">
 								{'Beløb under 10 kr kan ikke betales med kort'}
 							</div>
 						)}
