@@ -1,3 +1,5 @@
+import { InteractionTypeValue } from './interactionTypes'
+
 // Helper types
 export interface Time {
 	hour: number
@@ -266,8 +268,8 @@ export interface ConfigsType {
 		kioskWelcomeMessage: string
 		kioskReloadMsSinceMidnight: number
 	}
-	createdAt: Date
-	updatedAt: Date
+	createdAt: string
+	updatedAt: string
 }
 
 // Kiosk ping/pong types
@@ -286,49 +288,6 @@ export interface KioskPongEventType {
 	timestamp: string
 	gitHash: string
 }
-
-// Interaction types for analytics
-export type InteractionTypeValue =
-	| 'session_start'
-	| 'session_timeout'
-	| 'activity_select'
-	| 'activity_auto_select'
-	| 'room_select'
-	| 'room_auto_select'
-	| 'nav_to_welcome'
-	| 'nav_to_activity'
-	| 'nav_to_room'
-	| 'nav_to_order'
-	| 'nav_auto_to_activity'
-	| 'nav_auto_to_room'
-	| 'nav_auto_to_order'
-	| 'timeout_continue'
-	| 'timeout_restart'
-	| 'product_select'
-	| 'product_increase'
-	| 'product_decrease'
-	| 'option_select'
-	| 'option_increase'
-	| 'option_decrease'
-	| 'cart_clear'
-	| 'checkout_start'
-	| 'payment_select_later'
-	| 'payment_select_card'
-	| 'payment_select_mobilepay'
-	| 'payment_auto_later'
-	| 'checkout_cancel'
-	| 'payment_cancel'
-	| 'checkout_complete'
-	| 'checkout_failed'
-	| 'confirmation_feedback_positive'
-	| 'confirmation_feedback_negative'
-	| 'confirmation_close'
-	| 'confirmation_timeout'
-	| 'feedback_banner_click'
-	| 'feedback_positive'
-	| 'feedback_negative'
-	| 'feedback_back'
-	| 'feedback_auto_back'
 
 export interface InteractionMetadata {
 	activityId?: string

@@ -70,8 +70,8 @@ export default function OverviewTab ({
 	}, [sessions])
 
 	const durationScatterData = useMemo(() => {
-		return sessions.map((session, idx) => ({
-			x: idx,
+		return sessions.map((session) => ({
+			date: session.startTime,
 			y: session.duration / 1000,
 			endReason: session.endReason
 		}))
@@ -169,12 +169,31 @@ export default function OverviewTab ({
 	)
 }
 
-function DurationScatter ({ data }: { data: Array<{ x: number, y: number, endReason: string }> }): ReactElement {
+function DurationScatter ({ data }: { data: Array<{ date: Date, y: number, endReason: string }> }): ReactElement {
 	const maxY = Math.max(...data.map(p => p.y), 60)
 	const yTicks = [0, Math.round(maxY * 0.25), Math.round(maxY * 0.5), Math.round(maxY * 0.75), Math.round(maxY)]
 
+	const minTime = Math.min(...data.map(p => p.date.getTime()))
+	const maxTime = Math.max(...data.map(p => p.date.getTime()))
+	const timeRange = maxTime - minTime || 1
+
+	const xTickCount = 5
+	const xTicks = Array.from({ length: xTickCount }, (_, i) => {
+		const t = minTime + (timeRange * i) / (xTickCount - 1)
+		return new Date(t)
+	})
+
+	const formatDate = (d: Date): string => {
+		const day = d.getDate()
+		const month = d.toLocaleString('da-DK', { month: 'short' })
+		if (timeRange < 86400000) {
+			return `${day}. ${month} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+		}
+		return `${day}. ${month}`
+	}
+
 	return (
-		<svg viewBox="0 0 420 200" className="w-full h-full" preserveAspectRatio="none">
+		<svg viewBox="0 0 420 210" className="w-full h-full" preserveAspectRatio="none">
 			{yTicks.map((tick, i) => {
 				const y = 180 - (tick / maxY) * 160
 				return <line key={i} x1={45} y1={y} x2={415} y2={y} stroke="#f3f4f6" strokeWidth={1} />
@@ -190,8 +209,17 @@ function DurationScatter ({ data }: { data: Array<{ x: number, y: number, endRea
 					</g>
 				)
 			})}
+			{xTicks.map((tick, i) => {
+				const x = 50 + ((tick.getTime() - minTime) / timeRange) * 360
+				return (
+					<g key={i}>
+						<line x1={x} y1={180} x2={x} y2={184} stroke="#9ca3af" strokeWidth={1} />
+						<text x={x} y={196} fontSize={7} fill="#6b7280" textAnchor="middle">{formatDate(tick)}</text>
+					</g>
+				)
+			})}
 			{data.map((point, idx) => {
-				const x = 50 + (point.x / Math.max(data.length - 1, 1)) * 360
+				const x = 50 + ((point.date.getTime() - minTime) / timeRange) * 360
 				const y = 180 - (point.y / maxY) * 160
 				const color = point.endReason === 'completed' ? '#22c55e' :
 					point.endReason === 'timeout' ? '#eab308' :

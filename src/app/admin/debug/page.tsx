@@ -152,7 +152,7 @@ export default function Page (): ReactElement {
 				<div className="mb-6">
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">{'Betalingssimulator'}</h1>
 					<p className="text-gray-600">
-						{'Debug-værktøj til at simulere SumUp betalingsstatusopdateringer. Dette værktøj kalder en debug version af reader-callback endpointet for at simulere betalingssvar.'}
+						{'Simulerer en betalingsterminals svar til systemet. Når en betaling gennemføres på en fysisk SumUp-terminal, sender terminalen et callback til serveren. Dette værktøj sender det samme callback, så systemet reagerer præcis som ved en rigtig terminalbetaling — uden at en fysisk terminal er involveret.'}
 					</p>
 				</div>
 
@@ -162,9 +162,9 @@ export default function Page (): ReactElement {
 						<div className="text-sm text-amber-800">
 							<p className="font-medium mb-1">{'Vigtig information'}</p>
 							<ul className="list-disc list-inside space-y-1">
-								<li>{'Kun ordrer med checkoutMethod "sumUp" kan simuleres'}</li>
-								<li>{'Kun ordrer med betalingsstatus "pending" kan simuleres'}</li>
-								<li>{'Denne funktion vil ikke påvirke SumUp enheden, kun systemets opfattelse af betalingens status'}</li>
+								<li>{'Kun ordrer med checkoutMethod "sumUp" og betalingsstatus "pending" kan simuleres'}</li>
+								<li>{'Simulering ændrer ordrens status i systemet på samme måde som et rigtigt terminalsvar'}</li>
+								<li>{'Den fysiske SumUp-terminal påvirkes ikke — kun systemets registrering opdateres'}</li>
 							</ul>
 						</div>
 					</div>

@@ -112,12 +112,12 @@ const AllKiosksStatusManager = ({
 					title="Handlinger for alle kiosker"
 				>
 					<FiSettings className="w-4 h-4" />
-					<span className="hidden sm:inline">{'Alle kiosker'}</span>
+					<span className="hidden sm:inline">{'Administrer Kiosker'}</span>
 					<FaChevronDown className={`w-3 h-3 transition-transform ${showOptions ? 'rotate-180' : ''}`} />
 				</button>
 
 				{showOptions && (
-					<div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-[340px]">
+					<div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-85">
 						{/* Refresh section */}
 						<div className="flex flex-col gap-3 text-gray-700 mb-4 pb-4 border-b border-gray-200">
 							<label className="flex flex-col gap-0.5">

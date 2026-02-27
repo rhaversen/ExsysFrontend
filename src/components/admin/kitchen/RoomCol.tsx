@@ -61,7 +61,7 @@ const RoomCol = ({
 	}, [orders, productMap, optionMap])
 
 	return (
-		<div className="rounded-lg m-1 p-1 bg-white overflow-y-auto max-w-[650px] h-full shadow-md">
+		<div className="rounded-lg m-1 p-1 bg-white overflow-y-auto max-w-162.5 h-full shadow-md">
 			<h2 className="text-gray-800 font-bold text-3xl text-center p-1">
 				{room.name}
 			</h2>

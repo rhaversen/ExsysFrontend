@@ -66,32 +66,62 @@ const OrderView = ({
 			return acc + (product?.price ?? 0) * quantity
 		}, 0)
 
-		const optionsTotal = Object.entries(cart.options).reduce((acc, [_id, quantity]) => {
-			const option = options.find(o => o._id === _id)
-			return acc + (option?.price ?? 0) * quantity
+		const optionsTotal = Object.values(cart.options).reduce((acc, productOptions) => {
+			return acc + Object.entries(productOptions).reduce((innerAcc, [optionId, quantity]) => {
+				const option = options.find(o => o._id === optionId)
+				return innerAcc + (option?.price ?? 0) * quantity
+			}, 0)
 		}, 0)
 
 		return productsTotal + optionsTotal
 	}, [cart, products, options])
 
-	const handleCartChange = useCallback((
-		_id: ProductType['_id'] | OptionType['_id'],
-		type: 'products' | 'options',
-		change: number
-	): void => {
-		const currentQuantity = cart[type][_id] ?? 0
+	const handleProductChange = useCallback((productId: ProductType['_id'], change: number): void => {
+		const currentQuantity = cart.products[productId] ?? 0
 		const newQuantity = currentQuantity + change
 
 		if (newQuantity <= 0) {
-			const updatedItems = { ...cart[type] }
-			delete updatedItems[_id]
-			updateCart({ ...cart, [type]: updatedItems })
+			const newProducts = { ...cart.products }
+			delete newProducts[productId]
+			const newOptions = { ...cart.options }
+			delete newOptions[productId]
+			updateCart({
+				products: newProducts,
+				options: newOptions,
+				productOrder: cart.productOrder.filter(id => id !== productId)
+			})
+			return
+		}
+
+		const isNew = currentQuantity === 0
+		updateCart({
+			products: { ...cart.products, [productId]: newQuantity },
+			options: { ...cart.options, [productId]: cart.options[productId] ?? {} },
+			productOrder: isNew ? [...cart.productOrder, productId] : cart.productOrder
+		})
+	}, [cart, updateCart])
+
+	const handleOptionChange = useCallback((productId: ProductType['_id'], optionId: OptionType['_id'], change: number): void => {
+		const productOptions = cart.options[productId] ?? {}
+		const currentQuantity = productOptions[optionId] ?? 0
+		const newQuantity = currentQuantity + change
+
+		if (newQuantity <= 0) {
+			const updatedProductOptions = { ...productOptions }
+			delete updatedProductOptions[optionId]
+			updateCart({
+				...cart,
+				options: { ...cart.options, [productId]: updatedProductOptions }
+			})
 			return
 		}
 
 		updateCart({
 			...cart,
-			[type]: { ...cart[type], [_id]: newQuantity }
+			options: {
+				...cart.options,
+				[productId]: { ...productOptions, [optionId]: newQuantity }
+			}
 		})
 	}, [cart, updateCart])
 
@@ -100,25 +130,34 @@ const OrderView = ({
 		const availableOptionIds = new Set(options.map(o => o._id))
 
 		let updated = false
-		const newProductsInCart = { ...cart.products }
-		const newOptionsInCart = { ...cart.options }
+		const newProducts = { ...cart.products }
+		const newOptions = { ...cart.options }
 
-		Object.keys(newProductsInCart).forEach(id => {
+		Object.keys(newProducts).forEach(id => {
 			if (!availableProductIds.has(id)) {
-				delete newProductsInCart[id]
+				delete newProducts[id]
+				delete newOptions[id]
 				updated = true
 			}
 		})
 
-		Object.keys(newOptionsInCart).forEach(id => {
-			if (!availableOptionIds.has(id)) {
-				delete newOptionsInCart[id]
-				updated = true
-			}
+		Object.entries(newOptions).forEach(([productId, productOptions]) => {
+			const cleaned = { ...productOptions }
+			Object.keys(cleaned).forEach(optionId => {
+				if (!availableOptionIds.has(optionId)) {
+					delete cleaned[optionId]
+					updated = true
+				}
+			})
+			newOptions[productId] = cleaned
 		})
 
 		if (updated) {
-			updateCart({ products: newProductsInCart, options: newOptionsInCart })
+			updateCart({
+				products: newProducts,
+				options: newOptions,
+				productOrder: cart.productOrder.filter(id => availableProductIds.has(id) && newProducts[id] !== undefined)
+			})
 		}
 	}, [products, options, cart, updateCart])
 
@@ -148,12 +187,19 @@ const OrderView = ({
 		const prepareCartItems = (items: Record<string, number>): Array<{ id: string, quantity: number }> =>
 			Object.entries(items).map(([id, quantity]) => ({ id, quantity }))
 
+		const flattenedOptions: Record<string, number> = {}
+		Object.values(cart.options).forEach(productOptions => {
+			Object.entries(productOptions).forEach(([optionId, quantity]) => {
+				flattenedOptions[optionId] = (flattenedOptions[optionId] ?? 0) + quantity
+			})
+		})
+
 		const data: PostOrderType = {
 			kioskId: kiosk._id,
 			activityId: activity._id,
 			roomId: room._id,
 			products: prepareCartItems(cart.products),
-			options: prepareCartItems(cart.options),
+			options: prepareCartItems(flattenedOptions),
 			checkoutMethod: selectedCheckoutMethod
 		}
 
@@ -233,7 +279,7 @@ const OrderView = ({
 
 	const clearCart = useCallback(() => {
 		track('cart_clear')
-		updateCart({ products: {}, options: {} })
+		updateCart({ products: {}, options: {}, productOrder: [] })
 		window.dispatchEvent(new Event('resetScroll'))
 	}, [updateCart, track])
 
@@ -244,19 +290,19 @@ const OrderView = ({
 					<SelectionWindow
 						cart={cart}
 						products={products}
-						options={options}
-						handleCartChange={handleCartChange}
+						onProductChange={handleProductChange}
 					/>
 				</div>
 			</div>
 
-			<div className="w-[400px] shadow-l-md">
+			<div className="w-75 shrink-0 shadow-l-md">
 				<CartWindow
 					price={totalPrice}
 					products={products}
 					options={options}
 					cart={cart}
-					onCartChange={handleCartChange}
+					onProductChange={handleProductChange}
+					onOptionChange={handleOptionChange}
 					onSubmit={handleCartSubmit}
 					clearCart={clearCart}
 					formIsValid={isFormValid}

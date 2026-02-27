@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useRef, useState } from 'react'
 import { FiArrowLeft, FiThumbsDown, FiThumbsUp } from 'react-icons/fi'
 import QRCode from 'react-qr-code'
 
@@ -10,37 +10,39 @@ import { FeedbackRatingValue } from '@/types/backendDataTypes'
 
 const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => {
 	const { track, endSession } = useAnalytics()
-	const feedbackUrl = 'kantine.nyskivehus.dk/risros'
+	const feedbackUrl = 'kantine.nyskivehus.dk'
 	const API_URL = process.env.NEXT_PUBLIC_API_URL
 	const { addError } = useError()
-	const [submittedRating, setSubmittedRating] = useState<FeedbackRatingValue | null>(null)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [selectedRating, setSelectedRating] = useState<FeedbackRatingValue | null>(null)
+	const selectedRatingRef = useRef<FeedbackRatingValue | null>(null)
 
-	const submitFeedback = async (rating: FeedbackRatingValue): Promise<void> => {
-		if (isSubmitting) { return }
-		track(rating === 'positive' ? 'feedback_positive' : 'feedback_negative')
-		setIsSubmitting(true)
-		try {
-			await axios.post(`${API_URL}/v1/feedback/rating`, { rating }, { withCredentials: true })
-			setSubmittedRating(rating)
-		} catch (error) {
-			addError(error)
-		} finally {
-			setIsSubmitting(false)
+	const submitAndLeave = useCallback(async (): Promise<void> => {
+		if (selectedRatingRef.current !== null) {
+			try {
+				await axios.post(`${API_URL}/v1/feedback/rating`, { rating: selectedRatingRef.current }, { withCredentials: true })
+			} catch (error) {
+				addError(error)
+			}
 		}
+		void endSession()
+		onBack()
+	}, [API_URL, addError, endSession, onBack])
+
+	const handleSelectRating = (rating: FeedbackRatingValue): void => {
+		track(rating === 'positive' ? 'feedback_positive' : 'feedback_negative')
+		setSelectedRating(rating)
+		selectedRatingRef.current = rating
 	}
 
 	const handleBack = useCallback((): void => {
 		track('feedback_back')
-		void endSession()
-		onBack()
-	}, [track, endSession, onBack])
+		void submitAndLeave()
+	}, [track, submitAndLeave])
 
 	const handleAutoBack = useCallback((): void => {
 		track('feedback_auto_back')
-		void endSession()
-		onBack()
-	}, [track, endSession, onBack])
+		void submitAndLeave()
+	}, [track, submitAndLeave])
 
 	return (
 		<div className="fixed inset-0 flex flex-col items-center justify-center">
@@ -51,16 +53,13 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 				<div className="flex items-center gap-12 mb-8">
 					<button
 						type="button"
-						onClick={() => submitFeedback('negative')}
-						disabled={isSubmitting || submittedRating !== null}
+						onClick={() => handleSelectRating('negative')}
 						title="Negativ feedback"
 						aria-label="Negativ feedback"
 						className={`p-8 rounded-2xl shadow-xl transition-all ${
-							submittedRating === 'negative'
+							selectedRating === 'negative'
 								? 'bg-red-500 text-white scale-110'
-								: submittedRating !== null
-									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-									: 'bg-white text-red-500 hover:bg-red-50 hover:scale-105 active:scale-95'
+								: 'bg-white text-red-500 hover:bg-red-50 hover:scale-105 active:scale-95'
 						}`}
 					>
 						<FiThumbsDown className="w-20 h-20" />
@@ -78,16 +77,13 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 					<button
 						type="button"
-						onClick={() => submitFeedback('positive')}
-						disabled={isSubmitting || submittedRating !== null}
+						onClick={() => handleSelectRating('positive')}
 						title="Positiv feedback"
 						aria-label="Positiv feedback"
 						className={`p-8 rounded-2xl shadow-xl transition-all ${
-							submittedRating === 'positive'
+							selectedRating === 'positive'
 								? 'bg-green-500 text-white scale-110'
-								: submittedRating !== null
-									? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-									: 'bg-white text-green-500 hover:bg-green-50 hover:scale-105 active:scale-95'
+								: 'bg-white text-green-500 hover:bg-green-50 hover:scale-105 active:scale-95'
 						}`}
 					>
 						<FiThumbsUp className="w-20 h-20" />
@@ -96,10 +92,10 @@ const KioskFeedbackInfo = ({ onBack }: { onBack: () => void }): ReactElement => 
 
 				<div className="flex flex-col items-center gap-6">
 					<p className="text-lg text-gray-500 font-mono">{feedbackUrl}</p>
-					<p className={`text-2xl font-semibold transition-opacity ${submittedRating !== null ? 'text-gray-600 opacity-100' : 'opacity-0'}`}>
+					<p className={`text-2xl font-semibold transition-opacity ${selectedRating !== null ? 'text-gray-600 opacity-100' : 'opacity-0'}`}>
 						{'Tak for din vurdering!'}
 					</p>
-					{submittedRating !== null ? (
+					{selectedRating !== null ? (
 						<TimeoutButton
 							totalMs={5000}
 							onClick={handleBack}

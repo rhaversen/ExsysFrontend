@@ -1,4 +1,5 @@
-import type { InteractionType, InteractionTypeValue, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { InteractionType, KioskType, OrderType } from '@/types/backendDataTypes'
+import type { InteractionTypeValue } from '@/types/interactionTypes'
 
 export interface SessionAnalysis {
 	sessionId: string
@@ -80,6 +81,7 @@ export function getInteractionIcon (type: InteractionTypeValue): string {
 		nav_auto_to_activity: '⚡',
 		nav_auto_to_room: '⚡',
 		nav_auto_to_order: '⚡',
+		timeout_warning_shown: '⏳',
 		timeout_continue: '▶️',
 		timeout_restart: '🔄',
 		product_select: '➕',
@@ -90,7 +92,7 @@ export function getInteractionIcon (type: InteractionTypeValue): string {
 		option_decrease: '➖',
 		cart_clear: '🗑️',
 		checkout_start: '💳',
-		payment_select_later: '⏳',
+		payment_select_later: '🪙',
 		payment_select_card: '💳',
 		payment_select_mobilepay: '📱',
 		payment_auto_later: '⚡',
@@ -126,6 +128,7 @@ export function getInteractionLabel (type: InteractionTypeValue): string {
 		nav_auto_to_activity: 'Auto-navigation til aktivitet',
 		nav_auto_to_room: 'Auto-navigation til lokale',
 		nav_auto_to_order: 'Auto-navigation til bestilling',
+		timeout_warning_shown: 'Timeout-advarsel vist',
 		timeout_continue: 'Fortsæt efter timeout-advarsel',
 		timeout_restart: 'Start forfra efter timeout-advarsel',
 		product_select: 'Produkt tilføjet',

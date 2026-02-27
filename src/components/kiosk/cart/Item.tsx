@@ -13,7 +13,7 @@ const Item = ({
 	price,
 	type,
 	quantity,
-	onCartChange
+	onQuantityChange
 }: {
 	imageURL?: ProductType['imageURL'] | OptionType['imageURL']
 	id: ProductType['_id'] | OptionType['_id']
@@ -21,7 +21,7 @@ const Item = ({
 	price: ProductType['price'] | OptionType['price']
 	type: 'products' | 'options'
 	quantity: number
-	onCartChange: (_id: ProductType['_id'] | OptionType['_id'], type: 'products' | 'options', quantity: number) => void
+	onQuantityChange: (change: number) => void
 }): ReactElement => {
 	const { track } = useAnalytics()
 	const isProduct = type === 'products'
@@ -33,34 +33,31 @@ const Item = ({
 		} else {
 			track(isProduct ? 'product_decrease' : 'option_decrease', metadata)
 		}
-		onCartChange(id, type, change)
-	}, [onCartChange, id, type, track, isProduct])
+		onQuantityChange(change)
+	}, [onQuantityChange, id, track, isProduct])
 
 	return (
-		<div className="py-3">
-			<div className="flex flex-row justify-evenly pb-1">
-				<h3 className="text-xl font-bold text-gray-800">
-					{name}
-				</h3>
-				<p className="text-lg font-semibold text-gray-800 italic">
-					{price === 0 ? 'Gratis' : `${price * quantity} kr`}
+		<div className="flex items-center gap-2 px-3 py-2">
+			<AsyncImage
+				className="w-12 h-12 rounded-xl shrink-0"
+				width={48}
+				height={48}
+				quality={75}
+				src={`${imageURL === undefined || imageURL === '' ? KioskImages.noUrl.src : imageURL}`}
+				alt={name}
+				draggable={false}
+				priority={true}
+			/>
+			<div className="flex-1 min-w-0">
+				<p className="font-bold text-gray-800 truncate">{name}</p>
+				<p className="text-sm text-gray-500">
+					{price === 0 ? 'Gratis' : `${price} kr`}
 				</p>
 			</div>
-			<div className="flex flex-row justify-evenly">
-				<AsyncImage
-					className="w-16 h-16"
-					width={40}
-					height={40}
-					quality={75}
-					src={`${imageURL === undefined || imageURL === '' ? KioskImages.noUrl.src : imageURL}`} alt={name}
-					draggable={false}
-					priority={true}
-				/>
-				<QuantityAdjuster
-					quantity={quantity}
-					onQuantityChange={handleQuantityChange}
-				/>
-			</div>
+			<QuantityAdjuster
+				quantity={quantity}
+				onQuantityChange={handleQuantityChange}
+			/>
 		</div>
 	)
 }

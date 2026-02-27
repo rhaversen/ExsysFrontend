@@ -4,7 +4,8 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo, useRef, type ReactElement } from 'react'
-import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiChevronDown, FiMonitor, FiCalendar, FiClock, FiShoppingBag, FiTerminal } from 'react-icons/fi'
+import { FaSyncAlt } from 'react-icons/fa'
+import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiChevronRight, FiMonitor, FiCalendar, FiClock, FiShoppingBag } from 'react-icons/fi'
 import { GiCookingPot } from 'react-icons/gi'
 import 'dayjs/locale/da'
 
@@ -35,6 +36,7 @@ export default function Page (): ReactElement | null {
 	const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessageType[]>([])
 	const [feedbackRatings, setFeedbackRatings] = useState<FeedbackRatingType[]>([])
 	const resetAllKiosksRef = useRef<(() => void) | null>(null)
+	const [isPingRefreshing, setIsPingRefreshing] = useState(false)
 
 	const calculateOrderStats = useCallback((ordersList: OrderType[]): void => {
 		const today = new Date()
@@ -141,23 +143,6 @@ export default function Page (): ReactElement | null {
 
 	return (
 		<main className="flex flex-col items-center relative">
-			{/* Dev tools - absolutely positioned top left */}
-			<details className="group text-xs text-gray-400 absolute top-2 left-4 z-20">
-				<summary className="cursor-pointer hover:text-gray-500 flex items-center gap-1 list-none">
-					<FiChevronDown className="w-3 h-3 transition-transform group-open:rotate-180" />
-					{'Udviklerværktøjer'}
-				</summary>
-				<div className="absolute top-full left-0 mt-2 flex flex-col gap-2 bg-white p-2 rounded-lg shadow-lg border border-gray-200">
-					<Link
-						href="/admin/debug"
-						className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
-					>
-						<FiTerminal className="w-4 h-4" />
-						{'Betalingssimulator'}
-					</Link>
-				</div>
-			</details>
-
 			<div className="flex flex-col pt-4 gap-6 w-full px-4">
 				{/* Header row */}
 				<div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
@@ -308,10 +293,22 @@ export default function Page (): ReactElement | null {
 									<FiMonitor className="w-5 h-5 text-gray-600" />
 									<h2 className="font-semibold text-gray-800">{'Kioskhåndtering'}</h2>
 								</div>
-								<AllKiosksStatusManager kiosks={kiosks} products={products} onRefreshAll={() => resetAllKiosksRef.current?.()} />
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										disabled={isPingRefreshing}
+										onClick={() => resetAllKiosksRef.current?.()}
+										className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors ${isPingRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+										title="Opdater status for alle kiosker"
+									>
+										<FaSyncAlt className={`w-3.5 h-3.5 ${isPingRefreshing ? 'animate-spin' : ''}`} />
+										{'Opdater status'}
+									</button>
+									<AllKiosksStatusManager kiosks={kiosks} products={products} onRefreshAll={() => resetAllKiosksRef.current?.()} />
+								</div>
 							</div>
 
-							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} onResetAllKiosks={(fn) => { resetAllKiosksRef.current = fn }} />
+							<KioskStatusManager kiosks={kiosks} products={products} configs={config} sessions={sessions} onResetAllKiosks={(fn, refreshing) => { resetAllKiosksRef.current = fn; setIsPingRefreshing(refreshing) }} />
 						</section>
 					</div>
 				</div>

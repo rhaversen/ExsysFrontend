@@ -20,16 +20,12 @@ interface PublicStats {
 	activityOrdersAllTime: ActivityStat[]
 }
 
-function PieChart ({ data }: { data: ActivityStat[] }): ReactElement {
+function PieChart ({ data }: { data: ActivityStat[] }): ReactElement | null {
 	const sorted = [...data].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 	const colors = getColorsForNames(sorted.map(d => d.name), 'activity')
 
 	if (sorted.length === 0 || sorted.every(d => d.count === 0)) {
-		return (
-			<div className="flex flex-col items-center justify-center h-full">
-				<div className="text-gray-400">{'Ingen data'}</div>
-			</div>
-		)
+		return null
 	}
 
 	const total = sorted.reduce((sum, d) => sum + d.count, 0)
