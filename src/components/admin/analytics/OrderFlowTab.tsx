@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo } from 'react'
 
-import type { KioskType, OrderType } from '@/types/backendDataTypes'
+import { isTimeInOrderWindow } from '@/lib/timeUtils'
+import type { KioskType, OrderType, ProductType } from '@/types/backendDataTypes'
 
 import { formatDuration, getKioskName } from './analyticsHelpers'
 
@@ -79,7 +80,7 @@ function getDayOfWeekCounts (orders: OrderType[]): number[] {
 
 const DAY_LABELS = ['Søn', 'Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør']
 
-function computeGapDistribution (orders: OrderType[]): Array<{ label: string, count: number }> {
+function computeGapDistribution (orders: OrderType[], products: ProductType[]): Array<{ label: string, count: number }> {
 	if (orders.length < 2) { return [] }
 
 	const sorted = [...orders].sort((a, b) =>
@@ -97,7 +98,10 @@ function computeGapDistribution (orders: OrderType[]): Array<{ label: string, co
 	]
 
 	for (let i = 1; i < sorted.length; i++) {
-		const gap = new Date(sorted[i].createdAt).getTime() - new Date(sorted[i - 1].createdAt).getTime()
+		const prev = new Date(sorted[i - 1].createdAt)
+		const curr = new Date(sorted[i].createdAt)
+		if (!isGapDuringOpenHours(prev, curr, products)) { continue }
+		const gap = curr.getTime() - prev.getTime()
 		const bucket = buckets.find(b => gap < b.max)
 		if (bucket != null) { bucket.count++ }
 	}
@@ -113,11 +117,27 @@ function formatDate (date: Date): string {
 	return date.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' })
 }
 
-export default function OrderFlowTab ({ orders, kiosks }: { orders: OrderType[], kiosks: KioskType[] }): ReactElement {
+function isGapDuringOpenHours (gapStart: Date, gapEnd: Date, products: ProductType[]): boolean {
+	if (products.length === 0) { return true }
+
+	const startDay = new Date(gapStart)
+	startDay.setHours(0, 0, 0, 0)
+	const endDay = new Date(gapEnd)
+	endDay.setHours(0, 0, 0, 0)
+	if (startDay.getTime() !== endDay.getTime()) { return false }
+
+	return products.some(p =>
+		p.isActive &&
+		isTimeInOrderWindow(gapStart.getHours(), gapStart.getMinutes(), p.orderWindow) &&
+		isTimeInOrderWindow(gapEnd.getHours(), gapEnd.getMinutes(), p.orderWindow)
+	)
+}
+
+export default function OrderFlowTab ({ orders, kiosks, products }: { orders: OrderType[], kiosks: KioskType[], products: ProductType[] }): ReactElement {
 	const queues = useMemo(() => detectQueues(orders), [orders])
 	const hourlyCounts = useMemo(() => getHourlyOrderCounts(orders), [orders])
 	const dayOfWeekCounts = useMemo(() => getDayOfWeekCounts(orders), [orders])
-	const gapDistribution = useMemo(() => computeGapDistribution(orders), [orders])
+	const gapDistribution = useMemo(() => computeGapDistribution(orders, products), [orders, products])
 
 	const sortedQueues = useMemo(() =>
 		[...queues].sort((a, b) => b.orderCount - a.orderCount),
@@ -135,11 +155,16 @@ export default function OrderFlowTab ({ orders, kiosks }: { orders: OrderType[],
 			new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 		)
 		let total = 0
+		let count = 0
 		for (let i = 1; i < sorted.length; i++) {
-			total += new Date(sorted[i].createdAt).getTime() - new Date(sorted[i - 1].createdAt).getTime()
+			const prev = new Date(sorted[i - 1].createdAt)
+			const curr = new Date(sorted[i].createdAt)
+			if (!isGapDuringOpenHours(prev, curr, products)) { continue }
+			total += curr.getTime() - prev.getTime()
+			count++
 		}
-		return total / (sorted.length - 1)
-	}, [orders])
+		return count > 0 ? total / count : 0
+	}, [orders, products])
 
 	const medianGap = useMemo(() => {
 		if (orders.length < 2) { return 0 }
@@ -148,12 +173,16 @@ export default function OrderFlowTab ({ orders, kiosks }: { orders: OrderType[],
 		)
 		const gaps: number[] = []
 		for (let i = 1; i < sorted.length; i++) {
-			gaps.push(new Date(sorted[i].createdAt).getTime() - new Date(sorted[i - 1].createdAt).getTime())
+			const prev = new Date(sorted[i - 1].createdAt)
+			const curr = new Date(sorted[i].createdAt)
+			if (!isGapDuringOpenHours(prev, curr, products)) { continue }
+			gaps.push(curr.getTime() - prev.getTime())
 		}
+		if (gaps.length === 0) { return 0 }
 		gaps.sort((a, b) => a - b)
 		const mid = Math.floor(gaps.length / 2)
 		return gaps.length % 2 === 0 ? (gaps[mid - 1] + gaps[mid]) / 2 : gaps[mid]
-	}, [orders])
+	}, [orders, products])
 
 	const hourlyMax = Math.max(...hourlyCounts, 1)
 	const dayMax = Math.max(...dayOfWeekCounts, 1)
@@ -214,9 +243,7 @@ export default function OrderFlowTab ({ orders, kiosks }: { orders: OrderType[],
 									title={`${hour}:00 — ${count} ordrer`}
 								/>
 							</div>
-							{hour % 2 === 0 && (
-								<span className="text-[10px] text-gray-400 mt-1">{hour}</span>
-							)}
+							<span className={`text-[10px] mt-1 ${hour % 2 === 0 ? 'text-gray-400' : 'invisible'}`}>{hour}</span>
 						</div>
 					))}
 				</div>

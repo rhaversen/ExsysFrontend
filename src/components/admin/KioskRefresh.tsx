@@ -28,8 +28,8 @@ export default function KioskRefresh (): React.ReactElement {
 			<div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
 				{/* Header Section */}
 				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-					<div className="flex items-center gap-3 flex-grow">
-						<FaSyncAlt className="text-blue-500 text-2xl flex-shrink-0" />
+					<div className="flex items-center gap-3 grow">
+						<FaSyncAlt className="text-blue-500 text-2xl shrink-0" />
 						<h2 className="text-lg text-gray-800">{'Genindlæs kiosker'}</h2>
 					</div>
 					<button

@@ -51,8 +51,9 @@ const Header = (): ReactElement | null => {
 
 	useEffect(() => {
 		setIsClient(true)
+	}, [])
 
-		// Update selectedLink when the pathname changes
+	useEffect(() => {
 		setSelectedLink(pathname ?? '')
 
 		const handleScroll = (): void => {
@@ -68,21 +69,29 @@ const Header = (): ReactElement | null => {
 		window.addEventListener('scroll', handleScroll)
 		document.addEventListener('mousedown', handleClickOutside)
 
+		return () => {
+			window.removeEventListener('scroll', handleScroll)
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [pathname])
+
+	useEffect(() => {
+		const header = headerRef.current
+		if (header == null) { return }
+
+		setHeaderHeight(header.getBoundingClientRect().height)
+
 		const observer = new ResizeObserver(([entry]) => {
 			if (entry != null) {
 				setHeaderHeight(entry.contentRect.height)
 			}
 		})
-		if (headerRef.current != null) {
-			observer.observe(headerRef.current)
-		}
+		observer.observe(header)
 
 		return () => {
-			window.removeEventListener('scroll', handleScroll)
-			document.removeEventListener('mousedown', handleClickOutside)
 			observer.disconnect()
 		}
-	}, [pathname])
+	}, [isClient])
 
 	// TODO: Dont return null if not client, return a loading spinner or something instead of user name
 	if (!isClient) {
@@ -112,7 +121,7 @@ const Header = (): ReactElement | null => {
 						)}
 					</div>
 					{/* Center: Page links */}
-					<div className="flex items-center justify-center h-full flex-grow mx-1 md:mx-2">
+					<div className="flex items-center justify-center h-full grow mx-1 md:mx-2">
 						{Object.entries(routeTitles).map(([route, title]) => (
 							<PageLink
 								key={route}
@@ -124,7 +133,7 @@ const Header = (): ReactElement | null => {
 						))}
 					</div>
 					{/* Right side: User dropdown */}
-					<div className="flex items-center justify-end flex-shrink-0">
+					<div className="flex items-center justify-end shrink-0">
 						<div className="relative" ref={dropdownRef}>
 							<button
 								onClick={() => { setDropdownOpen(!dropdownOpen) }}

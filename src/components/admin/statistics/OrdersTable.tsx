@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import { FiCheck, FiClock, FiDollarSign, FiAlertTriangle, FiCoffee } from 'react-icons/fi'
+import { FiCheck, FiClock, FiDollarSign, FiAlertTriangle, FiCoffee, FiCreditCard, FiSmartphone } from 'react-icons/fi'
 
 import type { OrderType, ProductType, OptionType, RoomType, KioskType, ActivityType } from '@/types/backendDataTypes'
 
@@ -29,7 +29,7 @@ type OrdersTableProps = {
 
 export default function OrdersTable ({ orders, products, options, rooms, kiosks, activities, currentTime }: OrdersTableProps) {
 	const [orderSort, setOrderSort] = useState<{
-    field: 'createdAt' | 'status' | 'paymentStatus' | 'room' | 'kiosk' | 'activity' | 'products' | 'total',
+    field: 'createdAt' | 'status' | 'paymentStatus' | 'checkoutMethod' | 'room' | 'kiosk' | 'activity' | 'products' | 'total',
     direction: 'asc' | 'desc';
   }>({ field: 'createdAt', direction: 'desc' })
 
@@ -44,6 +44,9 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 						</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'paymentStatus', direction: orderSort.field === 'paymentStatus' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
 							<div className="flex items-center gap-1">{'Betaling'}{orderSort.field === 'paymentStatus' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
+						</th>
+						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'checkoutMethod', direction: orderSort.field === 'checkoutMethod' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
+							<div className="flex items-center gap-1">{'Metode'}{orderSort.field === 'checkoutMethod' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
 						</th>
 						<th className="p-3 cursor-pointer hover:bg-gray-200 border-b transition-colors" onClick={() => setOrderSort({ field: 'status', direction: orderSort.field === 'status' && orderSort.direction === 'desc' ? 'asc' : 'desc' })}>
 							<div className="flex items-center gap-1">{'Status'}{orderSort.field === 'status' && (<span className="text-blue-600">{orderSort.direction === 'desc' ? '↓' : '↑'}</span>)}</div>
@@ -78,6 +81,10 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 								return orderSort.direction === 'desc'
 									? b.paymentStatus.localeCompare(a.paymentStatus)
 									: a.paymentStatus.localeCompare(b.paymentStatus)
+							} else if (orderSort.field === 'checkoutMethod') {
+								return orderSort.direction === 'desc'
+									? b.checkoutMethod.localeCompare(a.checkoutMethod)
+									: a.checkoutMethod.localeCompare(b.checkoutMethod)
 							} else if (orderSort.field === 'room') {
 								const roomNameA = rooms.find(r => r._id === a.roomId)?.name ?? 'Unknown'
 								const roomNameB = rooms.find(r => r._id === b.roomId)?.name ?? 'Unknown'
@@ -154,6 +161,28 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 										)}
 									</td>
 									<td className="p-3">
+										{order.checkoutMethod === 'sumUp' && (
+											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Kortbetaling via SumUp">
+												<FiCreditCard className="w-3 h-3" />{'Kort'}
+											</span>
+										)}
+										{order.checkoutMethod === 'mobilePay' && (
+											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="MobilePay">
+												<FiSmartphone className="w-3 h-3" />{'MobilePay'}
+											</span>
+										)}
+										{order.checkoutMethod === 'later' && (
+											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Betales senere">
+												<FiClock className="w-3 h-3" />{'Senere'}
+											</span>
+										)}
+										{order.checkoutMethod === 'manual' && (
+											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" title="Manuel Ordre">
+												<FiCoffee className="w-3 h-3" />{'Manuel'}
+											</span>
+										)}
+									</td>
+									<td className="p-3">
 										{order.status === 'pending' && (
 											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" title="Afventer behandling">
 												<FiClock className="w-3 h-3" />{'Afventer\r'}
@@ -161,7 +190,7 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 										)}
 										{order.status === 'confirmed' && (
 											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Ordre er bekræftet">
-												<FiCoffee className="w-3 h-3" />{'I produktion\r'}
+												<FiCoffee className="w-3 h-3" />{'Set\r'}
 											</span>
 										)}
 										{order.status === 'delivered' && (
@@ -171,16 +200,16 @@ export default function OrdersTable ({ orders, products, options, rooms, kiosks,
 										)}
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={kioskName}>{kioskName}</div>
+										<div className="truncate max-w-25" title={kioskName}>{kioskName}</div>
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={activityName}>{activityName}</div>
+										<div className="truncate max-w-25" title={activityName}>{activityName}</div>
 									</td>
 									<td className="p-3">
-										<div className="truncate max-w-[100px]" title={roomName}>{roomName}</div>
+										<div className="truncate max-w-25" title={roomName}>{roomName}</div>
 									</td>
 									<td className="p-3">
-										<div className="max-w-[200px] truncate" title={order.products.map(p => `${products.find(prod => prod._id === p._id)?.name} (${p.quantity})`).join(', ')}>
+										<div className="max-w-50 truncate" title={order.products.map(p => `${products.find(prod => prod._id === p._id)?.name} (${p.quantity})`).join(', ')}>
 											{order.products.length > 0 ? (
 												<span>
 													{products.find(prod => prod._id === order.products[0]._id)?.name ?? 'Ukendt produkt'}

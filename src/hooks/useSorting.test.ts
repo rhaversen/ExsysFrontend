@@ -40,8 +40,8 @@ describe('useSorting', () => {
 	describe('type change reset', () => {
 		it('resets sort field and direction when type changes', () => {
 			const { result, rerender } = renderHook(
-				({ type }) => useSorting(type),
-				{ initialProps: { type: 'Produkter' as const } }
+				({ type }: { type: 'Produkter' | 'Tilvalg' }) => useSorting(type),
+				{ initialProps: { type: 'Produkter' } }
 			)
 
 			act(() => {
@@ -52,7 +52,7 @@ describe('useSorting', () => {
 			expect(result.current.sortField).toBe('name')
 			expect(result.current.sortDirection).toBe('asc')
 
-			rerender({ type: 'Tilvalg' as const })
+			rerender({ type: 'Tilvalg' })
 
 			expect(result.current.sortField).toBe('createdAt')
 			expect(result.current.sortDirection).toBe('desc')

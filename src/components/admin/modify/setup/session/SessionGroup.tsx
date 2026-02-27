@@ -44,7 +44,7 @@ const SessionGroup = ({
 				}`}
 				onClick={() => { onSelect(type, null, true) }}
 			>
-				<span className="flex-grow">{title}</span>
+				<span className="grow">{title}</span>
 				<span
 					className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 transition-colors duration-150 ${
 						isGroupSelected
@@ -75,13 +75,13 @@ const SessionGroup = ({
 							}`}
 							onClick={() => { onSelect(type, userId, false) }}
 						>
-							<div className={`flex items-center flex-grow overflow-hidden ${isUserSelected ? 'font-semibold' : 'font-medium'}`}>
+							<div className={`flex items-center grow overflow-hidden ${isUserSelected ? 'font-semibold' : 'font-medium'}`}>
 								<span className="truncate">
 									{user?.name ?? (type === 'admin' ? 'Ukendt Navn' : 'Ukendt navn')}
 								</span>
 								{isCurrentUser && (
 									<span
-										className={`ml-2 flex-shrink-0 text-xs px-1.5 rounded-sm transition-colors duration-150 ${
+										className={`ml-2 shrink-0 text-xs px-1.5 rounded-sm transition-colors duration-150 ${
 											isUserSelected
 												? 'bg-blue-200 text-blue-800'
 												: 'bg-gray-200 text-gray-700 group-hover:bg-gray-300 group-hover:text-gray-900'
@@ -97,7 +97,7 @@ const SessionGroup = ({
 								)}
 							</div>
 							<span
-								className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 flex-shrink-0 transition-colors duration-150 ${
+								className={`rounded-full w-5 h-5 flex items-center justify-center text-xs ml-2 shrink-0 transition-colors duration-150 ${
 									isUserSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-800 group-hover:bg-gray-300 group-hover:text-gray-900'
 								}`}
 							>

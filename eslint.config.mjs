@@ -25,7 +25,8 @@ const eslintConfig = [
 			'public/kiosk-offline.html',
 			'coverage/**',
 			'jest.config.js',
-			'jest.setup.ts'
+			'jest.setup.ts',
+			'scripts/**'
 		]
 	},
 	...nextCoreWebVitals,

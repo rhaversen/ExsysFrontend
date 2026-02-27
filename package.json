@@ -8,7 +8,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint:fix": "npm run fix:classes && eslint --fix .",
+    "fix:classes": "node scripts/fix-canonical-classes.mjs",
     "spellcheck": "npx cspell ."
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "tailwind-api-utils": "^1.0.3",
     "tailwindcss": "^4.1.7",
     "ts-jest": "^29.4.6",
     "typescript": "^5"
